@@ -7,6 +7,7 @@ import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { useUIStore, type SortMode } from "@/store/ui";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/generated/prisma/client";
+import type { TaskWithSubtasks } from "@/lib/types";
 
 const EMOTIONAL_WEIGHT: Record<string, number> = {
   DREADING: 1,
@@ -22,7 +23,7 @@ const SORT_LABELS: Record<SortMode, string> = {
   manual:    "Manual",
 };
 
-function sortTasks(tasks: Task[], mode: SortMode): Task[] {
+function sortTasks(tasks: TaskWithSubtasks[], mode: SortMode): TaskWithSubtasks[] {
   return [...tasks].sort((a, b) => {
     if (mode === "due_date") {
       if (!a.dueAt && !b.dueAt) return a.sortOrder - b.sortOrder;
@@ -44,7 +45,7 @@ function sortTasks(tasks: Task[], mode: SortMode): Task[] {
   });
 }
 
-async function fetchTodaysTasks(): Promise<Task[]> {
+async function fetchTodaysTasks(): Promise<TaskWithSubtasks[]> {
   const res = await fetch("/api/tasks?filter=today");
   if (!res.ok) throw new Error("Failed to fetch tasks");
   return res.json();
@@ -55,7 +56,7 @@ export function TaskList() {
   const [modalOpen, setModalOpen] = useState(false);
   const { sortMode, setSortMode } = useUIStore();
 
-  const { data: tasks = [], isLoading, isError } = useQuery({
+  const { data: tasks = [], isLoading, isError } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "today"],
     queryFn: fetchTodaysTasks,
   });
@@ -102,6 +103,28 @@ export function TaskList() {
         body: JSON.stringify({ new_due_at: newDueAt.toISOString(), confirmed: true }),
       });
       if (!res.ok) throw new Error("Failed to defer task");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const { mutate: addSubtask } = useMutation({
+    mutationFn: async ({ parentId, title }: { parentId: string; title: string }) => {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, parentTaskId: parentId }),
+      });
+      if (!res.ok) throw new Error("Failed to create subtask");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const { mutate: completeSubtask } = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to complete subtask");
       return res.json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
@@ -204,6 +227,9 @@ export function TaskList() {
               onDefer={(id, newDueAt) => deferTask({ id, newDueAt })}
               onUpdate={(id, patch) => updateTask({ id, patch })}
               onDelete={deleteTask}
+              onAddSubtask={(parentId, title) => addSubtask({ parentId, title })}
+              onCompleteSubtask={completeSubtask}
+              onDeleteSubtask={deleteTask}
             />
           ))}
         </div>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { Task } from "@/lib/generated/prisma/client";
+import type { TaskWithSubtasks } from "@/lib/types";
 import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
 import { DeferralModal } from "@/components/DeferralModal";
 import { NudgeBanner } from "@/components/NudgeBanner";
@@ -29,16 +30,31 @@ function formatDue(dueAt: Date | string | null) {
 }
 
 interface Props {
-  task: Task;
+  task: TaskWithSubtasks;
   onMarkDone?: (id: string) => void;
   onDefer?: (id: string, newDueAt: Date) => void;
   onUpdate?: (id: string, patch: Partial<Pick<Task, "title" | "dueAt" | "emotionalState">>) => void;
   onDelete?: (id: string) => void;
+  onAddSubtask?: (parentId: string, title: string) => void;
+  onCompleteSubtask?: (id: string) => void;
+  onDeleteSubtask?: (id: string) => void;
 }
 
-export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Props) {
+export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddSubtask, onCompleteSubtask, onDeleteSubtask }: Props) {
   const [done, setDone] = useState(false);
   const [deferOpen, setDeferOpen] = useState(false);
+  const [addingSubtask, setAddingSubtask] = useState(false);
+  const [subtaskDraft, setSubtaskDraft] = useState("");
+  const subtaskRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { if (addingSubtask) subtaskRef.current?.focus(); }, [addingSubtask]);
+
+  function submitSubtask() {
+    const t = subtaskDraft.trim();
+    if (t) onAddSubtask?.(task.id, t);
+    setSubtaskDraft("");
+    setAddingSubtask(false);
+  }
   const { nudgedTaskIds } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
   const state = STATE_CONFIG[task.emotionalState];
@@ -149,6 +165,77 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
           </h2>
         )}
       </div>
+
+      {/* Subtasks */}
+      {(task.subtasks.length > 0 || addingSubtask) && (
+        <div className="px-5 pb-4 border-t border-[var(--stone-300)] pt-3 mt-2 space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--stone-500)] mb-2">
+            Action items
+          </p>
+          {task.subtasks.map((sub) => (
+            <div key={sub.id} className="group flex items-center gap-2.5 py-0.5">
+              <button
+                onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)}
+                aria-label={sub.isCompleted ? "Completed" : "Mark complete"}
+                className={cn(
+                  "w-[13px] h-[13px] rounded-[3px] border flex-shrink-0 transition-all",
+                  sub.isCompleted
+                    ? "bg-[hsl(var(--primary))] border-[hsl(var(--primary))]"
+                    : "border-[var(--stone-500)] hover:border-[hsl(var(--primary))]"
+                )}
+              />
+              <span className={cn(
+                "text-[12.5px] flex-1 leading-[1.4]",
+                sub.isCompleted ? "line-through text-[var(--stone-500)]" : "text-[var(--lime-ink)]"
+              )}>
+                {sub.title}
+              </span>
+              <button
+                onClick={() => onDeleteSubtask?.(sub.id)}
+                className="opacity-0 group-hover:opacity-100 text-[10px] text-[var(--stone-500)] hover:text-[hsl(var(--destructive))] transition-all px-1"
+                aria-label="Delete subtask"
+              >✕</button>
+            </div>
+          ))}
+
+          {addingSubtask ? (
+            <div className="flex items-center gap-2 pt-1">
+              <div className="w-[13px] h-[13px] rounded-[3px] border border-[var(--stone-400)] flex-shrink-0" />
+              <input
+                ref={subtaskRef}
+                value={subtaskDraft}
+                onChange={(e) => setSubtaskDraft(e.target.value)}
+                onBlur={() => { if (!subtaskDraft.trim()) setAddingSubtask(false); else submitSubtask(); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") submitSubtask();
+                  if (e.key === "Escape") { setSubtaskDraft(""); setAddingSubtask(false); }
+                }}
+                placeholder="Add action item…"
+                className="flex-1 text-[12.5px] bg-transparent border-b border-[hsl(var(--primary))] outline-none text-[var(--lime-ink)] placeholder:text-[var(--stone-500)] pb-0.5"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => setAddingSubtask(true)}
+              className="text-[11px] text-[var(--stone-500)] hover:text-[hsl(var(--primary))] transition-colors mt-1 flex items-center gap-1"
+            >
+              <span className="text-[13px] leading-none">+</span> Add action item
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Show add button when no subtasks yet */}
+      {task.subtasks.length === 0 && !addingSubtask && (
+        <div className="px-5 pb-3">
+          <button
+            onClick={() => setAddingSubtask(true)}
+            className="text-[11px] text-[var(--stone-500)] hover:text-[hsl(var(--primary))] transition-colors flex items-center gap-1"
+          >
+            <span className="text-[13px] leading-none">+</span> Add action item
+          </button>
+        </div>
+      )}
 
       {/* Nudge banner — shown when polling detects trigger conditions */}
       {isNudged && !done && (

@@ -10,30 +10,21 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get("filter");
 
-  // today = overdue + due today + undated, all incomplete
   let dueAtFilter = {};
   if (filter === "today") {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
-
-    dueAtFilter = {
-      OR: [
-        { dueAt: null },
-        { dueAt: { lte: todayEnd } },
-      ],
-    };
+    dueAtFilter = { OR: [{ dueAt: null }, { dueAt: { lte: todayEnd } }] };
   }
 
   const tasks = await prisma.task.findMany({
-    where: {
-      userId: user.id,
-      parentTaskId: null,
-      isCompleted: false,
-      ...dueAtFilter,
-    },
+    where: { userId: user.id, parentTaskId: null, isCompleted: false, ...dueAtFilter },
     orderBy: { sortOrder: "asc" },
+    include: {
+      subtasks: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
   });
 
   return NextResponse.json(tasks);
@@ -45,14 +36,26 @@ export async function POST(request: Request) {
   if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { title, dueAt, emotionalState } = body;
+  const { title, dueAt, emotionalState, parentTaskId } = body;
 
   if (!title?.trim()) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
   }
 
+  // Max depth: 1 level — reject if parent is itself a subtask
+  if (parentTaskId) {
+    const parent = await prisma.task.findFirst({
+      where: { id: parentTaskId, userId: user.id },
+      select: { parentTaskId: true },
+    });
+    if (!parent) return NextResponse.json({ error: "Parent task not found" }, { status: 404 });
+    if (parent.parentTaskId) {
+      return NextResponse.json({ error: "Subtasks cannot have their own subtasks" }, { status: 400 });
+    }
+  }
+
   const lastTask = await prisma.task.findFirst({
-    where: { userId: user.id, parentTaskId: null },
+    where: { userId: user.id, parentTaskId: parentTaskId ?? null },
     orderBy: { sortOrder: "desc" },
     select: { sortOrder: true },
   });
@@ -64,6 +67,7 @@ export async function POST(request: Request) {
       dueAt: dueAt ? new Date(dueAt) : null,
       emotionalState: emotionalState ?? "NEUTRAL",
       sortOrder: (lastTask?.sortOrder ?? -1) + 1,
+      parentTaskId: parentTaskId ?? null,
     },
   });
 
