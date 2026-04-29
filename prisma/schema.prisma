@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────────────────
+
+enum EmotionalState {
+  DREADING
+  ANXIOUS
+  NEUTRAL
+  WILLING
+  EXCITED
+}
+
+// ── Models ─────────────────────────────────────────────────────────
+
+model Profile {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("profiles")
+}
+
+model Task {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  title          String
+  dueAt          DateTime?      @map("due_at")
+  emotionalState EmotionalState @default(NEUTRAL) @map("emotional_state")
+  isCompleted    Boolean        @default(false) @map("is_completed")
+  deferredCount  Int            @default(0) @map("deferred_count")
+  lastTouchedAt  DateTime       @default(now()) @map("last_touched_at")
+  sortOrder      Int            @default(0) @map("sort_order")
+  recurrenceRule String?        @map("recurrence_rule")
+  parentTaskId   String?        @map("parent_task_id") @db.Uuid
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  parent           Task?                   @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subtasks         Task[]                  @relation("TaskSubtasks")
+  emotionalHistory EmotionalStateHistory[]
+  deferrals        DeferralLog[]
+
+  @@index([userId])
+  @@index([dueAt])
+  @@map("tasks")
+}
+
+model EmotionalStateHistory {
+  id            String          @id @default(uuid()) @db.Uuid
+  taskId        String          @map("task_id") @db.Uuid
+  userId        String          @map("user_id") @db.Uuid
+  previousState EmotionalState? @map("previous_state")
+  newState      EmotionalState  @map("new_state")
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("emotional_state_history")
+}
+
+model DeferralLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  taskId        String    @map("task_id") @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  previousDueAt DateTime? @map("previous_due_at")
+  newDueAt      DateTime? @map("new_due_at")
+  reason        String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("deferral_log")
+}
+
+model NudgeDismissal {
+  id          String   @id @default(uuid()) @db.Uuid
+  taskId      String   @map("task_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  dismissedAt DateTime @default(now()) @map("dismissed_at")
+
+  @@index([taskId, userId])
+  @@map("nudge_dismissals")
+}
