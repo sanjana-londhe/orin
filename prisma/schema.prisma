@@ -49,6 +49,7 @@ model Task {
   subtasks         Task[]                  @relation("TaskSubtasks")
   emotionalHistory EmotionalStateHistory[]
   deferrals        DeferralLog[]
+  nudgeDismissals  NudgeDismissal[]
 
   @@index([userId])
   @@index([dueAt])
@@ -89,6 +90,8 @@ model NudgeDismissal {
   taskId      String   @map("task_id") @db.Uuid
   userId      String   @map("user_id") @db.Uuid
   dismissedAt DateTime @default(now()) @map("dismissed_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@index([taskId, userId])
   @@map("nudge_dismissals")
