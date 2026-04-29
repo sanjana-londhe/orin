@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { Task } from "@/lib/generated/prisma/client";
 import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
+import { DeferralModal } from "@/components/DeferralModal";
 import { cn } from "@/lib/utils";
 
 const STATE_CONFIG = {
@@ -28,13 +29,14 @@ function formatDue(dueAt: Date | string | null) {
 interface Props {
   task: Task;
   onMarkDone?: (id: string) => void;
-  onDefer?: (id: string) => void;
+  onDefer?: (id: string, newDueAt: Date) => void;
   onUpdate?: (id: string, patch: Partial<Pick<Task, "title" | "dueAt" | "emotionalState">>) => void;
   onDelete?: (id: string) => void;
 }
 
 export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Props) {
   const [done, setDone] = useState(false);
+  const [deferOpen, setDeferOpen] = useState(false);
   const state = STATE_CONFIG[task.emotionalState];
   const { label: dueLabel, overdue, isoDate, isoTime } = formatDue(task.dueAt);
 
@@ -76,6 +78,7 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
   }
 
   return (
+  <>
     <article className={cn(
       "rounded-[14px] border border-[var(--stone-400)] bg-white overflow-hidden transition-all",
       done
@@ -156,7 +159,7 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
           </button>
         )}
         {onDefer && (
-          <button onClick={() => onDefer(task.id)}
+          <button onClick={() => setDeferOpen(true)}
             className="inline-flex items-center rounded-[7px] border border-[var(--stone-400)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--stone-500)] transition-all hover:bg-[var(--lime-subtle)] hover:border-[var(--stone-500)] hover:text-[var(--lime-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2">
             Push this →
           </button>
@@ -180,5 +183,15 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
         </div>
       </div>
     </article>
+
+    {onDefer && (
+      <DeferralModal
+        open={deferOpen}
+        onOpenChange={setDeferOpen}
+        task={task}
+        onConfirm={(newDueAt) => onDefer(task.id, newDueAt)}
+      />
+    )}
+  </>
   );
 }

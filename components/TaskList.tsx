@@ -178,6 +178,7 @@ export function TaskList() {
               key={task.id}
               task={task}
               onMarkDone={markDone}
+              onDefer={(id, newDueAt) => updateTask({ id, patch: { dueAt: newDueAt } })}
               onUpdate={(id, patch) => updateTask({ id, patch })}
               onDelete={deleteTask}
             />
