@@ -114,7 +114,7 @@ export function WeeklyReviewCard() {
 
       {/* Stats grid */}
       <div className="px-6 py-5">
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-4 sm:grid-cols-4">
           {[
             {
               emoji: EMOTION_EMOJI["DREADING"],

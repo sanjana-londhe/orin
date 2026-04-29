@@ -143,7 +143,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         {/* Tab: Defer by hours */}
         {tab === "defer" && (
           <div className="space-y-3">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {HOUR_OPTIONS.map((opt) => (
                 <button key={opt.hours}
                   onClick={() => setSelected({ kind: "hours", hours: opt.hours })}

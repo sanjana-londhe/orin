@@ -17,7 +17,7 @@ export default function QuadrantPage() {
 
   return (
     <main className="min-h-screen bg-[hsl(var(--background))]">
-      <div className="mx-auto max-w-[860px] px-6 py-10">
+      <div className="mx-auto max-w-[860px] px-4 py-6 sm:px-6 sm:py-10">
         {/* Header */}
         <div className="mb-6">
           <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--stone-500)] mb-1">
@@ -67,7 +67,7 @@ export default function QuadrantPage() {
         </div>
 
         {/* Axis explanation */}
-        <div className="mt-5 grid grid-cols-2 gap-4">
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-[12px] border border-[var(--stone-400)] bg-white px-5 py-4">
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--stone-500)] mb-1">
               X-axis — Urgency

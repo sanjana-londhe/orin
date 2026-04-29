@@ -212,8 +212,8 @@ export function TaskList() {
     <>
       {/* Header */}
       <div className="mb-5">
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
+        <div className="flex items-start justify-between gap-3 mb-4 flex-wrap sm:flex-nowrap">
+          <div className="min-w-0">
             <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--stone-500)] mb-1">
               Daily workspace · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
             </p>
@@ -235,14 +235,14 @@ export function TaskList() {
         </div>
 
         {/* Sort controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="font-mono text-[11px] text-[var(--stone-500)] mr-1">Sort</span>
           {(Object.keys(SORT_LABELS) as SortMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setSortMode(mode)}
               className={cn(
-                "px-3 py-1 rounded-[6px] text-[12.5px] font-semibold border transition-all",
+                "px-3 py-2 min-h-[44px] rounded-[6px] text-[12.5px] font-semibold border transition-all sm:py-1 sm:min-h-0",
                 sortMode === mode
                   ? "bg-[hsl(var(--primary))] text-white border-[var(--ink)] shadow-[2px_2px_0_var(--ink)]"
                   : "bg-white text-[var(--stone-500)] border-[var(--stone-400)] hover:bg-[var(--lime-subtle)] hover:text-[var(--lime-ink)] hover:border-[var(--stone-500)]"
