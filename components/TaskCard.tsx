@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import type { Task } from "@/lib/generated/prisma/client";
 import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
 import { DeferralModal } from "@/components/DeferralModal";
+import { NudgeBanner } from "@/components/NudgeBanner";
+import { useUIStore } from "@/store/ui";
 import { cn } from "@/lib/utils";
 
 const STATE_CONFIG = {
@@ -37,6 +39,8 @@ interface Props {
 export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Props) {
   const [done, setDone] = useState(false);
   const [deferOpen, setDeferOpen] = useState(false);
+  const { nudgedTaskIds } = useUIStore();
+  const isNudged = nudgedTaskIds.has(task.id);
   const state = STATE_CONFIG[task.emotionalState];
   const { label: dueLabel, overdue, isoDate, isoTime } = formatDue(task.dueAt);
 
@@ -145,6 +149,15 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
           </h2>
         )}
       </div>
+
+      {/* Nudge banner — shown when polling detects trigger conditions */}
+      {isNudged && !done && (
+        <NudgeBanner
+          task={task}
+          onDefer={onDefer ? () => setDeferOpen(true) : undefined}
+          onMarkDone={onMarkDone ? () => handleMarkDone() : undefined}
+        />
+      )}
 
       {/* Footer */}
       <div className="flex items-center gap-2 border-t border-[var(--stone-300)] bg-[var(--stone-100)] px-5 py-3">
