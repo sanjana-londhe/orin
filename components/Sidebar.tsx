@@ -59,7 +59,7 @@ export function Sidebar({ userName }: Props) {
 
   return (
     <>
-      <aside className="hidden md:flex w-[252px] flex-shrink-0 flex-col overflow-hidden bg-white border-r border-black/[0.07]">
+      <aside style={{ width: 252, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", background: "#fff", borderRight: "1px solid rgba(0,0,0,0.07)" }}>
 
         {/* Header — logo + nav */}
         <div className="px-[18px] pt-5 pb-4 border-b border-black/[0.06] flex-shrink-0">
