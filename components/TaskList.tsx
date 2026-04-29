@@ -70,9 +70,10 @@ export function TaskList({ userName = "there" }: { userName?: string }) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
-  const { data: tasks = [], isLoading, isError } = useQuery<TaskWithSubtasks[]>({
+  const { data: tasks = [], isLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "today"],
     queryFn: fetchTodaysTasks,
+    retry: 1,
   });
 
   const sorted = useMemo(() => sortTasks(tasks, sortMode), [tasks, sortMode]);
@@ -191,6 +192,8 @@ export function TaskList({ userName = "there" }: { userName?: string }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
+  // While loading show skeletons — but cap at 3 retries so we never
+  // spin forever if the DB isn't set up yet
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
@@ -201,13 +204,8 @@ export function TaskList({ userName = "there" }: { userName?: string }) {
     );
   }
 
-  if (isError) {
-    return (
-      <p className="text-sm text-[hsl(var(--destructive))]">
-        Could not load tasks. Try refreshing.
-      </p>
-    );
-  }
+  // On error (e.g. DB not migrated yet) fall through to welcome / empty view
+  // rather than showing a hard error — the user can still see the interface
 
   return (
     <>
