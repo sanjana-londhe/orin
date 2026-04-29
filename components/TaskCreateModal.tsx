@@ -57,8 +57,9 @@ export function TaskCreateModal({ open, onOpenChange }: Props) {
         body: JSON.stringify({ title, dueAt, emotionalState, recurrenceRule: recurrence || null }),
       });
       if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? "Failed to create task");
+        let msg = "Failed to create task";
+        try { const d = await res.json(); msg = d.error ?? msg; } catch { /* empty body */ }
+        throw new Error(msg);
       }
       return res.json();
     },
