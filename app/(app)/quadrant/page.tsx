@@ -16,8 +16,7 @@ export default function QuadrantPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[hsl(var(--background))]">
-      <div className="mx-auto max-w-[860px] px-4 py-6 sm:px-6 sm:py-10">
+    <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 24px 64px" }}>
         {/* Header */}
         <div className="mb-6">
           <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--stone-500)] mb-1">
@@ -85,7 +84,6 @@ export default function QuadrantPage() {
             </p>
           </div>
         </div>
-      </div>
-    </main>
+    </div>
   );
 }

@@ -87,8 +87,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[hsl(var(--background))]">
-      <div className="mx-auto max-w-[860px] px-4 py-6 sm:px-6 sm:py-10">
+    <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 24px 64px" }}>
 
         {/* Page header */}
         <div className="mb-6">
@@ -252,7 +251,6 @@ export default function CalendarPage() {
           </div>
 
         </div>
-      </div>
-    </main>
+    </div>
   );
 }
