@@ -24,7 +24,7 @@ export async function GET() {
 
   const tasks = await prisma.task.findMany({
     where: { userId: user.id, parentTaskId: null, isCompleted: false },
-    select: { id: true, title: true, emotionalState: true, dueAt: true },
+    select: { id: true, title: true, emotionalState: true, dueAt: true, deferredCount: true },
   });
 
   const result = tasks.map((t) => ({
@@ -34,6 +34,7 @@ export async function GET() {
     urgencyScore: urgencyScore(t.dueAt),
     emotionalWeight: EMOTIONAL_WEIGHT[t.emotionalState] ?? 3,
     dueAt: t.dueAt,
+    deferredCount: t.deferredCount,
   }));
 
   return NextResponse.json(result);
