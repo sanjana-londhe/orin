@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useUIStore } from "@/store/ui";
 import { DeferralModal } from "@/components/DeferralModal";
-import type { Task } from "@/lib/generated/prisma/client";
+import type { Task } from "@prisma/client";
 
 interface Props {
   task: Task;

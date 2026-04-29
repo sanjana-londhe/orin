@@ -1,3 +1,3 @@
-import type { Task } from "@/lib/generated/prisma/client";
+import type { Task } from "@prisma/client";
 
 export type TaskWithSubtasks = Task & { subtasks: Task[] };

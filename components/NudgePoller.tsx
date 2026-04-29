@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUIStore } from "@/store/ui";
-import type { Task } from "@/lib/generated/prisma/client";
+import type { Task } from "@prisma/client";
 
 const POLL_INTERVAL_MS = 5 * 60 * 1000;
 const TOUCHED_THRESHOLD_MS = 6 * 60 * 60 * 1000;

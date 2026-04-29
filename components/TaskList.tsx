@@ -16,7 +16,7 @@ import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { WelcomeView } from "@/components/WelcomeView";
 import { useUIStore, type SortMode } from "@/store/ui";
 import { cn } from "@/lib/utils";
-import type { Task } from "@/lib/generated/prisma/client";
+import type { Task } from "@prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 const EMOTIONAL_WEIGHT: Record<string, number> = {

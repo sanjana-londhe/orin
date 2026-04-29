@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import type { Task } from "@/lib/generated/prisma/client";
+import type { Task } from "@prisma/client";
 
 // ── date helpers ──────────────────────────────────────────────────
 

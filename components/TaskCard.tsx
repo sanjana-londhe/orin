@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useState, useRef, useEffect } from "react";
-import type { Task } from "@/lib/generated/prisma/client";
+import type { Task } from "@prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
 import { DeferralModal } from "@/components/DeferralModal";

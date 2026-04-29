@@ -4,7 +4,7 @@ import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TaskCard } from "@/components/TaskCard";
-import type { Task } from "@/lib/generated/prisma/client";
+import type { Task } from "@prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 interface Props {
