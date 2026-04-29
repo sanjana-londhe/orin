@@ -3,13 +3,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
-  // Include Prisma generated client + engine binaries in the serverless bundle
-  outputFileTracingIncludes: {
-    "/api/**": [
-      "./lib/generated/prisma/**",
-      "./node_modules/@prisma/engines/**",
-    ],
-  },
+
+  // Tell Next.js NOT to bundle these — load from node_modules at runtime
+  // so the Prisma native binary (.node file) is found correctly on Vercel
+  serverExternalPackages: ["@prisma/client", "prisma"],
 };
 
 export default nextConfig;
