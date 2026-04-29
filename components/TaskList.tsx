@@ -23,12 +23,8 @@ export function TaskList() {
 
   const { mutate: markDone } = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isCompleted: true }),
-      });
-      if (!res.ok) throw new Error("Failed to update task");
+      const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to complete task");
       return res.json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),

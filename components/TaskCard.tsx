@@ -34,6 +34,7 @@ interface Props {
 }
 
 export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Props) {
+  const [done, setDone] = useState(false);
   const state = STATE_CONFIG[task.emotionalState];
   const { label: dueLabel, overdue, isoDate, isoTime } = formatDue(task.dueAt);
 
@@ -69,8 +70,18 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
     setEditingState(false);
   }
 
+  function handleMarkDone() {
+    setDone(true);
+    onMarkDone?.(task.id);
+  }
+
   return (
-    <article className="rounded-[14px] border border-[var(--stone-400)] bg-white overflow-hidden transition-all hover:-translate-y-px hover:border-[var(--ink)] hover:shadow-[3px_3px_0_var(--ink)]">
+    <article className={cn(
+      "rounded-[14px] border border-[var(--stone-400)] bg-white overflow-hidden transition-all",
+      done
+        ? "opacity-35 pointer-events-none"
+        : "hover:-translate-y-px hover:border-[var(--ink)] hover:shadow-[3px_3px_0_var(--ink)]"
+    )}>
       <div className={cn("h-[3px] w-full", state.strip)} aria-hidden="true" />
 
       <div className="px-5 py-4">
@@ -112,7 +123,7 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
           )}
         </div>
 
-        {/* Title (click to edit) */}
+        {/* Title (click to edit, strikethrough when done) */}
         {editingTitle ? (
           <input ref={titleRef} value={titleDraft}
             onChange={e => setTitleDraft(e.target.value)}
@@ -120,8 +131,13 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
             onKeyDown={e => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setTitleDraft(task.title); setEditingTitle(false); } }}
             className="w-full text-[19px] font-semibold leading-snug tracking-tight text-[var(--lime-ink)] border-b-2 border-[hsl(var(--primary))] bg-transparent outline-none" />
         ) : (
-          <h2 onClick={() => setEditingTitle(true)}
-            className="text-[19px] font-semibold leading-snug tracking-tight text-[var(--lime-ink)] cursor-text hover:text-[hsl(var(--primary))] transition-colors">
+          <h2 onClick={() => !done && setEditingTitle(true)}
+            className={cn(
+              "text-[19px] font-semibold leading-snug tracking-tight transition-colors",
+              done
+                ? "line-through text-[var(--stone-500)] font-normal"
+                : "text-[var(--lime-ink)] cursor-text hover:text-[hsl(var(--primary))]"
+            )}>
             {task.title}
           </h2>
         )}
@@ -129,10 +145,16 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
 
       {/* Footer */}
       <div className="flex items-center gap-2 border-t border-[var(--stone-300)] bg-[var(--stone-100)] px-5 py-3">
-        <button onClick={() => onMarkDone?.(task.id)}
-          className="inline-flex items-center gap-1.5 rounded-[7px] bg-[hsl(var(--primary))] border border-[var(--ink)] px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)] hover:shadow-[2px_2px_0_var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2">
-          ✓ Mark done
-        </button>
+        {done ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[hsl(var(--primary))]">
+            ✓ Done
+          </span>
+        ) : (
+          <button onClick={handleMarkDone}
+            className="inline-flex items-center gap-1.5 rounded-[7px] bg-[hsl(var(--primary))] border border-[var(--ink)] px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)] hover:shadow-[2px_2px_0_var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2">
+            ✓ Mark done
+          </button>
+        )}
         {onDefer && (
           <button onClick={() => onDefer(task.id)}
             className="inline-flex items-center rounded-[7px] border border-[var(--stone-400)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--stone-500)] transition-all hover:bg-[var(--lime-subtle)] hover:border-[var(--stone-500)] hover:text-[var(--lime-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2">
