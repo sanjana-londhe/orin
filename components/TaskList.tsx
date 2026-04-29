@@ -73,6 +73,16 @@ export function TaskList() {
 
   const { mutate: updateTask } = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<Task> }) => {
+      // Route emotional state changes through the dedicated endpoint so history is logged
+      if (patch.emotionalState !== undefined && Object.keys(patch).length === 1) {
+        const res = await fetch(`/api/tasks/${id}/emotional-state`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ emotional_state: patch.emotionalState }),
+        });
+        if (!res.ok) throw new Error("Failed to update emotional state");
+        return res.json();
+      }
       const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
