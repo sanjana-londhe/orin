@@ -84,6 +84,19 @@ export function TaskList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
+  const { mutate: deferTask } = useMutation({
+    mutationFn: async ({ id, newDueAt }: { id: string; newDueAt: Date }) => {
+      const res = await fetch(`/api/tasks/${id}/defer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_due_at: newDueAt.toISOString(), confirmed: true }),
+      });
+      if (!res.ok) throw new Error("Failed to defer task");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
   const { mutate: deleteTask } = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
@@ -178,7 +191,7 @@ export function TaskList() {
               key={task.id}
               task={task}
               onMarkDone={markDone}
-              onDefer={(id, newDueAt) => updateTask({ id, patch: { dueAt: newDueAt } })}
+              onDefer={(id, newDueAt) => deferTask({ id, newDueAt })}
               onUpdate={(id, patch) => updateTask({ id, patch })}
               onDelete={deleteTask}
             />
