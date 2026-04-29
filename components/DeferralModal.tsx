@@ -112,13 +112,13 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-[var(--lime-ink)]">Push this task</DialogTitle>
+          <DialogTitle className="text-[var(--lime-ink)]">Give yourself more time</DialogTitle>
         </DialogHeader>
 
         {/* Current due date */}
         {task.dueAt && (
           <p className="text-[12.5px] text-[var(--stone-500)] -mt-1">
-            Currently due{" "}
+            Currently on for{" "}
             <span className="font-semibold text-[var(--lime-ink)]">
               {formatPreview(new Date(task.dueAt))}
             </span>
@@ -135,7 +135,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   ? "bg-white text-[var(--lime-ink)] shadow-sm border border-[var(--stone-400)]"
                   : "text-[var(--stone-500)] hover:text-[var(--lime-ink)]"
               )}>
-              {t === "defer" ? "By hours" : "Reschedule"}
+              {t === "defer" ? "A bit more time" : "Pick a new day"}
             </button>
           ))}
         </div>
@@ -222,7 +222,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         {preview && (
           <div className="rounded-[10px] bg-[var(--lime-muted)] border border-[var(--lime-border)] px-4 py-3">
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--lime-dark)] mb-0.5">
-              New due date
+              Giving yourself until
             </p>
             <p className="text-[14px] font-semibold text-[var(--lime-ink)]">
               {formatPreview(preview)}
@@ -232,13 +232,13 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
 
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-1">
-          <Button variant="outline" onClick={handleClose}>Cancel</Button>
+          <Button variant="outline" onClick={handleClose}>Not now</Button>
           <Button
             disabled={!preview}
             onClick={handleConfirm}
             className="bg-[hsl(var(--primary))] border border-[var(--ink)] text-white font-bold hover:bg-[hsl(var(--primary)/0.9)] hover:shadow-[2px_2px_0_var(--ink)] disabled:opacity-40 disabled:shadow-none"
           >
-            Confirm push
+            Take this time
           </Button>
         </div>
       </DialogContent>

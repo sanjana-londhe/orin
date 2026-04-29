@@ -16,10 +16,21 @@ export function NudgeBanner({ task, onDefer, onMarkDone }: Props) {
   const [deferOpen, setDeferOpen] = useState(false);
   const [deferTab, setDeferTab] = useState<"defer" | "reschedule">("defer");
 
-  const message =
-    task.emotionalState === "DREADING"
-      ? "This one's been sitting heavy. You've had it for a while — want to push it or get it done?"
-      : "This feels a bit anxious. A small push might take the edge off.";
+  function buildMessage(): string {
+    if (task.emotionalState === "DREADING") {
+      const deferrals = task.deferredCount ?? 0;
+      if (deferrals >= 2) return `You've deferred this ${deferrals}× — want to reschedule it properly or break it down?`;
+      return "This one's been sitting heavy. Want to push it or break it down?";
+    }
+    // ANXIOUS — show time remaining
+    if (task.dueAt) {
+      const hoursLeft = Math.round((new Date(task.dueAt).getTime() - Date.now()) / (60 * 60 * 1000));
+      if (hoursLeft <= 3) return `${hoursLeft}h left and this is tagged Anxious — any movement possible?`;
+    }
+    return "This one feels a bit anxious. Giving yourself more time might help.";
+  }
+
+  const message = buildMessage();
 
   async function handleDismiss() {
     // Optimistic: update Zustand immediately
@@ -80,9 +91,9 @@ export function NudgeBanner({ task, onDefer, onMarkDone }: Props) {
           <button
             onClick={handleDismiss}
             className="ml-auto text-[11px] text-[var(--stone-500)] hover:text-[var(--lime-ink)] transition-colors px-1"
-            aria-label="Dismiss nudge for 2 hours"
+            aria-label="Not now — suppress for 2 hours"
           >
-            Dismiss ✕
+            Not now
           </button>
         </div>
       </div>
