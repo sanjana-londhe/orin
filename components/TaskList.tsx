@@ -55,6 +55,11 @@ function sortTasks(tasks: TaskWithSubtasks[], mode: SortMode): TaskWithSubtasks[
   });
 }
 
+function timeGreeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
+}
+
 async function fetchTodaysTasks(): Promise<TaskWithSubtasks[]> {
   const res = await fetch("/api/tasks?filter=today");
   if (!res.ok) throw new Error("Failed to fetch tasks");
@@ -209,44 +214,31 @@ export function TaskList({ userName = "there" }: { userName?: string }) {
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-5">
-        <div className="flex items-start justify-between gap-3 mb-4 flex-wrap sm:flex-nowrap">
-          <div className="min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--stone-500)] mb-1">
-              Daily workspace · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-            </p>
-            <h1 className="text-[30px] font-extrabold leading-none tracking-[-0.04em] text-[var(--lime-ink)]">
-              Today
-            </h1>
-            <p className="mt-1 text-[13.5px] text-[var(--stone-500)]">
-              {tasks.length === 0
-                ? "Nothing on your plate yet"
-                : `${tasks.length} task${tasks.length === 1 ? "" : "s"} remaining`}
-            </p>
-          </div>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-[8px] bg-[hsl(var(--primary))] border border-[var(--ink)] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)] hover:shadow-[2px_2px_0_var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2 whitespace-nowrap"
-          >
-            + New task
-          </button>
+      {/* Day header — matches 4.html style */}
+      <div className="mb-8">
+        <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#B0A89E] mb-2">
+          Daily focus · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })}
+        </p>
+        <div className="flex items-end gap-3 mb-1.5">
+          <h1 className="text-[40px] font-black leading-none tracking-[-0.045em] text-[#1A1814]">
+            Today
+          </h1>
         </div>
+        <p className="text-[13.5px] text-[#A09890]">
+          {userName !== "there" ? `Good ${timeGreeting()}, ${userName} ☀️  · ` : ""}
+          {tasks.length === 0 ? "Nothing on your plate yet" : `${tasks.length} task${tasks.length === 1 ? "" : "s"} remaining`}
+        </p>
 
-        {/* Sort controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-mono text-[11px] text-[var(--stone-500)] mr-1">Sort</span>
+        {/* Sort controls — inline below header */}
+        <div className="flex items-center gap-2 mt-4 flex-wrap">
           {(Object.keys(SORT_LABELS) as SortMode[]).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setSortMode(mode)}
+            <button key={mode} onClick={() => setSortMode(mode)}
               className={cn(
-                "px-3 py-2 min-h-[44px] rounded-[6px] text-[12.5px] font-semibold border transition-all sm:py-1 sm:min-h-0",
+                "px-[10px] py-[3px] rounded-[6px] text-[12px] border transition-all",
                 sortMode === mode
-                  ? "bg-[hsl(var(--primary))] text-white border-[var(--ink)] shadow-[2px_2px_0_var(--ink)]"
-                  : "bg-white text-[var(--stone-500)] border-[var(--stone-400)] hover:bg-[var(--lime-subtle)] hover:text-[var(--lime-ink)] hover:border-[var(--stone-500)]"
-              )}
-            >
+                  ? "bg-[#059669] text-white border-[#059669] font-semibold"
+                  : "bg-white text-[#8C8880] border-black/[0.09] hover:bg-black/[0.04] hover:text-[#1A1814]"
+              )}>
               {SORT_LABELS[mode]}
             </button>
           ))}
