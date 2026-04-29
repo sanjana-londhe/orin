@@ -17,6 +17,15 @@ const STATE_CONFIG = {
   EXCITED:  { strip: "bg-[hsl(var(--emotion-excited))]",  pill: "bg-[hsl(var(--emotion-excited-bg))] text-[hsl(var(--emotion-excited-fg))] border border-[hsl(var(--emotion-excited-border))]",  label: "Excited",  emoji: "🤩" },
 } as const;
 
+function recurrenceLabel(rule: string | null): string | null {
+  if (!rule) return null;
+  if (rule.includes("BYDAY=MO,TU,WE,TH,FR")) return "↺ Weekdays";
+  if (rule.includes("INTERVAL=2") && rule.includes("WEEKLY")) return "↺ Biweekly";
+  if (rule.includes("WEEKLY")) return "↺ Weekly";
+  if (rule.includes("DAILY")) return "↺ Daily";
+  return "↺ Recurring";
+}
+
 function formatDue(dueAt: Date | string | null) {
   if (!dueAt) return { label: "No deadline", overdue: false, isoDate: "", isoTime: "" };
   const d = new Date(dueAt);
@@ -131,18 +140,25 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddS
           <span className="text-2xl leading-none" aria-hidden="true">{state.emoji}</span>
         </div>
 
-        {/* State pill (click to edit) */}
-        <div className="mb-3">
+        {/* State pill + recurrence badge */}
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
           {editingState ? (
             <div className="space-y-2">
               <EmotionalStatePicker value={task.emotionalState as EmotionalState} onChange={commitState} />
               <button onClick={() => setEditingState(false)} className="text-[10px] text-[var(--stone-500)]">Cancel</button>
             </div>
           ) : (
-            <button onClick={() => setEditingState(true)}
-              className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold hover:opacity-80 transition-opacity", state.pill)}>
-              {state.label}
-            </button>
+            <>
+              <button onClick={() => setEditingState(true)}
+                className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold hover:opacity-80 transition-opacity", state.pill)}>
+                {state.label}
+              </button>
+              {recurrenceLabel(task.recurrenceRule) && (
+                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold bg-[#EEF0FF] text-[#4A4ACC] border border-[#c7caff]">
+                  {recurrenceLabel(task.recurrenceRule)}
+                </span>
+              )}
+            </>
           )}
         </div>
 

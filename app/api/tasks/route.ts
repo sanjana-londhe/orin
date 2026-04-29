@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const { title, dueAt, emotionalState, parentTaskId } = body;
+  const { title, dueAt, emotionalState, parentTaskId, recurrenceRule } = body;
 
   if (!title?.trim()) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       emotionalState: emotionalState ?? "NEUTRAL",
       sortOrder: (lastTask?.sortOrder ?? -1) + 1,
       parentTaskId: parentTaskId ?? null,
+      recurrenceRule: recurrenceRule ?? null,
     },
   });
 
