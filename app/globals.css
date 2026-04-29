@@ -1,1 +1,100 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    /* ── shadcn base tokens ── */
+    --background: 43 23% 93%;
+    --foreground: 30 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 10% 10%;
+    --primary: 162 91% 30%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 36 18% 88%;
+    --secondary-foreground: 30 10% 20%;
+    --muted: 36 18% 91%;
+    --muted-foreground: 30 8% 52%;
+    --accent: 36 18% 88%;
+    --accent-foreground: 30 10% 10%;
+    --destructive: 14 88% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 33 16% 86%;
+    --input: 33 16% 86%;
+    --ring: 162 91% 30%;
+    --radius: 0.625rem;
+
+    /* ── Emotional state tokens ── */
+    --emotion-dreading: 0 84% 60%;          /* #EF4444 red */
+    --emotion-dreading-bg: 0 93% 97%;       /* #FEF2F0 */
+    --emotion-dreading-fg: 14 82% 43%;      /* #C0381A */
+
+    --emotion-anxious: 38 92% 50%;          /* #F59E0B amber */
+    --emotion-anxious-bg: 48 100% 97%;      /* #FEFBF0 */
+    --emotion-anxious-fg: 35 88% 36%;       /* #A87210 */
+
+    --emotion-neutral: 220 9% 83%;          /* #D1D5DB gray */
+    --emotion-neutral-bg: 210 11% 96%;      /* #F3F2F0 */
+    --emotion-neutral-fg: 30 5% 43%;        /* #706C68 */
+
+    --emotion-willing: 174 77% 40%;         /* #14B8A6 teal */
+    --emotion-willing-bg: 174 64% 95%;      /* #EEFAF8 */
+    --emotion-willing-fg: 177 82% 28%;      /* #0C847A */
+
+    --emotion-excited: 142 71% 45%;         /* #22C55E green */
+    --emotion-excited-bg: 142 69% 96%;      /* #EEFAF0 */
+    --emotion-excited-fg: 145 72% 30%;      /* #168A3A */
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-emotion-dreading: hsl(var(--emotion-dreading));
+  --color-emotion-dreading-bg: hsl(var(--emotion-dreading-bg));
+  --color-emotion-dreading-fg: hsl(var(--emotion-dreading-fg));
+  --color-emotion-anxious: hsl(var(--emotion-anxious));
+  --color-emotion-anxious-bg: hsl(var(--emotion-anxious-bg));
+  --color-emotion-anxious-fg: hsl(var(--emotion-anxious-fg));
+  --color-emotion-neutral: hsl(var(--emotion-neutral));
+  --color-emotion-neutral-bg: hsl(var(--emotion-neutral-bg));
+  --color-emotion-neutral-fg: hsl(var(--emotion-neutral-fg));
+  --color-emotion-willing: hsl(var(--emotion-willing));
+  --color-emotion-willing-bg: hsl(var(--emotion-willing-bg));
+  --color-emotion-willing-fg: hsl(var(--emotion-willing-fg));
+  --color-emotion-excited: hsl(var(--emotion-excited));
+  --color-emotion-excited-bg: hsl(var(--emotion-excited-bg));
+  --color-emotion-excited-fg: hsl(var(--emotion-excited-fg));
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
