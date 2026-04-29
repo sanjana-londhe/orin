@@ -10,21 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const EMOTIONAL_STATES = [
-  { value: "DREADING", label: "😮‍💨 Dreading" },
-  { value: "ANXIOUS",  label: "😟 Anxious" },
-  { value: "NEUTRAL",  label: "😐 Neutral" },
-  { value: "WILLING",  label: "🙂 Willing" },
-  { value: "EXCITED",  label: "🤩 Excited" },
-] as const;
+import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
 
 interface Props {
   open: boolean;
@@ -36,7 +22,7 @@ export function TaskCreateModal({ open, onOpenChange }: Props) {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [dueTime, setDueTime] = useState("");
-  const [emotionalState, setEmotionalState] = useState("NEUTRAL");
+  const [emotionalState, setEmotionalState] = useState<EmotionalState>("NEUTRAL");
   const [error, setError] = useState("");
 
   const { mutate, isPending } = useMutation({
@@ -126,18 +112,10 @@ export function TaskCreateModal({ open, onOpenChange }: Props) {
           {/* Emotional state */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium">How do you feel about it?</label>
-            <Select value={emotionalState} onValueChange={setEmotionalState}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EMOTIONAL_STATES.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EmotionalStatePicker
+              value={emotionalState}
+              onChange={setEmotionalState}
+            />
           </div>
 
           {error && (
