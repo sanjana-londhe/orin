@@ -54,7 +54,12 @@ export function NudgeBanner({ task, onDefer, onMarkDone }: Props) {
 
   return (
     <>
-      <div className="mx-5 mb-4 rounded-[10px] bg-[var(--anxious-bg,#fffbeb)] border border-[var(--anxious-border,#ebd587)] px-4 py-3 relative">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-label="Task nudge"
+        className="mx-5 mb-4 rounded-[10px] bg-[var(--anxious-bg,#fffbeb)] border border-[var(--anxious-border,#ebd587)] px-4 py-3 relative"
+      >
         {/* Decorative quote mark */}
         <span
           aria-hidden="true"

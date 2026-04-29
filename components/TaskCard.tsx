@@ -189,26 +189,30 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddS
             Action items
           </p>
           {task.subtasks.map((sub) => (
-            <div key={sub.id} className="group flex items-center gap-2.5 py-0.5">
+            <div key={sub.id} className="group flex items-center gap-2.5">
+              {/* Touch target: 44×44px wrapper around 13px visual checkbox */}
               <button
                 onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)}
                 aria-label={sub.isCompleted ? "Completed" : "Mark complete"}
-                className={cn(
-                  "w-[13px] h-[13px] rounded-[3px] border flex-shrink-0 transition-all",
+                className="flex items-center justify-center w-[44px] h-[44px] -mx-[15px] flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-1 rounded"
+              >
+                <span className={cn(
+                  "w-[13px] h-[13px] rounded-[3px] border block transition-all",
                   sub.isCompleted
                     ? "bg-[hsl(var(--primary))] border-[hsl(var(--primary))]"
-                    : "border-[var(--stone-500)] hover:border-[hsl(var(--primary))]"
-                )}
-              />
+                    : "border-[var(--stone-500)] group-hover:border-[hsl(var(--primary))]"
+                )} />
+              </button>
               <span className={cn(
                 "text-[12.5px] flex-1 leading-[1.4]",
                 sub.isCompleted ? "line-through text-[var(--stone-500)]" : "text-[var(--lime-ink)]"
               )}>
                 {sub.title}
               </span>
+              {/* Touch target: min 44×44 */}
               <button
                 onClick={() => onDeleteSubtask?.(sub.id)}
-                className="opacity-0 group-hover:opacity-100 text-[10px] text-[var(--stone-500)] hover:text-[hsl(var(--destructive))] transition-all px-1"
+                className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 min-w-[44px] min-h-[44px] flex items-center justify-center text-[10px] text-[var(--stone-500)] hover:text-[hsl(var(--destructive))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--destructive))] focus-visible:ring-offset-1 rounded transition-all"
                 aria-label="Delete subtask"
               >✕</button>
             </div>
@@ -280,19 +284,23 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddS
             Push this →
           </button>
         )}
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-0.5">
           {confirmDelete ? (
             <>
-              <span className="text-[11px] text-[hsl(var(--destructive))]">Delete?</span>
+              <span className="text-[11px] text-[hsl(var(--destructive))] mr-1">Delete?</span>
               <button onClick={() => onDelete?.(task.id)}
-                className="text-[11px] font-bold text-[hsl(var(--destructive))] hover:underline">Yes</button>
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[11px] font-bold text-[hsl(var(--destructive))] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--destructive))] focus-visible:ring-offset-1 rounded">
+                Yes
+              </button>
               <button onClick={() => setConfirmDelete(false)}
-                className="text-[11px] text-[var(--stone-500)] hover:underline">No</button>
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[11px] text-[var(--stone-500)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-1 rounded">
+                No
+              </button>
             </>
           ) : (
             <button onClick={() => setConfirmDelete(true)}
               aria-label="Delete task"
-              className="text-[11px] text-[var(--stone-500)] hover:text-[hsl(var(--destructive))] transition-colors px-1">
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[11px] text-[var(--stone-500)] hover:text-[hsl(var(--destructive))] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--destructive))] focus-visible:ring-offset-1 rounded">
               ✕
             </button>
           )}

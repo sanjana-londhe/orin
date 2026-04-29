@@ -76,13 +76,25 @@ export function EmotionalStatePicker({
   compact = false,
   className,
 }: Props) {
+  const currentIndex = STATES.findIndex((s) => s.value === value);
+
+  function handleKeyDown(e: React.KeyboardEvent, index: number) {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      onChange(STATES[(index + 1) % STATES.length].value);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      onChange(STATES[(index - 1 + STATES.length) % STATES.length].value);
+    }
+  }
+
   return (
     <div
       role="radiogroup"
       aria-label="Emotional state"
       className={cn("flex flex-wrap gap-2", className)}
     >
-      {STATES.map((state) => {
+      {STATES.map((state, index) => {
         const isSelected = value === state.value;
         return (
           <button
@@ -91,7 +103,9 @@ export function EmotionalStatePicker({
             role="radio"
             aria-checked={isSelected}
             aria-label={state.label}
+            tabIndex={isSelected ? 0 : currentIndex === -1 && index === 0 ? 0 : -1}
             onClick={() => onChange(state.value)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
               compact ? "px-2" : "px-3",
