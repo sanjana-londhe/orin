@@ -34,6 +34,27 @@ export function TaskList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
+  const { mutate: updateTask } = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Task> }) => {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) throw new Error("Failed to update task");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const { mutate: deleteTask } = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete task");
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
@@ -99,6 +120,8 @@ export function TaskList() {
               key={task.id}
               task={task}
               onMarkDone={markDone}
+              onUpdate={(id, patch) => updateTask({ id, patch })}
+              onDelete={deleteTask}
             />
           ))}
         </div>
