@@ -154,7 +154,7 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete }: Prop
       {isNudged && !done && (
         <NudgeBanner
           task={task}
-          onDefer={onDefer ? () => setDeferOpen(true) : undefined}
+          onDefer={onDefer ? (newDueAt) => onDefer(task.id, newDueAt) : undefined}
           onMarkDone={onMarkDone ? () => handleMarkDone() : undefined}
         />
       )}

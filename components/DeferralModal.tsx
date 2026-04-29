@@ -68,10 +68,11 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   task: Task;
   onConfirm: (newDueAt: Date) => void;
+  defaultTab?: Tab;
 }
 
-export function DeferralModal({ open, onOpenChange, task, onConfirm }: Props) {
-  const [tab, setTab] = useState<Tab>("defer");
+export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab = "defer" }: Props) {
+  const [tab, setTab] = useState<Tab>(defaultTab);
   const [selected, setSelected] = useState<Selection | null>(null);
   const [customHours, setCustomHours] = useState("");
   const [customDate, setCustomDate] = useState("");
@@ -98,7 +99,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm }: Props) {
   }
 
   function reset() {
-    setTab("defer");
+    setTab(defaultTab);
     setSelected(null);
     setCustomHours("");
     setCustomDate("");
