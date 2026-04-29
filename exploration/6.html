@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orin — Today</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Space Mono (Arc) + Space Grotesk (closest to Matter/Marlin) -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Marlin Soft Basic — Arc's primary font, loaded from their CDN */
+    @font-face {
+      font-family: 'Marlin Soft Basic';
+      src: url('https://arc.net/fonts/MarlinSoftBasic-Regular.otf') format('opentype');
+      font-weight: 400; font-style: normal; font-display: swap;
+    }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  DESIGN LANGUAGE — Warp × Arc × Notion               ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    :root {
+      /* ── Warp dark palette ──────────────────────────────── */
+      --warp-900:   #0a0a09;   /* page bg */
+      --warp-800:   #111110;   /* sidebar/panel bg */
+      --warp-700:   #161615;   /* card bg */
+      --warp-600:   #1e1e1c;   /* elevated card */
+      --warp-500:   #2b2b28;   /* hover state */
+      --warp-400:   #353534;   /* borders strong */
+      --warp-300:   #666469;   /* muted text */
+      --warp-200:   #afaeac;   /* secondary text */
+      --warp-100:   #e3e2e0;   /* primary light text */
+      --warp-50:    #faf9f5;   /* near white */
+
+      /* Warp accent colors */
+      --warp-blue:   #5093FF;
+      --warp-purple: #AA73FF;
+      --warp-green:  #54D454;
+      --warp-yellow: #F5C542;
+      --warp-pink:   #D64570;
+      --warp-teal:   #3A7D44;
+      --warp-cyan:   #385558;
+
+      /* ── Arc brand palette ──────────────────────────────── */
+      --arc-offwhite: #FFFCEC;   /* Arc's warm cream text */
+      --arc-navy:     #000354;   /* Arc sidebar dark navy */
+      --arc-deep:     #2404AA;   /* Arc deep indigo */
+      --arc-blue:     #3139FB;   /* Arc primary blue */
+      --arc-pale:     #96C4FF;   /* Arc focus/highlight */
+      --arc-red:      #FB3A4D;
+      --arc-grad: linear-gradient(135deg, #3139FB 0%, #AA73FF 50%, #FB3A4D 100%);
+
+      /* ── Notion database colors ─────────────────────────── */
+      --notion-red:    #E03E3E;
+      --notion-orange: #D9730D;
+      --notion-yellow: #DFAB01;
+      --notion-teal:   #0F7B6C;
+      --notion-blue:   #0B6E99;
+      --notion-purple: #6940A5;
+      --notion-gray:   #787774;
+      --notion-default-bg: rgba(0,0,0,0.03);
+
+      /* ── Semantic surfaces  (white theme) ─────────────────── */
+      --bg:            #f7f6f3;    /* Notion/Warp off-white page */
+      --surface:       #f0efeb;    /* sidebar */
+      --surface-card:  #ffffff;    /* cards */
+      --surface-raised:#f7f6f3;    /* elevated / footers */
+      --border:        rgba(0,0,0,0.08);
+      --border-strong: rgba(0,0,0,0.14);
+      --border-focus:  var(--arc-blue);
+
+      /* ── Text ───────────────────────────────────────────── */
+      --text-1:   #1a1916;    /* primary — near-black */
+      --text-2:   #4a4845;    /* secondary */
+      --text-3:   #7a7874;    /* tertiary */
+      --text-4:   #b5b3af;    /* muted */
+
+      /* ── Emotional states — adjusted for white bg ───────── */
+      --st-dreading:     #c0283e;            /* darker pink/red — readable on white */
+      --st-dreading-bg:  #fef1f4;
+      --st-dreading-border: #fbbdcb;
+      --st-dreading-glow:rgba(192,40,62,0.12);
+
+      --st-anxious:      #96700a;            /* dark amber */
+      --st-anxious-bg:   #fef9ec;
+      --st-anxious-border: #fde99a;
+      --st-anxious-glow: rgba(150,112,10,0.12);
+
+      --st-neutral:      #6b6967;
+      --st-neutral-bg:   #f4f3f1;
+      --st-neutral-border: #e0deda;
+      --st-neutral-glow: rgba(107,105,103,0.1);
+
+      --st-willing:      #0f766e;
+      --st-willing-bg:   #f0fdfa;
+      --st-willing-border:#99f6e4;
+      --st-willing-glow: rgba(15,118,110,0.12);
+
+      --st-excited:      #16803d;            /* dark green — Notion-style */
+      --st-excited-bg:   #f0fdf4;
+      --st-excited-border:#bbf7d0;
+      --st-excited-glow: rgba(22,128,61,0.12);
+
+      /* ── Fonts ──────────────────────────────────────────── */
+      --font:       'Marlin Soft Basic', 'Space Grotesk', system-ui, sans-serif;
+      --font-ui:    'Space Grotesk', 'Marlin Soft Basic', system-ui, sans-serif;
+      --font-mono:  'Space Mono', 'ABC Favorit Mono', ui-monospace, monospace;
+
+      /* ── Spacing ────────────────────────────────────────── */
+      --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+      --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px; --sp-12:48px;
+
+      /* ── Radius ─────────────────────────────────────────── */
+      --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:18px; --r-2xl:26px;
+
+      /* ── Layout ─────────────────────────────────────────── */
+      --sidebar-w: 220px;
+      --nav-h:     50px;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text-1);
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 2px; }
+
+    /* ── Noise texture (Arc-style) ── */
+    .noise {
+      position: relative;
+    }
+    .noise::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  SHELL                                               ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    .shell { display: flex; height: 100vh; }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  SIDEBAR  — Arc deep navy                           ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--surface);   /* warm light gray */
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sb-head {
+      padding: var(--sp-5) var(--sp-4) var(--sp-4);
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Arc-style logo with gradient badge */
+    .sb-logo {
+      display: flex; align-items: center; gap: var(--sp-2);
+      text-decoration: none; margin-bottom: var(--sp-5);
+    }
+    .sb-logo-badge {
+      width: 24px; height: 24px; border-radius: var(--r-sm);
+      background: var(--arc-grad);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .sb-logo-text {
+      font-family: var(--font-ui);
+      font-size: 14px; font-weight: 700;
+      letter-spacing: -0.04em; color: var(--text-1);
+    }
+
+    /* Arc Spaces — nav items with colored orbs */
+    .sb-nav { display: flex; flex-direction: column; gap: 2px; }
+    .sb-space {
+      display: flex; align-items: center; gap: var(--sp-2);
+      padding: 7px var(--sp-3); border-radius: var(--r-md);
+      cursor: pointer; border: none; background: none;
+      font-family: var(--font-ui); font-size: 12.5px;
+      color: var(--text-3);
+      text-align: left; width: 100%;
+      transition: background 0.12s, color 0.12s, transform 0.12s;
+    }
+    .sb-space:hover {
+      background: rgba(0,0,0,0.05);
+      color: var(--text-1);
+      transform: translateX(2px);
+    }
+    .sb-space.active {
+      background: #ffffff;
+      color: var(--arc-blue);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    /* Arc Space orb */
+    .space-orb {
+      width: 20px; height: 20px; border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; flex-shrink: 0;
+    }
+    .space-orb-grad { background: var(--arc-grad); }
+    .sb-space-count {
+      margin-left: auto;
+      font-family: var(--font-mono); font-size: 9px;
+      color: var(--text-4); padding: 1px 5px;
+      background: rgba(0,0,0,0.06);
+      border-radius: var(--r-sm);
+    }
+
+    .sb-rule { height: 1px; background: rgba(0,0,0,0.07); margin: var(--sp-3) 0; }
+
+    /* Sidebar date block (Arc-style large date in sidebar) */
+    .sb-date-block { padding: 0 var(--sp-3) var(--sp-3); }
+    .sb-weekday {
+      font-family: var(--font-mono); font-size: 9px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-4); margin-bottom: 3px;
+    }
+    .sb-date-big {
+      font-size: 30px; font-weight: 700; letter-spacing: -0.05em;
+      line-height: 1; color: var(--text-1);
+    }
+    .sb-month {
+      font-size: 11px; color: var(--text-4); margin-top: 2px;
+    }
+
+    /* Mood strip — 5 colored pips */
+    .sb-mood-strip {
+      display: flex; gap: 3px; padding: 0 var(--sp-3) var(--sp-3);
+    }
+    .mood-pip { flex: 1; height: 3px; border-radius: 2px; opacity: 0.65; }
+
+    /* Sidebar task list */
+    .sb-tasks { flex: 1; overflow-y: auto; padding: 4px var(--sp-2); }
+    .sb-task {
+      display: flex; align-items: flex-start; gap: var(--sp-2);
+      padding: 8px var(--sp-2); border-radius: var(--r-md);
+      cursor: pointer; margin-bottom: 1px;
+      border-left: 2px solid transparent;
+      transition: all 0.12s;
+    }
+    .sb-task:hover { background: rgba(0,0,0,0.04); }
+    .sb-task.sel {
+      background: #ffffff;
+      border-left-color: var(--state-c, var(--border-strong));
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .sb-task-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
+    }
+    .sb-task-info { min-width: 0; }
+    .sb-task-time {
+      font-family: var(--font-mono); font-size: 9px;
+      color: var(--text-4); margin-bottom: 2px;
+    }
+    .sb-task-name { font-size: 11.5px; color: var(--text-3); line-height: 1.35; }
+    .sb-task.sel .sb-task-name { color: var(--text-1); font-weight: 500; }
+    .sb-task.faded { opacity: 0.3; }
+
+    .sb-foot { padding: var(--sp-2) var(--sp-2); border-top: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; }
+    .sb-new {
+      display: flex; align-items: center; gap: var(--sp-2); width: 100%;
+      padding: 7px var(--sp-3); border-radius: var(--r-md);
+      border: 1px dashed var(--border-strong); background: none; cursor: pointer;
+      font-family: var(--font-ui); font-size: 12px;
+      color: var(--text-4); transition: all 0.12s;
+    }
+    .sb-new:hover {
+      border-color: var(--arc-blue); color: var(--arc-blue);
+      background: #eff3ff;
+    }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  MAIN                                               ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+    /* Arc-style gradient bar at top of page */
+    .arc-bar {
+      height: 3px;
+      background: var(--arc-grad);
+      flex-shrink: 0;
+    }
+
+    /* Top toolbar */
+    .toolbar {
+      height: var(--nav-h);
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0 var(--sp-6);
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+    }
+
+    /* Notion-style breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: var(--sp-1);
+      font-size: 12.5px; color: var(--text-3); flex: 1;
+    }
+    .bc-sep { color: var(--warp-400); font-size: 11px; }
+    .bc-active { color: var(--text-2); font-weight: 500; }
+
+    .tb-right { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; }
+    .tb-sort {
+      padding: 4px 10px; border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: none; cursor: pointer;
+      font-family: var(--font-ui); font-size: 11.5px; color: var(--text-3);
+      transition: all 0.12s;
+    }
+    .tb-sort:hover { background: rgba(0,0,0,0.06); color: var(--text-1); }
+    .tb-sort.on {
+      background: var(--arc-blue); color: #fff;
+      border-color: var(--arc-blue); font-weight: 600;
+    }
+    .tb-icon {
+      width: 28px; height: 28px; border-radius: var(--r-sm);
+      border: 1px solid var(--border); background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--text-3); transition: all 0.12s;
+    }
+    .tb-icon:hover { background: rgba(0,0,0,0.06); color: var(--text-1); }
+    /* Arc-style avatar with gradient ring */
+    .tb-av {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--arc-grad);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10.5px; font-weight: 700; color: #fff; cursor: pointer;
+      box-shadow: 0 0 0 1.5px rgba(49,57,251,0.4);
+    }
+
+    /* ── Content scroll ── */
+    .scroll { flex: 1; overflow-y: auto; padding: var(--sp-8) var(--sp-8) 80px; }
+    .inner { max-width: 700px; margin: 0 auto; }
+
+    /* ── Page header — Notion heading style ── */
+    .page-head { margin-bottom: var(--sp-8); }
+    .page-mono {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-4); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: var(--sp-2);
+    }
+    /* Notion's H1 style */
+    .page-h1 {
+      font-size: 38px; font-weight: 700;
+      letter-spacing: -0.05em;       /* Arc tight tracking */
+      line-height: 0.975em;          /* Arc tight line height */
+      color: var(--text-1); margin-bottom: var(--sp-3);
+    }
+    .page-sub { font-size: 13px; color: var(--text-3); margin-bottom: var(--sp-5); }
+
+    /* Notion-style inline properties row — page metadata */
+    .page-props {
+      display: flex; align-items: center; gap: var(--sp-5);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      margin-bottom: var(--sp-5);
+    }
+    .page-prop { display: flex; align-items: center; gap: var(--sp-2); }
+    .pp-key {
+      font-family: var(--font-mono); font-size: 9.5px;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-4); white-space: nowrap;
+    }
+    .pp-val { font-size: 13px; color: var(--text-2); font-weight: 500; }
+    .pp-val.accent { color: var(--arc-blue); }
+    .pp-sep { width: 1px; height: 14px; background: var(--border-strong); }
+
+    /* Progress track */
+    .prog-track { width: 80px; height: 3px; background: var(--warp-500); border-radius: 2px; }
+    .prog-fill   { height: 100%; border-radius: 2px; background: var(--warp-green); }
+
+    /* Capture bar */
+    .capture {
+      display: flex; align-items: center; gap: var(--sp-3);
+      padding: 10px var(--sp-4);
+      background: var(--surface-card); border: 1px solid var(--border);
+      border-radius: var(--r-lg); margin-bottom: var(--sp-6);
+      transition: border-color 0.15s;
+    }
+    .capture:focus-within {
+      border-color: var(--arc-pale);
+      box-shadow: 0 0 0 3px rgba(150,196,255,0.12);
+    }
+    .capture-icon { font-size: 13px; color: var(--text-4); flex-shrink: 0; }
+    .capture input {
+      flex: 1; background: none; border: none; outline: none;
+      font-family: var(--font-ui); font-size: 13.5px; color: var(--text-1);
+    }
+    .capture input::placeholder { color: var(--text-4); }
+    .capture-kbd {
+      font-family: var(--font-mono); font-size: 9.5px; color: var(--text-4);
+      background: var(--warp-500); border-radius: 4px; padding: 2px 6px; flex-shrink: 0;
+    }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  TASK CARDS — Warp terminal blocks                  ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    .task-list { display: flex; flex-direction: column; gap: var(--sp-3); margin-bottom: var(--sp-8); }
+
+    .task-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      position: relative;
+      /* Warp: no drop shadow, just border */
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .task-card:hover {
+      border-color: rgba(0,0,0,0.16);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+    .task-card.done-card { opacity: 0.32; }
+
+    /* Colored top line + glow — Warp terminal output indicator */
+    .card-line { height: 2px; }
+    .card-glow {
+      height: 40px; margin-top: -40px;
+      pointer-events: none;
+    }
+
+    .card-body { padding: var(--sp-5) var(--sp-5) var(--sp-4); }
+
+    /* Card header row */
+    .card-header {
+      display: flex; align-items: center; gap: var(--sp-3);
+      margin-bottom: var(--sp-4);
+    }
+    .card-time {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-4); white-space: nowrap;
+    }
+    .card-time.late { color: var(--st-dreading); font-weight: 600; }
+    .card-pills { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+    .card-ml { margin-left: auto; }
+
+    /* Warp-style colored pill */
+    .pill {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10.5px; font-weight: 600; padding: 2px 8px;
+      border-radius: var(--r-sm);
+    }
+    .p-dreading { background: var(--st-dreading-bg);   color: var(--st-dreading);   border: 1px solid var(--st-dreading-border); }
+    .p-anxious  { background: var(--st-anxious-bg);    color: var(--st-anxious);    border: 1px solid var(--st-anxious-border); }
+    .p-neutral  { background: var(--st-neutral-bg);    color: var(--st-neutral);    border: 1px solid var(--st-neutral-border); }
+    .p-willing  { background: var(--st-willing-bg);    color: var(--st-willing);    border: 1px solid var(--st-willing-border); }
+    .p-excited  { background: var(--st-excited-bg);    color: var(--st-excited);    border: 1px solid var(--st-excited-border); }
+    .p-defer    { background: var(--st-dreading-bg);   color: var(--st-dreading);   border: 1px solid var(--st-dreading-border); font-family: var(--font-mono); }
+    .p-recur    { background: #eff3ff;                 color: var(--arc-blue);      border: 1px solid #bfdbfe; font-family: var(--font-mono); }
+
+    /* Card title — Notion H2 style */
+    .card-title {
+      font-size: 19px; font-weight: 600;
+      letter-spacing: -0.035em; color: var(--text-1);
+      line-height: 1.3; margin-bottom: var(--sp-4);
+    }
+    .card-title.done { text-decoration: line-through; color: var(--text-4); font-weight: 400; }
+
+    /* Notion database properties — inside card */
+    .card-props {
+      display: grid; grid-template-columns: 90px 1fr;
+      row-gap: 1px; margin-bottom: var(--sp-4);
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md); overflow: hidden;
+    }
+    .prop-row {
+      display: contents;
+    }
+    .prop-key {
+      padding: 6px 10px;
+      font-family: var(--font-mono); font-size: 9.5px;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--text-4); background: rgba(0,0,0,0.03);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+    }
+    .prop-val {
+      padding: 6px 10px;
+      font-size: 12.5px; color: var(--text-2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: var(--sp-2);
+    }
+    .prop-key:last-of-type, .prop-val:last-of-type { border-bottom: none; }
+
+    /* Nudge block — Notion callout block style */
+    .nudge {
+      margin-bottom: var(--sp-4);
+      background: var(--st-anxious-bg);
+      border: 1px solid var(--st-anxious-border);
+      border-radius: var(--r-lg); padding: 12px var(--sp-4);
+    }
+    .nudge-text {
+      font-size: 13px; color: var(--st-anxious); line-height: 1.5; margin-bottom: var(--sp-2);
+    }
+    .nudge-row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+    .nb-fill {
+      font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: var(--r-md);
+      background: var(--arc-blue); color: #fff; border: none; cursor: pointer;
+      font-family: var(--font-ui); transition: background 0.12s;
+    }
+    .nb-fill:hover { background: var(--arc-deep); }
+    .nb-line {
+      font-size: 11.5px; padding: 4px 11px; border-radius: var(--r-md);
+      background: #ffffff; color: var(--text-2);
+      border: 1px solid var(--border-strong); cursor: pointer;
+      font-family: var(--font-ui); transition: all 0.12s;
+    }
+    .nb-line:hover { background: var(--surface-raised); color: var(--text-1); border-color: var(--text-4); }
+    .nb-x { font-size: 11px; color: var(--text-4); background: none; border: none; cursor: pointer; margin-left: auto; }
+
+    /* Action items (Notion checkbox list) */
+    .ai-wrap { margin-bottom: var(--sp-3); }
+    .ai-label {
+      font-family: var(--font-mono); font-size: 9px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-4); margin-bottom: var(--sp-2);
+    }
+    .ai-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+    .ai-cb {
+      width: 13px; height: 13px; border-radius: 3px;
+      border: 1.5px solid var(--border-strong); flex-shrink: 0;
+      background: transparent;
+    }
+    .ai-cb.done { background: var(--st-excited); border-color: var(--st-excited); }
+    .ai-text { font-size: 12.5px; color: var(--text-2); }
+    .ai-text.done { text-decoration: line-through; color: var(--text-4); }
+
+    /* Card footer actions */
+    .card-foot {
+      padding: 10px var(--sp-5) 12px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-raised);
+      display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+    }
+    .act {
+      font-size: 11.5px; font-weight: 500; padding: 4px 11px; border-radius: var(--r-md);
+      border: 1px solid var(--border-strong); background: #ffffff;
+      color: var(--text-2); cursor: pointer; font-family: var(--font-ui);
+      transition: all 0.12s;
+    }
+    .act:hover { background: #f0f0ee; border-color: var(--text-4); color: var(--text-1); }
+    .act-primary {
+      background: var(--arc-blue); border-color: var(--arc-blue); color: #fff;
+    }
+    .act-primary:hover { background: var(--arc-deep); border-color: var(--arc-deep); }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  SECTION HEADERS                                    ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    .sec-head {
+      display: flex; align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: var(--sp-4);
+    }
+    .sec-title {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .sec-count {
+      font-family: var(--font-mono); font-size: 9.5px;
+      color: var(--text-4); background: rgba(0,0,0,0.07);
+      padding: 1px 6px; border-radius: var(--r-sm); margin-left: var(--sp-2);
+    }
+    .sec-link {
+      font-size: 11.5px; color: var(--arc-blue); text-decoration: none; font-weight: 500;
+    }
+    .sec-link:hover { text-decoration: underline; }
+    .sec-divider { border: none; border-top: 1px solid var(--border); margin: var(--sp-8) 0; }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  QUADRANT MAP                                       ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    .q-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden;
+    }
+    .q-head {
+      padding: 12px var(--sp-5); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface-raised);
+    }
+    .q-head-title { font-size: 13px; font-weight: 600; color: var(--text-1); letter-spacing: -0.02em; }
+    .q-head-sub { font-size: 11px; color: var(--text-4); margin-top: 1px; }
+    .q-body { padding: var(--sp-4) var(--sp-5); }
+    .q-wrap {
+      position: relative; padding-top: 38%;
+      background: var(--surface-raised);
+      border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden;
+    }
+    .q-stage { position: absolute; inset: 18px 18px 22px 26px; }
+    .qz { position: absolute; border-radius: 3px; }
+    .ax-h { position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed var(--border-strong); }
+    .ax-v { position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px dashed var(--border-strong); }
+    .qlbl {
+      position: absolute; font-family: var(--font-mono);
+      font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .axlbl { position: absolute; font-size: 7.5px; color: var(--text-4); letter-spacing: 0.08em; text-transform: uppercase; }
+    /* Glowing dots — Warp terminal output indicator */
+    .qdot {
+      position: absolute; width: 9px; height: 9px; border-radius: 50%;
+      transform: translate(-50%,-50%); cursor: pointer;
+      transition: transform 0.13s;
+    }
+    .qdot:hover { transform: translate(-50%,-50%) scale(1.7); }
+    .q-legend {
+      display: flex; gap: var(--sp-5); flex-wrap: wrap; margin-top: 12px;
+      padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .leg { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--text-4); }
+    .leg-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* ╔═══════════════════════════════════════════════════════╗
+       ║  WEEKLY REVIEW                                      ║
+       ╚═══════════════════════════════════════════════════════╝ */
+    .rv-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden;
+    }
+    .rv-head {
+      padding: 12px var(--sp-5); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface-raised);
+    }
+    .rv-head-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
+    .rv-head-sub { font-family: var(--font-mono); font-size: 9.5px; color: var(--text-4); margin-top: 2px; }
+    .rv-body { padding: var(--sp-4) var(--sp-5); }
+    /* Notion-style database grid */
+    .rv-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: var(--sp-2); margin-bottom: var(--sp-4); }
+    .rv-cell {
+      background: var(--surface-raised); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 12px 10px; text-align: center;
+    }
+    .rv-num { font-size: 24px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+    .rv-label { font-size: 10px; color: var(--text-4); margin-top: 4px; line-height: 1.3; }
+    /* Notion callout block for insight */
+    .rv-callout {
+      display: flex; align-items: flex-start; gap: var(--sp-3);
+      padding: 12px var(--sp-4);
+      background: #eff3ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--r-lg);
+      font-size: 13px; color: #3b4ea6; line-height: 1.55;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; }
+    .rv-callout strong { font-weight: 600; color: var(--arc-blue); }
+
+    /* Pulse */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+    .pulse { animation: pulse 1.8s ease-in-out infinite; display: inline-block; }
+
+    /* Arc page-load animation */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp 0.4s ease both; }
+    .d1 { animation-delay: 0.05s; }
+    .d2 { animation-delay: 0.12s; }
+    .d3 { animation-delay: 0.19s; }
+    .d4 { animation-delay: 0.26s; }
+    .d5 { animation-delay: 0.33s; }
+    .d6 { animation-delay: 0.40s; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ════════════ SIDEBAR — Arc deep navy ════════════ -->
+  <aside class="sidebar" style="position:relative;">
+    <div class="sb-head" style="position:relative;z-index:2;">
+      <!-- Arc gradient logo -->
+      <a href="#" class="sb-logo">
+        <div class="sb-logo-badge">O</div>
+        <span class="sb-logo-text">orin</span>
+      </a>
+
+      <!-- Arc Spaces nav -->
+      <nav class="sb-nav">
+        <button class="sb-space active">
+          <div class="space-orb space-orb-grad">☀️</div>
+          Today
+          <span class="sb-space-count">4</span>
+        </button>
+        <button class="sb-space">
+          <div class="space-orb" style="background:rgba(49,57,251,0.25);">📅</div>
+          Upcoming
+          <span class="sb-space-count">11</span>
+        </button>
+        <button class="sb-space">
+          <div class="space-orb" style="background:rgba(170,115,255,0.25);">⬡</div>
+          Quadrant
+        </button>
+        <button class="sb-space">
+          <div class="space-orb" style="background:rgba(42,157,153,0.25);">🗓</div>
+          Calendar
+        </button>
+        <button class="sb-space">
+          <div class="space-orb" style="background:rgba(245,197,66,0.25);">📊</div>
+          Review
+        </button>
+      </nav>
+    </div>
+
+    <div class="sb-rule" style="margin:0;"></div>
+
+    <div style="padding:var(--sp-3) var(--sp-4) var(--sp-2);position:relative;z-index:2;">
+      <div class="sb-weekday">Tuesday</div>
+      <div class="sb-date-big">29</div>
+      <div class="sb-month">April 2024</div>
+    </div>
+
+    <!-- Mood strip -->
+    <div class="sb-mood-strip" style="position:relative;z-index:2;">
+      <div class="mood-pip" style="background:var(--st-dreading);"></div>
+      <div class="mood-pip" style="background:var(--st-anxious);"></div>
+      <div class="mood-pip" style="background:var(--st-neutral);"></div>
+      <div class="mood-pip" style="background:var(--st-willing);"></div>
+      <div class="mood-pip" style="background:var(--st-excited);"></div>
+    </div>
+
+    <div class="sb-rule" style="margin:0 0 var(--sp-1);"></div>
+
+    <!-- Task list -->
+    <div class="sb-tasks" style="position:relative;z-index:2;">
+      <div class="sb-task sel" style="--state-c:var(--st-dreading);">
+        <div class="sb-task-dot" style="background:var(--st-dreading);box-shadow:0 0 5px var(--st-dreading-glow);"></div>
+        <div class="sb-task-info">
+          <div class="sb-task-time"><span class="pulse" style="display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--warp-pink);margin-right:3px;"></span> 10:00 AM · overdue</div>
+          <div class="sb-task-name">Review quarterly performance report</div>
+        </div>
+      </div>
+      <div class="sb-task">
+        <div class="sb-task-dot" style="background:var(--st-anxious);"></div>
+        <div class="sb-task-info">
+          <div class="sb-task-time">2:00 PM</div>
+          <div class="sb-task-name">Prepare slides for team presentation</div>
+        </div>
+      </div>
+      <div class="sb-task">
+        <div class="sb-task-dot" style="background:var(--st-neutral);"></div>
+        <div class="sb-task-info">
+          <div class="sb-task-time">9:30 AM · ↺ daily</div>
+          <div class="sb-task-name">Log daily standup notes</div>
+        </div>
+      </div>
+      <div class="sb-task">
+        <div class="sb-task-dot" style="background:var(--st-willing);"></div>
+        <div class="sb-task-info">
+          <div class="sb-task-time">5:00 PM</div>
+          <div class="sb-task-name">Redesign onboarding flow</div>
+        </div>
+      </div>
+      <div class="sb-task">
+        <div class="sb-task-dot" style="background:var(--st-excited);"></div>
+        <div class="sb-task-info">
+          <div class="sb-task-time">No deadline</div>
+          <div class="sb-task-name">Work on side project — auth flow</div>
+        </div>
+      </div>
+      <div class="sb-rule"></div>
+      <div class="sb-task faded">
+        <div class="sb-task-dot" style="background:var(--text-4);"></div>
+        <div class="sb-task-info">
+          <div class="sb-task-time">Done · 9:14 AM</div>
+          <div class="sb-task-name" style="text-decoration:line-through;">Reply to emails</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-foot" style="position:relative;z-index:2;">
+      <button class="sb-new">
+        <span style="font-size:13px;">+</span> New task…
+      </button>
+    </div>
+  </aside>
+
+  <!-- ════════════ MAIN ════════════ -->
+  <main class="main">
+    <!-- Arc gradient strip at top -->
+    <div class="arc-bar"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="breadcrumb">
+        <span>Workspace</span>
+        <span class="bc-sep">/</span>
+        <span>Sanjana</span>
+        <span class="bc-sep">/</span>
+        <span class="bc-active">Today</span>
+      </div>
+      <div class="tb-right">
+        <span style="font-size:10px;color:var(--text-4);font-family:var(--font-mono);">sort</span>
+        <button class="tb-sort on">Due</button>
+        <button class="tb-sort">Mood</button>
+        <button class="tb-sort">Manual</button>
+        <button class="tb-icon">⌕</button>
+        <div style="width:1px;height:14px;background:var(--border-strong);"></div>
+        <div class="tb-av">S</div>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="scroll">
+      <div class="inner">
+
+        <!-- Page header -->
+        <div class="page-head fade-up">
+          <div class="page-mono">Daily workspace · Tue 29 Apr</div>
+          <h1 class="page-h1">Today</h1>
+          <p class="page-sub">Good morning, Sanjana ✦ &nbsp;5 tasks &nbsp;·&nbsp; 4 remaining</p>
+          <!-- Notion-style inline page properties -->
+          <div class="page-props">
+            <div class="page-prop">
+              <span class="pp-key">Tasks</span>
+              <span class="pp-val">5</span>
+            </div>
+            <div class="pp-sep"></div>
+            <div class="page-prop">
+              <span class="pp-key">On fire</span>
+              <span class="pp-val" style="color:var(--warp-pink);">1 🔥</span>
+            </div>
+            <div class="pp-sep"></div>
+            <div class="page-prop">
+              <span class="pp-key">Done</span>
+              <span class="pp-val accent">20%</span>
+            </div>
+            <div class="pp-sep"></div>
+            <div class="page-prop">
+              <span class="pp-key">Progress</span>
+              <div class="prog-track"><div class="prog-fill" style="width:20%;"></div></div>
+            </div>
+            <div class="pp-sep"></div>
+            <div class="page-prop">
+              <span class="pp-key">Week</span>
+              <span class="pp-val" style="color:var(--warp-green);">70%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Capture bar -->
+        <div class="capture fade-up d1">
+          <span class="capture-icon">✦</span>
+          <input type="text" placeholder="Capture a task — what's on your mind?">
+          <span class="capture-kbd">↵ add</span>
+        </div>
+
+        <!-- ════ TASK LIST ════ -->
+        <div class="sec-head fade-up d1">
+          <div style="display:flex;align-items:center;gap:var(--sp-2);">
+            <span class="sec-title">Active tasks</span>
+            <span class="sec-count">5</span>
+          </div>
+        </div>
+
+        <div class="task-list">
+
+          <!-- ── DREADING + nudge ── -->
+          <div class="task-card fade-up d1">
+            <!-- Colored line + glow -->
+            <div class="card-line" style="background:var(--st-dreading);box-shadow:0 0 12px var(--st-dreading-glow);"></div>
+            <div class="card-body">
+              <div class="card-header">
+                <span class="card-time late"><span class="pulse">⚑</span> 10:00 AM · overdue</span>
+                <div class="card-pills">
+                  <span class="pill p-dreading">😮‍💨 Dreading</span>
+                  <span class="pill p-defer">deferred 2×</span>
+                </div>
+              </div>
+              <h2 class="card-title">Review quarterly performance report</h2>
+              <!-- Notion database properties -->
+              <div class="card-props">
+                <div class="prop-row">
+                  <div class="prop-key">Due</div>
+                  <div class="prop-val" style="color:var(--st-dreading);font-weight:500;">10:00 AM · overdue</div>
+                </div>
+                <div class="prop-row">
+                  <div class="prop-key">State</div>
+                  <div class="prop-val">😮‍💨 Dreading — "I really don't want to do this"</div>
+                </div>
+                <div class="prop-row">
+                  <div class="prop-key">Deferred</div>
+                  <div class="prop-val">2× <span style="color:var(--text-4);font-size:11px;font-family:var(--font-mono);">(last: 8:44 PM yesterday)</span></div>
+                </div>
+              </div>
+              <!-- Notion callout / nudge -->
+              <div class="nudge">
+                <p class="nudge-text">This one's been sitting heavy. You've deferred it twice — want to push it or break it down?</p>
+                <div class="nudge-row">
+                  <button class="nb-fill">Defer</button>
+                  <button class="nb-line">Reschedule</button>
+                  <button class="nb-line">Break it down</button>
+                  <button class="nb-line">Mark done</button>
+                  <button class="nb-x">✕</button>
+                </div>
+              </div>
+            </div>
+            <div class="card-foot">
+              <button class="act act-primary">✓ Mark done</button>
+              <button class="act">Push this →</button>
+              <button class="act">Break it down</button>
+            </div>
+          </div>
+
+          <!-- ── ANXIOUS ── -->
+          <div class="task-card fade-up d2">
+            <div class="card-line" style="background:var(--st-anxious);box-shadow:0 0 10px var(--st-anxious-glow);"></div>
+            <div class="card-body">
+              <div class="card-header">
+                <span class="card-time">2:00 PM</span>
+                <div class="card-pills"><span class="pill p-anxious">😟 Anxious</span></div>
+              </div>
+              <h2 class="card-title">Prepare slides for team presentation</h2>
+            </div>
+            <div class="card-foot">
+              <button class="act act-primary">✓ Mark done</button>
+              <button class="act">Push this →</button>
+            </div>
+          </div>
+
+          <!-- ── NEUTRAL recurring ── -->
+          <div class="task-card fade-up d3">
+            <div class="card-line" style="background:var(--st-neutral);"></div>
+            <div class="card-body">
+              <div class="card-header">
+                <span class="card-time">9:30 AM</span>
+                <div class="card-pills">
+                  <span class="pill p-neutral">😐 Neutral</span>
+                  <span class="pill p-recur">↺ Daily</span>
+                </div>
+              </div>
+              <h2 class="card-title">Log daily standup notes</h2>
+            </div>
+            <div class="card-foot">
+              <button class="act act-primary">✓ Mark done</button>
+              <button class="act">Push this →</button>
+            </div>
+          </div>
+
+          <!-- ── WILLING + action items ── -->
+          <div class="task-card fade-up d4">
+            <div class="card-line" style="background:var(--st-willing);box-shadow:0 0 10px var(--st-willing-glow);"></div>
+            <div class="card-body">
+              <div class="card-header">
+                <span class="card-time">5:00 PM</span>
+                <div class="card-pills"><span class="pill p-willing">🙂 Willing</span></div>
+              </div>
+              <h2 class="card-title">Redesign onboarding flow</h2>
+              <!-- Notion action items / checklist -->
+              <div class="ai-wrap">
+                <div class="ai-label">Action items</div>
+                <div class="ai-row"><div class="ai-cb"></div><span class="ai-text">Map out user journey steps</span></div>
+                <div class="ai-row"><div class="ai-cb done"></div><span class="ai-text done">Research competitor flows</span></div>
+                <div class="ai-row"><div class="ai-cb"></div><span class="ai-text">Create wireframes in Figma</span></div>
+              </div>
+            </div>
+            <div class="card-foot">
+              <button class="act act-primary">✓ Mark done</button>
+              <button class="act">Push this →</button>
+            </div>
+          </div>
+
+          <!-- ── EXCITED ── -->
+          <div class="task-card fade-up d5">
+            <div class="card-line" style="background:var(--st-excited);box-shadow:0 0 12px var(--st-excited-glow);"></div>
+            <div class="card-body">
+              <div class="card-header">
+                <span class="card-time" style="color:var(--text-4);">No deadline</span>
+                <div class="card-pills"><span class="pill p-excited">🤩 Excited</span></div>
+              </div>
+              <h2 class="card-title">Work on side project — build the auth flow</h2>
+            </div>
+            <div class="card-foot">
+              <button class="act act-primary">✓ Mark done</button>
+            </div>
+          </div>
+
+          <!-- ── COMPLETED ── -->
+          <div class="task-card done-card fade-up d6">
+            <div class="card-line" style="background:var(--warp-400);"></div>
+            <div class="card-body">
+              <div class="card-header">
+                <span class="card-time">Done · 9:14 AM</span>
+                <div class="card-pills"><span class="pill p-neutral">😐 Neutral</span></div>
+              </div>
+              <h2 class="card-title done">Reply to emails from last week</h2>
+            </div>
+          </div>
+
+        </div><!-- /task-list -->
+
+        <hr class="sec-divider">
+
+        <!-- ════ QUADRANT ════ -->
+        <div class="sec-head">
+          <div style="display:flex;align-items:center;gap:var(--sp-2);">
+            <span class="sec-title">Emotional Quadrant</span>
+          </div>
+          <a href="#" class="sec-link">Full map →</a>
+        </div>
+        <div class="q-card" style="margin-bottom:var(--sp-4);">
+          <div class="q-head">
+            <div>
+              <p class="q-head-title">Task Quadrant Map</p>
+              <p class="q-head-sub">Urgency vs. emotional weight — your personal radar</p>
+            </div>
+          </div>
+          <div class="q-body">
+            <div class="q-wrap">
+              <div class="q-stage">
+                <div class="qz" style="top:0;right:0;width:50%;height:50%;background:rgba(214,69,112,0.05);border-radius:0 8px 0 0;"></div>
+                <div class="qz" style="bottom:0;left:0;width:50%;height:50%;background:rgba(84,212,84,0.04);border-radius:0 0 0 6px;"></div>
+                <div class="ax-h"></div>
+                <div class="ax-v"></div>
+                <span class="qlbl" style="top:7px;right:7px;color:rgba(214,69,112,0.5);">ON FIRE</span>
+                <span class="qlbl" style="bottom:7px;left:7px;color:rgba(84,212,84,0.5);">SAFE ZONE</span>
+                <span class="axlbl" style="bottom:-17px;left:0;right:0;text-align:center;">← far off &nbsp;&nbsp; urgency &nbsp;&nbsp; imminent →</span>
+                <span class="axlbl" style="left:-22px;top:0;bottom:0;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;">dreading ↑ &nbsp; mood &nbsp; ↓ excited</span>
+                <!-- Glowing dots — Warp terminal style -->
+                <div class="qdot" style="left:88%;top:11%;background:var(--st-dreading);box-shadow:0 0 8px var(--st-dreading-glow),0 0 0 2.5px #ffffff;"></div>
+                <div class="qdot" style="left:63%;top:32%;background:var(--st-anxious);box-shadow:0 0 8px var(--st-anxious-glow),0 0 0 2.5px #ffffff;"></div>
+                <div class="qdot" style="left:46%;top:51%;background:var(--st-neutral);box-shadow:0 0 0 2.5px #ffffff;"></div>
+                <div class="qdot" style="left:56%;top:70%;background:var(--st-willing);box-shadow:0 0 8px var(--st-willing-glow),0 0 0 2.5px #ffffff;"></div>
+                <div class="qdot" style="left:12%;top:83%;background:var(--st-excited);box-shadow:0 0 10px var(--st-excited-glow),0 0 0 2.5px #ffffff;"></div>
+                <div class="qdot" style="left:71%;top:51%;background:var(--warp-500);opacity:0.5;box-shadow:0 0 0 2.5px #ffffff;"></div>
+              </div>
+            </div>
+            <div class="q-legend">
+              <div class="leg"><div class="leg-dot" style="background:var(--st-dreading);box-shadow:0 0 5px var(--st-dreading-glow);"></div>Dreading</div>
+              <div class="leg"><div class="leg-dot" style="background:var(--st-anxious);box-shadow:0 0 5px var(--st-anxious-glow);"></div>Anxious</div>
+              <div class="leg"><div class="leg-dot" style="background:var(--st-neutral);"></div>Neutral</div>
+              <div class="leg"><div class="leg-dot" style="background:var(--st-willing);box-shadow:0 0 5px var(--st-willing-glow);"></div>Willing</div>
+              <div class="leg"><div class="leg-dot" style="background:var(--st-excited);box-shadow:0 0 5px var(--st-excited-glow);"></div>Excited</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ WEEKLY REVIEW ════ -->
+        <div class="sec-head">
+          <div style="display:flex;align-items:center;gap:var(--sp-2);">
+            <span class="sec-title">Weekly Review</span>
+          </div>
+        </div>
+        <div class="rv-card">
+          <div class="rv-head">
+            <div>
+              <p class="rv-head-title">📊 Apr 21 – Apr 27</p>
+              <p class="rv-head-sub">weekly-summary · 14 tasks completed</p>
+            </div>
+            <button class="nb-fill">See review →</button>
+          </div>
+          <div class="rv-body">
+            <div class="rv-grid">
+              <div class="rv-cell"><div class="rv-num" style="color:var(--st-dreading);">4</div><div class="rv-label">Dreading<br>deferred</div></div>
+              <div class="rv-cell"><div class="rv-num" style="color:var(--st-anxious);">2</div><div class="rv-label">Anxious<br>deferred</div></div>
+              <div class="rv-cell"><div class="rv-num" style="color:var(--text-1);">14</div><div class="rv-label">Tasks<br>completed</div></div>
+              <div class="rv-cell"><div class="rv-num" style="color:var(--st-excited);">+3</div><div class="rv-label">Mood<br>shifts up</div></div>
+            </div>
+            <div class="rv-callout">
+              <span class="callout-icon">💡</span>
+              <div><strong>4 Dreading tasks deferred this week</strong> — most after 8 pm. Want to try tackling the heavy ones first thing tomorrow?</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /inner -->
+    </div><!-- /scroll -->
+  </main>
+</div>
+</body>
+</html>

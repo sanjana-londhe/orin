@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orin — Today</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background: #F3F1EC; }
+
+    /* ════════════════════════════════
+       SHELL
+    ════════════════════════════════ */
+    .shell { display: flex; height: 100vh; }
+
+    /* ════════════════════════════════
+       SIDEBAR  — light panel
+    ════════════════════════════════ */
+    .sidebar {
+      width: 252px; flex-shrink: 0;
+      background: #FFFFFF;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .sb-header {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      flex-shrink: 0;
+    }
+    .sb-logo {
+      font-size: 15px; font-weight: 800; letter-spacing: -0.05em;
+      color: #1A1814; text-decoration: none; display: block; margin-bottom: 16px;
+    }
+
+    /* Nav */
+    .sb-nav { display: flex; flex-direction: column; gap: 1px; }
+    .sb-link {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 10px; border-radius: 7px; cursor: pointer;
+      font-size: 12.5px; color: #9C9890; border: none; background: none;
+      font-family: 'Inter', sans-serif; text-align: left; width: 100%;
+      transition: all 0.12s;
+    }
+    .sb-link:hover { background: #F3F1EC; color: #4C4840; }
+    .sb-link.on { background: #EDE8E0; color: #1A1814; font-weight: 500; }
+    .sb-link-icon { font-size: 13px; width: 16px; text-align: center; flex-shrink: 0; }
+    .sb-badge {
+      margin-left: auto; font-family: 'DM Mono', monospace; font-size: 9.5px;
+      color: #B0A89E; background: #EDE8E0; padding: 1px 6px; border-radius: 4px;
+    }
+    .sb-link.on .sb-badge { color: #6C6860; background: #E0DBD4; }
+
+    .sb-rule { height: 1px; background: rgba(0,0,0,0.06); margin: 10px 0; }
+
+    /* Date widget */
+    .sb-date { padding: 4px 10px 10px; }
+    .sb-weekday {
+      font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em;
+      color: #B0A89E; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .sb-date-big { font-size: 34px; font-weight: 900; color: #1A1814; letter-spacing: -0.05em; line-height: 1; }
+    .sb-month-year { font-size: 11px; color: #A09890; margin-top: 2px; }
+
+    /* Mood bar */
+    .sb-mood {
+      padding: 8px 10px 10px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .mood-pip {
+      flex: 1; height: 3px; border-radius: 2px; opacity: 0.7;
+    }
+
+    /* Task list */
+    .sb-list { flex: 1; overflow-y: auto; padding: 4px 8px; }
+    .sb-list::-webkit-scrollbar { width: 2px; }
+    .sb-list::-webkit-scrollbar-thumb { background: #D8D2CC; }
+
+    .sb-item {
+      display: flex; align-items: flex-start; gap: 9px;
+      padding: 9px 10px; border-radius: 8px; cursor: pointer;
+      margin-bottom: 1px; transition: background 0.12s;
+      border-left: 2px solid transparent;
+    }
+    .sb-item:hover { background: #F3F1EC; }
+    .sb-item.sel { background: #EDE8E0; border-left-color: var(--c); }
+    .sb-item-emoji { font-size: 14px; flex-shrink: 0; margin-top: 1px; line-height: 1; }
+    .sb-item-body { min-width: 0; flex: 1; }
+    .sb-item-time {
+      font-family: 'DM Mono', monospace; font-size: 9px;
+      color: #B0A89E; margin-bottom: 2px; white-space: nowrap;
+    }
+    .sb-item-title { font-size: 11.5px; color: #8C8880; line-height: 1.36; }
+    .sb-item.sel .sb-item-title { color: #1A1814; }
+    .sb-item.faded { opacity: 0.3; }
+
+    /* Bottom */
+    .sb-footer {
+      padding: 10px 8px; border-top: 1px solid rgba(0,0,0,0.06); flex-shrink: 0;
+    }
+    .sb-new {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      padding: 8px 10px; border-radius: 8px; border: 1px dashed #D8D2CC;
+      background: none; cursor: pointer; font-size: 12px; color: #B0A89E;
+      font-family: 'Inter', sans-serif; transition: all 0.13s;
+    }
+    .sb-new:hover { border-color: #B0A89E; color: #4C4840; }
+    .sb-new-icon {
+      width: 18px; height: 18px; border-radius: 5px; background: #EDE8E0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #8C8880; flex-shrink: 0; line-height: 1;
+    }
+
+    /* ════════════════════════════════
+       MAIN
+    ════════════════════════════════ */
+    .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+
+    /* Toolbar */
+    .toolbar {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(243,241,236,0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding: 0 36px; height: 46px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tb-sort {
+      font-size: 12px; padding: 3px 10px; border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.09); background: none; cursor: pointer;
+      color: #8C8880; font-family: 'Inter', sans-serif; transition: all 0.12s;
+    }
+    .tb-sort:hover { background: rgba(0,0,0,0.04); color: #1A1814; }
+    .tb-sort.on { background: #059669; color: #fff; border-color: #059669; font-weight: 600; }
+    .tb-r { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .tb-icon {
+      width: 29px; height: 29px; border-radius: 7px; border: 1px solid rgba(0,0,0,0.09);
+      background: none; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 13px; color: #8C8880; transition: all 0.12s;
+    }
+    .tb-icon:hover { background: rgba(0,0,0,0.04); }
+    .tb-av {
+      width: 27px; height: 27px; border-radius: 50%; background: #DDD8D0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10.5px; font-weight: 700; color: #6C6860; cursor: pointer;
+    }
+
+    /* ════════════════════════════════
+       CONTENT
+    ════════════════════════════════ */
+    .content {
+      max-width: 660px; margin: 0 auto; width: 100%;
+      padding: 40px 36px 100px;
+    }
+
+    /* ── Day header ── */
+    .day-header { margin-bottom: 32px; }
+    .day-eyebrow {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: #B0A89E;
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    /* Granola/jobs: large headline */
+    .day-title-row { display: flex; align-items: flex-end; gap: 14px; margin-bottom: 6px; }
+    .day-title {
+      font-size: 40px; font-weight: 900; letter-spacing: -0.045em; color: #1A1814; line-height: 1;
+    }
+    /* Handwritten accent — from granola.ai/jobs */
+    .day-handwrite {
+      font-family: 'Caveat', cursive; font-size: 26px; font-weight: 600;
+      color: #059669; line-height: 1; margin-bottom: 2px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hw-svg { display: inline-block; width: 80px; }
+
+    .day-sub { font-size: 13.5px; color: #A09890; margin-bottom: 14px; }
+
+    /* Progress */
+    .prog-row { display: flex; align-items: center; gap: 10px; }
+    .prog-track { flex: 1; max-width: 160px; height: 3px; background: #E4DED8; border-radius: 999px; }
+    .prog-fill { height: 100%; border-radius: 999px; background: #059669; }
+    .prog-lbl { font-size: 11.5px; color: #B0A89E; }
+
+    /* ════════════════════════════════
+       TASK CARDS  — Granola/jobs style
+       (emoji identifier + large title + action items)
+    ════════════════════════════════ */
+    .task-stack { display: flex; flex-direction: column; gap: 12px; }
+
+    .task-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #EDE8E0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.05);
+      overflow: hidden;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .task-card:hover {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.09);
+      transform: translateY(-1px);
+    }
+    .task-card.done-card { opacity: 0.35; }
+
+    /* Card top color strip — emotional state, Granola/jobs category-color */
+    .card-strip { height: 3px; width: 100%; }
+
+    /* Card main body */
+    .card-body { padding: 18px 20px 16px; }
+
+    /* Top row: timestamp + emoji identifier (jobs page pattern) */
+    .card-top-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .card-ts {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: #C0B8AE; display: flex; align-items: center; gap: 6px;
+    }
+    .ts-overdue { color: #D14626; }
+    /* Big emoji — from granola.ai/jobs emoji identifiers for each role */
+    .card-emoji { font-size: 24px; line-height: 1; flex-shrink: 0; }
+
+    /* State pill row */
+    .card-pills { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+    }
+    .p-dreading { background: #FEF2F0; color: #C0381A; }
+    .p-anxious  { background: #FEFBF0; color: #A87210; }
+    .p-neutral  { background: #F3F2F0; color: #706C68; }
+    .p-willing  { background: #EEFAF8; color: #0C847A; }
+    .p-excited  { background: #EEFAF0; color: #168A3A; }
+    .pill-defer { background: #FEF2F0; color: #C0381A; }
+    .pill-recur { background: #EEF0FF; color: #4A4ACC; }
+
+    /* Task title — large like Granola meeting title */
+    .card-title {
+      font-size: 19px; font-weight: 600; color: #1A1814;
+      letter-spacing: -0.025em; line-height: 1.35; margin-bottom: 16px;
+    }
+    .card-title.is-done { text-decoration: line-through; color: #B0A89E; font-weight: 400; }
+
+    /* Action items — from Granola's meeting note format */
+    .ai-label {
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #C8C0B8; margin-bottom: 7px;
+    }
+    .ai-list { margin-bottom: 14px; display: flex; flex-direction: column; gap: 1px; }
+    .ai-row { display: flex; align-items: center; gap: 9px; padding: 4px 0; }
+    .ai-cb {
+      width: 13px; height: 13px; border-radius: 3px;
+      border: 1.5px solid #D8D2CC; background: #fff; flex-shrink: 0; cursor: pointer;
+      transition: all 0.12s;
+    }
+    .ai-cb:hover { border-color: #059669; }
+    .ai-cb.done { background: #059669; border-color: #059669; }
+    .ai-text { font-size: 12.5px; color: #4C4840; line-height: 1.4; }
+    .ai-text.done { text-decoration: line-through; color: #C8C0B8; }
+
+    /* Nudge — styled as a quote/testimonial callout from granola.ai/jobs */
+    .card-nudge {
+      margin-bottom: 14px;
+      background: #FEFBF0; border: 1px solid #EDE080;
+      border-radius: 10px; padding: 14px 16px;
+      position: relative;
+    }
+    .nudge-quote-mark {
+      font-family: 'Caveat', cursive; font-size: 44px; line-height: 0.6;
+      color: #F0D060; position: absolute; top: 14px; left: 14px;
+      pointer-events: none; user-select: none;
+    }
+    .nudge-text {
+      font-size: 13px; color: #7A6010; line-height: 1.55; margin-bottom: 10px;
+      padding-left: 26px;
+    }
+    .nudge-actions { display: flex; gap: 6px; flex-wrap: wrap; padding-left: 26px; }
+    .nb-primary {
+      font-size: 12px; font-weight: 700; padding: 5px 13px; border-radius: 7px;
+      background: #059669; color: #fff; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: background 0.12s;
+    }
+    .nb-primary:hover { background: #047857; }
+    .nb-ghost {
+      font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 7px;
+      background: #fff; color: #4C4840; border: 1px solid #E4DDD4;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.12s;
+    }
+    .nb-ghost:hover { background: #F7F4EF; border-color: #D4CEC8; }
+    .nb-x { font-size: 11px; color: #C0B8AE; background: none; border: none; cursor: pointer; margin-left: auto; padding: 2px; }
+
+    /* Card footer */
+    .card-footer {
+      display: flex; align-items: center; gap: 6px;
+      padding: 12px 20px 14px;
+      border-top: 1px solid #F0ECE6;
+      background: #FDFCFA;
+    }
+    .cf-done {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 7px;
+      background: #059669; color: #fff; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: background 0.12s;
+    }
+    .cf-done:hover { background: #047857; }
+    .cf-action {
+      font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 7px;
+      background: none; color: #8C8880; border: 1px solid #E4DDD4;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.12s;
+    }
+    .cf-action:hover { background: #F7F4EF; color: #1A1814; border-color: #D4CEC8; }
+
+    /* ════════════════════════════════
+       SECTION HEADER
+       (handwritten accent — /jobs style)
+    ════════════════════════════════ */
+    .sec-head { margin-bottom: 14px; }
+    .sec-title-row { display: flex; align-items: center; justify-content: space-between; }
+    .sec-title { font-size: 15px; font-weight: 800; color: #1A1814; letter-spacing: -0.03em; }
+    /* Handwritten underline — granola.ai/jobs SVG flourish */
+    .sec-underline { display: block; margin-top: 3px; }
+    .sec-sub { font-size: 12px; color: #B0A89E; margin-top: 3px; }
+    .sec-link { font-size: 12px; color: #059669; text-decoration: none; font-weight: 600; }
+    .sec-link:hover { text-decoration: underline; }
+
+    /* ════════════════════════════════
+       QUADRANT
+    ════════════════════════════════ */
+    .q-card {
+      background: #fff; border: 1px solid #EDE8E0; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.05);
+    }
+    .q-card-head {
+      padding: 16px 20px; border-bottom: 1px solid #F0ECE6;
+    }
+    .q-card-body { padding: 18px 20px; }
+    .q-wrap {
+      position: relative; padding-top: 42%; background: #F9F8F5;
+      border-radius: 10px; overflow: hidden; border: 1px solid #EDE8E0;
+    }
+    .q-stage { position: absolute; inset: 20px 20px 24px 28px; }
+    .qz { position: absolute; border-radius: 3px; }
+    .ax-h { position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed #E4DFDA; }
+    .ax-v { position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px dashed #E4DFDA; }
+    .qlbl { position: absolute; font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; }
+    .axlbl { position: absolute; font-size: 8px; color: #D0CAC2; letter-spacing: 0.05em; text-transform: uppercase; }
+    .qdot {
+      position: absolute; width: 9px; height: 9px; border-radius: 50%;
+      transform: translate(-50%,-50%); box-shadow: 0 0 0 2.5px #F9F8F5;
+      cursor: pointer; transition: transform 0.13s;
+    }
+    .qdot:hover { transform: translate(-50%,-50%) scale(1.7); }
+    .q-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+    .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #A09890; }
+    .leg-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* ════════════════════════════════
+       WEEKLY REVIEW
+       (benefits-grid style — /jobs page)
+    ════════════════════════════════ */
+    .rv-card {
+      background: #fff; border: 1px solid #EDE8E0; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 14px rgba(0,0,0,0.05);
+    }
+    .rv-head {
+      padding: 16px 20px; border-bottom: 1px solid #F0ECE6;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .rv-head-title { font-size: 14px; font-weight: 700; color: #1A1814; letter-spacing: -0.02em; }
+    .rv-head-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: #B0A89E; margin-top: 2px; }
+    .rv-cta {
+      font-size: 12px; font-weight: 700; padding: 7px 15px; border-radius: 8px;
+      background: #059669; color: #fff; border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: background 0.12s;
+    }
+    .rv-cta:hover { background: #047857; }
+    .rv-body { padding: 18px 20px; }
+
+    /* Benefits-grid style stats — exactly from granola.ai/jobs benefits section */
+    .rv-benefits { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 14px; }
+    .rv-benefit {
+      background: #F9F8F5; border: 1px solid #EDE8E0; border-radius: 10px;
+      padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+    }
+    .rv-benefit-icon { font-size: 22px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+    .rv-benefit-body {}
+    .rv-benefit-num { font-size: 22px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin-bottom: 2px; }
+    .rv-benefit-label { font-size: 11px; color: #A09890; font-weight: 500; line-height: 1.35; }
+
+    .rv-insight {
+      padding: 13px 16px; background: #F0FDF4; border: 1px solid #A7F3D0;
+      border-radius: 10px; font-size: 13px; color: #065F46; line-height: 1.55;
+    }
+    .rv-insight strong { font-weight: 700; }
+
+    /* Pulse */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+    .pulse { animation: pulse 1.8s ease-in-out infinite; display: inline-block; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside class="sidebar">
+    <div class="sb-header">
+      <a href="#" class="sb-logo">orin</a>
+      <nav class="sb-nav">
+        <button class="sb-link on">
+          <span class="sb-link-icon">☀️</span> Today
+          <span class="sb-badge">4</span>
+        </button>
+        <button class="sb-link">
+          <span class="sb-link-icon">📅</span> Upcoming
+          <span class="sb-badge">11</span>
+        </button>
+        <button class="sb-link">
+          <span class="sb-link-icon">⬡</span> Quadrant
+        </button>
+        <button class="sb-link">
+          <span class="sb-link-icon">🗓</span> Calendar
+        </button>
+        <button class="sb-link">
+          <span class="sb-link-icon">📊</span> Review
+        </button>
+      </nav>
+    </div>
+
+    <div class="sb-rule"></div>
+
+    <!-- Date -->
+    <div class="sb-date">
+      <div class="sb-weekday">Tuesday</div>
+      <div class="sb-date-big">29</div>
+      <div class="sb-month-year">April 2024</div>
+    </div>
+
+    <!-- Mood bar — colour strip like granola.ai/jobs category colours -->
+    <div class="sb-mood">
+      <div class="mood-pip" style="background:#EF4444;"></div>
+      <div class="mood-pip" style="background:#F59E0B;"></div>
+      <div class="mood-pip" style="background:#D1D5DB;"></div>
+      <div class="mood-pip" style="background:#14B8A6;"></div>
+      <div class="mood-pip" style="background:#22C55E;"></div>
+    </div>
+
+    <div class="sb-rule"></div>
+
+    <!-- Task list — emoji identifier pattern from granola.ai/jobs -->
+    <div class="sb-list">
+      <div class="sb-item sel" style="--c:#EF4444;">
+        <div class="sb-item-emoji">😮‍💨</div>
+        <div class="sb-item-body">
+          <div class="sb-item-time"><span class="pulse" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#EF4444;"></span> 10:00 AM · overdue</div>
+          <div class="sb-item-title">Review quarterly performance report</div>
+        </div>
+      </div>
+      <div class="sb-item" style="--c:#F59E0B;">
+        <div class="sb-item-emoji">😟</div>
+        <div class="sb-item-body">
+          <div class="sb-item-time">2:00 PM</div>
+          <div class="sb-item-title">Prepare slides for team presentation</div>
+        </div>
+      </div>
+      <div class="sb-item" style="--c:#D1D5DB;">
+        <div class="sb-item-emoji">😐</div>
+        <div class="sb-item-body">
+          <div class="sb-item-time">9:30 AM · ↺ daily</div>
+          <div class="sb-item-title">Log daily standup notes</div>
+        </div>
+      </div>
+      <div class="sb-item" style="--c:#14B8A6;">
+        <div class="sb-item-emoji">🙂</div>
+        <div class="sb-item-body">
+          <div class="sb-item-time">5:00 PM</div>
+          <div class="sb-item-title">Redesign onboarding flow</div>
+        </div>
+      </div>
+      <div class="sb-item" style="--c:#22C55E;">
+        <div class="sb-item-emoji">🤩</div>
+        <div class="sb-item-body">
+          <div class="sb-item-time">No deadline</div>
+          <div class="sb-item-title">Work on side project — auth flow</div>
+        </div>
+      </div>
+      <div class="sb-rule"></div>
+      <div class="sb-item faded" style="--c:#D1D5DB;">
+        <div class="sb-item-emoji">✅</div>
+        <div class="sb-item-body">
+          <div class="sb-item-time">Done · 9:14 AM</div>
+          <div class="sb-item-title" style="text-decoration:line-through;">Reply to emails from last week</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-footer">
+      <button class="sb-new">
+        <div class="sb-new-icon">+</div>
+        New task…
+      </button>
+    </div>
+  </aside>
+
+  <!-- ════════════ MAIN ════════════ -->
+  <main class="main">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <span style="font-size:11px;color:#B0A89E;margin-right:2px;font-family:'DM Mono',monospace;">sort</span>
+      <button class="tb-sort on">Due date</button>
+      <button class="tb-sort">Emotional</button>
+      <button class="tb-sort">Manual</button>
+      <div class="tb-r">
+        <button class="tb-icon" title="Search">⌕</button>
+        <button class="tb-icon" title="View">⊞</button>
+        <div class="tb-av">S</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ── Day header ── -->
+      <div class="day-header">
+        <div class="day-eyebrow">Daily focus · Tue 29 Apr</div>
+        <div class="day-title-row">
+          <h1 class="day-title">Today</h1>
+          <!-- Handwritten accent — granola.ai/jobs SVG flourish -->
+          <div class="day-handwrite">
+            <span>focus</span>
+            <!-- Hand-drawn underline SVG from /jobs aesthetic -->
+            <svg class="hw-svg" viewBox="0 0 90 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:4px;">
+              <path d="M2 10 C15 4, 30 13, 45 8 C60 3, 74 11, 88 6" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <p class="day-sub">Good morning, Sanjana ☀️ &nbsp;·&nbsp; 5 tasks &nbsp;·&nbsp; 4 remaining</p>
+        <div class="prog-row">
+          <div class="prog-track"><div class="prog-fill" style="width:20%;"></div></div>
+          <span class="prog-lbl">1 of 5 done</span>
+        </div>
+      </div>
+
+      <!-- ════ TASK CARDS ════ -->
+      <div class="task-stack">
+
+        <!-- ── DREADING + nudge ── -->
+        <div class="task-card">
+          <div class="card-strip" style="background:#EF4444;"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="card-ts">
+                <span class="ts-overdue">⚑</span>
+                <span class="ts-overdue">10:00 AM · overdue</span>
+              </div>
+              <!-- Emoji identifier — from granola.ai/jobs role emoji -->
+              <div class="card-emoji">😮‍💨</div>
+            </div>
+            <div class="card-pills">
+              <span class="pill p-dreading">Dreading</span>
+              <span class="pill pill-defer">deferred 2×</span>
+            </div>
+            <h2 class="card-title">Review quarterly performance report</h2>
+            <!-- Nudge as testimonial/quote card — granola.ai/jobs testimonials pattern -->
+            <div class="card-nudge">
+              <span class="nudge-quote-mark">"</span>
+              <p class="nudge-text">This one's been sitting heavy. Want to push it or break it down?</p>
+              <div class="nudge-actions">
+                <button class="nb-primary">Defer</button>
+                <button class="nb-ghost">Reschedule</button>
+                <button class="nb-ghost">Break it down</button>
+                <button class="nb-ghost">Mark done</button>
+                <button class="nb-x">✕</button>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="cf-done">✓ Mark done</button>
+            <button class="cf-action">Push this →</button>
+            <button class="cf-action">Break it down</button>
+          </div>
+        </div>
+
+        <!-- ── ANXIOUS ── -->
+        <div class="task-card">
+          <div class="card-strip" style="background:#F59E0B;"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="card-ts">2:00 PM</div>
+              <div class="card-emoji">😟</div>
+            </div>
+            <div class="card-pills">
+              <span class="pill p-anxious">Anxious</span>
+            </div>
+            <h2 class="card-title">Prepare slides for team presentation</h2>
+          </div>
+          <div class="card-footer">
+            <button class="cf-done">✓ Mark done</button>
+            <button class="cf-action">Push this →</button>
+          </div>
+        </div>
+
+        <!-- ── NEUTRAL recurring ── -->
+        <div class="task-card">
+          <div class="card-strip" style="background:#D1D5DB;"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="card-ts">9:30 AM</div>
+              <div class="card-emoji">😐</div>
+            </div>
+            <div class="card-pills">
+              <span class="pill p-neutral">Neutral</span>
+              <span class="pill pill-recur">↺ Daily</span>
+            </div>
+            <h2 class="card-title">Log daily standup notes</h2>
+          </div>
+          <div class="card-footer">
+            <button class="cf-done">✓ Mark done</button>
+            <button class="cf-action">Push this →</button>
+          </div>
+        </div>
+
+        <!-- ── WILLING + action items ── -->
+        <div class="task-card">
+          <div class="card-strip" style="background:#14B8A6;"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="card-ts">5:00 PM</div>
+              <div class="card-emoji">🙂</div>
+            </div>
+            <div class="card-pills">
+              <span class="pill p-willing">Willing</span>
+            </div>
+            <h2 class="card-title">Redesign onboarding flow</h2>
+            <!-- Action items — Granola meeting note format -->
+            <div>
+              <p class="ai-label">Action items</p>
+              <div class="ai-list">
+                <div class="ai-row">
+                  <div class="ai-cb"></div>
+                  <span class="ai-text">Map out user journey steps</span>
+                </div>
+                <div class="ai-row">
+                  <div class="ai-cb done"></div>
+                  <span class="ai-text done">Research competitor flows</span>
+                </div>
+                <div class="ai-row">
+                  <div class="ai-cb"></div>
+                  <span class="ai-text">Create wireframes in Figma</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="cf-done">✓ Mark done</button>
+            <button class="cf-action">Push this →</button>
+          </div>
+        </div>
+
+        <!-- ── EXCITED ── -->
+        <div class="task-card">
+          <div class="card-strip" style="background:#22C55E;"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="card-ts">No deadline</div>
+              <div class="card-emoji">🤩</div>
+            </div>
+            <div class="card-pills">
+              <span class="pill p-excited">Excited</span>
+            </div>
+            <h2 class="card-title">Work on side project — build the auth flow</h2>
+          </div>
+          <div class="card-footer">
+            <button class="cf-done">✓ Mark done</button>
+            <button class="cf-action">Push this →</button>
+          </div>
+        </div>
+
+        <!-- ── COMPLETED ── -->
+        <div class="task-card done-card">
+          <div class="card-strip" style="background:#E5E7EB;"></div>
+          <div class="card-body">
+            <div class="card-top-row">
+              <div class="card-ts">Done · 9:14 AM</div>
+              <div class="card-emoji">✅</div>
+            </div>
+            <div class="card-pills">
+              <span class="pill p-neutral">Neutral</span>
+            </div>
+            <h2 class="card-title is-done">Reply to emails from last week</h2>
+          </div>
+        </div>
+
+      </div><!-- /task-stack -->
+
+      <!-- ════ QUADRANT ════ -->
+      <div style="margin-top:36px;">
+        <div class="sec-head">
+          <div class="sec-title-row">
+            <div>
+              <span class="sec-title">Emotional Task Quadrant</span>
+              <!-- Handwritten underline SVG -->
+              <svg class="sec-underline" viewBox="0 0 160 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:160px;height:8px;">
+                <path d="M2 5 C30 2, 60 7, 90 4 C120 1, 145 6, 158 4" stroke="#059669" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+              </svg>
+              <p class="sec-sub">Urgency vs. how you feel about each task</p>
+            </div>
+            <a href="#" class="sec-link">Full map →</a>
+          </div>
+        </div>
+        <div class="q-card">
+          <div class="q-card-body">
+            <div class="q-wrap">
+              <div class="q-stage">
+                <div class="qz" style="top:0;right:0;width:50%;height:50%;background:rgba(239,68,68,0.06);border-radius:0 8px 0 0;"></div>
+                <div class="qz" style="bottom:0;left:0;width:50%;height:50%;background:rgba(20,184,166,0.06);border-radius:0 0 0 6px;"></div>
+                <div class="ax-h"></div>
+                <div class="ax-v"></div>
+                <span class="qlbl" style="top:7px;right:7px;color:#EAA8A0;">ON FIRE</span>
+                <span class="qlbl" style="bottom:7px;left:7px;color:#8ECAC4;">SAFE ZONE</span>
+                <span class="axlbl" style="bottom:-18px;left:0;right:0;text-align:center;">← far off &nbsp;&nbsp; deadline urgency &nbsp;&nbsp; imminent →</span>
+                <span class="axlbl" style="left:-24px;top:0;bottom:0;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;">dreading ↑ &nbsp; emotional &nbsp; ↓ excited</span>
+                <div class="qdot" style="left:88%;top:11%;background:#EF4444;"></div>
+                <div class="qdot" style="left:63%;top:32%;background:#F59E0B;"></div>
+                <div class="qdot" style="left:46%;top:52%;background:#9CA3AF;"></div>
+                <div class="qdot" style="left:56%;top:70%;background:#14B8A6;"></div>
+                <div class="qdot" style="left:12%;top:83%;background:#22C55E;"></div>
+                <div class="qdot" style="left:71%;top:51%;background:#D1D5DB;opacity:0.3;"></div>
+              </div>
+            </div>
+            <div class="q-legend">
+              <div class="leg"><div class="leg-dot" style="background:#EF4444;"></div>Dreading</div>
+              <div class="leg"><div class="leg-dot" style="background:#F59E0B;"></div>Anxious</div>
+              <div class="leg"><div class="leg-dot" style="background:#9CA3AF;"></div>Neutral</div>
+              <div class="leg"><div class="leg-dot" style="background:#14B8A6;"></div>Willing</div>
+              <div class="leg"><div class="leg-dot" style="background:#22C55E;"></div>Excited</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ WEEKLY REVIEW ════ -->
+      <div style="margin-top:28px;">
+        <div class="sec-head">
+          <div class="sec-title-row">
+            <div>
+              <span class="sec-title">Weekly Emotional Review</span>
+              <svg class="sec-underline" viewBox="0 0 180 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:180px;height:8px;">
+                <path d="M2 5 C36 2, 72 7, 108 4 C140 1, 165 6, 178 4" stroke="#059669" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+              </svg>
+              <p class="sec-sub">Apr 21 – Apr 27 · Ready when you are</p>
+            </div>
+          </div>
+        </div>
+        <div class="rv-card">
+          <div class="rv-head">
+            <div>
+              <p class="rv-head-title">📊 Apr 21 – Apr 27</p>
+              <p class="rv-head-sub">weekly summary · 14 tasks completed</p>
+            </div>
+            <button class="rv-cta">See review →</button>
+          </div>
+          <div class="rv-body">
+            <!-- Benefits-grid style stats — from granola.ai/jobs benefits section -->
+            <div class="rv-benefits">
+              <div class="rv-benefit">
+                <div class="rv-benefit-icon">😮‍💨</div>
+                <div class="rv-benefit-body">
+                  <div class="rv-benefit-num" style="color:#EF4444;">4</div>
+                  <div class="rv-benefit-label">Dreading tasks deferred this week</div>
+                </div>
+              </div>
+              <div class="rv-benefit">
+                <div class="rv-benefit-icon">😟</div>
+                <div class="rv-benefit-body">
+                  <div class="rv-benefit-num" style="color:#F59E0B;">2</div>
+                  <div class="rv-benefit-label">Anxious tasks deferred this week</div>
+                </div>
+              </div>
+              <div class="rv-benefit">
+                <div class="rv-benefit-icon">✅</div>
+                <div class="rv-benefit-body">
+                  <div class="rv-benefit-num" style="color:#059669;">14</div>
+                  <div class="rv-benefit-label">Tasks completed across all moods</div>
+                </div>
+              </div>
+              <div class="rv-benefit">
+                <div class="rv-benefit-icon">📈</div>
+                <div class="rv-benefit-body">
+                  <div class="rv-benefit-num" style="color:#059669;">+3</div>
+                  <div class="rv-benefit-label">Emotional state shifts toward positive</div>
+                </div>
+              </div>
+            </div>
+            <div class="rv-insight">
+              <strong>You deferred 4 tasks tagged Dreading this week.</strong>
+              Most happened after 8 pm. Want to try tackling the heavy ones first thing tomorrow?
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+</body>
+</html>

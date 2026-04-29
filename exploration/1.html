@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orin — Today</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { -webkit-font-smoothing: antialiased; background: #ffffff; font-family: 'Inter', sans-serif; color: #1a1a1a; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(18px) saturate(1.6);
+      border-bottom: 1px solid #f0eeec;
+    }
+    .nav-inner {
+      max-width: 700px; margin: 0 auto; padding: 0 24px;
+      height: 52px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .wordmark { font-size: 15px; font-weight: 700; letter-spacing: -0.03em; color: #1a1a1a; text-decoration: none; }
+    .nav-tabs { display: flex; gap: 2px; }
+    .tab {
+      padding: 5px 13px; border-radius: 8px; font-size: 13px; font-weight: 450;
+      color: #b0ada9; cursor: pointer; border: none; background: none; transition: all 0.14s;
+    }
+    .tab:hover { background: #f5f4f2; color: #525252; }
+    .tab.active { background: #f2f0ee; color: #1a1a1a; font-weight: 500; }
+    .btn-new {
+      display: flex; align-items: center; gap: 5px;
+      background: #1a1a1a; color: #fff;
+      border: none; border-radius: 8px; padding: 6px 13px;
+      font-size: 12.5px; font-weight: 500; cursor: pointer; letter-spacing: -0.01em;
+      transition: background 0.14s;
+    }
+    .btn-new:hover { background: #2e2e2e; }
+    .avatar {
+      width: 26px; height: 26px; border-radius: 50%; background: #f0eeec;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10.5px; font-weight: 600; color: #737373; cursor: pointer; flex-shrink: 0;
+    }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── LAYOUT ── */
+    main { max-width: 700px; margin: 0 auto; padding: 40px 24px 72px; }
+
+    /* ── PAGE HEADER ── */
+    .page-header { margin-bottom: 32px; }
+    .greeting { font-size: 12px; color: #c0bdb9; font-weight: 450; margin-bottom: 6px; letter-spacing: 0.01em; }
+    .page-title { font-size: 42px; font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #1a1a1a; margin-bottom: 6px; }
+    .page-meta { font-size: 13px; color: #b0ada9; }
+
+    /* ── SORT BAR ── */
+    .sort-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
+    .sort-label { font-size: 11.5px; color: #c0bdb9; margin-right: 2px; }
+    .sort-pill {
+      font-size: 11.5px; padding: 3px 11px; border-radius: 999px; cursor: pointer;
+      border: 1px solid transparent; color: #b0ada9; background: none; transition: all 0.13s;
+    }
+    .sort-pill:hover { background: #f5f4f2; color: #525252; }
+    .sort-pill.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; font-weight: 500; }
+
+    /* ── TASK CARDS ── */
+    .task-list { display: flex; flex-direction: column; gap: 7px; }
+    .task-card {
+      background: #fff; border: 1px solid #eeece9; border-radius: 12px;
+      padding: 14px 16px 14px 20px; position: relative;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      border-left-width: 3px;
+    }
+    .task-card:hover { border-color: #e0ddd8; box-shadow: 0 2px 10px rgba(0,0,0,0.045); }
+    .card-row { display: flex; align-items: flex-start; gap: 12px; }
+    .card-body { flex: 1; min-width: 0; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 7px; }
+    .task-title { font-size: 13.5px; font-weight: 500; line-height: 1.45; color: #1a1a1a; }
+    .card-badges { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .card-footer { display: flex; align-items: center; gap: 6px; }
+
+    /* Emotional state left border */
+    .s-dreading { border-left-color: #f97316; }
+    .s-anxious  { border-left-color: #f59e0b; }
+    .s-neutral  { border-left-color: #d4d0cb; }
+    .s-willing  { border-left-color: #14b8a6; }
+    .s-excited  { border-left-color: #22c55e; }
+
+    /* State pills */
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 500; white-space: nowrap;
+    }
+    .p-dreading { background: #fff2ed; color: #c24b1a; }
+    .p-anxious  { background: #fffbeb; color: #b45309; }
+    .p-neutral  { background: #f5f4f2; color: #737373; }
+    .p-willing  { background: #effdfb; color: #0f766e; }
+    .p-excited  { background: #f0fdf4; color: #166534; }
+
+    /* Checkbox */
+    .cb {
+      width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid #d4d0cb;
+      flex-shrink: 0; cursor: pointer; background: white; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center; transition: all 0.14s;
+    }
+    .cb:hover { border-color: #a3a3a3; }
+    .cb.done { background: #1a1a1a; border-color: #1a1a1a; }
+    .cb.done::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; }
+
+    /* Badges */
+    .time-badge {
+      font-size: 11px; padding: 2px 7px; border-radius: 6px;
+      background: #f5f4f2; color: #a3a3a3; white-space: nowrap;
+    }
+    .time-badge.late { background: #fff2ed; color: #c24b1a; }
+    .deferred-badge {
+      font-size: 10.5px; padding: 2px 6px; border-radius: 6px;
+      background: #fff2ed; color: #c24b1a; white-space: nowrap;
+    }
+    .recurring-badge {
+      font-size: 10.5px; padding: 2px 6px; border-radius: 6px;
+      background: #f0f4ff; color: #4f6ef7; white-space: nowrap;
+    }
+
+    /* Defer button */
+    .defer-btn {
+      font-size: 11.5px; color: #c0bdb9; padding: 2px 8px; border-radius: 6px;
+      border: 1px solid transparent; background: none; cursor: pointer; transition: all 0.13s;
+    }
+    .defer-btn:hover { background: #f5f4f2; color: #525252; border-color: #eae8e5; }
+
+    /* Completed task */
+    .task-card.completed { opacity: 0.42; }
+    .task-card.completed .task-title { text-decoration: line-through; }
+
+    /* ── NUDGE BANNER ── */
+    .nudge {
+      margin-top: 11px; padding: 10px 12px;
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 9px;
+    }
+    .nudge-text { font-size: 12.5px; color: #92400e; line-height: 1.45; margin-bottom: 9px; }
+    .nudge-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .nudge-btn-primary {
+      font-size: 11.5px; font-weight: 600; padding: 4px 11px;
+      background: #1a1a1a; color: #fff; border: none; border-radius: 6px; cursor: pointer; transition: background 0.13s;
+    }
+    .nudge-btn-primary:hover { background: #333; }
+    .nudge-btn-ghost {
+      font-size: 11.5px; font-weight: 450; padding: 4px 11px;
+      background: white; color: #525252; border: 1px solid #e5e3e0; border-radius: 6px; cursor: pointer; transition: all 0.13s;
+    }
+    .nudge-btn-ghost:hover { background: #f9f8f6; border-color: #ccc; }
+    .nudge-dismiss { font-size: 11px; color: #c0bdb9; background: none; border: none; cursor: pointer; margin-left: auto; padding: 2px 4px; }
+    .nudge-dismiss:hover { color: #737373; }
+
+    /* ── SUBTASKS ── */
+    .subtask-divider { border-top: 1px solid #f0eeec; margin-top: 11px; padding-top: 9px; }
+    .subtask-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .subtask-cb {
+      width: 13px; height: 13px; border-radius: 3px; border: 1.5px solid #d4d0cb;
+      flex-shrink: 0; background: white;
+    }
+    .subtask-cb.done { background: #1a1a1a; border-color: #1a1a1a; }
+    .subtask-label { font-size: 12px; color: #525252; }
+    .subtask-label.done { text-decoration: line-through; opacity: 0.5; }
+
+    /* ── ADD TASK ── */
+    .add-task {
+      width: 100%; margin-top: 7px;
+      border: 1.5px dashed #e5e3df; border-radius: 12px; padding: 13px 20px;
+      background: none; color: #c0bdb9; font-size: 13px; font-family: 'Inter', sans-serif;
+      text-align: left; cursor: pointer; transition: all 0.14s;
+    }
+    .add-task:hover { border-color: #c0bdb9; color: #737373; background: #fafaf9; }
+
+    /* ── SECTION TITLE ── */
+    .section-wrap { margin-top: 52px; }
+    .section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.025em; }
+    .section-sub { font-size: 12px; color: #b0ada9; margin-top: 2px; }
+    .section-link {
+      font-size: 12.5px; color: #b0ada9; text-decoration: none;
+      border-bottom: 1px solid #e5e3e0; padding-bottom: 1px; transition: color 0.13s;
+    }
+    .section-link:hover { color: #525252; }
+
+    /* ── QUADRANT MAP ── */
+    .quadrant-wrap {
+      position: relative; width: 100%; padding-top: 54%;
+      background: #fafaf9; border: 1px solid #eeecea; border-radius: 14px; overflow: hidden;
+    }
+    .quadrant-stage { position: absolute; inset: 28px 28px 30px 36px; }
+
+    /* quadrant fill zones */
+    .qz { position: absolute; border-radius: 4px; }
+
+    /* dashed axis lines */
+    .axis-h {
+      position: absolute; top: 50%; left: 0; right: 0; height: 0;
+      border-top: 1px dashed #e2e0dc;
+    }
+    .axis-v {
+      position: absolute; left: 50%; top: 0; bottom: 0; width: 0;
+      border-left: 1px dashed #e2e0dc;
+    }
+
+    /* quadrant corner labels */
+    .qlabel { position: absolute; font-size: 9.5px; font-weight: 500; letter-spacing: 0.05em; }
+
+    /* axis labels */
+    .axis-label { position: absolute; font-size: 9px; color: #c8c5c0; letter-spacing: 0.06em; text-transform: uppercase; }
+
+    /* dots */
+    .qdot {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      transform: translate(-50%, -50%); cursor: pointer;
+      transition: transform 0.15s; box-shadow: 0 0 0 2px #fff;
+    }
+    .qdot:hover { transform: translate(-50%, -50%) scale(1.5); }
+
+    /* ── WEEKLY REVIEW ── */
+    .review-card {
+      background: #fafaf9; border: 1px solid #eeecea; border-radius: 14px; padding: 18px 20px;
+    }
+    .review-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .review-icon { font-size: 22px; flex-shrink: 0; }
+    .review-info { flex: 1; }
+    .review-title { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; }
+    .review-date { font-size: 11.5px; color: #b0ada9; }
+    .btn-review {
+      font-size: 12.5px; font-weight: 500; padding: 6px 13px;
+      background: white; border: 1px solid #e5e3e0; border-radius: 8px; cursor: pointer;
+      color: #1a1a1a; transition: all 0.13s; white-space: nowrap;
+    }
+    .btn-review:hover { background: #f5f4f2; border-color: #d4d0cb; }
+    .review-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #eeecea; }
+    .stat-box { text-align: center; }
+    .stat-num { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+    .stat-label { font-size: 10px; color: #b0ada9; margin-top: 3px; line-height: 1.3; }
+
+    /* ── HR DIVIDER ── */
+    .divider { border: none; border-top: 1px solid #f0eeec; margin: 48px 0; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e5e3e0; border-radius: 2px; }
+
+    /* ── PULSE DOT ── */
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
+    .pulse { animation: pulse 2.2s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+<!-- ════ NAV ════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="wordmark">orin</a>
+
+    <div class="nav-tabs">
+      <button class="tab active">Today</button>
+      <button class="tab">Quadrant</button>
+      <button class="tab">Calendar</button>
+      <button class="tab">Review</button>
+    </div>
+
+    <div class="nav-right">
+      <button class="btn-new">
+        <span style="font-size:15px;line-height:1;margin-top:-1px">+</span> New task
+      </button>
+      <div class="avatar">S</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════ MAIN ════ -->
+<main>
+
+  <!-- ── Page header ── -->
+  <div class="page-header">
+    <p class="greeting">Good morning, Sanjana ☀️</p>
+    <h1 class="page-title">Today</h1>
+    <p class="page-meta">Tuesday, April 29 &nbsp;·&nbsp; 5 tasks &nbsp;·&nbsp; 4 remaining</p>
+  </div>
+
+  <!-- ── Sort bar ── -->
+  <div class="sort-bar">
+    <span class="sort-label">Sort</span>
+    <button class="sort-pill active">Due date</button>
+    <button class="sort-pill">Emotional state</button>
+    <button class="sort-pill">Manual</button>
+  </div>
+
+  <!-- ════ TASK LIST ════ -->
+  <div class="task-list">
+
+    <!-- ── Task 1: DREADING + nudge + deferred ── -->
+    <div class="task-card s-dreading">
+      <div class="card-row">
+        <div class="cb"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <span class="task-title">Review quarterly performance report</span>
+            <div class="card-badges">
+              <span class="time-badge late">10:00 AM</span>
+              <span class="deferred-badge">deferred 2×</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="pill p-dreading">😮‍💨 Dreading</span>
+            <button class="defer-btn">Push this →</button>
+          </div>
+        </div>
+      </div>
+      <!-- Nudge banner -->
+      <div class="nudge" role="status">
+        <p class="nudge-text">This one's been sitting heavy. Want to push it or break it down?</p>
+        <div class="nudge-actions">
+          <button class="nudge-btn-primary">Defer</button>
+          <button class="nudge-btn-ghost">Reschedule</button>
+          <button class="nudge-btn-ghost">Break it down</button>
+          <button class="nudge-btn-ghost">Mark done</button>
+          <button class="nudge-dismiss">Dismiss ×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Task 2: ANXIOUS ── -->
+    <div class="task-card s-anxious">
+      <div class="card-row">
+        <div class="cb"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <span class="task-title">Prepare slides for team presentation</span>
+            <div class="card-badges">
+              <span class="time-badge">2:00 PM</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="pill p-anxious">😟 Anxious</span>
+            <button class="defer-btn">Push this →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Task 3: NEUTRAL recurring ── -->
+    <div class="task-card s-neutral">
+      <div class="card-row">
+        <div class="cb"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <span class="task-title">Log daily standup notes</span>
+            <div class="card-badges">
+              <span class="time-badge">9:30 AM</span>
+              <span class="recurring-badge">↺ Daily</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="pill p-neutral">😐 Neutral</span>
+            <button class="defer-btn">Push this →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Task 4: WILLING with subtasks ── -->
+    <div class="task-card s-willing">
+      <div class="card-row">
+        <div class="cb"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <span class="task-title">Redesign onboarding flow</span>
+            <div class="card-badges">
+              <span class="time-badge">5:00 PM</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="pill p-willing">🙂 Willing</span>
+            <button class="defer-btn">Push this →</button>
+          </div>
+          <!-- Subtasks -->
+          <div class="subtask-divider">
+            <div class="subtask-row">
+              <div class="subtask-cb"></div>
+              <span class="subtask-label">Map out user journey steps</span>
+            </div>
+            <div class="subtask-row">
+              <div class="subtask-cb done"></div>
+              <span class="subtask-label done">Research competitor flows</span>
+            </div>
+            <div class="subtask-row">
+              <div class="subtask-cb"></div>
+              <span class="subtask-label">Create wireframes in Figma</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Task 5: EXCITED / no deadline ── -->
+    <div class="task-card s-excited">
+      <div class="card-row">
+        <div class="cb"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <span class="task-title">Work on side project — build the auth flow</span>
+            <div class="card-badges">
+              <span class="time-badge">No deadline</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="pill p-excited">🤩 Excited</span>
+            <button class="defer-btn">Push this →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Task 6: COMPLETED ── -->
+    <div class="task-card s-neutral completed">
+      <div class="card-row">
+        <div class="cb done"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <span class="task-title">Reply to emails from last week</span>
+            <div class="card-badges">
+              <span class="time-badge">Done 9:14 AM</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="pill p-neutral">😐 Neutral</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Add task ── -->
+    <button class="add-task">+ Add a task for today</button>
+
+  </div><!-- /task-list -->
+
+  <hr class="divider">
+
+  <!-- ════ QUADRANT MAP ════ -->
+  <div class="section-wrap" style="margin-top: 0;">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Task Quadrant</h2>
+        <p class="section-sub">Urgency vs. how you feel about each task</p>
+      </div>
+      <a href="#" class="section-link">Full map →</a>
+    </div>
+
+    <div class="quadrant-wrap">
+      <div class="quadrant-stage">
+
+        <!-- Quadrant fill zones -->
+        <!-- Top-right: on fire (urgent + dreading) -->
+        <div class="qz" style="top:0;right:0;width:50%;height:50%;background:rgba(239,68,68,0.07);border-radius:0 8px 0 0;"></div>
+        <!-- Bottom-left: safe zone (far + excited) -->
+        <div class="qz" style="bottom:0;left:0;width:50%;height:50%;background:rgba(20,184,166,0.07);border-radius:0 0 0 8px;"></div>
+
+        <!-- Axis lines -->
+        <div class="axis-h"></div>
+        <div class="axis-v"></div>
+
+        <!-- Corner labels -->
+        <span class="qlabel" style="top:7px;right:8px;color:#f3b4a8;">on fire</span>
+        <span class="qlabel" style="bottom:7px;left:8px;color:#8ed8d1;">safe zone</span>
+
+        <!-- Axis labels -->
+        <span class="axis-label" style="bottom:-20px;left:0;right:0;text-align:center;">← far off &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; deadline urgency &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; imminent →</span>
+        <span class="axis-label" style="left:-30px;top:0;bottom:0;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;text-align:center;">↑ dreading &nbsp; emotional &nbsp; excited ↓</span>
+
+        <!-- Task dots (left% = urgency 0-100, top% = dreading 0-100 / excited 100) -->
+        <!-- Review report: dreading, very urgent → top-right -->
+        <div class="qdot" style="left:87%;top:11%;background:#f97316;" title="Review quarterly report — Dreading · due in 2h · deferred 2×"></div>
+        <!-- Presentation: anxious, moderately urgent -->
+        <div class="qdot" style="left:63%;top:32%;background:#f59e0b;" title="Prepare slides — Anxious · due in 5h"></div>
+        <!-- Standup: neutral, soon -->
+        <div class="qdot" style="left:44%;top:52%;background:#a3a3a3;" title="Log standup — Neutral · due in 1h"></div>
+        <!-- Onboarding: willing, later today -->
+        <div class="qdot" style="left:55%;top:70%;background:#14b8a6;" title="Redesign onboarding — Willing · due in 8h"></div>
+        <!-- Side project: excited, no deadline -->
+        <div class="qdot" style="left:12%;top:83%;background:#22c55e;" title="Side project — Excited · no deadline"></div>
+        <!-- Completed emails: faded neutral -->
+        <div class="qdot" style="left:70%;top:51%;background:#d4d0cb;opacity:0.35;" title="Reply emails — Neutral (completed)"></div>
+
+      </div><!-- /quadrant-stage -->
+    </div><!-- /quadrant-wrap -->
+  </div>
+
+  <!-- ════ WEEKLY REVIEW CARD ════ -->
+  <div class="section-wrap">
+    <div class="review-card">
+      <div class="review-top">
+        <span class="review-icon">📊</span>
+        <div class="review-info">
+          <p class="review-title">Weekly Emotional Review</p>
+          <p class="review-date">Apr 21 – Apr 27 &nbsp;·&nbsp; Ready to review</p>
+        </div>
+        <button class="btn-review">See review →</button>
+      </div>
+      <div class="review-stats">
+        <div class="stat-box">
+          <div class="stat-num" style="color:#f97316;">4</div>
+          <div class="stat-label">Dreading<br>deferred</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" style="color:#f59e0b;">2</div>
+          <div class="stat-label">Anxious<br>deferred</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" style="color:#1a1a1a;">14</div>
+          <div class="stat-label">Tasks<br>completed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" style="color:#22c55e;">+3</div>
+          <div class="stat-label">Mood<br>shifts up</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

@@ -1,53 +1,115 @@
 # Architecture: Orin Todo App
 
-## 1. System Overview
+---
 
-Orin is a full-stack Next.js application. The frontend, API layer, and background logic all live in a single Next.js project deployed on Vercel. Supabase provides the database and authentication — no other external services are required.
+## 1. ELI5 Overview
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                     Browser                         │
-│                                                     │
-│   Next.js Client (RSC + Client Components)          │
-│   ├── Zustand      (UI state)                       │
-│   └── TanStack Query (server cache)                 │
-└────────────────────┬────────────────────────────────┘
-                     │ HTTPS
-┌────────────────────▼────────────────────────────────┐
-│              Vercel (Next.js 15)                    │
-│                                                     │
-│   App Router Pages    API Routes (/app/api/*)       │
-│   ├── /               ├── /api/tasks                │
-│   ├── /quadrant       ├── /api/tasks/:id/defer      │
-│   └── /calendar       ├── /api/reports/weekly       │
-│                       └── /api/tasks/quadrant       │
-└────────────────────┬────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────┐
-│                  Supabase                           │
-│                                                     │
-│   Auth (auth.users)    PostgreSQL (via Prisma ORM)  │
-│   ├── profiles         ├── tasks                    │
-│   └── sessions         ├── emotional_state_history  │
-│                        ├── deferral_log             │
-│                        └── nudge_dismissals         │
-└─────────────────────────────────────────────────────┘
+                    +------------------+
+                    |  👤  YOU         |
+                    |  (the browser)   |
+                    +------------------+
+                             |
+                    "show me my tasks"
+                             |
+                             ▼
++--------------------------------------------------------+
+|  🖥  NEXT.JS APP (on Vercel)                           |
+|                                                        |
+|   +---------------+  +---------------+  +-----------+ |
+|   | Task List     |  | Quadrant Map  |  | Calendar  | |
+|   | page.tsx      |  | /quadrant     |  | /calendar | |
+|   +---------------+  +---------------+  +-----------+ |
+|                                                        |
+|   +--------------------------------------------------+ |
+|   | 🧠 BRAIN (state managers)                        | |
+|   | • Zustand      → remembers UI stuff              | |
+|   |                  (sort mode, which tooltip open) | |
+|   | • TanStack Query → fetches & caches server data  | |
+|   +--------------------------------------------------+ |
+|                                                        |
+|   +--------------------------------------------------+ |
+|   | 🔌 API ROUTES (/app/api/*)                       | |
+|   | The "smart" stuff lives here:                    | |
+|   | • /tasks          → get, create, update, delete  | |
+|   | • /defer          → log push + update due date   | |
+|   | • /complete       → make next recurring task     | |
+|   | • /quadrant       → crunch scores for the map    | |
+|   | • /reports/weekly → crunch the numbers           | |
+|   | • /nudge-dismissals → remember "I said not now"  | |
+|   +--------------------------------------------------+ |
+|                                                        |
++--------------------------------------------------------+
+                             |
+                  (talks via supabase-js)
+                             |
+                             ▼
++--------------------------------------------------------+
+|  🟢 SUPABASE                                           |
+|                                                        |
+|   +--------------------------------------------------+ |
+|   | 🔐 AUTH                                          | |
+|   | Handles login/signup.                            | |
+|   | Stores session in a cookie.                      | |
+|   | Every API call checks "is this person logged in?"| |
+|   +--------------------------------------------------+ |
+|                                                        |
+|   +--------------------------------------------------+ |
+|   | 🗄  POSTGRES DATABASE (via Prisma)               | |
+|   |                                                  | |
+|   |  tasks ──────────────────────────────────────┐  | |
+|   |   • title, due_at, emotional_state           |  | |
+|   |   • deferred_count, last_touched_at          |  | |
+|   |   • parent_task_id (→ subtasks)              |  | |
+|   |   • recurrence_rule (RRULE string)           |  | |
+|   |                                              |  | |
+|   |  emotional_state_history ←──────────────────┘  | |
+|   |   • tracks every time you change how           | |
+|   |     you feel about a task                      | |
+|   |                                                | |
+|   |  deferral_log ←─────────────────────────────  | |
+|   |   • every push recorded: when, why, how far   | |
+|   |                                                | |
+|   |  nudge_dismissals ←─────────────────────────  | |
+|   |   • "I clicked dismiss" → stay quiet 2 hours  | |
+|   +--------------------------------------------------+ |
+|                                                        |
++--------------------------------------------------------+
 ```
 
 ---
 
-## 2. Frontend Architecture
+## 2. System Architecture (Technical)
 
-### Rendering Strategy
-- **Server Components (RSC):** Pages that fetch initial data — daily task list, weekly report card. Rendered on the server, zero client JS for the initial paint.
-- **Client Components:** Anything interactive — task cards, modals, drag-to-reorder, quadrant map, nudge banners. Marked with `'use client'`.
+```
+Browser (Next.js Client)
+  ├── Zustand       → UI state (sort mode, tooltips)
+  └── TanStack Query → server cache (tasks, reports)
+           │ HTTPS
+Vercel (Next.js 15)
+  ├── App Router Pages  → /, /quadrant, /calendar
+  └── API Routes        → /api/tasks, /api/reports/weekly, etc.
+           │
+Supabase
+  ├── Auth (auth.users, sessions)
+  └── PostgreSQL via Prisma
+       ├── tasks
+       ├── emotional_state_history
+       ├── deferral_log
+       └── nudge_dismissals
+```
+
+### Frontend
+
+- **Server Components (RSC)** — pages that fetch initial data (daily list, weekly report card). Rendered on the server, zero client JS on initial paint.
+- **Client Components** — anything interactive: task cards, modals, drag-to-reorder, quadrant map, nudge banners. Marked with `'use client'`.
 
 ### State Layers
 
 | Layer | Tool | What it holds |
 |-------|------|---------------|
 | Server cache | TanStack Query | Tasks, deferral logs, weekly report — fetched from API, cached, refetched in background |
-| UI state | Zustand | Active sort mode, open tooltip ID, nudge dismissal state — never hits the server |
+| UI state | Zustand | Active sort mode, open tooltip ID — never hits the server |
 | Persistent UI | localStorage | Sort mode preference — survives page reload, not synced to DB |
 
 ### Nudge Polling
@@ -57,12 +119,12 @@ A `setInterval` runs every 5 minutes inside a `useEffect` in `layout.tsx`. On ea
 
 ## 3. API Layer
 
-All routes live under `/app/api/`. Every route follows the same three-step pattern:
+Every route follows the same 3-step pattern:
 
 ```
-1. Validate session      →  supabase.auth.getUser()  →  401 if missing
-2. Scope query to user   →  WHERE user_id = session.user.id
-3. Execute + respond     →  Prisma query  →  JSON response
+1. supabase.auth.getUser()         → 401 if missing
+2. WHERE user_id = session.user.id → scoped to user
+3. Prisma query                    → JSON response
 ```
 
 ### Route Map
@@ -126,13 +188,13 @@ auth.users (Supabase managed)
 ### Key Design Decisions
 
 **tasks is self-referencing for subtasks.**
-Rather than a separate `subtasks` table, a `parent_task_id` FK on `tasks` keeps the schema simple. Max depth is enforced at the application layer — the DB allows it, the API rejects it.
+A `parent_task_id` FK on `tasks` keeps the schema simple. Max depth is enforced at the application layer — the DB allows it, the API rejects it.
 
 **Recurring task instances are independent rows.**
-When a recurring task is completed, a new row is inserted for the next occurrence. There is no link between instances. This keeps all queries simple — no need to ever join across recurrence chains.
+When a recurring task is completed, a new row is inserted for the next occurrence. No link between instances — keeps all queries simple.
 
 **Deferral consent is enforced at the API layer.**
-The `deferral_log` table has no `confirmed` column — the API route rejects any `POST /defer` request that does not include `confirmed: true` in the body. The DB never sees an unconfirmed deferral.
+The `deferral_log` table has no `confirmed` column — the API route rejects any `POST /defer` without `confirmed: true` in the body. The DB never sees an unconfirmed deferral.
 
 ---
 
@@ -161,7 +223,7 @@ supabase.auth.getUser()
 Proceed         Return 401
 ```
 
-Supabase Auth session is stored as an HTTP-only cookie. The Supabase client on the server reads it via `@supabase/ssr`.
+Session stored as HTTP-only cookie, read server-side via `@supabase/ssr`.
 
 ---
 
@@ -238,7 +300,7 @@ GET /api/tasks/quadrant
       │
       ▼
 Server: for each active task
-  urgency_score  = clamp(1 - (hoursRemaining / 168), 0, 1)
+  urgency_score   = clamp(1 - (hoursRemaining / 168), 0, 1)
   emotional_weight = task.emotional_state (1–5)
       │
       ▼
@@ -247,8 +309,8 @@ Client: <QuadrantMap /> renders D3 SVG
   Y-axis → emotional_weight (1 = excited bottom, 5 = dreading top)
       │
       ▼
-Quadrant fills applied:
-  top-right  (urgency > 0.5, weight > 3) → muted red
+Quadrant fills:
+  top-right   (urgency > 0.5, weight > 3) → muted red
   bottom-left (urgency ≤ 0.5, weight ≤ 3) → muted teal
       │
       ▼
@@ -262,22 +324,20 @@ Mobile:  tap dot → QuadrantTooltip, tap elsewhere → dismiss
 
 ```
 GitHub repo
-    │
     │  push to main
     ▼
-Vercel (production deployment)
-    ├── Next.js build
-    ├── Static assets → Vercel CDN
-    ├── API routes → Vercel Serverless Functions
-    └── Environment variables pulled from Vercel dashboard
-              │
-              └── NEXT_PUBLIC_SUPABASE_URL
-                  NEXT_PUBLIC_SUPABASE_ANON_KEY
-                  SUPABASE_SERVICE_ROLE_KEY
-                  DATABASE_URL
+Vercel (production)
+  ├── Next.js build
+  ├── Static assets → Vercel CDN
+  ├── API routes    → Vercel Serverless Functions
+  └── Env vars from Vercel dashboard:
+        NEXT_PUBLIC_SUPABASE_URL
+        NEXT_PUBLIC_SUPABASE_ANON_KEY
+        SUPABASE_SERVICE_ROLE_KEY
+        DATABASE_URL
 ```
 
-Preview deployments are created automatically on every PR branch. Each preview shares the same Supabase project (dev environment).
+Every PR branch gets an automatic preview deployment sharing the same Supabase project.
 
 ---
 
