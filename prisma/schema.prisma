@@ -53,6 +53,8 @@ model Task {
 
   @@index([userId])
   @@index([dueAt])
+  @@index([userId, isCompleted, parentTaskId]) // main list query
+  @@index([userId, sortOrder])                 // manual sort
   @@map("tasks")
 }
 

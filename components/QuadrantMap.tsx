@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { scaleLinear } from "d3-scale";
 
 const EMOTION_COLOUR: Record<string, string> = {
@@ -79,6 +79,17 @@ export function QuadrantMap({ tasks }: Props) {
 
   const activeTask = tooltip ? tasks.find((t) => t.id === tooltip.taskId) ?? null : null;
 
+  // Memoize dot positions — recomputes only when tasks change, not on tooltip hover
+  const dotPositions = useMemo(() =>
+    tasks.map((t) => ({
+      ...t,
+      cx: PAD.left + xScale(t.urgencyScore),
+      cy: PAD.top + yScale(t.emotionalWeight),
+      colour: EMOTION_COLOUR[t.emotionalState] ?? "#c4cbc2",
+    })),
+    [tasks]
+  );
+
   // Edge-flip: offset 14px right, flip left if near right edge
   const ttX = tooltip
     ? tooltip.x + DOT_OFFSET + TOOLTIP_W > VW - PAD.right
@@ -138,11 +149,9 @@ export function QuadrantMap({ tasks }: Props) {
           dreading ↑ · EMOTIONAL · ↓ excited
         </text>
 
-        {/* Dots */}
-        {tasks.map((t) => {
-          const cx = PAD.left + xScale(t.urgencyScore);
-          const cy = PAD.top + yScale(t.emotionalWeight);
-          const colour = EMOTION_COLOUR[t.emotionalState] ?? "#c4cbc2";
+        {/* Dots — positions memoized, only active state changes on hover */}
+        {dotPositions.map((t) => {
+          const { cx, cy, colour } = t;
           const active = tooltip?.taskId === t.id;
 
           return (

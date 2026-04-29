@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import type { Task } from "@/lib/generated/prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
@@ -49,7 +49,7 @@ interface Props {
   onDeleteSubtask?: (id: string) => void;
 }
 
-export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddSubtask, onCompleteSubtask, onDeleteSubtask }: Props) {
+function TaskCardInner({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddSubtask, onCompleteSubtask, onDeleteSubtask }: Props) {
   const [done, setDone] = useState(false);
   const [deferOpen, setDeferOpen] = useState(false);
   const [addingSubtask, setAddingSubtask] = useState(false);
@@ -319,3 +319,5 @@ export function TaskCard({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddS
   </>
   );
 }
+
+export const TaskCard = memo(TaskCardInner);
