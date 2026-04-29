@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { TaskCard } from "@/components/TaskCard";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { useUIStore, type SortMode } from "@/store/ui";
 import { cn } from "@/lib/utils";
@@ -56,12 +65,55 @@ export function TaskList() {
   const [modalOpen, setModalOpen] = useState(false);
   const { sortMode, setSortMode } = useUIStore();
 
+  const [manualOrder, setManualOrder] = useState<string[]>([]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
   const { data: tasks = [], isLoading, isError } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "today"],
     queryFn: fetchTodaysTasks,
   });
 
   const sorted = useMemo(() => sortTasks(tasks, sortMode), [tasks, sortMode]);
+
+  // Sync manualOrder when tasks or sort mode changes
+  useEffect(() => {
+    setManualOrder(sorted.map((t) => t.id));
+  }, [tasks, sortMode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const displayTasks = useMemo(() => {
+    if (sortMode !== "manual" || manualOrder.length === 0) return sorted;
+    const map = new Map(sorted.map((t) => [t.id, t]));
+    return manualOrder.map((id) => map.get(id)).filter(Boolean) as TaskWithSubtasks[];
+  }, [sorted, manualOrder, sortMode]);
+
+  const { mutate: reorderTasks } = useMutation({
+    mutationFn: async (ordered_ids: string[]) => {
+      const res = await fetch("/api/tasks/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ordered_ids }),
+      });
+      if (!res.ok) throw new Error("Failed to reorder");
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = manualOrder.indexOf(active.id as string);
+    const newIndex = manualOrder.indexOf(over.id as string);
+    const newOrder = arrayMove(manualOrder, oldIndex, newIndex);
+
+    // Optimistic update
+    setManualOrder(newOrder);
+
+    // Debounced DB write
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => reorderTasks(newOrder), 500);
+  }
 
   const { mutate: markDone } = useMutation({
     mutationFn: async (id: string) => {
@@ -218,21 +270,26 @@ export function TaskList() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {sorted.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onMarkDone={markDone}
-              onDefer={(id, newDueAt) => deferTask({ id, newDueAt })}
-              onUpdate={(id, patch) => updateTask({ id, patch })}
-              onDelete={deleteTask}
-              onAddSubtask={(parentId, title) => addSubtask({ parentId, title })}
-              onCompleteSubtask={completeSubtask}
-              onDeleteSubtask={deleteTask}
-            />
-          ))}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={displayTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-3">
+              {displayTasks.map((task) => (
+                <SortableTaskCard
+                  key={task.id}
+                  task={task}
+                  dragActive={sortMode === "manual"}
+                  onMarkDone={markDone}
+                  onDefer={(id, newDueAt) => deferTask({ id, newDueAt })}
+                  onUpdate={(id, patch) => updateTask({ id, patch })}
+                  onDelete={deleteTask}
+                  onAddSubtask={(parentId, title) => addSubtask({ parentId, title })}
+                  onCompleteSubtask={completeSubtask}
+                  onDeleteSubtask={deleteTask}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       <TaskCreateModal open={modalOpen} onOpenChange={setModalOpen} />
