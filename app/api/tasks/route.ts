@@ -2,13 +2,37 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { searchParams } = new URL(request.url);
+  const filter = searchParams.get("filter");
+
+  // today = overdue + due today + undated, all incomplete
+  let dueAtFilter = {};
+  if (filter === "today") {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    dueAtFilter = {
+      OR: [
+        { dueAt: null },
+        { dueAt: { lte: todayEnd } },
+      ],
+    };
+  }
+
   const tasks = await prisma.task.findMany({
-    where: { userId: user.id, parentTaskId: null },
+    where: {
+      userId: user.id,
+      parentTaskId: null,
+      isCompleted: false,
+      ...dueAtFilter,
+    },
     orderBy: { sortOrder: "asc" },
   });
 
