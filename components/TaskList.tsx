@@ -13,6 +13,7 @@ import {
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
+import { WelcomeView } from "@/components/WelcomeView";
 import { useUIStore, type SortMode } from "@/store/ui";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/generated/prisma/client";
@@ -60,7 +61,7 @@ async function fetchTodaysTasks(): Promise<TaskWithSubtasks[]> {
   return res.json();
 }
 
-export function TaskList() {
+export function TaskList({ userName = "there" }: { userName?: string }) {
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const { sortMode, setSortMode } = useUIStore();
@@ -254,21 +255,9 @@ export function TaskList() {
         </div>
       </div>
 
-      {/* Empty state */}
+      {/* Empty state → personalised welcome for new users */}
       {tasks.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[14px] border border-dashed border-[var(--stone-400)] bg-white py-16 text-center">
-          <span className="text-5xl" aria-hidden="true">🌿</span>
-          <div>
-            <p className="font-semibold text-[var(--lime-ink)]">You&apos;re all clear</p>
-            <p className="mt-1 text-sm text-[var(--stone-500)]">Add a task to get started</p>
-          </div>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="mt-1 rounded-[8px] bg-[hsl(var(--primary))] border border-[var(--ink)] px-5 py-2 text-sm font-bold text-white transition-all hover:shadow-[2px_2px_0_var(--ink)]"
-          >
-            Add first task
-          </button>
-        </div>
+        <WelcomeView name={userName} />
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={displayTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>

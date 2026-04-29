@@ -23,6 +23,13 @@ export default function SignUpPage() {
 
         <form action={action} className="space-y-4">
           <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              Your name
+            </label>
+            <Input id="name" name="name" type="text" autoComplete="name"
+              placeholder="Sanjana" />
+          </div>
+          <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">Email</label>
             <Input id="email" name="email" type="email" autoComplete="email"
               required placeholder="you@example.com" />
