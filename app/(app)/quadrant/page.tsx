@@ -89,57 +89,28 @@ export default function QuadrantPage() {
         )}
       </div>
 
-      {/* Quadrant card */}
-      <div style={{
-        background: "#fff", borderRadius: 16, overflow: "hidden",
-        border: "1px solid #dde4de",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-      }}>
-        {/* Card header */}
-        <div style={{ padding: "16px 24px", borderBottom: "1px solid #e9ede9", background: "#f2fdec", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <p style={{ fontSize: 13.5, fontWeight: 700, color: "#082d1d", margin: 0 }}>
-              Emotional Task Quadrant Map
-            </p>
-            <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
-              {tasks.length} active task{tasks.length !== 1 ? "s" : ""} · {TABS.find(t => t.value === period)?.label} view
-            </p>
-          </div>
-        </div>
+      {/* Task count */}
+      <p style={{ fontSize: 12, color: "#4a6d47", marginBottom: 16 }}>
+        {isLoading ? "Loading…" : `${tasks.length} task${tasks.length !== 1 ? "s" : ""} · ${TABS.find(t => t.value === period)?.label} view`}
+      </p>
 
-        {/* Map */}
-        <div style={{ padding: "20px 24px 16px" }}>
-          {isLoading && <SkeletonBox height={300} radius={12} />}
-          {isError && (
-            <p style={{ fontSize: 13, color: "#c23934", padding: "64px 0", textAlign: "center" }}>
-              Could not load data.
-            </p>
-          )}
-          {!isLoading && !isError && (
-            tasks.length === 0 ? (
-              <div style={{ height: 300, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, color: "#b9d3c4", background: "#f2fdec", borderRadius: 12 }}>
-                <span style={{ fontSize: 40 }}>⬡</span>
-                <p style={{ fontSize: 13 }}>No tasks in this period</p>
-              </div>
-            ) : (
-              <QuadrantMap tasks={tasks} />
-            )
-          )}
-        </div>
-      </div>
-
-      {/* Axis explanation */}
-      <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {[
-          { title: "X-axis — Urgency", body: "How close the deadline is within the selected period. Right = imminent." },
-          { title: "Y-axis — Emotional weight", body: "How you feel. Dreading = top, Excited = bottom." },
-        ].map((item, i) => (
-          <div key={i} style={{ background: "#fff", border: "1px solid #dde4de", borderRadius: 10, padding: "12px 16px" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#4a6d47", marginBottom: 4 }}>{item.title}</p>
-            <p style={{ fontSize: 12.5, color: "#082d1d" }}>{item.body}</p>
+      {/* Map — full width, no wrapper box */}
+      {isLoading && <SkeletonBox height={340} radius={12} />}
+      {isError && (
+        <p style={{ fontSize: 13, color: "#c23934", padding: "64px 0", textAlign: "center" }}>
+          Could not load data.
+        </p>
+      )}
+      {!isLoading && !isError && (
+        tasks.length === 0 ? (
+          <div style={{ height: 340, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, color: "#b9d3c4", background: "#f8f9f5", borderRadius: 12, border: "1px solid #dde4de" }}>
+            <span style={{ fontSize: 40 }}>⬡</span>
+            <p style={{ fontSize: 13 }}>No tasks in this period</p>
           </div>
-        ))}
-      </div>
+        ) : (
+          <QuadrantMap tasks={tasks} />
+        )
+      )}
     </div>
   );
 }
