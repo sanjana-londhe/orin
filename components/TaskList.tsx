@@ -213,7 +213,34 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
           ))}
         </div>
       ) : tasks.length === 0 ? (
-        <WelcomeView name={userName} />
+        /* Empty — same section structure as when tasks exist */
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 16 }}>
+            <div>
+              <span style={{ display: "inline-flex", alignItems: "center", background: "#e3ffd1", border: "1.5px solid #c8f7ae", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 700, color: "#243000", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
+                📋 Today
+              </span>
+              <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>Your tasks</p>
+              <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
+                {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })} · nothing due today
+              </p>
+            </div>
+            <button onClick={() => setModalOpen(true)} style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8,
+              background: "#059669", border: "none", color: "#fff", fontSize: 13, fontWeight: 600,
+              cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
+            }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
+              + New task
+            </button>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "48px 0", color: "#b9d3c4" }}>
+            <span style={{ fontSize: 40, marginBottom: 12 }}>🌿</span>
+            <p style={{ fontSize: 14, fontWeight: 500 }}>You&apos;re all clear for today</p>
+            <p style={{ fontSize: 12, marginTop: 4 }}>Add a task to get started</p>
+          </div>
+        </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={displayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
