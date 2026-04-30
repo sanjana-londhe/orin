@@ -40,7 +40,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] p-0 overflow-hidden rounded-[14px] border-[1.5px] border-[#059669]" style={{ boxShadow: "0 4px 24px rgba(5,150,105,0.12)" }}>
+      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[12px] border-[1.5px] border-[#059669]" style={{ boxShadow: "0 4px 20px rgba(5,150,105,0.1)" }}>
         {open && (
           <ModalForm
             key={openCount}
@@ -109,47 +109,40 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
 
   return (
     <>
-        {/* Title row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 20px 16px", borderBottom: "1px solid #e9ede9" }}>
-          <span style={{ fontSize: 15, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
-          <input
-            autoFocus
-            value={title}
-            onChange={e => setTitle(e.target.value)}
+        {/* Title */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 12px", borderBottom: "1px solid #e9ede9" }}>
+          <span style={{ fontSize: 13, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
+          <input autoFocus value={title} onChange={e => setTitle(e.target.value)}
             placeholder="What needs doing?"
-            style={{ flex: 1, border: "none", outline: "none", fontSize: 16, fontWeight: 500, color: "#082d1d", background: "transparent", fontFamily: "inherit" }}
-          />
+            style={{ flex: 1, border: "none", outline: "none", fontSize: 14, fontWeight: 500, color: "#082d1d", background: "transparent", fontFamily: "inherit" }} />
         </div>
 
-        {/* Body */}
-        <div style={{ padding: "20px 20px 16px" }}>
+        <div style={{ padding: "14px 16px 12px" }}>
 
-          {/* Due date */}
-          <div style={{ marginBottom: 16 }}>
+          {/* Date + Time side by side */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6 }}>Due time</p>
+              <input ref={timeRef} type="time" defaultValue={initTime}
+                style={{ width: "100%", padding: "8px 10px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 12.5, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+            </div>
           </div>
 
-          {/* Time */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Due time</p>
-            <input ref={timeRef} type="time" defaultValue={initTime}
-              style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
-          </div>
-
-          {/* Feeling */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 10 }}>How do you feel about it?</p>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {/* Feeling — compact pills */}
+          <div style={{ marginBottom: 14 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 7 }}>Feeling</p>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
               {STATES.map(s => {
                 const active = emotion === s.value;
                 return (
                   <button key={s.value} onClick={() => setEmotion(s.value)} style={{
-                    display: "inline-flex", alignItems: "center", gap: 5,
-                    padding: "6px 13px", borderRadius: 999,
+                    display: "inline-flex", alignItems: "center", gap: 3,
+                    padding: "4px 10px", borderRadius: 999,
                     background: active ? s.activeBg : s.bg,
                     color: active ? "#fff" : s.fg,
                     border: `1.5px solid ${active ? s.activeBg : s.bg}`,
-                    fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                    fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
                     transition: "all 0.12s",
                   }}>
                     {s.emoji} {s.label}
@@ -160,33 +153,33 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           </div>
 
           {/* Action items */}
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 10 }}>Action items</p>
+          <div style={{ marginBottom: 10 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6 }}>Action items</p>
             {subtasks.map((st, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
-                <span style={{ width: 14, height: 14, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
-                <span style={{ flex: 1, fontSize: 13, color: "#082d1d" }}>{st}</span>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, padding: "3px 0" }}>
+                <span style={{ width: 12, height: 12, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
+                <span style={{ flex: 1, fontSize: 12, color: "#082d1d" }}>{st}</span>
                 <button onClick={() => setSubtasks(p => p.filter((_, j) => j !== i))}
-                  style={{ fontSize: 11, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+                  style={{ fontSize: 10, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
               </div>
             ))}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
-              <span style={{ width: 14, height: 14, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 7, paddingTop: 3 }}>
+              <span style={{ width: 12, height: 12, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
               <input value={subInput} onChange={e => setSubInput(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSubtask(); } }}
                 placeholder="Add action item..."
-                style={{ flex: 1, border: "none", borderBottom: "1px solid #e9ede9", outline: "none", fontSize: 13, color: "#082d1d", background: "transparent", fontFamily: "inherit", paddingBottom: 4 }} />
+                style={{ flex: 1, border: "none", borderBottom: "1px solid #e9ede9", outline: "none", fontSize: 12, color: "#082d1d", background: "transparent", fontFamily: "inherit", paddingBottom: 3 }} />
             </div>
           </div>
 
-          {error && <p style={{ fontSize: 12, color: "#c23934", marginBottom: 8 }}>{error}</p>}
+          {error && <p style={{ fontSize: 11.5, color: "#c23934", marginTop: 6 }}>{error}</p>}
         </div>
 
         {/* Footer */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, padding: "12px 20px 18px", borderTop: "1px solid #e9ede9" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "10px 16px 14px", borderTop: "1px solid #e9ede9" }}>
           <button onClick={handleClose} style={{
-            padding: "9px 20px", borderRadius: 8, border: "1.5px solid #dde4de",
-            background: "#fff", color: "#3d5a4a", fontSize: 13.5, fontWeight: 500,
+            padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de",
+            background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500,
             cursor: "pointer", fontFamily: "inherit",
           }}>
             Cancel
@@ -194,9 +187,9 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           <button onClick={() => { if (!title.trim()) { setError("Add a title first"); return; } setError(""); mutate(); }}
             disabled={isPending || !title.trim()}
             style={{
-              padding: "9px 24px", borderRadius: 8, border: "none",
+              padding: "7px 20px", borderRadius: 8, border: "none",
               background: title.trim() ? "#059669" : "#c4cbc2",
-              color: "#fff", fontSize: 13.5, fontWeight: 700,
+              color: "#fff", fontSize: 13, fontWeight: 700,
               cursor: title.trim() ? "pointer" : "default", fontFamily: "inherit",
               transition: "background 0.13s",
             }}
