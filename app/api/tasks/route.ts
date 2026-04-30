@@ -9,6 +9,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get("filter");
+  const dateParam = searchParams.get("date"); // YYYY-MM-DD — browse a specific day
 
   const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
 
@@ -16,6 +17,14 @@ export async function GET(request: Request) {
   type WhereClause = Record<string, unknown>;
   let where: WhereClause = { userId: user.id, parentTaskId: null };
   let orderBy: Record<string, string> | Record<string, string>[] = { sortOrder: "asc" };
+
+  // Specific date browse — show all tasks (inc. completed) due on that day
+  if (dateParam) {
+    const dayStart = new Date(dateParam + "T00:00:00");
+    const dayEnd   = new Date(dateParam + "T23:59:59");
+    where = { ...where, dueAt: { gte: dayStart, lte: dayEnd } };
+    orderBy = { dueAt: "asc" };
+  }
 
   switch (filter) {
     case "today":

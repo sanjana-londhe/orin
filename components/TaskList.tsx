@@ -65,13 +65,41 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const { sortMode, setSortMode } = useUIStore();
   const m = useTaskMutations();
 
+  // Date navigation
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const [selectedDate, setSelectedDate] = useState(todayISO);
+  const isToday = selectedDate === todayISO;
+
+  function shiftDay(delta: number) {
+    const d = new Date(selectedDate + "T12:00:00");
+    d.setDate(d.getDate() + delta);
+    setSelectedDate(d.toISOString().slice(0, 10));
+  }
+
+  function dateLabelFor(iso: string): string {
+    const d = new Date(iso + "T12:00:00");
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    if (iso === today.toISOString().slice(0, 10)) return "Today";
+    if (iso === yesterday.toISOString().slice(0, 10)) return "Yesterday";
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }
+
   const [manualOrder, setManualOrder] = useState<string[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const { data: tasks = [], isLoading } = useQuery<TaskWithSubtasks[]>({
-    queryKey: ["tasks", "today"],
-    queryFn: fetchTodaysTasks,
+    queryKey: ["tasks", selectedDate],
+    queryFn: async () => {
+      const url = isToday
+        ? "/api/tasks?filter=today"
+        : `/api/tasks?date=${selectedDate}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch tasks");
+      return res.json();
+    },
     retry: 1,
   });
 
@@ -169,10 +197,50 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
               Daily workspace · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
             </p>
-            <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1 }}>Today</h1>
-            {userName !== "there" && (
+            {/* Date navigation */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
+              <button onClick={() => shiftDay(-1)} style={{
+                width: 28, height: 28, borderRadius: "50%", border: "1.5px solid #dde4de",
+                background: "#fff", cursor: "pointer", fontSize: 14, color: "#4a6d47",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, transition: "all 0.12s",
+              }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#059669"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}>
+                ‹
+              </button>
+              <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1 }}>
+                {dateLabelFor(selectedDate)}
+              </h1>
+              <button onClick={() => shiftDay(1)} disabled={isToday} style={{
+                width: 28, height: 28, borderRadius: "50%", border: "1.5px solid #dde4de",
+                background: "#fff", cursor: isToday ? "default" : "pointer",
+                fontSize: 14, color: isToday ? "#dde4de" : "#4a6d47",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, transition: "all 0.12s",
+              }}
+                onMouseEnter={e => { if (!isToday) (e.currentTarget as HTMLElement).style.borderColor = "#059669"; }}
+                onMouseLeave={e => { if (!isToday) (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}>
+                ›
+              </button>
+              {!isToday && (
+                <button onClick={() => setSelectedDate(todayISO)} style={{
+                  fontSize: 11, fontWeight: 600, color: "#059669", background: "none",
+                  border: "1px solid #c8f7ae", borderRadius: 999,
+                  padding: "2px 10px", cursor: "pointer", fontFamily: "inherit",
+                }}>
+                  Back to today
+                </button>
+              )}
+            </div>
+            {userName !== "there" && isToday && (
               <p style={{ fontSize: 12.5, color: "#4a6d47", marginTop: 4 }}>
                 Good {timeGreeting}, {userName} ☀️ &nbsp;·&nbsp; {tasks.length} task{tasks.length !== 1 ? "s" : ""} &nbsp;·&nbsp; {tasks.length} remaining
+              </p>
+            )}
+            {!isToday && (
+              <p style={{ fontSize: 12.5, color: "#4a6d47", marginTop: 4 }}>
+                {tasks.length} task{tasks.length !== 1 ? "s" : ""} on this day
               </p>
             )}
           </div>
