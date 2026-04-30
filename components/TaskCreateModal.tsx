@@ -123,9 +123,26 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
             <div>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6 }}>Due time</p>
-              <input ref={timeRef} type="time" defaultValue={initTime}
-                style={{ width: "100%", padding: "9px 12px", height: 38, border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6, margin: "0 0 6px 0" }}>Due time</p>
+              {/* Wrapper makes full box clickable, consistent with DatePickerField trigger */}
+              <label style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "9px 12px", height: 38, borderRadius: 8,
+                border: "1px solid #dde4de", background: "#fafbf7",
+                cursor: "text", boxSizing: "border-box", transition: "border-color 0.14s",
+              }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}
+                onFocus={e => (e.currentTarget as HTMLElement).style.borderColor = "#059669"}
+                onBlur={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}
+              >
+                <input ref={timeRef} type="time" defaultValue={initTime}
+                  style={{
+                    flex: 1, border: "none", outline: "none",
+                    fontSize: 13, color: "#082d1d", background: "transparent",
+                    fontFamily: "inherit", cursor: "pointer", minWidth: 0,
+                  }} />
+              </label>
             </div>
           </div>
 

@@ -293,9 +293,13 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
                 <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
                 <div>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6, margin: "0 0 6px 0" }}>Due time</p>
-                  <input type="time" value={inlineDueTime} onChange={e => setInlineDueTime(e.target.value)}
-                    style={{ width: "100%", padding: "9px 12px", height: 38, border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", margin: "0 0 6px 0" }}>Due time</p>
+                  <label style={{ display: "flex", alignItems: "center", padding: "9px 12px", height: 38, borderRadius: 8, border: "1px solid #dde4de", background: "#fafbf7", cursor: "text", boxSizing: "border-box", transition: "border-color 0.14s" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}>
+                    <input type="time" value={inlineDueTime} onChange={e => setInlineDueTime(e.target.value)}
+                      style={{ flex: 1, border: "none", outline: "none", fontSize: 13, color: "#082d1d", background: "transparent", fontFamily: "inherit", cursor: "pointer", minWidth: 0 }} />
+                  </label>
                 </div>
               </div>
 
