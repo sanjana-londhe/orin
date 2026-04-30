@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { TopNav } from "@/components/TopNav";
+import { Sidebar } from "@/components/Sidebar";
 
 function displayName(user: { email?: string; user_metadata?: { full_name?: string } }): string {
   const meta = user.user_metadata?.full_name;
@@ -17,10 +18,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div style={{ minHeight: "100vh", background: "#F3F1EC" }}>
+      {/* Fixed top nav */}
       <TopNav initial={initial} />
-      {/* 54px offset for fixed nav */}
-      <div style={{ paddingTop: 54 }}>
-        {children}
+
+      {/* Shell: sidebar + content, offset by nav height */}
+      <div style={{ paddingTop: 54, display: "flex", height: "calc(100vh - 0px)" }}>
+        {/* Sidebar */}
+        <div style={{ height: "calc(100vh - 54px)", position: "sticky", top: 54, flexShrink: 0 }}>
+          <Sidebar />
+        </div>
+
+        {/* Main content */}
+        <main style={{ flex: 1, overflowY: "auto", height: "calc(100vh - 54px)" }}>
+          {children}
+        </main>
       </div>
     </div>
   );

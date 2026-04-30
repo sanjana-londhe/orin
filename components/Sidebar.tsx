@@ -4,48 +4,35 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { TaskCreateModal } from "@/components/TaskCreateModal";
-import { cn } from "@/lib/utils";
 import type { TaskWithSubtasks } from "@/lib/types";
 
-const EMOTION_COLOUR: Record<string, string> = {
-  DREADING: "#c23934",
-  ANXIOUS:  "#886a00",
-  NEUTRAL:  "#c4cbc2",
-  WILLING:  "#2b6b5e",
-  EXCITED:  "#59d10b",
-};
-
-const EMOTION_EMOJI: Record<string, string> = {
-  DREADING: "😮‍💨",
-  ANXIOUS:  "😟",
-  NEUTRAL:  "😐",
-  WILLING:  "🙂",
-  EXCITED:  "🤩",
-};
-
-const NAV = [
-  { href: "/",          icon: "☀️",  label: "Today" },
-  { href: "/calendar",  icon: "🗓",  label: "Calendar" },
-  { href: "/quadrant",  icon: "⬡",   label: "Quadrant" },
+const TILES = [
+  {
+    href: "/",
+    label: "List view",
+    icon: "☀️",
+    iconBg: "#059669",
+    activeBg: "#059669",
+  },
+  {
+    href: "/calendar",
+    label: "Calendar",
+    icon: "🗓",
+    iconBg: "#e05230",
+    activeBg: "#e05230",
+  },
+  {
+    href: "/quadrant",
+    label: "Visual emotion map",
+    icon: "⬡",
+    iconBg: "#6c4fd8",
+    activeBg: "#6c4fd8",
+  },
 ];
 
-function formatSidebarTime(dueAt: Date | string | null): string {
-  if (!dueAt) return "No deadline";
-  const d = new Date(String(dueAt));
-  const overdue = d < new Date();
-  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  return overdue ? `${time} · overdue` : time;
-}
-
-interface Props {
-  userName: string;
-}
-
-export function Sidebar({ userName }: Props) {
+export function Sidebar() {
   const pathname = usePathname();
-  const [modalOpen, setModalOpen] = useState(false);
-  const now = new Date();
+  const [search, setSearch] = useState("");
 
   const { data: tasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "today"],
@@ -57,111 +44,102 @@ export function Sidebar({ userName }: Props) {
     retry: 1,
   });
 
+  const counts: Record<string, number> = {
+    "/": tasks.length,
+    "/calendar": tasks.filter(t => t.dueAt).length,
+    "/quadrant": tasks.length,
+  };
+
   return (
-    <>
-      <aside style={{ width: 252, flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", background: "#fff", borderRight: "1px solid rgba(0,0,0,0.07)" }}>
+    <aside style={{
+      width: 240,
+      flexShrink: 0,
+      background: "#1c1c1e",
+      display: "flex",
+      flexDirection: "column",
+      padding: "16px 12px",
+      gap: 12,
+      overflowY: "auto",
+    }}>
+      {/* Search */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        background: "#2c2c2e", borderRadius: 10,
+        padding: "8px 12px",
+      }}>
+        <span style={{ fontSize: 14, color: "#8e8e93" }}>⌕</span>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search"
+          style={{
+            flex: 1, background: "transparent", border: "none", outline: "none",
+            fontSize: 14, color: "#fff", fontFamily: "inherit",
+          }}
+        />
+      </div>
 
-        {/* Header — logo + nav */}
-        <div className="px-[18px] pt-5 pb-4 border-b border-black/[0.06] flex-shrink-0">
-          <span className="block text-[15px] font-extrabold tracking-[-0.05em] text-[#1A1814] mb-4">
-            orin
-          </span>
-          <nav className="flex flex-col gap-px">
-            {NAV.map((item) => {
-              const active = pathname === item.href;
-              return (
-                <Link key={item.href} href={item.href}
-                  className={cn(
-                    "flex items-center gap-[9px] px-[10px] py-[6px] rounded-[7px] text-[12.5px] transition-all",
-                    active
-                      ? "bg-[#EDE8E0] text-[#1A1814] font-medium"
-                      : "text-[#9C9890] hover:bg-[#F3F1EC] hover:text-[#4C4840]"
-                  )}>
-                  <span className="text-[13px] w-4 text-center flex-shrink-0">{item.icon}</span>
-                  {item.label}
-                  {item.href === "/" && tasks.length > 0 && (
-                    <span className={cn(
-                      "ml-auto font-mono text-[9.5px] px-[6px] py-px rounded",
-                      active ? "bg-[#E0DBD4] text-[#6C6860]" : "bg-[#EDE8E0] text-[#B0A89E]"
-                    )}>
-                      {tasks.length}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-black/[0.06] mx-0" />
-
-        {/* Date widget */}
-        <div className="px-[10px] pt-[4px] pb-[10px] flex-shrink-0">
-          <p className="font-mono text-[9px] uppercase tracking-[0.1em] text-[#B0A89E] mb-1">
-            {now.toLocaleDateString("en-US", { weekday: "long" })}
-          </p>
-          <p className="text-[34px] font-black leading-none tracking-[-0.05em] text-[#1A1814]">
-            {now.getDate()}
-          </p>
-          <p className="text-[11px] text-[#A09890] mt-0.5">
-            {now.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-          </p>
-        </div>
-
-        {/* Mood bar */}
-        <div className="flex items-center gap-1 px-[10px] pb-[10px]">
-          {Object.values(EMOTION_COLOUR).map((c, i) => (
-            <div key={i} className="flex-1 h-[3px] rounded-sm opacity-70"
-              style={{ background: c }} />
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-black/[0.06]" />
-
-        {/* Mini task list */}
-        <div className="flex-1 overflow-y-auto px-2 py-1 [scrollbar-width:thin]">
-          {tasks.map((task) => {
-            const colour = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
-            const emoji = EMOTION_EMOJI[task.emotionalState] ?? "😐";
-            const timeStr = formatSidebarTime(task.dueAt);
-            const overdue = task.dueAt ? new Date(String(task.dueAt)) < new Date() : false;
-            return (
-              <div key={task.id}
-                className="flex items-start gap-[9px] px-[10px] py-[9px] rounded-[8px] mb-px hover:bg-[#F3F1EC] cursor-pointer transition-colors border-l-2 border-transparent"
-                style={{ "--c": colour } as React.CSSProperties}>
-                <span className="text-[14px] flex-shrink-0 mt-px leading-none">{emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <p className={cn(
-                    "font-mono text-[9px] mb-0.5 whitespace-nowrap",
-                    overdue ? "text-[#c23934]" : "text-[#B0A89E]"
-                  )}>
-                    {overdue && <span>⚑ </span>}{timeStr}
-                    {task.recurrenceRule && " · ↺"}
-                  </p>
-                  <p className="text-[11.5px] text-[#8C8880] leading-[1.36] truncate">
-                    {task.title}
-                  </p>
+      {/* Tile grid */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 10,
+      }}>
+        {TILES.map(tile => {
+          const active = pathname === tile.href;
+          const count = counts[tile.href] ?? 0;
+          return (
+            <Link
+              key={tile.href}
+              href={tile.href}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                padding: "12px 14px",
+                borderRadius: 12,
+                background: active ? tile.activeBg : "#2c2c2e",
+                textDecoration: "none",
+                minHeight: 86,
+                transition: "background 0.15s, transform 0.15s",
+                gridColumn: tile.href === "/quadrant" ? "1 / -1" : undefined,
+              }}
+              onMouseEnter={e => {
+                if (!active) (e.currentTarget as HTMLElement).style.background = "#3a3a3c";
+              }}
+              onMouseLeave={e => {
+                if (!active) (e.currentTarget as HTMLElement).style.background = "#2c2c2e";
+              }}
+            >
+              {/* Top row: icon + count */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: "50%",
+                  background: active ? "rgba(255,255,255,0.25)" : tile.iconBg,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 16,
+                }}>
+                  {tile.icon}
                 </div>
+                <span style={{
+                  fontSize: 22, fontWeight: 700, color: active ? "#fff" : "#ebebf5",
+                  letterSpacing: "-0.03em",
+                }}>
+                  {count}
+                </span>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Footer — new task */}
-        <div className="px-2 py-[10px] border-t border-black/[0.06] flex-shrink-0">
-          <button onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 w-full px-[10px] py-2 rounded-[8px] border border-dashed border-[#D8D2CC] text-[12px] text-[#B0A89E] hover:border-[#B0A89E] hover:text-[#4C4840] transition-all">
-            <span className="w-[18px] h-[18px] rounded-[5px] bg-[#EDE8E0] flex items-center justify-center text-[13px] text-[#8C8880] flex-shrink-0 leading-none">
-              +
-            </span>
-            New task…
-          </button>
-        </div>
-      </aside>
-
-      <TaskCreateModal open={modalOpen} onOpenChange={setModalOpen} />
-    </>
+              {/* Label */}
+              <span style={{
+                fontSize: 13, fontWeight: 600,
+                color: active ? "#fff" : "#ebebf5",
+                marginTop: 10,
+              }}>
+                {tile.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </aside>
   );
 }
