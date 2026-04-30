@@ -126,15 +126,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const totalDeferred = tasks.reduce((s, t) => s + (t.deferredCount ?? 0), 0);
 
   // Quick capture state
-  const [captureValue, setCaptureValue] = useState("");
-  const { mutate: quickCreate } = useMutation({
-    mutationFn: async (title: string) => {
-      const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title }) });
-      if (!res.ok) throw new Error("Failed");
-      return res.json();
-    },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["tasks"] }); setCaptureValue(""); },
-  });
+  const [inlineDraft, setInlineDraft] = useState("");
+  const [inlineModalOpen, setInlineModalOpen] = useState(false);
 
   return (
     <>
@@ -187,22 +180,6 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
           </div>
         </div>
 
-        {/* Quick capture — 5.html style */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 12,
-          padding: "12px 16px", background: "#fff",
-          border: "1px solid #dde4de", borderRadius: 12,
-          marginBottom: 24, transition: "border-color 0.15s, box-shadow 0.15s",
-        }}
-          onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(89,209,11,0.3)"; }}
-          onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
-          <span style={{ fontSize: 14, color: "#4a6d47", flexShrink: 0 }}>✦</span>
-          <input value={captureValue} onChange={e => setCaptureValue(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && captureValue.trim()) quickCreate(captureValue.trim()); }}
-            placeholder="Capture a task — what do you need to do?"
-            style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 13.5, color: "#082d1d", background: "transparent" }} />
-          <span style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d47", background: "#f1f3ef", border: "1px solid #dde4de", borderRadius: 4, padding: "2px 6px", flexShrink: 0 }}>↵ add</span>
-        </div>
       </div>
 
       {/* ── Cards (5.html: featured + 2-col grid) ── */}
@@ -213,33 +190,61 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
           ))}
         </div>
       ) : tasks.length === 0 ? (
-        /* Empty — same section structure as when tasks exist */
+        /* Empty — section header + inline add input, no CTA button */
         <div style={{ marginBottom: 32 }}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 16 }}>
-            <div>
-              <span style={{ display: "inline-flex", alignItems: "center", background: "#e3ffd1", border: "1.5px solid #c8f7ae", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 700, color: "#243000", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
-                📋 Today
-              </span>
-              <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>Your tasks</p>
-              <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
-                {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })} · nothing due today
-              </p>
-            </div>
-            <button onClick={() => setModalOpen(true)} style={{
-              display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8,
-              background: "#059669", border: "none", color: "#fff", fontSize: 13, fontWeight: 600,
-              cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
-            }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
-              + New task
-            </button>
+          {/* Section header — no CTA */}
+          <div style={{ marginBottom: 20 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", background: "#e3ffd1", border: "1.5px solid #c8f7ae", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 700, color: "#243000", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
+              📋 Today
+            </span>
+            <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>Your tasks</p>
+            <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
+              {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })} · nothing due today
+            </p>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "48px 0", color: "#b9d3c4" }}>
-            <span style={{ fontSize: 40, marginBottom: 12 }}>🌿</span>
-            <p style={{ fontSize: 14, fontWeight: 500 }}>You&apos;re all clear for today</p>
-            <p style={{ fontSize: 12, marginTop: 4 }}>Add a task to get started</p>
+
+          {/* Inline task input — appears instead of empty message */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 12,
+            padding: "14px 18px", background: "#fff",
+            border: "1.5px solid #dde4de", borderRadius: 12,
+            marginBottom: 16, transition: "border-color 0.15s, box-shadow 0.15s",
+          }}
+            onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(89,209,11,0.15)"; }}
+            onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
+            <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
+            <input
+              value={inlineDraft}
+              onChange={e => setInlineDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && inlineDraft.trim()) setInlineModalOpen(true); }}
+              placeholder="What needs doing?"
+              style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }}
+            />
+            {inlineDraft.trim() && (
+              <button onClick={() => setInlineModalOpen(true)} style={{
+                padding: "5px 14px", borderRadius: 7,
+                background: "#059669", border: "none",
+                color: "#fff", fontSize: 12.5, fontWeight: 600,
+                cursor: "pointer", fontFamily: "inherit", flexShrink: 0,
+                transition: "background 0.13s",
+              }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
+                Add →
+              </button>
+            )}
           </div>
+
+          <div style={{ textAlign: "center", padding: "32px 0", color: "#b9d3c4" }}>
+            <p style={{ fontSize: 13 }}>Type above to add your first task</p>
+          </div>
+
+          {/* Full modal opens when user clicks Add → */}
+          <TaskCreateModal
+            open={inlineModalOpen}
+            onOpenChange={open => { setInlineModalOpen(open); if (!open) setInlineDraft(""); }}
+            defaultTitle={inlineDraft}
+          />
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
