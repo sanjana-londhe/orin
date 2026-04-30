@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -55,16 +55,21 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
 
 function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: string; defaultTitle?: string; onClose: () => void }) {
   const queryClient = useQueryClient();
-  const [title, setTitle]         = useState(defaultTitle ?? "");
-  const [dueDate, setDueDate]     = useState(defaultDate ?? getDefaultDate());
-  const [dueTime, setDueTime]     = useState(getDefaultTime());
-  const [emotion, setEmotion]     = useState<typeof STATES[number]["value"]>("NEUTRAL");
-  const [subtasks, setSubtasks]   = useState<string[]>([]);
-  const [subInput, setSubInput]   = useState("");
-  const [error, setError]         = useState("");
+  const [title, setTitle]     = useState(defaultTitle ?? "");
+  const [emotion, setEmotion] = useState<typeof STATES[number]["value"]>("NEUTRAL");
+  const [subtasks, setSubtasks] = useState<string[]>([]);
+  const [subInput, setSubInput] = useState("");
+  const [error, setError]     = useState("");
+  // Use refs for date/time so defaultValue renders immediately in DOM
+  const dateRef = useRef<HTMLInputElement>(null);
+  const timeRef = useRef<HTMLInputElement>(null);
+  const initDate = defaultDate ?? getDefaultDate();
+  const initTime = getDefaultTime();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
+      const dueDate = dateRef.current?.value ?? initDate;
+      const dueTime = timeRef.current?.value ?? initTime;
       const dueAt = dueDate
         ? new Date(`${dueDate}T${dueTime || "00:00"}`).toISOString()
         : null;
@@ -125,13 +130,13 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
             <div>
               <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Set due date</p>
-              <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
+              <input ref={dateRef} type="date" defaultValue={initDate}
                 style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
             <div>
               <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Set time</p>
-              <input type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} disabled={!dueDate}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: dueDate ? "#082d1d" : "#b9d3c4", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+              <input ref={timeRef} type="time" defaultValue={initTime}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
           </div>
 
