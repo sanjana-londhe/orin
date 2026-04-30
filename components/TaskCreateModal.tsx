@@ -25,10 +25,35 @@ function getDefaultDate() {
 
 function getDefaultTime() {
   const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
-  return d.toTimeString().slice(0, 5); // "HH:MM"
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
 }
 
 export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle }: Props) {
+  const [openCount, setOpenCount] = useState(0);
+
+  useEffect(() => {
+    if (open) setOpenCount(c => c + 1);
+  }, [open]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[560px] p-0 overflow-hidden rounded-[14px] border-[1.5px] border-[#059669]" style={{ boxShadow: "0 4px 24px rgba(5,150,105,0.12)" }}>
+        {open && (
+          <ModalForm
+            key={openCount}
+            defaultDate={defaultDate}
+            defaultTitle={defaultTitle}
+            onClose={() => onOpenChange(false)}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: string; defaultTitle?: string; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [title, setTitle]         = useState(defaultTitle ?? "");
   const [dueDate, setDueDate]     = useState(defaultDate ?? getDefaultDate());
@@ -37,19 +62,6 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
   const [subtasks, setSubtasks]   = useState<string[]>([]);
   const [subInput, setSubInput]   = useState("");
   const [error, setError]         = useState("");
-
-  // Refresh defaults every time the modal opens
-  useEffect(() => {
-    if (open) {
-      setDueDate(defaultDate ?? getDefaultDate());
-      setDueTime(getDefaultTime());
-      setTitle(defaultTitle ?? "");
-      setEmotion("NEUTRAL");
-      setSubtasks([]);
-      setSubInput("");
-      setError("");
-    }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -84,14 +96,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
   });
 
   function handleClose() {
-    setTitle(defaultTitle ?? "");
-    setDueDate(defaultDate ?? getDefaultDate());
-    setDueTime(getDefaultTime());
-    setEmotion("NEUTRAL");
-    setSubtasks([]);
-    setSubInput("");
-    setError("");
-    onOpenChange(false);
+    onClose();
   }
 
   function addSubtask() {
@@ -100,9 +105,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[560px] p-0 overflow-hidden rounded-[14px] border-[1.5px] border-[#059669]" style={{ boxShadow: "0 4px 24px rgba(5,150,105,0.12)" }}>
-
+    <>
         {/* Title row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 20px 16px", borderBottom: "1px solid #e9ede9" }}>
           <span style={{ fontSize: 15, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
@@ -201,8 +204,6 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
             {isPending ? "Creating…" : "Create task"}
           </button>
         </div>
-
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }
