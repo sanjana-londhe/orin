@@ -80,17 +80,17 @@ export function Sidebar({ userName: _userName }: Props) {
                 <Link key={v.href} href={v.href} style={{
                   display: "flex", alignItems: "center", gap: 8, padding: "8px 8px",
                   borderRadius: 6, fontSize: 12.5, fontWeight: active ? 600 : 450,
-                  color: active ? "#fff" : T.textSecondary,
-                  background: active ? T.accent : "none",
+                  color: active ? "#1a5c3a" : T.textSecondary,
+                  background: active ? "rgba(5,150,105,0.12)" : "none",
                   border: "1px solid transparent",
                   textDecoration: "none", transition: "all 0.12s",
                 }}
                   onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = T.surfaceMuted; }}
                   onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "none"; }}>
-                  <v.Icon size={14} strokeWidth={2} style={{ flexShrink: 0 }} />
+                  <v.Icon size={14} strokeWidth={2} style={{ flexShrink: 0, color: active ? "#1a5c3a" : "inherit" }} />
                   <span style={{ flex: 1 }}>{v.label}</span>
                   {v.href === "/" && tasks.length > 0 && (
-                    <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: active ? "rgba(255,255,255,0.2)" : T.surfaceMuted, color: active ? "#fff" : T.textTertiary }}>{tasks.length}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: active ? "rgba(5,150,105,0.15)" : T.surfaceMuted, color: active ? "#1a5c3a" : T.textTertiary }}>{tasks.length}</span>
                   )}
                 </Link>
               );
