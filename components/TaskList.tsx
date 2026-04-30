@@ -407,18 +407,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
               return (
                 <>
-                  {/* Section: Needs attention (if featured task exists) */}
                   {featured && (
-                    <div style={{ marginBottom: 32 }}>
-                      <div style={{ marginBottom: 16 }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", background: "#e3ffd1", border: "1.5px solid #c8f7ae", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 700, color: "#243000", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
-                          🔥 Urgent
-                        </span>
-                        <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>Needs attention</p>
-                        <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>Urgent or emotionally heavy</p>
-                      </div>
-                      <SortableTaskCard key={featured.id} {...cardProps(featured, true)} />
-                    </div>
+                    <SortableTaskCard key={featured.id} {...cardProps(featured, true)} />
                   )}
 
                   {/* Section: Other tasks — no header */}

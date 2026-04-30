@@ -19,11 +19,20 @@ interface Props {
   defaultTitle?: string;
 }
 
+function getDefaultDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getDefaultTime() {
+  const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
+  return d.toTimeString().slice(0, 5); // "HH:MM"
+}
+
 export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle }: Props) {
   const queryClient = useQueryClient();
   const [title, setTitle]         = useState(defaultTitle ?? "");
-  const [dueDate, setDueDate]     = useState(defaultDate ?? "");
-  const [dueTime, setDueTime]     = useState("");
+  const [dueDate, setDueDate]     = useState(defaultDate ?? getDefaultDate());
+  const [dueTime, setDueTime]     = useState(getDefaultTime());
   const [emotion, setEmotion]     = useState<typeof STATES[number]["value"]>("NEUTRAL");
   const [subtasks, setSubtasks]   = useState<string[]>([]);
   const [subInput, setSubInput]   = useState("");
@@ -63,8 +72,8 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
 
   function handleClose() {
     setTitle(defaultTitle ?? "");
-    setDueDate(defaultDate ?? "");
-    setDueTime("");
+    setDueDate(defaultDate ?? getDefaultDate());
+    setDueTime(getDefaultTime());
     setEmotion("NEUTRAL");
     setSubtasks([]);
     setSubInput("");
