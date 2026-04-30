@@ -14,6 +14,7 @@ import {
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
+import { DatePickerField } from "@/components/DatePickerField";
 import { useUIStore, type SortMode } from "@/store/ui";
 import type { TaskWithSubtasks } from "@/lib/types";
 
@@ -154,7 +155,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   // Inline task creation state
   const [inlineDraft, setInlineDraft] = useState("");
   const [showInlineForm, setShowInlineForm] = useState(false);
-  const [inlineDueDate, setInlineDueDate] = useState("");
+  const [inlineDueDate, setInlineDueDate] = useState(new Date().toISOString().slice(0, 10));
   const [inlineDueTime, setInlineDueTime] = useState("");
   const [inlineEmotion, setInlineEmotion] = useState<"DREADING"|"ANXIOUS"|"NEUTRAL"|"WILLING"|"EXCITED">("NEUTRAL");
   const [inlineSubtasks, setInlineSubtasks] = useState<string[]>([]);
@@ -292,22 +293,12 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
             }}>
               {/* Due date + time */}
-              <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 5 }}>Set due date</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "#f8f9f5", border: "1px solid #dde4de", borderRadius: 8 }}>
-                    <span style={{ fontSize: 13 }}>📅</span>
-                    <input type="date" value={inlineDueDate} onChange={e => setInlineDueDate(e.target.value)}
-                      style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 12.5, color: "#082d1d", fontFamily: "inherit" }} />
-                  </div>
-                </div>
-                <div style={{ flex: 1, opacity: inlineDueDate ? 1 : 0.4, pointerEvents: inlineDueDate ? "auto" : "none" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
+                <div>
                   <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 5 }}>Set time</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "#f8f9f5", border: "1px solid #dde4de", borderRadius: 8 }}>
-                    <span style={{ fontSize: 13 }}>🕐</span>
-                    <input type="time" value={inlineDueTime} onChange={e => setInlineDueTime(e.target.value)} disabled={!inlineDueDate}
-                      style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 12.5, color: "#082d1d", fontFamily: "inherit" }} />
-                  </div>
+                  <input type="time" value={inlineDueTime} onChange={e => setInlineDueTime(e.target.value)}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 12.5, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
                 </div>
               </div>
 
