@@ -14,8 +14,9 @@ export function displayName(user: { email?: string; user_metadata?: { full_name?
 }
 
 /** Consistent page content padding used across all views */
+/** 5.html: content-scroll → content-inner */
 export const PAGE_STYLE = {
-  maxWidth: 1100,
+  maxWidth: 860,
   margin: "0 auto",
-  padding: "24px 28px 80px",
+  padding: "24px 24px 64px",
 } as const;

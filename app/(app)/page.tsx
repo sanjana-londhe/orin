@@ -14,9 +14,9 @@ export default async function TodayPage() {
   const name = user ? displayName(user as Parameters<typeof displayName>[0]) : "there";
 
   return (
-    <div style={{ minHeight: "calc(100vh - 54px)", background: "#F3F1EC" }}>
-      {/* Full-width content — no sidebar */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 28px 80px" }}>
+    /* 5.html .content-scroll → .content-inner */
+    <div style={{ padding: "24px 24px 64px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
         <WeeklyReviewCard />
         <TaskList userName={name} timeGreeting={timeGreeting()} />
       </div>
