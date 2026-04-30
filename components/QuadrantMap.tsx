@@ -89,6 +89,16 @@ export function QuadrantMap({ tasks }: Props) {
 
   return (
     <div className="relative w-full">
+      {/* Legend — top */}
+      <div className="flex flex-wrap gap-4 mb-3 px-1">
+        {Object.entries(EMOTION_MAP).map(([state, em]) => (
+          <div key={state} className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: em.chartColor }} />
+            <span className="text-[11.5px] font-medium" style={{ color: "#3d5a4a" }}>{em.label}</span>
+          </div>
+        ))}
+      </div>
+
       <svg
         viewBox={`0 0 ${VW} ${VH}`}
         className="w-full h-auto"
@@ -265,15 +275,6 @@ export function QuadrantMap({ tasks }: Props) {
         )}
       </svg>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4 mt-3 px-1">
-        {Object.entries(EMOTION_MAP).map(([state, em]) => (
-          <div key={state} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: em.chartColor }} />
-            <span className="text-[11px] text-[var(--stone-500)]">{em.label}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
