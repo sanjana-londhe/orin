@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { PAGE_STYLE } from "@/lib/utils";
 import { QuadrantMap, type QuadrantTask } from "@/components/QuadrantMap";
 
 async function fetchQuadrantData(): Promise<QuadrantTask[]> {
@@ -16,7 +17,7 @@ export default function QuadrantPage() {
   });
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 24px 64px" }}>
+    <div style={PAGE_STYLE}>
         {/* Header */}
         <div className="mb-6">
           <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--stone-500)] mb-1">

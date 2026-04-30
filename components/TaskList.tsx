@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTaskMutations } from "@/hooks/useTaskMutations";
 import {
   DndContext,
   closestCenter,
@@ -65,6 +66,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const { sortMode, setSortMode } = useUIStore();
+  const m = useTaskMutations();
 
   const [manualOrder, setManualOrder] = useState<string[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -117,80 +119,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     debounceRef.current = setTimeout(() => reorderTasks(newOrder), 500);
   }
 
-  const { mutate: markDone } = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
-      if (!res.ok) throw new Error("Failed to complete task");
-      return res.json();
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  });
-
-  const { mutate: updateTask } = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Task> }) => {
-      // Route emotional state changes through the dedicated endpoint so history is logged
-      if (patch.emotionalState !== undefined && Object.keys(patch).length === 1) {
-        const res = await fetch(`/api/tasks/${id}/emotional-state`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ emotional_state: patch.emotionalState }),
-        });
-        if (!res.ok) throw new Error("Failed to update emotional state");
-        return res.json();
-      }
-      const res = await fetch(`/api/tasks/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patch),
-      });
-      if (!res.ok) throw new Error("Failed to update task");
-      return res.json();
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  });
-
-  const { mutate: deferTask } = useMutation({
-    mutationFn: async ({ id, newDueAt }: { id: string; newDueAt: Date }) => {
-      const res = await fetch(`/api/tasks/${id}/defer`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_due_at: newDueAt.toISOString(), confirmed: true }),
-      });
-      if (!res.ok) throw new Error("Failed to defer task");
-      return res.json();
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  });
-
-  const { mutate: addSubtask } = useMutation({
-    mutationFn: async ({ parentId, title }: { parentId: string; title: string }) => {
-      const res = await fetch("/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, parentTaskId: parentId }),
-      });
-      if (!res.ok) throw new Error("Failed to create subtask");
-      return res.json();
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  });
-
-  const { mutate: completeSubtask } = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
-      if (!res.ok) throw new Error("Failed to complete subtask");
-      return res.json();
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  });
-
-  const { mutate: deleteTask } = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete task");
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  });
+  // All shared mutations from hook — no duplication with SimpleTaskView
+  const { markDone, updateTask, deferTask, deleteTask, addSubtask, completeSubtask, deleteSubtask } = m;
 
   const overdue = tasks.filter(t => t.dueAt && new Date(t.dueAt) < new Date()).length;
   const totalDeferred = tasks.reduce((s, t) => s + (t.deferredCount ?? 0), 0);
@@ -318,12 +248,12 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 <SortableTaskCard
                   key={task.id} task={task} dragActive={sortMode === "manual"}
                   onMarkDone={markDone}
-                  onDefer={(id, newDueAt) => deferTask({ id, newDueAt })}
-                  onUpdate={(id, patch) => updateTask({ id, patch })}
+                  onDefer={deferTask}
+                  onUpdate={updateTask}
                   onDelete={deleteTask}
-                  onAddSubtask={(parentId, title) => addSubtask({ parentId, title })}
+                  onAddSubtask={addSubtask}
                   onCompleteSubtask={completeSubtask}
-                  onDeleteSubtask={deleteTask}
+                  onDeleteSubtask={deleteSubtask}
                 />
               ))}
             </div>

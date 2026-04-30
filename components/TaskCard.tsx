@@ -7,14 +7,7 @@ import { EmotionalStatePicker, type EmotionalState } from "@/components/Emotiona
 import { DeferralModal } from "@/components/DeferralModal";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
-
-const EMOTION: Record<string, { strip: string; pillBg: string; pillText: string; label: string; emoji: string }> = {
-  DREADING: { strip: "#c23934", pillBg: "#FFF0EC", pillText: "#D14626", label: "Dreading", emoji: "😮‍💨" },
-  ANXIOUS:  { strip: "#886a00", pillBg: "#FFF8E8", pillText: "#B07A10", label: "Anxious",  emoji: "😟" },
-  NEUTRAL:  { strip: "#c4cbc2", pillBg: "#F3F2F0", pillText: "#7A756E", label: "Neutral",  emoji: "😐" },
-  WILLING:  { strip: "#2b6b5e", pillBg: "#EEF9F7", pillText: "#0E8A7D", label: "Willing",  emoji: "🙂" },
-  EXCITED:  { strip: "#59d10b", pillBg: "#EEFAF1", pillText: "#1A9444", label: "Excited",  emoji: "🤩" },
-};
+import { getEmotion } from "@/lib/emotions";
 
 function formatTime(dueAt: Date | string | null) {
   if (!dueAt) return { label: "No deadline", overdue: false, isoDate: "", isoTime: "" };
@@ -53,7 +46,7 @@ function TaskCardInner({
 }: Props) {
   const { nudgedTaskIds } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
-  const em = EMOTION[task.emotionalState] ?? EMOTION.NEUTRAL;
+  const em = getEmotion(task.emotionalState);
   const { label: timeLabel, overdue, isoDate, isoTime } = formatTime(task.dueAt);
   const recur = recurrenceLabel(task.recurrenceRule);
   const completedSubs = task.subtasks.filter(s => s.isCompleted).length;

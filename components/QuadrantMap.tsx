@@ -2,22 +2,9 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { scaleLinear } from "d3-scale";
+import { getEmotion, EMOTION_MAP } from "@/lib/emotions";
 
-const EMOTION_COLOUR: Record<string, string> = {
-  DREADING: "#c23934",
-  ANXIOUS:  "#886a00",
-  NEUTRAL:  "#c4cbc2",
-  WILLING:  "#2b6b5e",
-  EXCITED:  "#59d10b",
-};
 
-const EMOTION_LABEL: Record<string, string> = {
-  DREADING: "Dreading",
-  ANXIOUS:  "Anxious",
-  NEUTRAL:  "Neutral",
-  WILLING:  "Willing",
-  EXCITED:  "Excited",
-};
 
 export interface QuadrantTask {
   id: string;
@@ -85,7 +72,7 @@ export function QuadrantMap({ tasks }: Props) {
       ...t,
       cx: PAD.left + xScale(t.urgencyScore),
       cy: PAD.top + yScale(t.emotionalWeight),
-      colour: EMOTION_COLOUR[t.emotionalState] ?? "#c4cbc2",
+      colour: getEmotion(t.emotionalState).chartColor,
     })),
     [tasks]
   );
@@ -209,11 +196,11 @@ export function QuadrantMap({ tasks }: Props) {
                   display: "inline-block",
                   width: 6, height: 6,
                   borderRadius: "50%",
-                  background: EMOTION_COLOUR[activeTask.emotionalState] ?? "#c4cbc2",
+                  background: getEmotion(activeTask.emotionalState).chartColor,
                   flexShrink: 0,
                 }} />
-                <span style={{ color: EMOTION_COLOUR[activeTask.emotionalState] ?? "#4a6d47", fontWeight: 600 }}>
-                  {EMOTION_LABEL[activeTask.emotionalState] ?? activeTask.emotionalState}
+                <span style={{ color: getEmotion(activeTask.emotionalState).pillText, fontWeight: 600 }}>
+                  {getEmotion(activeTask.emotionalState).label}
                 </span>
               </div>
               {/* Relative deadline */}
@@ -241,12 +228,10 @@ export function QuadrantMap({ tasks }: Props) {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-4 mt-3 px-1">
-        {Object.entries(EMOTION_COLOUR).map(([state, colour]) => (
+        {Object.entries(EMOTION_MAP).map(([state, em]) => (
           <div key={state} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: colour }} />
-            <span className="text-[11px] text-[var(--stone-500)]">
-              {EMOTION_LABEL[state]}
-            </span>
+            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: em.chartColor }} />
+            <span className="text-[11px] text-[var(--stone-500)]">{em.label}</span>
           </div>
         ))}
       </div>

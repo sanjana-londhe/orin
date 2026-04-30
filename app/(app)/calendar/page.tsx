@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
+import { getEmotion } from "@/lib/emotions";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 const EMOTION_COLOUR: Record<string, string> = {
