@@ -10,21 +10,39 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get("filter");
 
-  let dueAtFilter = {};
-  if (filter === "today") {
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
-    dueAtFilter = { OR: [{ dueAt: null }, { dueAt: { lte: todayEnd } }] };
+  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+
+  // Build where clause based on filter
+  type WhereClause = Record<string, unknown>;
+  let where: WhereClause = { userId: user.id, parentTaskId: null };
+  let orderBy: Record<string, string> | Record<string, string>[] = { sortOrder: "asc" };
+
+  switch (filter) {
+    case "today":
+      where = { ...where, isCompleted: false, OR: [{ dueAt: null }, { dueAt: { lte: todayEnd } }] };
+      break;
+    case "scheduled":
+      where = { ...where, isCompleted: false, dueAt: { gt: todayEnd } };
+      orderBy = { dueAt: "asc" };
+      break;
+    case "flagged":
+      where = { ...where, isCompleted: false, deferredCount: { gt: 0 } };
+      orderBy = { deferredCount: "desc" };
+      break;
+    case "completed":
+      where = { ...where, isCompleted: true };
+      orderBy = { updatedAt: "desc" };
+      break;
+    default:
+      // "all" — all incomplete, newest first
+      where = { ...where, isCompleted: false };
+      orderBy = { createdAt: "desc" };
   }
 
   const tasks = await prisma.task.findMany({
-    where: { userId: user.id, parentTaskId: null, isCompleted: false, ...dueAtFilter },
-    orderBy: { sortOrder: "asc" },
-    include: {
-      subtasks: {
-        orderBy: { createdAt: "asc" },
-      },
-    },
+    where,
+    orderBy,
+    include: { subtasks: { orderBy: { createdAt: "asc" } } },
   });
 
   return NextResponse.json(tasks);
