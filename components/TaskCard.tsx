@@ -7,35 +7,33 @@ import { EmotionalStatePicker, type EmotionalState } from "@/components/Emotiona
 import { DeferralModal } from "@/components/DeferralModal";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
-import { cn } from "@/lib/utils";
 
-const STATE_CONFIG = {
-  DREADING: { strip: "bg-[hsl(var(--emotion-dreading))]", pill: "bg-[hsl(var(--emotion-dreading-bg))] text-[hsl(var(--emotion-dreading-fg))] border border-[hsl(var(--emotion-dreading-border))]", label: "Dreading", emoji: "😮‍💨" },
-  ANXIOUS:  { strip: "bg-[hsl(var(--emotion-anxious))]",  pill: "bg-[hsl(var(--emotion-anxious-bg))] text-[hsl(var(--emotion-anxious-fg))] border border-[hsl(var(--emotion-anxious-border))]",  label: "Anxious",  emoji: "😟" },
-  NEUTRAL:  { strip: "bg-[hsl(var(--emotion-neutral))]",  pill: "bg-[hsl(var(--emotion-neutral-bg))] text-[hsl(var(--emotion-neutral-fg))] border border-[hsl(var(--emotion-neutral-border))]",  label: "Neutral",  emoji: "😐" },
-  WILLING:  { strip: "bg-[hsl(var(--emotion-willing))]",  pill: "bg-[hsl(var(--emotion-willing-bg))] text-[hsl(var(--emotion-willing-fg))] border border-[hsl(var(--emotion-willing-border))]",  label: "Willing",  emoji: "🙂" },
-  EXCITED:  { strip: "bg-[hsl(var(--emotion-excited))]",  pill: "bg-[hsl(var(--emotion-excited-bg))] text-[hsl(var(--emotion-excited-fg))] border border-[hsl(var(--emotion-excited-border))]",  label: "Excited",  emoji: "🤩" },
-} as const;
+const EMOTION: Record<string, { strip: string; pillBg: string; pillText: string; label: string; emoji: string }> = {
+  DREADING: { strip: "#c23934", pillBg: "#FFF0EC", pillText: "#D14626", label: "Dreading", emoji: "😮‍💨" },
+  ANXIOUS:  { strip: "#886a00", pillBg: "#FFF8E8", pillText: "#B07A10", label: "Anxious",  emoji: "😟" },
+  NEUTRAL:  { strip: "#c4cbc2", pillBg: "#F3F2F0", pillText: "#7A756E", label: "Neutral",  emoji: "😐" },
+  WILLING:  { strip: "#2b6b5e", pillBg: "#EEF9F7", pillText: "#0E8A7D", label: "Willing",  emoji: "🙂" },
+  EXCITED:  { strip: "#59d10b", pillBg: "#EEFAF1", pillText: "#1A9444", label: "Excited",  emoji: "🤩" },
+};
 
-function recurrenceLabel(rule: string | null): string | null {
-  if (!rule) return null;
-  if (rule.includes("BYDAY=MO,TU,WE,TH,FR")) return "↺ Weekdays";
-  if (rule.includes("INTERVAL=2") && rule.includes("WEEKLY")) return "↺ Biweekly";
-  if (rule.includes("WEEKLY")) return "↺ Weekly";
-  if (rule.includes("DAILY")) return "↺ Daily";
-  return "↺ Recurring";
-}
-
-function formatDue(dueAt: Date | string | null) {
+function formatTime(dueAt: Date | string | null) {
   if (!dueAt) return { label: "No deadline", overdue: false, isoDate: "", isoTime: "" };
   const d = new Date(dueAt);
-  const overdue = d < new Date();
   return {
-    label: overdue ? `${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · overdue` : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    overdue,
+    label: d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    overdue: d < new Date(),
     isoDate: d.toISOString().slice(0, 10),
     isoTime: d.toISOString().slice(11, 16),
   };
+}
+
+function recurrenceLabel(rule: string | null) {
+  if (!rule) return null;
+  if (rule.includes("BYDAY=MO,TU,WE,TH,FR")) return "↺ weekdays";
+  if (rule.includes("INTERVAL=2")) return "↺ biweekly";
+  if (rule.includes("WEEKLY")) return "↺ weekly";
+  if (rule.includes("DAILY")) return "↺ daily";
+  return "↺ recurring";
 }
 
 interface Props {
@@ -49,274 +47,223 @@ interface Props {
   onDeleteSubtask?: (id: string) => void;
 }
 
-function TaskCardInner({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddSubtask, onCompleteSubtask, onDeleteSubtask }: Props) {
-  const [done, setDone] = useState(false);
-  const [deferOpen, setDeferOpen] = useState(false);
-  const [addingSubtask, setAddingSubtask] = useState(false);
-  const [subtaskDraft, setSubtaskDraft] = useState("");
-  const subtaskRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => { if (addingSubtask) subtaskRef.current?.focus(); }, [addingSubtask]);
-
-  function submitSubtask() {
-    const t = subtaskDraft.trim();
-    if (t) onAddSubtask?.(task.id, t);
-    setSubtaskDraft("");
-    setAddingSubtask(false);
-  }
+function TaskCardInner({
+  task, onMarkDone, onDefer, onUpdate, onDelete,
+  onAddSubtask, onCompleteSubtask, onDeleteSubtask,
+}: Props) {
   const { nudgedTaskIds } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
-  const state = STATE_CONFIG[task.emotionalState];
-  const { label: dueLabel, overdue, isoDate, isoTime } = formatDue(task.dueAt);
+  const em = EMOTION[task.emotionalState] ?? EMOTION.NEUTRAL;
+  const { label: timeLabel, overdue, isoDate, isoTime } = formatTime(task.dueAt);
+  const recur = recurrenceLabel(task.recurrenceRule);
+  const completedSubs = task.subtasks.filter(s => s.isCompleted).length;
+  const totalSubs = task.subtasks.length;
 
+  const [done, setDone] = useState(false);
+  const [deferOpen, setDeferOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(task.title);
+  const [editingState, setEditingState] = useState(false);
+  const [addingSubtask, setAddingSubtask] = useState(false);
+  const [subtaskDraft, setSubtaskDraft] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editingDue, setEditingDue] = useState(false);
   const [dateDraft, setDateDraft] = useState(isoDate);
   const [timeDraft, setTimeDraft] = useState(isoTime);
-  const [editingState, setEditingState] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+  const subtaskRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (editingTitle) titleRef.current?.focus(); }, [editingTitle]);
+  useEffect(() => { if (addingSubtask) subtaskRef.current?.focus(); }, [addingSubtask]);
 
   function commitTitle() {
-    const trimmed = titleDraft.trim();
-    if (trimmed && trimmed !== task.title) onUpdate?.(task.id, { title: trimmed });
+    const t = titleDraft.trim();
+    if (t && t !== task.title) onUpdate?.(task.id, { title: t });
     else setTitleDraft(task.title);
     setEditingTitle(false);
   }
 
   function commitDue() {
-    let dueAt: string | null = null;
-    if (dateDraft) {
-      dueAt = new Date(`${dateDraft}T${timeDraft || "00:00"}`).toISOString();
-    }
+    const dueAt = dateDraft ? new Date(`${dateDraft}T${timeDraft || "00:00"}`).toISOString() : null;
     onUpdate?.(task.id, { dueAt: dueAt as unknown as Date });
     setEditingDue(false);
   }
 
-  function commitState(val: EmotionalState) {
-    if (val !== task.emotionalState) onUpdate?.(task.id, { emotionalState: val });
-    setEditingState(false);
+  function submitSubtask() {
+    const t = subtaskDraft.trim();
+    if (t) onAddSubtask?.(task.id, t);
+    setSubtaskDraft(""); setAddingSubtask(false);
   }
 
-  function handleMarkDone() {
-    setDone(true);
-    onMarkDone?.(task.id);
-  }
+  function handleMarkDone() { setDone(true); onMarkDone?.(task.id); }
+
+  if (done) return null;
 
   return (
-  <>
-    <article className={cn(
-      "rounded-[14px] border border-[var(--stone-400)] bg-white overflow-hidden transition-all",
-      done
-        ? "opacity-35 pointer-events-none"
-        : "hover:-translate-y-px hover:border-[var(--ink)] "
-    )}>
-      <div className={cn("h-[3px] w-full", state.strip)} aria-hidden="true" />
+    <>
+      <div
+        style={{
+          breakInside: "avoid", marginBottom: 14,
+          background: "#FFFEFB", borderRadius: 16, overflow: "hidden",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 18px rgba(0,0,0,0.07)",
+          transition: "transform 0.22s cubic-bezier(.34,1.2,.64,1), box-shadow 0.22s ease",
+          border: "1px solid rgba(0,0,0,0.04)",
+        }}
+        onMouseEnter={e => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.transform = "translateY(-3px)";
+          el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05), 0 16px 44px rgba(0,0,0,0.11)";
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.transform = "translateY(0)";
+          el.style.boxShadow = "0 1px 2px rgba(0,0,0,0.04), 0 4px 18px rgba(0,0,0,0.07)";
+        }}
+      >
+        {/* Colour strip */}
+        <div style={{ height: 4, background: em.strip }} />
 
-      <div className="px-5 py-4">
-        {/* Top row: due date (editable) + emoji */}
-        <div className="flex items-start justify-between mb-2.5">
-          {editingDue ? (
-            <div className="flex items-center gap-1.5">
-              <input type="date" value={dateDraft} onChange={e => setDateDraft(e.target.value)}
-                className="text-[10px] font-mono border border-[var(--stone-400)] rounded px-1.5 py-0.5 focus:outline-none focus:border-[hsl(var(--primary))]" />
-              <input type="time" value={timeDraft} onChange={e => setTimeDraft(e.target.value)}
-                disabled={!dateDraft}
-                className="text-[10px] font-mono border border-[var(--stone-400)] rounded px-1.5 py-0.5 focus:outline-none focus:border-[hsl(var(--primary))] disabled:opacity-40" />
-              <button onClick={commitDue} className="text-[10px] font-bold text-[hsl(var(--primary))]">Save</button>
-              <button onClick={() => { setDateDraft(isoDate); setTimeDraft(isoTime); setEditingDue(false); }}
-                className="text-[10px] text-[var(--stone-500)]">✕</button>
-            </div>
+        <div style={{ padding: "16px 18px 12px" }}>
+
+          {/* Timestamp row */}
+          <div style={{ fontFamily: "monospace", fontSize: 10.5, color: overdue ? "#E05230" : "#C0B8AE", marginBottom: 7, display: "flex", alignItems: "center", gap: 6 }}>
+            {editingDue ? (
+              <>
+                <input type="date" value={dateDraft} onChange={e => setDateDraft(e.target.value)}
+                  style={{ fontFamily: "monospace", fontSize: 10, border: "1px solid #dde4de", borderRadius: 4, padding: "1px 4px", outline: "none" }} />
+                <input type="time" value={timeDraft} onChange={e => setTimeDraft(e.target.value)} disabled={!dateDraft}
+                  style={{ fontFamily: "monospace", fontSize: 10, border: "1px solid #dde4de", borderRadius: 4, padding: "1px 4px", outline: "none" }} />
+                <button onClick={commitDue} style={{ fontSize: 10, fontWeight: 700, color: "#059669", background: "none", border: "none", cursor: "pointer" }}>Save</button>
+                <button onClick={() => { setDateDraft(isoDate); setTimeDraft(isoTime); setEditingDue(false); }}
+                  style={{ fontSize: 10, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+              </>
+            ) : (
+              <button onClick={() => setEditingDue(true)}
+                style={{ fontFamily: "monospace", fontSize: 10.5, background: "none", border: "none", cursor: "pointer", color: overdue ? "#E05230" : "#C0B8AE", padding: 0 }}>
+                {overdue && "⚑ "}{task.dueAt ? (overdue ? `${timeLabel} · overdue` : timeLabel) : "No deadline"}
+                {totalSubs > 0 && <span style={{ color: "#c4cbc2" }}> · {completedSubs} of {totalSubs} done</span>}
+              </button>
+            )}
+            {recur && (
+              <span style={{ background: "#F0F0FF", color: "#5555CC", fontWeight: 600, fontSize: 10, padding: "1px 6px", borderRadius: 5 }}>{recur}</span>
+            )}
+          </div>
+
+          {/* Title */}
+          {editingTitle ? (
+            <input ref={titleRef} value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
+              onBlur={commitTitle}
+              onKeyDown={e => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setTitleDraft(task.title); setEditingTitle(false); } }}
+              style={{ width: "100%", fontSize: 15, fontWeight: 700, color: "#1A1612", letterSpacing: "-0.02em", border: "none", borderBottom: "2px solid #059669", background: "transparent", outline: "none", marginBottom: 10, fontFamily: "inherit" }}
+            />
           ) : (
-            <button onClick={() => setEditingDue(true)}
-              className={cn("font-mono text-[10px] text-left hover:underline decoration-dashed",
-                overdue ? "text-[hsl(var(--emotion-dreading-fg))]" : "text-[var(--stone-500)]")}>
-              {overdue && <span aria-label="overdue">⚑ </span>}{dueLabel}
-            </button>
+            <p onClick={() => setEditingTitle(true)}
+              style={{ fontSize: task.emotionalState === "DREADING" ? 17 : 15, fontWeight: 700, color: "#1A1612", lineHeight: 1.42, letterSpacing: "-0.02em", marginBottom: 10, cursor: "text" }}>
+              {task.title}
+            </p>
           )}
-          <span className="text-2xl leading-none" aria-hidden="true">{state.emoji}</span>
-        </div>
 
-        {/* State pill + recurrence badge */}
-        <div className="mb-3 flex items-center gap-2 flex-wrap">
-          {editingState ? (
-            <div className="space-y-2">
-              <EmotionalStatePicker value={task.emotionalState as EmotionalState} onChange={commitState} />
-              <button onClick={() => setEditingState(false)} className="text-[10px] text-[var(--stone-500)]">Cancel</button>
-            </div>
-          ) : (
-            <>
+          {/* Pills */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
+            {editingState ? (
+              <>
+                <EmotionalStatePicker value={task.emotionalState as EmotionalState} compact
+                  onChange={v => { if (v !== task.emotionalState) onUpdate?.(task.id, { emotionalState: v }); setEditingState(false); }} />
+                <button onClick={() => setEditingState(false)} style={{ fontSize: 10, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
+              </>
+            ) : (
               <button onClick={() => setEditingState(true)}
-                className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold hover:opacity-80 transition-opacity", state.pill)}>
-                {state.label}
+                style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 7, background: em.pillBg, color: em.pillText, border: "none", cursor: "pointer" }}>
+                {em.emoji} {em.label}
               </button>
-              {recurrenceLabel(task.recurrenceRule) && (
-                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold bg-[#EEF0FF] text-[#4A4ACC] border border-[#c7caff]">
-                  {recurrenceLabel(task.recurrenceRule)}
-                </span>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Title (click to edit, strikethrough when done) */}
-        {editingTitle ? (
-          <input ref={titleRef} value={titleDraft}
-            onChange={e => setTitleDraft(e.target.value)}
-            onBlur={commitTitle}
-            onKeyDown={e => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setTitleDraft(task.title); setEditingTitle(false); } }}
-            className="w-full text-[19px] font-semibold leading-snug tracking-tight text-[var(--lime-ink)] border-b-2 border-[hsl(var(--primary))] bg-transparent outline-none" />
-        ) : (
-          <h2 onClick={() => !done && setEditingTitle(true)}
-            className={cn(
-              "text-[19px] font-semibold leading-snug tracking-tight transition-colors",
-              done
-                ? "line-through text-[var(--stone-500)] font-normal"
-                : "text-[var(--lime-ink)] cursor-text hover:text-[hsl(var(--primary))]"
-            )}>
-            {task.title}
-          </h2>
-        )}
-      </div>
-
-      {/* Subtasks */}
-      {(task.subtasks.length > 0 || addingSubtask) && (
-        <div className="px-5 pb-4 border-t border-[var(--stone-300)] pt-3 mt-2 space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--stone-500)] mb-2">
-            Action items
-          </p>
-          {task.subtasks.map((sub) => (
-            <div key={sub.id} className="group flex items-center gap-2.5">
-              {/* Touch target: 44×44px wrapper around 13px visual checkbox */}
-              <button
-                onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)}
-                aria-label={sub.isCompleted ? "Completed" : "Mark complete"}
-                className="flex items-center justify-center w-[44px] h-[44px] -mx-[15px] flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-1 rounded"
-              >
-                <span className={cn(
-                  "w-[13px] h-[13px] rounded-[3px] border block transition-all",
-                  sub.isCompleted
-                    ? "bg-[hsl(var(--primary))] border-[hsl(var(--primary))]"
-                    : "border-[var(--stone-500)] group-hover:border-[hsl(var(--primary))]"
-                )} />
-              </button>
-              <span className={cn(
-                "text-[12.5px] flex-1 leading-[1.4]",
-                sub.isCompleted ? "line-through text-[var(--stone-500)]" : "text-[var(--lime-ink)]"
-              )}>
-                {sub.title}
+            )}
+            {task.deferredCount > 0 && (
+              <span style={{ background: "#FFF0EC", color: "#D14626", fontSize: 10.5, fontWeight: 600, padding: "2px 7px", borderRadius: 6 }}>
+                deferred {task.deferredCount}×
               </span>
-              {/* Touch target: min 44×44 */}
-              <button
-                onClick={() => onDeleteSubtask?.(sub.id)}
-                className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 min-w-[44px] min-h-[44px] flex items-center justify-center text-[10px] text-[var(--stone-500)] hover:text-[hsl(var(--destructive))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--destructive))] focus-visible:ring-offset-1 rounded transition-all"
-                aria-label="Delete subtask"
-              >✕</button>
-            </div>
-          ))}
+            )}
+          </div>
 
+          {/* Nudge */}
+          {isNudged && (
+            <div style={{ marginTop: 10 }}>
+              <NudgeBanner task={task}
+                onDefer={onDefer ? d => onDefer(task.id, d) : undefined}
+                onMarkDone={onMarkDone ? handleMarkDone : undefined} />
+            </div>
+          )}
+
+          {/* Subtasks */}
+          {totalSubs > 0 && (
+            <div style={{ borderTop: "1px solid #F2EEE8", marginTop: 10, paddingTop: 8 }}>
+              {task.subtasks.map(sub => (
+                <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
+                  <button onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)} style={{ width: 12, height: 12, borderRadius: 3, flexShrink: 0, cursor: "pointer", background: sub.isCompleted ? "#1A1612" : "#fff", border: `1.5px solid ${sub.isCompleted ? "#1A1612" : "#D8D0C8"}` }} />
+                  <span style={{ fontSize: 12, color: sub.isCompleted ? "#c4cbc2" : "#7A756E", textDecoration: sub.isCompleted ? "line-through" : "none", flex: 1 }}>{sub.title}</span>
+                  <button onClick={() => onDeleteSubtask?.(sub.id)} style={{ fontSize: 10, color: "#D8D0C8", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add subtask inline */}
           {addingSubtask ? (
-            <div className="flex items-center gap-2 pt-1">
-              <div className="w-[13px] h-[13px] rounded-[3px] border border-[var(--stone-400)] flex-shrink-0" />
-              <input
-                ref={subtaskRef}
-                value={subtaskDraft}
-                onChange={(e) => setSubtaskDraft(e.target.value)}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+              <div style={{ width: 12, height: 12, borderRadius: 3, border: "1.5px dashed #D8D0C8", flexShrink: 0 }} />
+              <input ref={subtaskRef} value={subtaskDraft} onChange={e => setSubtaskDraft(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") submitSubtask(); if (e.key === "Escape") { setSubtaskDraft(""); setAddingSubtask(false); } }}
                 onBlur={() => { if (!subtaskDraft.trim()) setAddingSubtask(false); else submitSubtask(); }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") submitSubtask();
-                  if (e.key === "Escape") { setSubtaskDraft(""); setAddingSubtask(false); }
-                }}
                 placeholder="Add action item…"
-                className="flex-1 text-[12.5px] bg-transparent border-b border-[hsl(var(--primary))] outline-none text-[var(--lime-ink)] placeholder:text-[var(--stone-500)] pb-0.5"
-              />
+                style={{ flex: 1, fontSize: 12, color: "#1A1612", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }} />
             </div>
           ) : (
-            <button
-              onClick={() => setAddingSubtask(true)}
-              className="text-[11px] text-[var(--stone-500)] hover:text-[hsl(var(--primary))] transition-colors mt-1 flex items-center gap-1"
-            >
-              <span className="text-[13px] leading-none">+</span> Add action item
+            <button onClick={() => setAddingSubtask(true)}
+              style={{ fontSize: 11, color: "#C8C0B8", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 3, marginTop: 8, padding: 0, fontFamily: "inherit" }}>
+              + action item
             </button>
           )}
         </div>
-      )}
 
-      {/* Show add button when no subtasks yet */}
-      {task.subtasks.length === 0 && !addingSubtask && (
-        <div className="px-5 pb-3">
-          <button
-            onClick={() => setAddingSubtask(true)}
-            className="text-[11px] text-[var(--stone-500)] hover:text-[hsl(var(--primary))] transition-colors flex items-center gap-1"
-          >
-            <span className="text-[13px] leading-none">+</span> Add action item
-          </button>
-        </div>
-      )}
+        {/* Footer */}
+        <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 18px 14px", borderTop: "1px solid #F2EEE8" }}>
+          <button onClick={handleMarkDone} aria-label="Mark complete"
+            style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px solid #D8D0C8", background: "transparent", flexShrink: 0, cursor: "pointer", transition: "border-color 0.14s" }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#059669"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#D8D0C8"}
+          />
+          <span style={{ fontSize: 11.5, color: "#B0A89E" }}>Mark complete</span>
 
-      {/* Nudge banner — shown when polling detects trigger conditions */}
-      {isNudged && !done && (
-        <NudgeBanner
-          task={task}
-          onDefer={onDefer ? (newDueAt) => onDefer(task.id, newDueAt) : undefined}
-          onMarkDone={onMarkDone ? () => handleMarkDone() : undefined}
-        />
-      )}
+          {onDefer && (
+            <button onClick={() => setDeferOpen(true)}
+              style={{ fontSize: 11.5, fontWeight: 500, padding: "4px 10px", borderRadius: 7, border: "1px solid rgba(0,0,0,0.1)", background: "none", cursor: "pointer", color: "#9C9389", fontFamily: "inherit", marginLeft: "auto" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f5f0e8"; (e.currentTarget as HTMLElement).style.color = "#1A1612"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "none"; (e.currentTarget as HTMLElement).style.color = "#9C9389"; }}>
+              Push this →
+            </button>
+          )}
 
-      {/* Footer */}
-      <div className="flex items-center gap-2 border-t border-[var(--stone-300)] bg-[var(--stone-100)] px-5 py-3">
-        {done ? (
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[hsl(var(--primary))]">
-            ✓ Done
-          </span>
-        ) : (
-          <button onClick={handleMarkDone}
-            className="inline-flex items-center gap-1.5 rounded-[7px] bg-[hsl(var(--primary))] border px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)]  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2">
-            ✓ Mark done
-          </button>
-        )}
-        {onDefer && (
-          <button onClick={() => setDeferOpen(true)}
-            className="inline-flex items-center rounded-[7px] border border-[var(--stone-400)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--stone-500)] transition-all hover:bg-[var(--lime-subtle)] hover:border-[var(--stone-500)] hover:text-[var(--lime-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2">
-            Push this →
-          </button>
-        )}
-        <div className="ml-auto flex items-center gap-0.5">
           {confirmDelete ? (
-            <>
-              <span className="text-[11px] text-[hsl(var(--destructive))] mr-1">Delete?</span>
-              <button onClick={() => onDelete?.(task.id)}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[11px] font-bold text-[hsl(var(--destructive))] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--destructive))] focus-visible:ring-offset-1 rounded">
-                Yes
-              </button>
-              <button onClick={() => setConfirmDelete(false)}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[11px] text-[var(--stone-500)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-1 rounded">
-                No
-              </button>
-            </>
+            <span style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: onDefer ? 4 : "auto" }}>
+              <span style={{ fontSize: 11, color: "#E05230" }}>Delete?</span>
+              <button onClick={() => onDelete?.(task.id)} style={{ fontSize: 11, fontWeight: 700, color: "#E05230", background: "none", border: "none", cursor: "pointer" }}>Yes</button>
+              <button onClick={() => setConfirmDelete(false)} style={{ fontSize: 11, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>No</button>
+            </span>
           ) : (
             <button onClick={() => setConfirmDelete(true)}
-              aria-label="Delete task"
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[11px] text-[var(--stone-500)] hover:text-[hsl(var(--destructive))] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--destructive))] focus-visible:ring-offset-1 rounded">
+              style={{ fontSize: 11, color: "#D8D0C8", background: "none", border: "none", cursor: "pointer", marginLeft: onDefer ? 4 : "auto", padding: "0 2px" }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#E05230"}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#D8D0C8"}>
               ✕
             </button>
           )}
         </div>
       </div>
-    </article>
 
-    {onDefer && (
-      <DeferralModal
-        open={deferOpen}
-        onOpenChange={setDeferOpen}
-        task={task}
-        onConfirm={(newDueAt) => onDefer(task.id, newDueAt)}
-      />
-    )}
-  </>
+      {onDefer && (
+        <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task}
+          onConfirm={d => onDefer(task.id, d)} />
+      )}
+    </>
   );
 }
 
