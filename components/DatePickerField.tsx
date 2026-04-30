@@ -96,8 +96,8 @@ export function DatePickerField({ value, onChange, label = "Due date" }: Props) 
         }}
       >
         <p style={{ fontSize: 13, fontWeight: 600, color: D.textPrimary, margin: 0 }}>
-          {mode === "today" ? `Today, ${fmt(today)}` :
-           mode === "tomorrow" ? `Tomorrow, ${fmt(tomorrow)}` :
+          {value === today    ? `Today, ${fmt(today)}` :
+           value === tomorrow ? `Tomorrow, ${fmt(tomorrow)}` :
            value ? fmt(value) : "Custom date"}
         </p>
         <ChevronDown
