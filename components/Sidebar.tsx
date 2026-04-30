@@ -23,7 +23,7 @@ const T = {
 };
 
 const VIEWS = [
-  { href: "/",         icon: "☀️", label: "Today" },
+  { href: "/",         icon: "☀️", label: "To-do list" },
   { href: "/quadrant", icon: "⬡",  label: "Quadrant" },
   { href: "/calendar", icon: "🗓", label: "Calendar" },
 ];
