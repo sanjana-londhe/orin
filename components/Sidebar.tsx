@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { ListChecks, ScatterChart, CalendarDays } from "lucide-react";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { getEmotion, EMOTION_MAP } from "@/lib/emotions";
 import type { TaskWithSubtasks } from "@/lib/types";
@@ -23,9 +24,9 @@ const T = {
 };
 
 const VIEWS = [
-  { href: "/",         icon: "☀️", label: "To-do list" },
-  { href: "/quadrant", icon: "⬡",  label: "Quadrant" },
-  { href: "/calendar", icon: "🗓", label: "Calendar" },
+  { href: "/",         Icon: ListChecks,    label: "To-do list" },
+  { href: "/quadrant", Icon: ScatterChart,  label: "Quadrant" },
+  { href: "/calendar", Icon: CalendarDays,  label: "Calendar" },
 ];
 
 interface Props { userName: string }
@@ -86,7 +87,7 @@ export function Sidebar({ userName: _userName }: Props) {
                 }}
                   onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = T.surfaceMuted; }}
                   onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "none"; }}>
-                  <span style={{ fontSize: 13, width: 16, textAlign: "center", flexShrink: 0 }}>{v.icon}</span>
+                  <v.Icon size={14} strokeWidth={2} style={{ flexShrink: 0 }} />
                   <span style={{ flex: 1 }}>{v.label}</span>
                   {v.href === "/" && tasks.length > 0 && (
                     <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: active ? "rgba(255,255,255,0.2)" : T.surfaceMuted, color: active ? "#fff" : T.textTertiary }}>{tasks.length}</span>
