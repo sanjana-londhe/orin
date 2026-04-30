@@ -15,6 +15,7 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-ki
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { DatePickerField } from "@/components/DatePickerField";
+import { TimePickerField } from "@/components/TimePickerField";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import { useUIStore, type SortMode } from "@/store/ui";
 import type { TaskWithSubtasks } from "@/lib/types";
@@ -293,13 +294,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
                 <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
                 <div>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", margin: "0 0 6px 0" }}>Due time</p>
-                  <label style={{ display: "flex", alignItems: "center", padding: "9px 12px", height: 38, borderRadius: 8, border: "1px solid #dde4de", background: "#fafbf7", cursor: "text", boxSizing: "border-box", transition: "border-color 0.14s" }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}>
-                    <input type="time" value={inlineDueTime} onChange={e => setInlineDueTime(e.target.value)}
-                      style={{ flex: 1, border: "none", outline: "none", fontSize: 13, color: "#082d1d", background: "transparent", fontFamily: "inherit", cursor: "pointer", minWidth: 0 }} />
-                  </label>
+                  <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" />
                 </div>
               </div>
 

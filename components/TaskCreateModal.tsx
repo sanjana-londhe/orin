@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DatePickerField } from "@/components/DatePickerField";
+import { TimePickerField } from "@/components/TimePickerField";
 
 const STATES = [
   { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626", activeBg: "#D14626" },
@@ -64,10 +65,11 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
   const timeRef = useRef<HTMLInputElement>(null);
   const initTime = getDefaultTime();
   const [selectedDate, setSelectedDate] = useState(defaultDate ?? getDefaultDate());
+  const [selectedTime, setSelectedTime] = useState(initTime);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      const dueTime = timeRef.current?.value ?? initTime;
+      const dueTime = selectedTime || initTime;
       const dueAt = selectedDate
         ? new Date(`${selectedDate}T${dueTime || "00:00"}`).toISOString()
         : null;
@@ -122,28 +124,7 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           {/* Date + Time side by side */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6, margin: "0 0 6px 0" }}>Due time</p>
-              {/* Wrapper makes full box clickable, consistent with DatePickerField trigger */}
-              <label style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "9px 12px", height: 38, borderRadius: 8,
-                border: "1px solid #dde4de", background: "#fafbf7",
-                cursor: "text", boxSizing: "border-box", transition: "border-color 0.14s",
-              }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}
-                onFocus={e => (e.currentTarget as HTMLElement).style.borderColor = "#059669"}
-                onBlur={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}
-              >
-                <input ref={timeRef} type="time" defaultValue={initTime}
-                  style={{
-                    flex: 1, border: "none", outline: "none",
-                    fontSize: 13, color: "#082d1d", background: "transparent",
-                    fontFamily: "inherit", cursor: "pointer", minWidth: 0,
-                  }} />
-              </label>
-            </div>
+            <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time" />
           </div>
 
           {/* Feeling — compact pills */}
