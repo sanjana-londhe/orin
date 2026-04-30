@@ -65,7 +65,7 @@ export function Sidebar({ userName: _userName }: Props) {
         {/* Logo — 50px */}
         <div style={{ height: 50, padding: "0 20px", display: "flex", alignItems: "center", borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-            <span style={{ width: 22, height: 22, borderRadius: 6, background: T.accent, border: "1.5px solid #050e11", color: "#fff", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: 8 }}>O</span>
+            <span style={{ width: 22, height: 22, borderRadius: 6, background: T.accent, border: "1.5px solid #dde4de", color: "#fff", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: 8 }}>O</span>
             <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: T.textPrimary }}>orin</span>
           </Link>
         </div>
@@ -82,7 +82,7 @@ export function Sidebar({ userName: _userName }: Props) {
                   borderRadius: 6, fontSize: 12.5, fontWeight: active ? 600 : 450,
                   color: active ? "#fff" : T.textSecondary,
                   background: active ? T.accent : "none",
-                  border: active ? "1px solid #050e11" : "1px solid transparent",
+                  border: "1px solid transparent",
                   textDecoration: "none", transition: "all 0.12s",
                 }}
                   onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = T.surfaceMuted; }}

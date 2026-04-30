@@ -99,21 +99,21 @@ function TaskCardInner({
         style={{
           breakInside: "avoid", marginBottom: 16,
           background: "#ffffff", borderRadius: 16, overflow: "hidden",
-          border: featured ? "1.5px solid #050e11" : "1.5px solid #dde4de",
-          boxShadow: featured ? "3px 3px 0 #050e11" : "none",
+          border: "1.5px solid #dde4de",
+          boxShadow: featured ? "0 4px 16px rgba(0,0,0,0.1)" : "none",
           transition: "border-color 0.15s, box-shadow 0.15s, transform 0.15s",
         }}
         onMouseEnter={e => {
           const el = e.currentTarget as HTMLElement;
-          el.style.borderColor = "#050e11";
-          el.style.boxShadow = featured ? "5px 5px 0 #050e11" : "3px 3px 0 #050e11";
-          el.style.transform = "translate(-1px, -1px)";
+          el.style.borderColor = "#c4cbc2";
+          el.style.boxShadow = "0 8px 24px rgba(0,0,0,0.12)";
+          el.style.transform = "translateY(-2px)";
         }}
         onMouseLeave={e => {
           const el = e.currentTarget as HTMLElement;
-          el.style.borderColor = featured ? "#050e11" : "#dde4de";
-          el.style.boxShadow = featured ? "3px 3px 0 #050e11" : "none";
-          el.style.transform = "translate(0, 0)";
+          el.style.borderColor = "#dde4de";
+          el.style.boxShadow = featured ? "0 4px 16px rgba(0,0,0,0.1)" : "none";
+          el.style.transform = "translateY(0)";
         }}
       >
         {/* Colour strip */}
@@ -231,11 +231,11 @@ function TaskCardInner({
           <button onClick={handleMarkDone} aria-label="Mark complete" style={{
             padding: "4px 12px", borderRadius: 8,
             background: "#059669", color: "#fff",
-            border: "1.5px solid #050e11",
+            border: "1.5px solid #dde4de",
             fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
             transition: "all 0.12s",
           }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#047857"; (e.currentTarget as HTMLElement).style.boxShadow = "2px 2px 0 #050e11"; }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#047857"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#059669"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
             ✓ Done
           </button>

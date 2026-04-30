@@ -157,7 +157,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
         {/* Stats band — 5.html: ink border, cells */}
         <div style={{
           display: "flex", alignItems: "stretch", gap: 0,
-          background: "#fff", border: "1.5px solid #050e11",
+          background: "#fff", border: "1.5px solid #dde4de",
           borderRadius: 12, overflow: "hidden", marginBottom: 20,
         }}>
           {[

@@ -66,7 +66,7 @@ export function Topbar({ initial }: Props) {
             return (
               <button key={mode} onClick={() => setSortMode(mode)} style={{
                 padding: "4px 12px", borderRadius: 6,
-                border: active ? "1.5px solid #050e11" : `1.5px solid ${T.border}`,
+                border: `1.5px solid ${active ? T.accent : T.border}`,
                 background: active ? T.accent : "none",
                 color: active ? "#fff" : T.textSecondary,
                 fontSize: 12.5, fontWeight: active ? 700 : 400,
@@ -93,7 +93,7 @@ export function Topbar({ initial }: Props) {
           <button onClick={() => setModalOpen(true)} style={{
             display: "flex", alignItems: "center", gap: 4,
             padding: "4px 16px", borderRadius: 8,
-            background: T.accent, border: "1.5px solid #050e11",
+            background: T.accent, border: "1.5px solid #dde4de",
             color: "#fff", fontSize: 12.5, fontWeight: 700,
             cursor: "pointer", fontFamily: "inherit", transition: "all 0.13s",
           }}
@@ -105,7 +105,7 @@ export function Topbar({ initial }: Props) {
           {/* Avatar */}
           <div style={{
             width: 28, height: 28, borderRadius: "50%",
-            background: T.accent, border: "1.5px solid #050e11",
+            background: T.accent, border: "1.5px solid #dde4de",
             color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 11, fontWeight: 700, cursor: "pointer",
           }}>
