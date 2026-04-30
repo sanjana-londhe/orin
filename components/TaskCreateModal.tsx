@@ -40,7 +40,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[12px] border-[1.5px] border-[#059669]" style={{ boxShadow: "0 4px 20px rgba(5,150,105,0.1)" }}>
+      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[12px] border border-[#dde4de]" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.1)", background: "#fff" }}>
         {open && (
           <ModalForm
             key={openCount}
@@ -125,7 +125,7 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6 }}>Due time</p>
               <input ref={timeRef} type="time" defaultValue={initTime}
-                style={{ width: "100%", padding: "8px 10px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 12.5, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+                style={{ width: "100%", padding: "9px 12px", height: 38, border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
           </div>
 

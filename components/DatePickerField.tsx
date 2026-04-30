@@ -71,37 +71,37 @@ export function DatePickerField({ value, onChange, label = "Due date" }: Props) 
   return (
     <div ref={ref} style={{ position: "relative" }}>
       {label && (
-        <p style={{ fontSize: 12, fontWeight: 600, color: D.textPrimary, marginBottom: 8 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6 }}>
           {label}
         </p>
       )}
 
-      {/* Trigger */}
+      {/* Trigger — same size/style as time input */}
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px 12px", borderRadius: 8,
-          border: `1.5px solid ${open ? D.accent : D.border}`,
-          background: open ? D.accentSubtle : D.surface,
-          cursor: "pointer", fontFamily: "inherit", transition: "all 0.14s",
-          boxSizing: "border-box",
+          padding: "9px 12px", borderRadius: 8,
+          border: `1px solid ${open ? D.accent : D.border}`,
+          background: D.surfacePage,
+          cursor: "pointer", fontFamily: "inherit", transition: "border-color 0.14s",
+          boxSizing: "border-box", height: 38,
         }}
         onMouseEnter={e => {
           if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.borderHover;
         }}
         onMouseLeave={e => {
-          if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.border;
+          if (!open) (e.currentTarget as HTMLElement).style.borderColor = open ? D.accent : D.border;
         }}
       >
-        <p style={{ fontSize: 13, fontWeight: 600, color: D.textPrimary, margin: 0 }}>
+        <span style={{ fontSize: 13, fontWeight: 400, color: D.textPrimary }}>
           {value === today    ? `Today, ${fmt(today)}` :
            value === tomorrow ? `Tomorrow, ${fmt(tomorrow)}` :
            value ? fmt(value) : "Custom date"}
-        </p>
+        </span>
         <ChevronDown
-          size={14}
+          size={13}
           color={D.textSecondary}
           style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.14s" }}
         />
