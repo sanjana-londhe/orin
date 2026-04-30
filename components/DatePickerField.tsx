@@ -166,55 +166,53 @@ export function DatePickerField({ value, onChange, label = "Due date" }: Props) 
           style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }} />
       </button>
 
-      {/* Dropdown options */}
-      {open && !showCal && (
+      {/* Dropdown — options + calendar side by side when Pick a date is clicked */}
+      {open && (
         <div style={{
-          position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0,
-          background: D.surface, border: `1.5px solid ${D.border}`,
-          borderRadius: 10, padding: "4px 0",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.09)", zIndex: 200,
+          position: "absolute", top: "calc(100% + 6px)", left: 0,
+          display: "flex", gap: 8, zIndex: 200,
         }}>
-          {[
-            { val: today,    label: "Today",     sub: shortFmt(today) },
-            { val: tomorrow, label: "Tomorrow",  sub: shortFmt(tomorrow) },
-          ].map(opt => (
-            <button key={opt.val} type="button" onClick={() => select(opt.val)} style={{
+          {/* Options list */}
+          <div style={{
+            background: D.surface, border: `1.5px solid ${D.border}`,
+            borderRadius: 10, padding: "4px 0",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
+            minWidth: 180,
+          }}>
+            {[
+              { val: today,    label: "Today",    sub: shortFmt(today) },
+              { val: tomorrow, label: "Tomorrow", sub: shortFmt(tomorrow) },
+            ].map(opt => (
+              <button key={opt.val} type="button" onClick={() => select(opt.val)} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                width: "100%", padding: "9px 14px",
+                background: value === opt.val ? D.accentSubtle : "none",
+                border: "none", cursor: "pointer", fontFamily: "inherit",
+              }}
+                onMouseEnter={e => { if (value !== opt.val) (e.currentTarget as HTMLElement).style.background = D.surfaceMuted; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = value === opt.val ? D.accentSubtle : "none"; }}>
+                <span style={{ fontSize: 13, color: D.textPrimary }}>{opt.label}</span>
+                <span style={{ fontSize: 11, color: D.textMuted }}>{opt.sub}</span>
+              </button>
+            ))}
+            <div style={{ height: 1, background: D.border, margin: "4px 0" }} />
+            <button type="button" onClick={() => setShowCal(true)} style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               width: "100%", padding: "9px 14px",
-              background: "none", border: "none", cursor: "pointer",
-              fontFamily: "inherit", textAlign: "left",
+              background: showCal ? D.accentSubtle : "none",
+              border: "none", cursor: "pointer", fontFamily: "inherit",
             }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = D.surfaceMuted}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}>
-              <span style={{ fontSize: 13, color: D.textPrimary }}>{opt.label}</span>
-              <span style={{ fontSize: 11, color: D.textMuted }}>{opt.sub}</span>
+              onMouseEnter={e => { if (!showCal) (e.currentTarget as HTMLElement).style.background = D.surfaceMuted; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showCal ? D.accentSubtle : "none"; }}>
+              <span style={{ fontSize: 13, color: D.textPrimary }}>Pick a date</span>
+              <ChevronRight size={13} color={showCal ? D.accent : D.textMuted} />
             </button>
-          ))}
-          <div style={{ height: 1, background: D.border, margin: "4px 0" }} />
-          <button type="button" onClick={() => setShowCal(true)} style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            width: "100%", padding: "9px 14px",
-            background: "none", border: "none", cursor: "pointer",
-            fontFamily: "inherit", textAlign: "left",
-          }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = D.surfaceMuted}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}>
-            <span style={{ fontSize: 13, color: D.textPrimary }}>Pick a date</span>
-            <ChevronRight size={13} color={D.textMuted} />
-          </button>
-        </div>
-      )}
+          </div>
 
-      {/* Calendar — opens to the right */}
-      {open && showCal && (
-        <div style={{
-          position: "absolute", top: 0, left: "calc(100% + 10px)",
-          zIndex: 200,
-        }}>
-          <MiniCalendar
-            selected={value}
-            onSelect={iso => select(iso)}
-          />
+          {/* Calendar — appears right next to options */}
+          {showCal && (
+            <MiniCalendar selected={value} onSelect={iso => select(iso)} />
+          )}
         </div>
       )}
     </div>
