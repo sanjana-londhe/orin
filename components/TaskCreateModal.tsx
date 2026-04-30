@@ -3,26 +3,14 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import type { EmotionalState } from "@/components/EmotionalStatePicker";
 
-const STATES: {
-  value: EmotionalState; label: string; emoji: string; desc: string;
-  bg: string; border: string; text: string; ring: string; btnBg: string;
-}[] = [
-  { value: "DREADING", label: "Dreading",  emoji: "😮‍💨", desc: "I really don't want to do this",  bg: "bg-[#fcf0f3]", border: "border-[#e9c3c1]", text: "text-[#991e4b]", ring: "ring-[#c23934]", btnBg: "#c23934" },
-  { value: "ANXIOUS",  label: "Anxious",   emoji: "😟",   desc: "This makes me nervous",           bg: "bg-[#f9f2d9]", border: "border-[#ebd587]", text: "text-[#886a00]", ring: "ring-[#886a00]", btnBg: "#886a00" },
-  { value: "NEUTRAL",  label: "Neutral",   emoji: "😐",   desc: "I feel nothing about this",        bg: "bg-[#f1f3ef]", border: "border-[#dde4de]", text: "text-[#4a6d47]", ring: "ring-[#c4cbc2]", btnBg: "#059669" },
-  { value: "WILLING",  label: "Willing",   emoji: "🙂",   desc: "I don't mind doing this",          bg: "bg-[#e8f5f5]", border: "border-[#bed7d7]", text: "text-[#234b43]", ring: "ring-[#2b6b5e]", btnBg: "#2b6b5e" },
-  { value: "EXCITED",  label: "Excited",   emoji: "🤩",   desc: "I actually want to do this",       bg: "bg-[#f2fdec]", border: "border-[#c8f7ae]", text: "text-[#243000]", ring: "ring-[#59d10b]", btnBg: "#59d10b" },
-];
-
-const RECURRENCE_PRESETS = [
-  { label: "None",       value: "" },
-  { label: "↺ Daily",    value: "FREQ=DAILY" },
-  { label: "↺ Weekdays", value: "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR" },
-  { label: "↺ Weekly",   value: "FREQ=WEEKLY" },
-];
+const STATES = [
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626", activeBg: "#D14626" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10", activeBg: "#B07A10" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#3a3a3a", fg: "#fff",    activeBg: "#3a3a3a" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D", activeBg: "#0E8A7D" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444", activeBg: "#1A9444" },
+] as const;
 
 interface Props {
   open: boolean;
@@ -33,25 +21,23 @@ interface Props {
 
 export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle }: Props) {
   const queryClient = useQueryClient();
-  const [step, setStep]                     = useState<"details" | "emotion">("details");
-  const [title, setTitle]                   = useState(defaultTitle ?? "");
-  const [dueDate, setDueDate]               = useState(defaultDate ?? "");
-  const [dueTime, setDueTime]               = useState("");
-  const [emotionalState, setEmotionalState] = useState<EmotionalState>("NEUTRAL");
-  const [recurrence, setRecurrence]         = useState("");
-  const [subtasks, setSubtasks]             = useState<string[]>([]);
-  const [subtaskInput, setSubtaskInput]     = useState("");
-  const [error, setError]                   = useState("");
+  const [title, setTitle]         = useState(defaultTitle ?? "");
+  const [dueDate, setDueDate]     = useState(defaultDate ?? "");
+  const [dueTime, setDueTime]     = useState("");
+  const [emotion, setEmotion]     = useState<typeof STATES[number]["value"]>("NEUTRAL");
+  const [subtasks, setSubtasks]   = useState<string[]>([]);
+  const [subInput, setSubInput]   = useState("");
+  const [error, setError]         = useState("");
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      let dueAt: string | null = null;
-      if (dueDate) dueAt = new Date(`${dueDate}T${dueTime || "00:00"}`).toISOString();
-
+      const dueAt = dueDate
+        ? new Date(`${dueDate}T${dueTime || "00:00"}`).toISOString()
+        : null;
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, dueAt, emotionalState, recurrenceRule: recurrence || null }),
+        body: JSON.stringify({ title: title.trim(), dueAt, emotionalState: emotion }),
       });
       if (!res.ok) {
         let msg = "Failed to create task";
@@ -59,8 +45,6 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
         throw new Error(msg);
       }
       const task = await res.json();
-
-      // Create subtasks if any
       for (const st of subtasks) {
         await fetch("/api/tasks", {
           method: "POST",
@@ -70,157 +54,132 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
       }
       return task;
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["tasks"] }); handleClose(); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      handleClose();
+    },
     onError: (e: Error) => setError(e.message),
   });
 
   function handleClose() {
-    setTitle(defaultTitle ?? ""); setDueDate(defaultDate ?? ""); setDueTime("");
-    setEmotionalState("NEUTRAL"); setRecurrence("");
-    setSubtasks([]); setSubtaskInput(""); setError(""); setStep("details");
+    setTitle(defaultTitle ?? "");
+    setDueDate(defaultDate ?? "");
+    setDueTime("");
+    setEmotion("NEUTRAL");
+    setSubtasks([]);
+    setSubInput("");
+    setError("");
     onOpenChange(false);
   }
 
   function addSubtask() {
-    const t = subtaskInput.trim();
-    if (t) { setSubtasks(p => [...p, t]); setSubtaskInput(""); }
+    const t = subInput.trim();
+    if (t) { setSubtasks(p => [...p, t]); setSubInput(""); }
   }
-
-  const sel = STATES.find(s => s.value === emotionalState)!;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[16px] border border-[var(--stone-400)] shadow-md">
+      <DialogContent className="sm:max-w-[560px] p-0 overflow-hidden rounded-[14px] border-[1.5px] border-[#059669]" style={{ boxShadow: "0 4px 24px rgba(5,150,105,0.12)" }}>
 
-        {step === "details" ? (
-          /* ─── Step 1: Task details ─── */
-          <div>
-            <div className="px-6 pt-6 pb-5">
-              <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#B0A89E] mb-3">New task</p>
+        {/* Title row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 20px 16px", borderBottom: "1px solid #e9ede9" }}>
+          <span style={{ fontSize: 15, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
+          <input
+            autoFocus
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="What needs doing?"
+            style={{ flex: 1, border: "none", outline: "none", fontSize: 16, fontWeight: 500, color: "#082d1d", background: "transparent", fontFamily: "inherit" }}
+          />
+        </div>
 
-              {/* Title */}
-              <textarea autoFocus value={title}
-                onChange={e => setTitle(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (title.trim()) { setError(""); setStep("emotion"); } } }}
-                placeholder="What needs doing?"
-                rows={2}
-                className="w-full resize-none bg-transparent outline-none text-[22px] font-bold leading-snug tracking-[-0.025em] text-[#1A1814] placeholder:text-[#D8D2CC] mb-5"
-              />
+        {/* Body */}
+        <div style={{ padding: "20px 20px 16px" }}>
 
-              {/* Due date + time — clear labels */}
-              <div className="flex gap-2 mb-5">
-                <div className="flex-1">
-                  <p className="text-[11px] font-semibold text-[#8C8880] mb-1.5">Set due date</p>
-                  <div className="flex items-center gap-1.5 rounded-[8px] border border-[#E4DDD4] bg-[#FDFCFA] px-3 py-2.5">
-                    <span className="text-[13px]">📅</span>
-                    <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-                      className="flex-1 bg-transparent outline-none text-[12.5px] text-[#4C4840] min-w-0" />
-                  </div>
-                </div>
-                <div className={cn("flex-1", !dueDate && "opacity-40 pointer-events-none")}>
-                  <p className="text-[11px] font-semibold text-[#8C8880] mb-1.5">Set time</p>
-                  <div className="flex items-center gap-1.5 rounded-[8px] border border-[#E4DDD4] bg-[#FDFCFA] px-3 py-2.5">
-                    <span className="text-[13px]">🕐</span>
-                    <input type="time" value={dueTime} onChange={e => setDueTime(e.target.value)}
-                      disabled={!dueDate}
-                      className="flex-1 bg-transparent outline-none text-[12.5px] text-[#4C4840]" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Repeats */}
-              <div className="mb-5">
-                <p className="text-[11px] font-semibold text-[#8C8880] mb-1.5">Repeats</p>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {RECURRENCE_PRESETS.map(p => (
-                    <button key={p.value} type="button" onClick={() => setRecurrence(p.value)}
-                      className={cn(
-                        "px-3 py-1 rounded-full text-[11px] font-semibold border transition-all",
-                        recurrence === p.value
-                          ? "bg-[#059669] text-white border-\[#059669\]"
-                          : "bg-white text-[#8C8880] border-[#E4DDD4] hover:border-[#B0A89E]"
-                      )}>
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Subtasks */}
-              <div>
-                <p className="text-[11px] font-semibold text-[#8C8880] mb-1.5">Action items (optional)</p>
-                {subtasks.map((st, i) => (
-                  <div key={i} className="flex items-center gap-2 py-1">
-                    <span className="w-[10px] h-[10px] rounded-[2px] border border-[#D8D2CC] flex-shrink-0" />
-                    <span className="text-[12.5px] text-[#4C4840] flex-1">{st}</span>
-                    <button onClick={() => setSubtasks(p => p.filter((_, j) => j !== i))}
-                      className="text-[10px] text-[#D8D2CC] hover:text-[#c23934] transition-colors">✕</button>
-                  </div>
-                ))}
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="w-[10px] h-[10px] rounded-[2px] border border-dashed border-[#D8D2CC] flex-shrink-0" />
-                  <input value={subtaskInput} onChange={e => setSubtaskInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSubtask(); } }}
-                    placeholder="Add an action item…"
-                    className="flex-1 bg-transparent outline-none text-[12.5px] text-[#4C4840] placeholder:text-[#D8D2CC]"
-                  />
-                  {subtaskInput && (
-                    <button onClick={addSubtask} className="text-[10px] font-bold text-[#059669]">+ Add</button>
-                  )}
-                </div>
-              </div>
-
-              {error && <p className="text-[12px] text-[#c23934] mt-3">{error}</p>}
+          {/* Due date + time */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Set due date</p>
+              <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
-
-            <div className="flex items-center justify-between px-6 py-4 border-t border-[#F0ECE6] bg-[#FDFCFA]">
-              <button onClick={handleClose} className="text-[12.5px] text-[#8C8880] hover:text-[#1A1814]">Cancel</button>
-              <button onClick={() => { if (!title.trim()) { setError("Add a title first"); return; } setError(""); setStep("emotion"); }}
-                className="flex items-center gap-1.5 bg-[#059669] border border-[var(--stone-400)] text-white text-[12.5px] font-bold px-4 py-2 rounded-[8px] hover: transition-all">
-                Next → how do you feel?
-              </button>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Set time</p>
+              <input type="time" value={dueTime} onChange={e => setDueTime(e.target.value)} disabled={!dueDate}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: dueDate ? "#082d1d" : "#b9d3c4", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
             </div>
           </div>
 
-        ) : (
-          /* ─── Step 2: Emotional state ─── */
-          <div>
-            <div className="px-6 pt-6 pb-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[#B0A89E] mb-1">How do you feel about it?</p>
-              <p className="text-[17px] font-bold tracking-tight text-[#1A1814] truncate mb-4">{title}</p>
-
-              <div className="flex flex-col gap-2" role="radiogroup" aria-label="Emotional state">
-                {STATES.map(s => (
-                  <button key={s.value} role="radio" aria-checked={emotionalState === s.value}
-                    onClick={() => setEmotionalState(s.value)}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-[10px] border text-left transition-all",
-                      s.bg, s.border,
-                      emotionalState === s.value ? `ring-2 ${s.ring} ring-offset-1` : "hover:opacity-90"
-                    )}>
-                    <span className="text-[22px] leading-none flex-shrink-0">{s.emoji}</span>
-                    <div className="flex-1">
-                      <p className={cn("text-[13px] font-bold", s.text)}>{s.label}</p>
-                      <p className={cn("text-[11px] opacity-70", s.text)}>{s.desc}</p>
-                    </div>
-                    {emotionalState === s.value && <span className={cn("text-[13px] font-bold flex-shrink-0", s.text)}>✓</span>}
+          {/* Feeling */}
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 10 }}>How do you feel about it?</p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {STATES.map(s => {
+                const active = emotion === s.value;
+                return (
+                  <button key={s.value} onClick={() => setEmotion(s.value)} style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    padding: "6px 13px", borderRadius: 999,
+                    background: active ? s.activeBg : s.bg,
+                    color: active ? "#fff" : s.fg,
+                    border: `1.5px solid ${active ? s.activeBg : s.bg}`,
+                    fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                    transition: "all 0.12s",
+                  }}>
+                    {s.emoji} {s.label}
                   </button>
-                ))}
-              </div>
-
-              {error && <p className="text-[12px] text-[#c23934] mt-3">{error}</p>}
-            </div>
-
-            <div className="flex items-center justify-between px-6 py-4 border-t border-[#F0ECE6] bg-[#FDFCFA]">
-              <button onClick={() => setStep("details")} className="text-[12.5px] text-[#8C8880] hover:text-[#1A1814]">← Back</button>
-              <button onClick={() => mutate()} disabled={isPending}
-                style={{ background: sel.btnBg }}
-                className="flex items-center gap-1.5 text-white text-[12.5px] font-bold px-5 py-2 rounded-[8px] border border-[var(--stone-400)] hover: transition-all disabled:opacity-50">
-                {isPending ? "Creating…" : `Add task — ${sel.emoji} ${sel.label}`}
-              </button>
+                );
+              })}
             </div>
           </div>
-        )}
+
+          {/* Action items */}
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 10 }}>Action items</p>
+            {subtasks.map((st, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
+                <span style={{ width: 14, height: 14, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
+                <span style={{ flex: 1, fontSize: 13, color: "#082d1d" }}>{st}</span>
+                <button onClick={() => setSubtasks(p => p.filter((_, j) => j !== i))}
+                  style={{ fontSize: 11, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+              </div>
+            ))}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 4 }}>
+              <span style={{ width: 14, height: 14, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
+              <input value={subInput} onChange={e => setSubInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSubtask(); } }}
+                placeholder="Add action item..."
+                style={{ flex: 1, border: "none", borderBottom: "1px solid #e9ede9", outline: "none", fontSize: 13, color: "#082d1d", background: "transparent", fontFamily: "inherit", paddingBottom: 4 }} />
+            </div>
+          </div>
+
+          {error && <p style={{ fontSize: 12, color: "#c23934", marginBottom: 8 }}>{error}</p>}
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, padding: "12px 20px 18px", borderTop: "1px solid #e9ede9" }}>
+          <button onClick={handleClose} style={{
+            padding: "9px 20px", borderRadius: 8, border: "1.5px solid #dde4de",
+            background: "#fff", color: "#3d5a4a", fontSize: 13.5, fontWeight: 500,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>
+            Cancel
+          </button>
+          <button onClick={() => { if (!title.trim()) { setError("Add a title first"); return; } setError(""); mutate(); }}
+            disabled={isPending || !title.trim()}
+            style={{
+              padding: "9px 24px", borderRadius: 8, border: "none",
+              background: title.trim() ? "#059669" : "#c4cbc2",
+              color: "#fff", fontSize: 13.5, fontWeight: 700,
+              cursor: title.trim() ? "pointer" : "default", fontFamily: "inherit",
+              transition: "background 0.13s",
+            }}
+            onMouseEnter={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = "#047857"; }}
+            onMouseLeave={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = "#059669"; }}>
+            {isPending ? "Creating…" : "Create task"}
+          </button>
+        </div>
+
       </DialogContent>
     </Dialog>
   );
