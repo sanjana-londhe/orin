@@ -25,7 +25,7 @@ export default function SignUpPage() {
         <form action={signInWithGoogle}>
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-3 rounded-[8px] border-[1.5px] border-[var(--stone-400)] bg-white px-4 py-3 text-[13.5px] font-semibold text-[var(--lime-ink)] transition-all hover:border-[var(--ink)] hover:shadow-[2px_2px_0_var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2"
+            className="w-full flex items-center justify-center gap-3 rounded-[8px] border-[1.5px] border-[var(--stone-400)] bg-white px-4 py-3 text-[13.5px] font-semibold text-[var(--lime-ink)] transition-all hover:border-[var(--ink)]  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
               <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>

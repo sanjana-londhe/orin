@@ -47,7 +47,7 @@ export function WelcomeView({ name }: Props) {
         {/* CTA */}
         <button
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-[10px] bg-[hsl(var(--primary))] border-[1.5px] border-[var(--ink)] px-6 py-3 text-[15px] font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)] hover:shadow-[3px_3px_0_var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-2 rounded-[10px] bg-[hsl(var(--primary))] border border-[var(--stone-400)] px-6 py-3 text-[15px] font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)]  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2"
         >
           + Add your first task
         </button>

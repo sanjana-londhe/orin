@@ -32,6 +32,7 @@
     --lime-border: #c8f7ae;             /* lime-200 */
     --lime-dark: #243000;               /* deep forest */
     --lime-ink: #082d1d;                /* darkest forest text */
+    --ink: #dde4de;                     /* was #050e11 — now soft border, no harsh black strokes */
     --stone-100: #f8f9f5;               /* sidebar bg */
     --stone-200: #f1f3ef;               /* muted surface */
     --stone-300: #e9ede9;               /* border light */

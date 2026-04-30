@@ -31,7 +31,7 @@ export default function QuadrantPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white border-[1.5px] border-[var(--ink)] rounded-[16px] overflow-hidden shadow-[3px_3px_0_var(--ink)]">
+        <div className="bg-white border border-[var(--stone-400)] rounded-[16px] overflow-hidden">
           {/* Card header */}
           <div className="px-6 py-4 border-b border-[var(--stone-400)] bg-[var(--lime-subtle)]">
             <p className="text-[13.5px] font-bold text-[var(--lime-ink)]">

@@ -112,7 +112,7 @@ function TaskCardInner({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddSub
       "rounded-[14px] border border-[var(--stone-400)] bg-white overflow-hidden transition-all",
       done
         ? "opacity-35 pointer-events-none"
-        : "hover:-translate-y-px hover:border-[var(--ink)] hover:shadow-[3px_3px_0_var(--ink)]"
+        : "hover:-translate-y-px hover:border-[var(--ink)] "
     )}>
       <div className={cn("h-[3px] w-full", state.strip)} aria-hidden="true" />
 
@@ -274,7 +274,7 @@ function TaskCardInner({ task, onMarkDone, onDefer, onUpdate, onDelete, onAddSub
           </span>
         ) : (
           <button onClick={handleMarkDone}
-            className="inline-flex items-center gap-1.5 rounded-[7px] bg-[hsl(var(--primary))] border border-[var(--ink)] px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)] hover:shadow-[2px_2px_0_var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2">
+            className="inline-flex items-center gap-1.5 rounded-[7px] bg-[hsl(var(--primary))] border px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:bg-[hsl(var(--primary)/0.9)]  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2">
             ✓ Mark done
           </button>
         )}

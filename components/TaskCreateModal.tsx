@@ -89,7 +89,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[16px] border-[1.5px] border-[#050e11] shadow-[4px_4px_0_#050e11]">
+      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[16px] border border-[var(--stone-400)] shadow-md">
 
         {step === "details" ? (
           /* ─── Step 1: Task details ─── */
@@ -136,7 +136,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate }: Props) {
                       className={cn(
                         "px-3 py-1 rounded-full text-[11px] font-semibold border transition-all",
                         recurrence === p.value
-                          ? "bg-[#059669] text-white border-[#050e11]"
+                          ? "bg-[#059669] text-white border-\[#059669\]"
                           : "bg-white text-[#8C8880] border-[#E4DDD4] hover:border-[#B0A89E]"
                       )}>
                       {p.label}
@@ -175,7 +175,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate }: Props) {
             <div className="flex items-center justify-between px-6 py-4 border-t border-[#F0ECE6] bg-[#FDFCFA]">
               <button onClick={handleClose} className="text-[12.5px] text-[#8C8880] hover:text-[#1A1814]">Cancel</button>
               <button onClick={() => { if (!title.trim()) { setError("Add a title first"); return; } setError(""); setStep("emotion"); }}
-                className="flex items-center gap-1.5 bg-[#059669] border border-[#050e11] text-white text-[12.5px] font-bold px-4 py-2 rounded-[8px] hover:shadow-[2px_2px_0_#050e11] transition-all">
+                className="flex items-center gap-1.5 bg-[#059669] border border-[var(--stone-400)] text-white text-[12.5px] font-bold px-4 py-2 rounded-[8px] hover: transition-all">
                 Next → how do you feel?
               </button>
             </div>
@@ -214,7 +214,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate }: Props) {
               <button onClick={() => setStep("details")} className="text-[12.5px] text-[#8C8880] hover:text-[#1A1814]">← Back</button>
               <button onClick={() => mutate()} disabled={isPending}
                 style={{ background: sel.btnBg }}
-                className="flex items-center gap-1.5 text-white text-[12.5px] font-bold px-5 py-2 rounded-[8px] border border-[#050e11] hover:shadow-[2px_2px_0_#050e11] transition-all disabled:opacity-50">
+                className="flex items-center gap-1.5 text-white text-[12.5px] font-bold px-5 py-2 rounded-[8px] border border-[var(--stone-400)] hover: transition-all disabled:opacity-50">
                 {isPending ? "Creating…" : `Add task — ${sel.emoji} ${sel.label}`}
               </button>
             </div>

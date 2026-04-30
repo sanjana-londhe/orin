@@ -150,7 +150,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   className={cn(
                     "rounded-[8px] border py-2.5 text-[13px] font-bold transition-all",
                     selected?.kind === "hours" && (selected as { hours: number }).hours === opt.hours
-                      ? "bg-[hsl(var(--primary))] text-white border-[var(--ink)] shadow-[2px_2px_0_var(--ink)]"
+                      ? "bg-[hsl(var(--primary))] text-white"
                       : "bg-white text-[var(--lime-ink)] border-[var(--stone-400)] hover:border-[var(--stone-500)] hover:bg-[var(--lime-subtle)]"
                   )}>
                   {opt.label}
@@ -186,7 +186,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   className={cn(
                     "rounded-[8px] border py-2.5 text-[12px] font-semibold transition-all",
                     selected?.kind === "reschedule" && preview && formatPreview(preview) === formatPreview(opt.fn())
-                      ? "bg-[hsl(var(--primary))] text-white border-[var(--ink)] shadow-[2px_2px_0_var(--ink)]"
+                      ? "bg-[hsl(var(--primary))] text-white"
                       : "bg-white text-[var(--lime-ink)] border-[var(--stone-400)] hover:border-[var(--stone-500)] hover:bg-[var(--lime-subtle)]"
                   )}>
                   {opt.label}
@@ -236,7 +236,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           <Button
             disabled={!preview}
             onClick={handleConfirm}
-            className="bg-[hsl(var(--primary))] border border-[var(--ink)] text-white font-bold hover:bg-[hsl(var(--primary)/0.9)] hover:shadow-[2px_2px_0_var(--ink)] disabled:opacity-40 disabled:shadow-none"
+            className="bg-[hsl(var(--primary))] border text-white font-bold hover:bg-[hsl(var(--primary)/0.9)]  disabled:opacity-40 disabled:shadow-none"
           >
             Take this time
           </Button>

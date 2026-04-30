@@ -75,7 +75,7 @@ export function NudgeBanner({ task, onDefer, onMarkDone }: Props) {
         <div className="flex items-center gap-2 flex-wrap pl-6">
           <button
             onClick={() => openDefer("defer")}
-            className="px-3 py-1 rounded-[7px] bg-[hsl(var(--primary))] border border-[var(--ink)] text-white text-[12px] font-bold transition-all hover:shadow-[2px_2px_0_var(--ink)]"
+            className="px-3 py-1 rounded-[7px] bg-[hsl(var(--primary))] border text-white text-[12px] font-bold transition-all "
           >
             Defer
           </button>

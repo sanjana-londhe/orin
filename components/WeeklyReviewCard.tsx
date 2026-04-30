@@ -92,7 +92,7 @@ export function WeeklyReviewCard() {
   const insight = buildInsight(data, topDeferState?.[0] ?? null);
 
   return (
-    <div className="mb-6 rounded-[16px] border-[1.5px] border-[var(--ink)] bg-white shadow-[3px_3px_0_var(--ink)] overflow-hidden">
+    <div className="mb-6 rounded-[16px] border border-[var(--stone-400)] bg-white overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-[var(--stone-400)] bg-[var(--lime-subtle)] flex items-center justify-between">
         <div>

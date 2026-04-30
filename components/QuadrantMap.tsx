@@ -188,7 +188,6 @@ export function QuadrantMap({ tasks }: Props) {
               border: "1.5px solid #dde4de",
               borderRadius: 8,
               padding: "7px 10px",
-              boxShadow: "2px 2px 0 #050e11",
               fontSize: 11,
               lineHeight: 1.45,
               color: "#082d1d",

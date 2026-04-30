@@ -61,9 +61,9 @@ function TaskPopover({ task, anchorRect, containerRect, onClose, onMarkDone }: P
     <div ref={ref} style={{
       position: "absolute", top, left, width: PW, zIndex: 50,
       background: "#fff",
-      border: "1.5px solid #050e11",
+      border: "1.5px solid #dde4de",
       borderRadius: 10,
-      boxShadow: "3px 3px 0 #050e11",
+      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
       padding: "12px 14px",
       fontSize: 12,
     }}>
@@ -94,7 +94,7 @@ function TaskPopover({ task, anchorRect, containerRect, onClose, onMarkDone }: P
 
       <div style={{ display: "flex", gap: 6 }}>
         <button onClick={() => { onMarkDone(task.id); onClose(); }} style={{
-          flex: 1, padding: "5px 0", borderRadius: 6, border: "1px solid #050e11",
+          flex: 1, padding: "5px 0", borderRadius: 6, border: "1px solid #dde4de",
           background: "#059669", color: "#fff", fontWeight: 700, fontSize: 11, cursor: "pointer",
         }}>
           ✓ Done
