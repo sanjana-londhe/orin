@@ -432,35 +432,9 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     </div>
                   )}
 
-                  {/* Section: Other tasks */}
+                  {/* Section: Other tasks — no header */}
                   {grid.length > 0 && (
                     <div style={{ marginBottom: 32 }}>
-                      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 16 }}>
-                        <div>
-                          <span style={{ display: "inline-flex", alignItems: "center", background: "#e3ffd1", border: "1.5px solid #c8f7ae", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 700, color: "#243000", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
-                            📋 Tasks
-                          </span>
-                          <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>
-                            {featured ? "Other tasks" : "Your tasks"}
-                          </p>
-                          <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
-                            Sorted by {SORT_LABELS[sortMode].toLowerCase()}
-                          </p>
-                        </div>
-                        <button onClick={() => setModalOpen(true)} style={{
-                          display: "flex", alignItems: "center", gap: 6,
-                          padding: "7px 16px", borderRadius: 8,
-                          background: "#059669", border: "none",
-                          color: "#fff", fontSize: 13, fontWeight: 600,
-                          cursor: "pointer", fontFamily: "inherit",
-                          transition: "background 0.15s",
-                          whiteSpace: "nowrap",
-                        }}
-                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
-                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
-                          + New task
-                        </button>
-                      </div>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                         {grid.map(t => <SortableTaskCard key={t.id} {...cardProps(t)} />)}
                       </div>
