@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { signOut } from "@/app/actions/auth";
+import { ProfileModal } from "@/components/ProfileModal";
 
 const PAGE_NAMES: Record<string, string> = {
   "/":         "To-do list",
@@ -30,7 +31,9 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
   const pathname = usePathname();
   const currentPage = PAGE_NAMES[pathname] ?? "Today";
 
-  const [view, setView]         = useState<"menu" | "profile" | "confirm-logout" | null>(null);
+  const [view, setView]         = useState<"menu" | "confirm-logout" | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [currentName, setCurrentName] = useState(name);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
           color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 11, fontWeight: 700, cursor: "pointer", userSelect: "none",
         }}>
-          {initial}
+          {(currentName.charAt(0) || initial).toUpperCase()}
         </div>
 
         {/* Menu */}
@@ -76,7 +79,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
             borderRadius: 10, padding: "4px 0",
             boxShadow: "0 4px 16px rgba(0,0,0,0.1)", minWidth: 160,
           }}>
-            <button onClick={() => setView("profile")} style={{
+            <button onClick={() => { setView(null); setProfileOpen(true); }} style={{
               display: "flex", alignItems: "center", gap: 9,
               width: "100%", padding: "9px 14px",
               background: "none", border: "none", cursor: "pointer",
@@ -96,40 +99,6 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}>
               <span>→</span> Log out
-            </button>
-          </div>
-        )}
-
-        {/* Profile popup */}
-        {view === "profile" && (
-          <div style={{
-            position: "absolute", top: 36, right: 0, zIndex: 100,
-            background: "#fff", border: `1.5px solid ${T.border}`,
-            borderRadius: 12, padding: "20px 20px 16px",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.1)", width: 240,
-          }}>
-            {/* Avatar */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <div style={{
-                width: 56, height: 56, borderRadius: "50%",
-                background: T.accent, border: `2px solid ${T.border}`,
-                color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 22, fontWeight: 700,
-              }}>
-                {initial}
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <p style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary, margin: 0 }}>{name || "User"}</p>
-                <p style={{ fontSize: 12, color: T.textTertiary, margin: "3px 0 0" }}>{email}</p>
-              </div>
-            </div>
-            <div style={{ height: 1, background: T.border, marginBottom: 12 }} />
-            <button onClick={() => setView(null)} style={{
-              width: "100%", padding: "7px 0", borderRadius: 8,
-              border: `1px solid ${T.border}`, background: "#fff",
-              fontSize: 12.5, color: T.textSecondary, cursor: "pointer", fontFamily: "inherit",
-            }}>
-              Close
             </button>
           </div>
         )}
@@ -167,6 +136,15 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
           </div>
         )}
       </div>
+      {/* Centered profile modal */}
+      <ProfileModal
+        open={profileOpen}
+        onOpenChange={setProfileOpen}
+        name={currentName}
+        email={email}
+        initial={currentName.charAt(0).toUpperCase() || initial}
+        onNameUpdate={n => setCurrentName(n)}
+      />
     </div>
   );
 }
