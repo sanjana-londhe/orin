@@ -37,7 +37,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
       });
       onNameUpdate?.(displayName.trim());
       setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => { setSaved(false); onOpenChange(false); }, 1200);
     } catch { /* silent */ }
     setSaving(false);
   }
