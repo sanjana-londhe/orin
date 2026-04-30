@@ -40,7 +40,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden rounded-[12px] border border-[#dde4de]" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.1)", background: "#fff" }}>
+      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden rounded-[12px] border border-[#dde4de]" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.1)", background: "#fff" }}>
         {open && (
           <ModalForm
             key={openCount}
@@ -110,14 +110,14 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
   return (
     <>
         {/* Title */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px 12px", borderBottom: "1px solid #e9ede9" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 20px 14px", borderBottom: "1px solid #e9ede9" }}>
           <span style={{ fontSize: 13, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
           <input autoFocus value={title} onChange={e => setTitle(e.target.value)}
             placeholder="What needs doing?"
             style={{ flex: 1, border: "none", outline: "none", fontSize: 14, fontWeight: 500, color: "#082d1d", background: "transparent", fontFamily: "inherit" }} />
         </div>
 
-        <div style={{ padding: "14px 16px 12px" }}>
+        <div style={{ padding: "16px 20px 14px" }}>
 
           {/* Date + Time side by side */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
@@ -176,7 +176,7 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
         </div>
 
         {/* Footer */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "10px 16px 14px", borderTop: "1px solid #e9ede9" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "12px 20px 16px", borderTop: "1px solid #e9ede9" }}>
           <button onClick={handleClose} style={{
             padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de",
             background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500,
