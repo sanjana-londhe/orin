@@ -212,38 +212,6 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
           </select>
         </div>
 
-        {/* Stats band — 5.html: ink border, cells */}
-        <div style={{
-          display: "flex", alignItems: "stretch", gap: 0,
-          background: "#fff", border: "1.5px solid #dde4de",
-          borderRadius: 12, overflow: "hidden", marginBottom: 20,
-        }}>
-          {[
-            { num: tasks.length,    label: "tasks today",   color: "#082d1d" },
-            { num: overdue,         label: "on fire · overdue", color: "#c23934" },
-            { num: `${totalDeferred}`, label: "total deferrals", color: totalDeferred > 0 ? "#c23934" : "#082d1d" },
-          ].map((s, i) => (
-            <div key={i} style={{
-              flex: 1, padding: "16px 20px",
-              borderRight: "1px solid #dde4de",
-            }}>
-              <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 3, color: s.color }}>
-                {s.num}
-              </div>
-              <div style={{ fontSize: 11, color: "#4a6d47", fontWeight: 500 }}>{s.label}</div>
-            </div>
-          ))}
-          {/* Progress cell */}
-          <div style={{ flex: 2, padding: "16px 20px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
-              <span style={{ color: "#3d5a4a" }}>Weekly completion</span>
-              <span style={{ fontWeight: 700, color: "#243000" }}>0%</span>
-            </div>
-            <div style={{ height: 4, background: "#f1f3ef", borderRadius: 999 }}>
-              <div style={{ height: "100%", borderRadius: 999, background: "#59d10b", width: "0%" }} />
-            </div>
-          </div>
-        </div>
 
       </div>
 
