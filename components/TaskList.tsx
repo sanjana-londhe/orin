@@ -164,7 +164,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     <>
       {/* ── Page header (5.html style) ── */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 12 }}>
           <div>
             <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
               Daily workspace · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
@@ -188,6 +188,28 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
             + New task
           </button>
+        </div>
+
+        {/* Sort dropdown — below Today heading */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+          <span style={{ fontSize: 12, color: "#4a6d47" }}>Sort by</span>
+          <select
+            value={sortMode}
+            onChange={e => setSortMode(e.target.value as SortMode)}
+            style={{
+              padding: "5px 32px 5px 10px", borderRadius: 7,
+              border: "1.5px solid #dde4de", background: "#fff",
+              color: "#082d1d", fontSize: 12.5, fontWeight: 500,
+              cursor: "pointer", fontFamily: "inherit", outline: "none",
+              appearance: "none",
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a6d47' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 10px center",
+            }}>
+            <option value="due_date">Due date</option>
+            <option value="emotional">Emotional state</option>
+            <option value="manual">Manual</option>
+          </select>
         </div>
 
         {/* Stats band — 5.html: ink border, cells */}
