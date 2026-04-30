@@ -24,13 +24,17 @@ const RECURRENCE_PRESETS = [
   { label: "↺ Weekly",   value: "FREQ=WEEKLY" },
 ];
 
-interface Props { open: boolean; onOpenChange: (open: boolean) => void; }
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  defaultDate?: string; // ISO date string e.g. "2026-04-30"
+}
 
-export function TaskCreateModal({ open, onOpenChange }: Props) {
+export function TaskCreateModal({ open, onOpenChange, defaultDate }: Props) {
   const queryClient = useQueryClient();
   const [step, setStep]                     = useState<"details" | "emotion">("details");
   const [title, setTitle]                   = useState("");
-  const [dueDate, setDueDate]               = useState("");
+  const [dueDate, setDueDate]               = useState(defaultDate ?? "");
   const [dueTime, setDueTime]               = useState("");
   const [emotionalState, setEmotionalState] = useState<EmotionalState>("NEUTRAL");
   const [recurrence, setRecurrence]         = useState("");
@@ -70,7 +74,7 @@ export function TaskCreateModal({ open, onOpenChange }: Props) {
   });
 
   function handleClose() {
-    setTitle(""); setDueDate(""); setDueTime("");
+    setTitle(""); setDueDate(defaultDate ?? ""); setDueTime("");
     setEmotionalState("NEUTRAL"); setRecurrence("");
     setSubtasks([]); setSubtaskInput(""); setError(""); setStep("details");
     onOpenChange(false);
