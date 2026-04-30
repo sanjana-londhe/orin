@@ -60,18 +60,23 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
   const [subtasks, setSubtasks] = useState<string[]>([]);
   const [subInput, setSubInput] = useState("");
   const [error, setError]     = useState("");
-  // Use refs for date/time so defaultValue renders immediately in DOM
-  const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
-  const initDate = defaultDate ?? getDefaultDate();
   const initTime = getDefaultTime();
+
+  // Date selection
+  const todayISO    = getDefaultDate();
+  const tomorrowISO = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })();
+  type DateMode = "today" | "tomorrow" | "custom";
+  const [dateMode, setDateMode] = useState<DateMode>("today");
+  const [customDate, setCustomDate] = useState(defaultDate ?? todayISO);
+
+  const selectedDate = dateMode === "today" ? todayISO : dateMode === "tomorrow" ? tomorrowISO : customDate;
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
-      const dueDate = dateRef.current?.value ?? initDate;
       const dueTime = timeRef.current?.value ?? initTime;
-      const dueAt = dueDate
-        ? new Date(`${dueDate}T${dueTime || "00:00"}`).toISOString()
+      const dueAt = selectedDate
+        ? new Date(`${selectedDate}T${dueTime || "00:00"}`).toISOString()
         : null;
       const res = await fetch("/api/tasks", {
         method: "POST",
@@ -126,18 +131,49 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
         {/* Body */}
         <div style={{ padding: "20px 20px 16px" }}>
 
-          {/* Due date + time */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Set due date</p>
-              <input ref={dateRef} type="date" defaultValue={initDate}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+          {/* Due date */}
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 10 }}>Set due date</p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: dateMode === "custom" ? 10 : 0 }}>
+              {(["today", "tomorrow", "custom"] as DateMode[]).map(opt => {
+                const active = dateMode === opt;
+                const label = opt === "today" ? "Today" : opt === "tomorrow" ? "Tomorrow" : "Custom date";
+                return (
+                  <button key={opt} onClick={() => setDateMode(opt)} style={{
+                    padding: "7px 16px", borderRadius: 999, fontSize: 13, fontWeight: 500,
+                    border: `1.5px solid ${active ? "#059669" : "#dde4de"}`,
+                    background: active ? "#059669" : "#fff",
+                    color: active ? "#fff" : "#3d5a4a",
+                    cursor: "pointer", fontFamily: "inherit", transition: "all 0.12s",
+                  }}>
+                    {label}
+                  </button>
+                );
+              })}
             </div>
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Set time</p>
-              <input ref={timeRef} type="time" defaultValue={initTime}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
-            </div>
+
+            {/* Custom date calendar picker */}
+            {dateMode === "custom" && (
+              <input
+                type="date"
+                value={customDate}
+                onChange={e => setCustomDate(e.target.value)}
+                min={todayISO}
+                style={{
+                  width: "100%", padding: "10px 12px",
+                  border: "1.5px solid #059669", borderRadius: 8,
+                  fontSize: 13, color: "#082d1d", background: "#f2fdec",
+                  fontFamily: "inherit", outline: "none", boxSizing: "border-box",
+                }}
+              />
+            )}
+          </div>
+
+          {/* Time */}
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", marginBottom: 8 }}>Set time</p>
+            <input ref={timeRef} type="time" defaultValue={initTime}
+              style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
           </div>
 
           {/* Feeling */}
