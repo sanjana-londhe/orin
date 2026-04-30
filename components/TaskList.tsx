@@ -138,102 +138,78 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
   return (
     <>
-      {/* ── Sticky stat band + sort ── */}
-      <div style={{
-        position: "sticky", top: 54, zIndex: 40,
-        background: "rgba(255,255,255,0.9)",
-        backdropFilter: "blur(16px)",
-        borderBottom: "1px solid rgba(0,0,0,0.06)",
-        margin: "0 -28px", padding: "0 28px",
-        display: "flex", alignItems: "stretch", gap: 0,
-      }}>
-        {[
-          { num: tasks.length, label: "tasks today", color: "#1A1612" },
-          { num: overdue, label: "on fire · overdue", color: "#FF4A00", pulse: overdue > 0 },
-          { num: `${tasks.length > 0 ? Math.round((1 - tasks.length / Math.max(tasks.length, 1)) * 0) : 0}%`, label: "completed today", color: "#1A9444" },
-          { num: totalDeferred, label: "total deferrals", color: "#D14626" },
-        ].map((s, i) => (
-          <div key={i} style={{
-            padding: "10px 24px 10px 0", display: "flex", flexDirection: "column",
-            justifyContent: "center", gap: 1,
-            borderRight: "1px solid rgba(0,0,0,0.06)", marginRight: 24,
-          }}>
-            <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1, color: s.color }}>
-              {s.num}{s.pulse ? " 🔥" : ""}
-            </span>
-            <span style={{ fontSize: 10.5, fontWeight: 500, color: "#B0A89E" }}>{s.label}</span>
+      {/* ── Page header (5.html style) ── */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+          <div>
+            <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
+              Daily workspace · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+            </p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1 }}>Today</h1>
+            {userName !== "there" && (
+              <p style={{ fontSize: 12.5, color: "#4a6d47", marginTop: 4 }}>
+                Good {timeGreeting}, {userName} ☀️ &nbsp;·&nbsp; {tasks.length} task{tasks.length !== 1 ? "s" : ""} &nbsp;·&nbsp; {tasks.length} remaining
+              </p>
+            )}
           </div>
-        ))}
-
-        {/* Sort pills */}
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
-          {(Object.keys(SORT_LABELS) as SortMode[]).map(mode => (
-            <button key={mode} onClick={() => setSortMode(mode)} style={{
-              fontSize: 11.5, padding: "4px 11px", borderRadius: 999,
-              border: sortMode === mode ? "1px solid #059669" : "1px solid rgba(0,0,0,0.1)",
-              background: sortMode === mode ? "#059669" : "none",
-              color: sortMode === mode ? "#fff" : "#9C9389",
-              fontWeight: sortMode === mode ? 600 : 400,
-              cursor: "pointer", fontFamily: "inherit", transition: "all 0.13s",
-            }}>
-              {SORT_LABELS[mode]}
-            </button>
-          ))}
         </div>
-      </div>
 
-      {/* ── Quick capture bar ── */}
-      <div style={{ marginTop: 16, marginBottom: 4 }}>
+        {/* Stats band — 5.html: ink border, cells */}
         <div style={{
-          display: "flex", alignItems: "center", gap: 10,
-          background: "#fff", borderRadius: 14, padding: "13px 18px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 20px rgba(0,0,0,0.07)",
-          border: "1px solid rgba(255,255,255,0.9)",
-          transition: "box-shadow 0.2s",
+          display: "flex", alignItems: "stretch", gap: 0,
+          background: "#fff", border: "1.5px solid #050e11",
+          borderRadius: 12, overflow: "hidden", marginBottom: 20,
         }}>
-          <span style={{ fontSize: 16, opacity: 0.45 }}>✦</span>
-          <input
-            value={captureValue}
-            onChange={e => setCaptureValue(e.target.value)}
+          {[
+            { num: tasks.length,    label: "tasks today",   color: "#082d1d" },
+            { num: overdue,         label: "on fire · overdue", color: "#c23934" },
+            { num: `${totalDeferred}`, label: "total deferrals", color: totalDeferred > 0 ? "#c23934" : "#082d1d" },
+          ].map((s, i) => (
+            <div key={i} style={{
+              flex: 1, padding: "16px 20px",
+              borderRight: "1px solid #dde4de",
+            }}>
+              <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1, marginBottom: 3, color: s.color }}>
+                {s.num}
+              </div>
+              <div style={{ fontSize: 11, color: "#4a6d47", fontWeight: 500 }}>{s.label}</div>
+            </div>
+          ))}
+          {/* Progress cell */}
+          <div style={{ flex: 2, padding: "16px 20px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+              <span style={{ color: "#3d5a4a" }}>Weekly completion</span>
+              <span style={{ fontWeight: 700, color: "#243000" }}>0%</span>
+            </div>
+            <div style={{ height: 4, background: "#f1f3ef", borderRadius: 999 }}>
+              <div style={{ height: "100%", borderRadius: 999, background: "#59d10b", width: "0%" }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Quick capture — 5.html style */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "12px 16px", background: "#fff",
+          border: "1px solid #dde4de", borderRadius: 12,
+          marginBottom: 24, transition: "border-color 0.15s, box-shadow 0.15s",
+        }}
+          onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.boxShadow = "0 0 0 3px rgba(89,209,11,0.3)"; }}
+          onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
+          <span style={{ fontSize: 14, color: "#4a6d47", flexShrink: 0 }}>✦</span>
+          <input value={captureValue} onChange={e => setCaptureValue(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && captureValue.trim()) quickCreate(captureValue.trim()); }}
-            placeholder="What's on your mind? Capture a task…"
-            style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#1A1612", background: "transparent" }}
-          />
-          <span style={{ fontFamily: "monospace", fontSize: 10.5, color: "#D0C8BE", flexShrink: 0 }}>↵ add</span>
+            placeholder="Capture a task — what do you need to do?"
+            style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 13.5, color: "#082d1d", background: "transparent" }} />
+          <span style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d47", background: "#f1f3ef", border: "1px solid #dde4de", borderRadius: 4, padding: "2px 6px", flexShrink: 0 }}>↵ add</span>
         </div>
       </div>
 
-      {/* ── Day header (4.html style) ── */}
-      <div style={{ margin: "28px 0 20px" }}>
-        <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#B0A89E", marginBottom: 8 }}>
-          Daily focus · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })}
-        </p>
-        <h1 style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-0.045em", color: "#1A1814", lineHeight: 1, marginBottom: 6 }}>
-          Today
-        </h1>
-        {userName !== "there" && (
-          <p style={{ fontSize: 13.5, color: "#A09890", marginBottom: 10 }}>
-            Good {timeGreeting}, {userName} ☀️ &nbsp;·&nbsp; {tasks.length} task{tasks.length !== 1 ? "s" : ""} &nbsp;·&nbsp; {tasks.length} remaining
-          </p>
-        )}
-        {/* Progress bar */}
-        {tasks.length > 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ flex: 1, maxWidth: 160, height: 3, background: "#E4DED8", borderRadius: 999 }}>
-              <div style={{ height: "100%", borderRadius: 999, background: "#059669", width: "20%" }} />
-            </div>
-            <span style={{ fontSize: 11.5, color: "#B0A89E" }}>
-              {isLoading ? "…" : "0"} of {tasks.length} done
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* ── Cards ── */}
+      {/* ── Cards (5.html: featured + 2-col grid) ── */}
       {isLoading ? (
-        <div style={{ columnCount: 3, columnGap: 14 }}>
-          {[...Array(6)].map((_, i) => (
-            <div key={i} style={{ breakInside: "avoid", marginBottom: 14, height: 160, borderRadius: 16, background: "rgba(0,0,0,0.04)", animation: "pulse 1.5s ease-in-out infinite" }} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} style={{ height: 160, borderRadius: 16, background: "rgba(0,0,0,0.04)" }} />
           ))}
         </div>
       ) : tasks.length === 0 ? (
@@ -241,22 +217,62 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={displayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-            {/* Masonry 3-column grid */}
-            <div style={{ columnCount: 3, columnGap: 14 }}
-              className="[column-count:1] sm:[column-count:2] lg:[column-count:3]">
-              {displayTasks.map(task => (
-                <SortableTaskCard
-                  key={task.id} task={task} dragActive={sortMode === "manual"}
-                  onMarkDone={markDone}
-                  onDefer={deferTask}
-                  onUpdate={updateTask}
-                  onDelete={deleteTask}
-                  onAddSubtask={addSubtask}
-                  onCompleteSubtask={completeSubtask}
-                  onDeleteSubtask={deleteSubtask}
-                />
-              ))}
-            </div>
+            {(() => {
+              // Split: first DREADING or overdue task → featured; rest → 2-col grid
+              const urgentIdx = displayTasks.findIndex(t =>
+                t.emotionalState === "DREADING" || (t.dueAt && new Date(t.dueAt) < new Date())
+              );
+              const featured = urgentIdx >= 0 ? displayTasks[urgentIdx] : null;
+              const grid = featured
+                ? [...displayTasks.slice(0, urgentIdx), ...displayTasks.slice(urgentIdx + 1)]
+                : displayTasks;
+
+              const cardProps = (t: typeof displayTasks[0], isFeatured = false) => ({
+                task: t, featured: isFeatured,
+                dragActive: sortMode === "manual",
+                onMarkDone: markDone, onDefer: deferTask, onUpdate: updateTask,
+                onDelete: deleteTask, onAddSubtask: addSubtask,
+                onCompleteSubtask: completeSubtask, onDeleteSubtask: deleteSubtask,
+              });
+
+              return (
+                <>
+                  {/* Section: Needs attention (if featured task exists) */}
+                  {featured && (
+                    <div style={{ marginBottom: 32 }}>
+                      <div style={{ marginBottom: 16 }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", background: "#e3ffd1", border: "1.5px solid #c8f7ae", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 700, color: "#243000", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
+                          🔥 Urgent
+                        </span>
+                        <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>Needs attention</p>
+                        <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>Urgent or emotionally heavy</p>
+                      </div>
+                      <SortableTaskCard key={featured.id} {...cardProps(featured, true)} />
+                    </div>
+                  )}
+
+                  {/* Section: Other tasks */}
+                  {grid.length > 0 && (
+                    <div style={{ marginBottom: 32 }}>
+                      <div style={{ marginBottom: 16 }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", background: "#e3ffd1", border: "1.5px solid #c8f7ae", borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 700, color: "#243000", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 6 }}>
+                          📋 Today
+                        </span>
+                        <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>
+                          {featured ? "Other tasks" : "Your tasks"}
+                        </p>
+                        <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
+                          {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })} · sorted by {SORT_LABELS[sortMode].toLowerCase()}
+                        </p>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                        {grid.map(t => <SortableTaskCard key={t.id} {...cardProps(t)} />)}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </SortableContext>
         </DndContext>
       )}

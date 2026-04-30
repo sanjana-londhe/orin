@@ -17,9 +17,10 @@ interface Props {
   onCompleteSubtask?: (id: string) => void;
   onDeleteSubtask?: (id: string) => void;
   dragActive?: boolean;
+  featured?: boolean;
 }
 
-function SortableTaskCardInner({ task, dragActive = false, ...props }: Props) {
+function SortableTaskCardInner({ task, dragActive = false, featured = false, ...props }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id });
 
@@ -47,7 +48,7 @@ function SortableTaskCardInner({ task, dragActive = false, ...props }: Props) {
         </div>
       )}
       <div className={dragActive ? "pl-6" : ""}>
-        <TaskCard task={task} {...props} />
+        <TaskCard task={task} featured={featured} {...props} />
       </div>
     </div>
   );

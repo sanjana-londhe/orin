@@ -31,6 +31,7 @@ function recurrenceLabel(rule: string | null) {
 
 interface Props {
   task: TaskWithSubtasks;
+  featured?: boolean; // full-width urgent card with ink border always
   onMarkDone?: (id: string) => void;
   onDefer?: (id: string, newDueAt: Date) => void;
   onUpdate?: (id: string, patch: Partial<Pick<Task, "title" | "dueAt" | "emotionalState">>) => void;
@@ -41,7 +42,7 @@ interface Props {
 }
 
 function TaskCardInner({
-  task, onMarkDone, onDefer, onUpdate, onDelete,
+  task, featured = false, onMarkDone, onDefer, onUpdate, onDelete,
   onAddSubtask, onCompleteSubtask, onDeleteSubtask,
 }: Props) {
   const { nudgedTaskIds } = useUIStore();
@@ -96,27 +97,29 @@ function TaskCardInner({
     <>
       <div
         style={{
-          breakInside: "avoid", marginBottom: 14,
-          background: "#FFFEFB", borderRadius: 16, overflow: "hidden",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 18px rgba(0,0,0,0.07)",
-          transition: "transform 0.22s cubic-bezier(.34,1.2,.64,1), box-shadow 0.22s ease",
-          border: "1px solid rgba(0,0,0,0.04)",
+          breakInside: "avoid", marginBottom: 16,
+          background: "#ffffff", borderRadius: 16, overflow: "hidden",
+          border: featured ? "1.5px solid #050e11" : "1.5px solid #dde4de",
+          boxShadow: featured ? "3px 3px 0 #050e11" : "none",
+          transition: "border-color 0.15s, box-shadow 0.15s, transform 0.15s",
         }}
         onMouseEnter={e => {
           const el = e.currentTarget as HTMLElement;
-          el.style.transform = "translateY(-3px)";
-          el.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05), 0 16px 44px rgba(0,0,0,0.11)";
+          el.style.borderColor = "#050e11";
+          el.style.boxShadow = featured ? "5px 5px 0 #050e11" : "3px 3px 0 #050e11";
+          el.style.transform = "translate(-1px, -1px)";
         }}
         onMouseLeave={e => {
           const el = e.currentTarget as HTMLElement;
-          el.style.transform = "translateY(0)";
-          el.style.boxShadow = "0 1px 2px rgba(0,0,0,0.04), 0 4px 18px rgba(0,0,0,0.07)";
+          el.style.borderColor = featured ? "#050e11" : "#dde4de";
+          el.style.boxShadow = featured ? "3px 3px 0 #050e11" : "none";
+          el.style.transform = "translate(0, 0)";
         }}
       >
         {/* Colour strip */}
         <div style={{ height: 4, background: em.strip }} />
 
-        <div style={{ padding: "16px 18px 12px" }}>
+        <div style={{ padding: featured ? "20px 24px 16px" : "20px 20px 16px" }}>
 
           {/* Timestamp row */}
           <div style={{ fontFamily: "monospace", fontSize: 10.5, color: overdue ? "#E05230" : "#C0B8AE", marginBottom: 7, display: "flex", alignItems: "center", gap: 6 }}>
@@ -151,7 +154,7 @@ function TaskCardInner({
             />
           ) : (
             <p onClick={() => setEditingTitle(true)}
-              style={{ fontSize: task.emotionalState === "DREADING" ? 17 : 15, fontWeight: 700, color: "#1A1612", lineHeight: 1.42, letterSpacing: "-0.02em", marginBottom: 10, cursor: "text" }}>
+              style={{ fontSize: featured ? 20 : 15, fontWeight: featured ? 700 : 600, color: "#082d1d", lineHeight: featured ? 1.3 : 1.36, letterSpacing: "-0.025em", marginBottom: 12, cursor: "text" }}>
               {task.title}
             </p>
           )}
@@ -217,20 +220,37 @@ function TaskCardInner({
           )}
         </div>
 
-        {/* Footer */}
-        <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 18px 14px", borderTop: "1px solid #F2EEE8" }}>
-          <button onClick={handleMarkDone} aria-label="Mark complete"
-            style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px solid #D8D0C8", background: "transparent", flexShrink: 0, cursor: "pointer", transition: "border-color 0.14s" }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#059669"}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#D8D0C8"}
-          />
-          <span style={{ fontSize: 11.5, color: "#B0A89E" }}>Mark complete</span>
+        {/* Footer — 5.html: stone-100 bg, stone-300 border-top */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: featured ? "12px 24px 14px" : "8px 20px 12px",
+          borderTop: "1px solid #e9ede9",
+          background: featured ? "#f2fdec" : "#f8f9f5",
+        }}>
+          {/* Mark done — action-primary */}
+          <button onClick={handleMarkDone} aria-label="Mark complete" style={{
+            padding: "4px 12px", borderRadius: 8,
+            background: "#059669", color: "#fff",
+            border: "1.5px solid #050e11",
+            fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+            transition: "all 0.12s",
+          }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#047857"; (e.currentTarget as HTMLElement).style.boxShadow = "2px 2px 0 #050e11"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#059669"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
+            ✓ Done
+          </button>
 
+          {/* Push this — action-secondary */}
           {onDefer && (
-            <button onClick={() => setDeferOpen(true)}
-              style={{ fontSize: 11.5, fontWeight: 500, padding: "4px 10px", borderRadius: 7, border: "1px solid rgba(0,0,0,0.1)", background: "none", cursor: "pointer", color: "#9C9389", fontFamily: "inherit", marginLeft: "auto" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f5f0e8"; (e.currentTarget as HTMLElement).style.color = "#1A1612"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "none"; (e.currentTarget as HTMLElement).style.color = "#9C9389"; }}>
+            <button onClick={() => setDeferOpen(true)} style={{
+              padding: "4px 12px", borderRadius: 8,
+              background: "#ffffff", color: "#3d5a4a",
+              border: "1.5px solid #dde4de",
+              fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+              transition: "all 0.12s",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f2fdec"; (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; (e.currentTarget as HTMLElement).style.color = "#082d1d"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#ffffff"; (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; (e.currentTarget as HTMLElement).style.color = "#3d5a4a"; }}>
               Push this →
             </button>
           )}
