@@ -31,9 +31,10 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
   const pathname = usePathname();
   const currentPage = PAGE_NAMES[pathname] ?? "Today";
 
-  const [view, setView]         = useState<"menu" | "confirm-logout" | null>(null);
+  const [view, setView]             = useState<"menu" | "confirm-logout" | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [currentName, setCurrentName] = useState(name);
+  const [avatarSrc, setAvatarSrc]     = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,8 +68,12 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
           background: T.accent, border: `1.5px solid ${T.border}`,
           color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 11, fontWeight: 700, cursor: "pointer", userSelect: "none",
+          overflow: "hidden",
         }}>
-          {(currentName.charAt(0) || initial).toUpperCase()}
+          {avatarSrc
+            ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+            : (currentName.charAt(0) || initial).toUpperCase()
+          }
         </div>
 
         {/* Menu */}
@@ -144,6 +149,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
         email={email}
         initial={currentName.charAt(0).toUpperCase() || initial}
         onNameUpdate={n => setCurrentName(n)}
+        onAvatarUpdate={url => setAvatarSrc(url)}
       />
     </div>
   );

@@ -11,9 +11,10 @@ interface Props {
   email: string;
   initial: string;
   onNameUpdate?: (name: string) => void;
+  onAvatarUpdate?: (url: string) => void;
 }
 
-export function ProfileModal({ open, onOpenChange, name, email, initial, onNameUpdate }: Props) {
+export function ProfileModal({ open, onOpenChange, name, email, initial, onNameUpdate, onAvatarUpdate }: Props) {
   const [displayName, setDisplayName] = useState(name);
   const [avatarUrl, setAvatarUrl]     = useState<string | null>(null);
   const [saving, setSaving]           = useState(false);
@@ -36,6 +37,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
         data: { full_name: displayName.trim() },
       });
       onNameUpdate?.(displayName.trim());
+      if (avatarUrl) onAvatarUpdate?.(avatarUrl);
       setSaved(true);
       setTimeout(() => { setSaved(false); onOpenChange(false); }, 1200);
     } catch { /* silent */ }
