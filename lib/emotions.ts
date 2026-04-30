@@ -5,7 +5,7 @@ export const EMOTION_MAP = {
     pillText:  "#D14626",
     label:     "Dreading",
     emoji:     "😮‍💨",
-    chartColor:"#c23934",
+    chartColor:"#EF4444",   // vivid red
   },
   ANXIOUS: {
     strip:     "#886a00",
@@ -13,7 +13,7 @@ export const EMOTION_MAP = {
     pillText:  "#B07A10",
     label:     "Anxious",
     emoji:     "😟",
-    chartColor:"#886a00",
+    chartColor:"#F59E0B",   // vivid amber
   },
   NEUTRAL: {
     strip:     "#c4cbc2",
@@ -21,7 +21,7 @@ export const EMOTION_MAP = {
     pillText:  "#7A756E",
     label:     "Neutral",
     emoji:     "😐",
-    chartColor:"#9CA3AF",
+    chartColor:"#94A3B8",   // slate gray — clearly distinct
   },
   WILLING: {
     strip:     "#2b6b5e",
@@ -29,7 +29,7 @@ export const EMOTION_MAP = {
     pillText:  "#0E8A7D",
     label:     "Willing",
     emoji:     "🙂",
-    chartColor:"#2b6b5e",
+    chartColor:"#14B8A6",   // vivid teal — clearly different from green
   },
   EXCITED: {
     strip:     "#59d10b",
@@ -37,7 +37,7 @@ export const EMOTION_MAP = {
     pillText:  "#1A9444",
     label:     "Excited",
     emoji:     "🤩",
-    chartColor:"#59d10b",
+    chartColor:"#22C55E",   // vivid green
   },
 } as const;
 
