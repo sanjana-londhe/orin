@@ -132,14 +132,15 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
+    // Auto-switch to manual sort when user drags
+    if (sortMode !== "manual") setSortMode("manual");
+
     const oldIndex = manualOrder.indexOf(active.id as string);
     const newIndex = manualOrder.indexOf(over.id as string);
     const newOrder = arrayMove(manualOrder, oldIndex, newIndex);
 
-    // Optimistic update
     setManualOrder(newOrder);
 
-    // Debounced DB write
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => reorderTasks(newOrder), 500);
   }
@@ -409,7 +410,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
               const cardProps = (t: typeof displayTasks[0], isFeatured = false) => ({
                 task: t, featured: isFeatured,
-                dragActive: sortMode === "manual",
+                dragActive: true,
                 onMarkDone: markDone, onDefer: deferTask, onUpdate: updateTask,
                 onDelete: deleteTask, onAddSubtask: addSubtask,
                 onCompleteSubtask: completeSubtask, onDeleteSubtask: deleteSubtask,
