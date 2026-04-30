@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -37,6 +37,19 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
   const [subtasks, setSubtasks]   = useState<string[]>([]);
   const [subInput, setSubInput]   = useState("");
   const [error, setError]         = useState("");
+
+  // Refresh defaults every time the modal opens
+  useEffect(() => {
+    if (open) {
+      setDueDate(defaultDate ?? getDefaultDate());
+      setDueTime(getDefaultTime());
+      setTitle(defaultTitle ?? "");
+      setEmotion("NEUTRAL");
+      setSubtasks([]);
+      setSubInput("");
+      setError("");
+    }
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
