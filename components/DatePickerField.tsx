@@ -95,14 +95,11 @@ export function DatePickerField({ value, onChange, label = "Due date" }: Props) 
           if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.border;
         }}
       >
-        <div style={{ textAlign: "left" }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: D.textPrimary, lineHeight: 1.3, margin: 0 }}>
-            {selected.label}
-          </p>
-          {selected.sub && (
-            <p style={{ fontSize: 10.5, color: D.textMuted, margin: 0, marginTop: 1 }}>{selected.sub}</p>
-          )}
-        </div>
+        <p style={{ fontSize: 13, fontWeight: 600, color: D.textPrimary, margin: 0 }}>
+          {mode === "today" ? `Today, ${fmt(today)}` :
+           mode === "tomorrow" ? `Tomorrow, ${fmt(tomorrow)}` :
+           value ? fmt(value) : "Custom date"}
+        </p>
         <ChevronDown
           size={14}
           color={D.textSecondary}
