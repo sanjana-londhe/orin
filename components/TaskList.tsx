@@ -232,7 +232,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             </span>
             <p style={{ fontSize: 15, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.03em" }}>Your tasks</p>
             <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
-              {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })} · nothing due today
+              Nothing due today
             </p>
           </div>
 
@@ -413,7 +413,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                             {featured ? "Other tasks" : "Your tasks"}
                           </p>
                           <p style={{ fontSize: 11, color: "#4a6d47", marginTop: 2 }}>
-                            {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })} · sorted by {SORT_LABELS[sortMode].toLowerCase()}
+                            Sorted by {SORT_LABELS[sortMode].toLowerCase()}
                           </p>
                         </div>
                         <button onClick={() => setModalOpen(true)} style={{
