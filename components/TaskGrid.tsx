@@ -2,6 +2,7 @@
 
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
+import { SkeletonTaskList } from "@/components/Skeleton";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 interface Props {
@@ -11,23 +12,11 @@ interface Props {
   dragActive?: boolean;
 }
 
-const SKELETON_HEIGHTS = [160, 120, 200, 140, 180, 110];
-
 export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: Props) {
   const m = useTaskMutations();
 
   if (isLoading) {
-    return (
-      <div style={{ columnCount: 3, columnGap: 14 }}>
-        {SKELETON_HEIGHTS.map((h, i) => (
-          <div key={i} style={{
-            breakInside: "avoid", marginBottom: 14, height: h,
-            borderRadius: 16, background: "rgba(0,0,0,0.04)",
-            animation: "pulse 1.5s ease-in-out infinite",
-          }} />
-        ))}
-      </div>
-    );
+    return <SkeletonTaskList count={4} />;
   }
 
   if (tasks.length === 0) {

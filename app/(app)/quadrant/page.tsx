@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { SkeletonBox } from "@/components/Skeleton";
 import { PAGE_STYLE } from "@/lib/utils";
 import { QuadrantMap, type QuadrantTask } from "@/components/QuadrantMap";
 
@@ -45,9 +46,7 @@ export default function QuadrantPage() {
 
           {/* Map */}
           <div className="px-6 py-5">
-            {isLoading && (
-              <div className="h-[300px] rounded-[12px] bg-[var(--lime-subtle)] animate-pulse" />
-            )}
+            {isLoading && <SkeletonBox height={300} radius={12} />}
             {isError && (
               <p className="text-sm text-[hsl(var(--destructive))]">
                 Could not load quadrant data.

@@ -15,6 +15,7 @@ import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-ki
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { DatePickerField } from "@/components/DatePickerField";
+import { SkeletonTaskList } from "@/components/Skeleton";
 import { useUIStore, type SortMode } from "@/store/ui";
 import type { TaskWithSubtasks } from "@/lib/types";
 
@@ -249,11 +250,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
       {/* ── Cards (5.html: featured + 2-col grid) ── */}
       {isLoading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          {[...Array(4)].map((_, i) => (
-            <div key={i} style={{ height: 160, borderRadius: 16, background: "rgba(0,0,0,0.04)" }} />
-          ))}
-        </div>
+        <SkeletonTaskList count={5} />
       ) : tasks.length === 0 ? (
         /* Empty — inline add input only */
         <div style={{ marginBottom: 32 }}>
