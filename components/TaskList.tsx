@@ -296,9 +296,9 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
                 <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
                 <div>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 5 }}>Set time</p>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6, margin: "0 0 6px 0" }}>Due time</p>
                   <input type="time" value={inlineDueTime} onChange={e => setInlineDueTime(e.target.value)}
-                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #dde4de", borderRadius: 8, fontSize: 12.5, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
+                    style={{ width: "100%", padding: "9px 12px", height: 38, border: "1px solid #dde4de", borderRadius: 8, fontSize: 13, color: "#082d1d", background: "#fafbf7", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }} />
                 </div>
               </div>
 

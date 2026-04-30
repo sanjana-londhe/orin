@@ -71,12 +71,12 @@ export function DatePickerField({ value, onChange, label = "Due date" }: Props) 
   return (
     <div ref={ref} style={{ position: "relative" }}>
       {label && (
-        <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6, margin: "0 0 6px 0" }}>
           {label}
         </p>
       )}
 
-      {/* Trigger — same size/style as time input */}
+      {/* Trigger — identical to time input */}
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
@@ -84,27 +84,20 @@ export function DatePickerField({ value, onChange, label = "Due date" }: Props) 
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", borderRadius: 8,
           border: `1px solid ${open ? D.accent : D.border}`,
-          background: D.surfacePage,
+          background: "#fafbf7",
           cursor: "pointer", fontFamily: "inherit", transition: "border-color 0.14s",
-          boxSizing: "border-box", height: 38,
+          boxSizing: "border-box", height: 38, outline: "none",
         }}
-        onMouseEnter={e => {
-          if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.borderHover;
-        }}
-        onMouseLeave={e => {
-          if (!open) (e.currentTarget as HTMLElement).style.borderColor = open ? D.accent : D.border;
-        }}
+        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.borderHover; }}
+        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.border; }}
       >
-        <span style={{ fontSize: 13, fontWeight: 400, color: D.textPrimary }}>
-          {value === today    ? `Today, ${fmt(today)}` :
-           value === tomorrow ? `Tomorrow, ${fmt(tomorrow)}` :
-           value ? fmt(value) : "Custom date"}
+        <span style={{ fontSize: 13, fontWeight: 400, color: "#082d1d" }}>
+          {value === today    ? "Today" :
+           value === tomorrow ? "Tomorrow" :
+           value ? fmt(value) : "Pick a date"}
         </span>
-        <ChevronDown
-          size={13}
-          color={D.textSecondary}
-          style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.14s" }}
-        />
+        <ChevronDown size={13} color="#4a6d47"
+          style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }} />
       </button>
 
       {/* Dropdown panel */}
