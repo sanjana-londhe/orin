@@ -248,7 +248,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
       {/* ── Cards (5.html: featured + 2-col grid) ── */}
       {isLoading ? (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           {[...Array(4)].map((_, i) => (
             <div key={i} style={{ height: 160, borderRadius: 16, background: "rgba(0,0,0,0.04)" }} />
           ))}
@@ -424,7 +424,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   {/* Section: Other tasks — no header */}
                   {grid.length > 0 && (
                     <div style={{ marginBottom: 32 }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
                         {grid.map(t => <SortableTaskCard key={t.id} {...cardProps(t)} />)}
                       </div>
                     </div>
