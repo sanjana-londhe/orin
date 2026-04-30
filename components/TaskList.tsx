@@ -164,7 +164,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     <>
       {/* ── Page header (5.html style) ── */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 20 }}>
           <div>
             <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
               Daily workspace · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
@@ -176,6 +176,18 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               </p>
             )}
           </div>
+          <button onClick={() => setModalOpen(true)} style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "8px 18px", borderRadius: 8,
+            background: "#059669", border: "none",
+            color: "#fff", fontSize: 13.5, fontWeight: 600,
+            cursor: "pointer", fontFamily: "inherit",
+            transition: "background 0.15s", flexShrink: 0,
+          }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
+            + New task
+          </button>
         </div>
 
         {/* Stats band — 5.html: ink border, cells */}
