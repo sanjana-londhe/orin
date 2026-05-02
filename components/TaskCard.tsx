@@ -117,7 +117,6 @@ function TaskCardInner({
         boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
         overflow: "hidden",
       }}>
-        <div style={{ height: 3, background: em.strip }} />
         <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
 
           {/* Title */}
@@ -235,7 +234,6 @@ function TaskCardInner({
         boxShadow: isLocallyCompleted ? "none" : "0 1px 4px rgba(0,0,0,0.05)",
         display: "flex", flexDirection: "column",
       }}>
-        <div style={{ height: 3, background: isLocallyCompleted ? "#c8f7ae" : em.strip, flexShrink: 0 }} />
 
         <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
 
