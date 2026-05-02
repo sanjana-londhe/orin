@@ -114,17 +114,17 @@ function TaskCardInner({
         onMouseLeave={() => setHovered(false)}
         style={{
           background: "#fff",
-          borderRadius: 16,
+          borderRadius: 12,
           border: "1px solid #e9ede9",
-          padding: "16px 18px",
-          marginBottom: 10,
-          boxShadow: hovered ? "0 4px 16px rgba(0,0,0,0.07)" : "0 1px 3px rgba(0,0,0,0.04)",
+          padding: "11px 14px",
+          marginBottom: 6,
+          boxShadow: hovered ? "0 3px 10px rgba(0,0,0,0.06)" : "0 1px 2px rgba(0,0,0,0.03)",
           transition: "box-shadow 0.15s, border-color 0.15s",
           borderColor: hovered ? "#c4cbc2" : "#e9ede9",
         }}
       >
         {/* ── Top row: emotion badge + menu ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {/* Emotion badge */}
             {editingState ? (
@@ -140,15 +140,15 @@ function TaskCardInner({
               <button
                 onClick={() => setEditingState(true)}
                 style={{
-                  display: "inline-flex", alignItems: "center", gap: 5,
-                  padding: "4px 10px", borderRadius: 999,
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "3px 8px", borderRadius: 999,
                   background: em.pillBg, color: em.pillText,
                   border: `1px solid ${em.pillBg}`,
-                  fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                  fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
                   transition: "opacity 0.12s",
                 }}
               >
-                <span style={{ fontSize: 13 }}>{em.emoji}</span>
+                <span style={{ fontSize: 11 }}>{em.emoji}</span>
                 {em.label}
               </button>
             )}
@@ -156,23 +156,17 @@ function TaskCardInner({
             {/* Deferred badge */}
             {task.deferredCount > 0 && (
               <span style={{
-                padding: "3px 8px", borderRadius: 999,
+                padding: "2px 7px", borderRadius: 999,
                 background: "#FFF0EC", color: "#D14626",
-                fontSize: 11, fontWeight: 600,
-              }}>
-                Deferred {task.deferredCount}×
-              </span>
+                fontSize: 10.5, fontWeight: 600,
+              }}>Deferred {task.deferredCount}×</span>
             )}
-
-            {/* Recurrence badge */}
             {recur && (
               <span style={{
-                padding: "3px 8px", borderRadius: 999,
+                padding: "2px 7px", borderRadius: 999,
                 background: "#F0F0FF", color: "#5555CC",
-                fontSize: 11, fontWeight: 600,
-              }}>
-                ↺ {recur}
-              </span>
+                fontSize: 10.5, fontWeight: 600,
+              }}>↺ {recur}</span>
             )}
           </div>
 
@@ -244,7 +238,7 @@ function TaskCardInner({
         </div>
 
         {/* ── Title ── */}
-        <div style={{ marginBottom: totalSubs > 0 ? 14 : 0 }}>
+        <div style={{ marginBottom: totalSubs > 0 ? 10 : 0 }}>
           {editingTitle ? (
             <input
               ref={titleRef}
@@ -253,18 +247,18 @@ function TaskCardInner({
               onBlur={commitTitle}
               onKeyDown={e => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setTitleDraft(task.title); setEditingTitle(false); } }}
               style={{
-                width: "100%", fontSize: 16, fontWeight: 700, color: "#082d1d",
+                width: "100%", fontSize: 14, fontWeight: 700, color: "#082d1d",
                 border: "none", borderBottom: "2px solid #059669",
                 background: "transparent", outline: "none", fontFamily: "inherit",
-                letterSpacing: "-0.02em", lineHeight: 1.3,
+                letterSpacing: "-0.01em", lineHeight: 1.3,
               }}
             />
           ) : (
             <p
               onClick={() => setEditingTitle(true)}
               style={{
-                fontSize: 16, fontWeight: 700, color: "#082d1d",
-                margin: 0, lineHeight: 1.35, letterSpacing: "-0.02em",
+                fontSize: 14, fontWeight: 700, color: "#082d1d",
+                margin: 0, lineHeight: 1.35, letterSpacing: "-0.01em",
                 cursor: "text",
               }}
             >
@@ -284,53 +278,40 @@ function TaskCardInner({
         {totalSubs > 0 && (
           <div style={{ marginBottom: 14 }}>
             {/* Segmented progress bar */}
-            <div style={{ display: "flex", gap: 3, marginBottom: 10 }}>
+            {/* Segmented progress bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: 3, marginBottom: 8 }}>
               {task.subtasks.map((sub, i) => (
-                <div key={i} style={{
-                  flex: 1, height: 4, borderRadius: 999,
-                  background: sub.isCompleted ? "#059669" : "#e9ede9",
-                  transition: "background 0.2s",
-                }} />
+                <div key={i} style={{ flex: 1, height: 3, borderRadius: 999, background: sub.isCompleted ? "#059669" : "#e9ede9", transition: "background 0.2s" }} />
               ))}
-              <span style={{
-                fontSize: 11, fontWeight: 700, color: "#059669",
-                marginLeft: 8, flexShrink: 0,
-                alignSelf: "center",
-              }}>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: "#059669", marginLeft: 6, flexShrink: 0 }}>
                 {completedSubs}/{totalSubs}
               </span>
             </div>
 
             {/* Subtask list */}
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#c4cbc2", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>
-              Subtasks
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {task.subtasks.map(sub => (
-                <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <button
                     onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)}
                     style={{
-                      width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                      width: 15, height: 15, borderRadius: 4, flexShrink: 0,
                       cursor: sub.isCompleted ? "default" : "pointer",
                       background: sub.isCompleted ? "#059669" : "#fff",
-                      border: `2px solid ${sub.isCompleted ? "#059669" : "#dde4de"}`,
+                      border: `1.5px solid ${sub.isCompleted ? "#059669" : "#dde4de"}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       transition: "all 0.15s",
                     }}
                   >
-                    {sub.isCompleted && <Check size={10} color="#fff" strokeWidth={3} />}
+                    {sub.isCompleted && <Check size={8} color="#fff" strokeWidth={3} />}
                   </button>
                   <span style={{
-                    fontSize: 13, color: sub.isCompleted ? "#c4cbc2" : "#3d5a4a",
+                    fontSize: 12, color: sub.isCompleted ? "#c4cbc2" : "#3d5a4a",
                     textDecoration: sub.isCompleted ? "line-through" : "none",
-                    flex: 1, lineHeight: 1.4,
-                  }}>
-                    {sub.title}
-                  </span>
-                  <button
-                    onClick={() => onDeleteSubtask?.(sub.id)}
-                    style={{ fontSize: 11, color: "#e9ede9", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                    flex: 1,
+                  }}>{sub.title}</span>
+                  <button onClick={() => onDeleteSubtask?.(sub.id)}
+                    style={{ fontSize: 10, color: "#e9ede9", background: "none", border: "none", cursor: "pointer", padding: 0 }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c23934"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#e9ede9"}
                   >✕</button>
@@ -341,9 +322,9 @@ function TaskCardInner({
         )}
 
         {/* Add subtask */}
-        {addingSubtask ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <div style={{ width: 18, height: 18, borderRadius: 5, border: "2px dashed #dde4de", flexShrink: 0 }} />
+        {addingSubtask && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <div style={{ width: 15, height: 15, borderRadius: 4, border: "1.5px dashed #dde4de", flexShrink: 0 }} />
             <input
               ref={subtaskRef}
               value={subtaskDraft}
@@ -351,24 +332,16 @@ function TaskCardInner({
               onKeyDown={e => { if (e.key === "Enter") submitSubtask(); if (e.key === "Escape") { setSubtaskDraft(""); setAddingSubtask(false); } }}
               onBlur={() => { if (!subtaskDraft.trim()) setAddingSubtask(false); else submitSubtask(); }}
               placeholder="Add subtask…"
-              style={{ flex: 1, fontSize: 13, color: "#082d1d", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }}
+              style={{ flex: 1, fontSize: 12, color: "#082d1d", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }}
             />
           </div>
-        ) : (
-          <button
-            onClick={() => setAddingSubtask(true)}
-            style={{ fontSize: 12, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer", padding: "0 0 12px", fontFamily: "inherit" }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#4a6d47"}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#c4cbc2"}
-          >
-            + Add subtask
-          </button>
         )}
 
         {/* ── Bottom row: date + quick actions ── */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          paddingTop: 12, borderTop: "1px solid #f1f3ef",
+          paddingTop: 8, borderTop: "1px solid #f1f3ef",
+          marginTop: 4,
         }}>
           {/* Due date */}
           <div>
@@ -403,38 +376,24 @@ function TaskCardInner({
           </div>
 
           {/* Quick actions */}
-          <div style={{ display: "flex", gap: 6 }}>
-            <button
-              onClick={handleMarkDone}
-              title="Mark done"
-              style={{
-                width: 30, height: 30, borderRadius: 8,
-                border: "1.5px solid #e9ede9", background: "#fff",
-                color: "#059669", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.12s",
-              }}
+          <div style={{ display: "flex", gap: 4 }}>
+            <button onClick={handleMarkDone} title="Mark done" style={{
+              width: 26, height: 26, borderRadius: 7, border: "1px solid #e9ede9",
+              background: "#fff", color: "#059669", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.12s",
+            }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#059669"; (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e9ede9"; (e.currentTarget as HTMLElement).style.color = "#059669"; }}
-            >
-              <Check size={13} strokeWidth={2.5} />
-            </button>
+            ><Check size={12} strokeWidth={2.5} /></button>
             {onDefer && (
-              <button
-                onClick={() => setDeferOpen(true)}
-                title="Push task"
-                style={{
-                  width: 30, height: 30, borderRadius: 8,
-                  border: "1.5px solid #e9ede9", background: "#fff",
-                  color: "#4a6d47", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all 0.12s",
-                }}
+              <button onClick={() => setDeferOpen(true)} title="Push task" style={{
+                width: 26, height: 26, borderRadius: 7, border: "1px solid #e9ede9",
+                background: "#fff", color: "#4a6d47", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.12s",
+              }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f2fdec"; (e.currentTarget as HTMLElement).style.borderColor = "#c8f7ae"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e9ede9"; }}
-              >
-                <ArrowRight size={13} strokeWidth={2} />
-              </button>
+              ><ArrowRight size={12} strokeWidth={2} /></button>
             )}
           </div>
         </div>
