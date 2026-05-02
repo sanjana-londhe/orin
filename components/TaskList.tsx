@@ -387,13 +387,13 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     <>
       {/* ── Page header (5.html style) ── */}
       <div style={{ marginBottom: 24 }}>
-        {/* Single row: Today + sort + filter + new task */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        {/* Single row: Today (left) | sort + filter + new task (right) */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 20 }}>
           <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1, flexShrink: 0 }}>
             Today
           </h1>
 
-          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
 
           {/* ── Sort by custom dropdown ── */}
           <SortDropdown value={sortMode} onChange={setSortMode} />
