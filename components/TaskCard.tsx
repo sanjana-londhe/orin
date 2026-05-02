@@ -57,10 +57,11 @@ function TaskCardInner({
   const totalSubs     = task.subtasks.length;
   const progress      = totalSubs > 0 ? Math.round((completedSubs / totalSubs) * 100) : 0;
 
-  const [deferOpen, setDeferOpen]   = useState(false);
-  const [editing, setEditing]       = useState(false);
-  const [subInput, setSubInput]     = useState("");
+  const [deferOpen, setDeferOpen]       = useState(false);
+  const [editing, setEditing]           = useState(false);
+  const [subInput, setSubInput]         = useState("");
   const [showSubInput, setShowSubInput] = useState(false);
+  const [subsExpanded, setSubsExpanded] = useState(true);
   const subRef = useRef<HTMLInputElement>(null);
 
   const [editTitle, setEditTitle]     = useState(task.title);
@@ -199,19 +200,19 @@ function TaskCardInner({
 
           {/* Title + meta */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p onClick={() => !isLocallyCompleted && openEdit()} style={{
+            <p style={{
               fontSize: 14, fontWeight: 600,
               color: isLocallyCompleted ? "#9ca3af" : "#0a2010",
               margin: 0, lineHeight: 1.4,
-              cursor: isLocallyCompleted ? "default" : "pointer",
+              cursor: "default",
               textDecoration: isLocallyCompleted ? "line-through" : "none",
             }}>{task.title}</p>
 
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
               {!isLocallyCompleted && (
-                <button onClick={openEdit} style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 7px", borderRadius: 999, background: em.pillBg, color: em.pillText, border: "none", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 7px", borderRadius: 999, background: em.pillBg, color: em.pillText, fontSize: 12, fontWeight: 600 }}>
                   {em.emoji} {em.label}
-                </button>
+                </span>
               )}
               {(due || (!isLocallyCompleted && onDefer)) && (
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -229,7 +230,7 @@ function TaskCardInner({
               )}
             </div>
 
-            {/* Progress bar */}
+            {/* Progress bar + collapse toggle */}
             {totalSubs > 0 && (
               <div style={{ marginTop: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
@@ -237,12 +238,18 @@ function TaskCardInner({
                     <div style={{ height: "100%", borderRadius: 999, background: progress === 100 ? "#16a34a" : "#059669", width: `${progress}%`, transition: "width 0.3s" }} />
                   </div>
                   <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500, flexShrink: 0 }}>{completedSubs}/{totalSubs}</span>
+                  {totalSubs > 1 && (
+                    <button onClick={() => setSubsExpanded(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#9ca3af", padding: 0, fontFamily: "inherit", flexShrink: 0 }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#374151"}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9ca3af"}
+                    >{subsExpanded ? "Hide" : "Show"}</button>
+                  )}
                 </div>
               </div>
             )}
 
             {/* Subtasks */}
-            {task.subtasks.length > 0 && (
+            {task.subtasks.length > 0 && subsExpanded && (
               <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 6 }}>
                 {task.subtasks.map(sub => (
                   <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
