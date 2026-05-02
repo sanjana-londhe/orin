@@ -570,15 +570,20 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               return (
                 <>
                   {featured && (
-                    <SortableTaskCard key={featured.id} {...cardProps(featured, true)} />
+                    <div style={{ marginBottom: 16 }}>
+                      <SortableTaskCard key={featured.id} {...cardProps(featured, true)} />
+                    </div>
                   )}
 
-                  {/* Section: Other tasks — no header */}
                   {grid.length > 0 && (
-                    <div style={{ marginBottom: 32 }}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                        {grid.map(t => <SortableTaskCard key={t.id} {...cardProps(t)} />)}
-                      </div>
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                      gap: 16,
+                      marginBottom: 32,
+                      alignItems: "start",
+                    }}>
+                      {grid.map(t => <SortableTaskCard key={t.id} {...cardProps(t)} />)}
                     </div>
                   )}
                 </>
