@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { ProfileModal } from "@/components/ProfileModal";
+import { EnergyCheckInModal, loadEnergyStore, saveEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
 import { getEmotion } from "@/lib/emotions";
 import { signOut } from "@/app/actions/auth";
 import type { TaskWithSubtasks } from "@/lib/types";
@@ -17,7 +18,7 @@ import type { TaskWithSubtasks } from "@/lib/types";
 const VIEWS = [
   { href: "/",          Icon: ListChecks,   label: "To-do list" },
   { href: "/all",       Icon: List,         label: "All Tasks" },
-  { href: "/energy",    Icon: Zap,          label: "Flow" },
+  { href: "/energy",    Icon: Zap,          label: "My Energy" },
   { href: "/quadrant",  Icon: ScatterChart, label: "Quadrant" },
   { href: "/calendar",  Icon: CalendarDays, label: "Calendar" },
 ];
@@ -26,14 +27,14 @@ interface Props { userName: string; email?: string; initial?: string }
 
 export function Sidebar({ userName, email = "", initial = "" }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
   const [modalOpen, setModalOpen]     = useState(false);
   const [collapsed, setCollapsed]     = useState(false);
   const [theme, setTheme]             = useState<"light" | "dark">("light");
   const [profileOpen, setProfileOpen] = useState(false);
-  const [showUser, setShowUser]       = useState(false);
-  const [currentName, setCurrentName] = useState(userName);
-  const [avatarSrc, setAvatarSrc]     = useState<string | null>(null);
+  const [showUser, setShowUser]         = useState(false);
+  const [currentName, setCurrentName]   = useState(userName);
+  const [avatarSrc, setAvatarSrc]       = useState<string | null>(null);
+  const [energyModalOpen, setEnergyModalOpen] = useState(false);
 
   const { data: tasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "today"],
@@ -180,7 +181,7 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
           {/* Promo card */}
           {!collapsed && (
             <button
-              onClick={() => router.push("/energy")}
+              onClick={() => setEnergyModalOpen(true)}
               style={{
                 width: "100%", textAlign: "left",
                 padding: 14, borderRadius: 12, border: "none",
@@ -190,9 +191,9 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
             >
               <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3 }}>Track your energy</p>
               <p style={{ fontSize: 11.5, margin: "0 0 10px", opacity: 0.85, lineHeight: 1.5 }}>
-                Log how each task feels and see your flow patterns.
+                Log how you feel and see patterns over time.
               </p>
-              <span style={{ fontSize: 12, fontWeight: 700 }}>Open Flow →</span>
+              <span style={{ fontSize: 12, fontWeight: 700 }}>Check in now →</span>
             </button>
           )}
         </div>
@@ -303,6 +304,17 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
       </aside>
 
       <TaskCreateModal open={modalOpen} onOpenChange={setModalOpen} />
+      {energyModalOpen && (
+        <EnergyCheckInModal
+          onClose={() => setEnergyModalOpen(false)}
+          onSave={(entry: CheckIn) => {
+            const store = loadEnergyStore();
+            const key = todayKey();
+            store[key] = [...(store[key] ?? []), entry];
+            saveEnergyStore(store);
+          }}
+        />
+      )}
       <ProfileModal
         open={profileOpen}
         onOpenChange={setProfileOpen}
