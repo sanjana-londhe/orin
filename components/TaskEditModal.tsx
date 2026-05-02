@@ -105,21 +105,21 @@ export function TaskEditModal({ task, onClose, onUpdate, onAddSubtask, onDeleteS
 
           {/* Emotion */}
           <div>
-            <label style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", display: "block", marginBottom: 7 }}>Feeling</label>
-            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+            <label style={{ fontSize: 13, fontWeight: 700, color: "#082d1d", display: "block", marginBottom: 10 }}>How do you feel about it?</label>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {EMOTIONS.map(s => {
                 const active = emotion === s.value;
                 return (
                   <button key={s.value} onClick={() => setEmotion(s.value)} style={{
-                    display: "inline-flex", alignItems: "center", gap: 3,
-                    padding: "4px 10px", borderRadius: 999,
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "8px 16px", borderRadius: 10,
                     background: active ? s.activeBg : s.bg,
                     color: active ? "#fff" : s.fg,
-                    border: `1.5px solid ${active ? s.activeBg : s.bg}`,
-                    fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                    border: "none",
+                    fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
                     transition: "all 0.12s",
                   }}>
-                    {s.emoji} {s.label}
+                    <span style={{ fontSize: 16 }}>{s.emoji}</span> {s.label}
                   </button>
                 );
               })}
