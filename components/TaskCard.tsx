@@ -134,12 +134,6 @@ function TaskCardInner({
             {/* Actions */}
             {!isLocallyCompleted && (
               <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
-                {canPushUp && (
-                  <button onClick={() => onPushUp?.(task.id)} title="Move up" style={{ width: 26, height: 26, borderRadius: 7, border: "1px solid #e5e7eb", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4b5563", transition: "all 0.12s" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f0fdf4"; (e.currentTarget as HTMLElement).style.borderColor = "#86efac"; (e.currentTarget as HTMLElement).style.color = "#16a34a"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e5e7eb"; (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
-                  ><ArrowUp size={13} strokeWidth={2} /></button>
-                )}
                 {onDefer && (
                   <button onClick={() => setDeferOpen(true)} title="Defer" style={{ width: 26, height: 26, borderRadius: 7, border: "1px solid #e5e7eb", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4b5563", transition: "all 0.12s" }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f9fafb"; (e.currentTarget as HTMLElement).style.color = "#111827"; }}
