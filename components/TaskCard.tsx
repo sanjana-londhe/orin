@@ -215,7 +215,7 @@ function TaskCardInner({
               )}
               {(due || (!isLocallyCompleted && onDefer)) && (
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  {due && <span style={{ fontSize: 11, color: due.overdue ? "#ef4444" : "#6b7280", fontWeight: 500 }}>{due.overdue ? "⚑ " : ""}{due.label}</span>}
+                  {due && <span style={{ fontSize: 12, color: due.overdue ? "#ef4444" : "#6b7280", fontWeight: 500 }}>{due.overdue ? "⚑ " : ""}{due.label}</span>}
                   {!isLocallyCompleted && onDefer && (
                     <button onClick={() => setDeferOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#059669", padding: 0, fontFamily: "inherit" }}
                       onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#047857"}
@@ -297,13 +297,13 @@ function TaskCardInner({
           {/* Edit + Delete */}
           {!isLocallyCompleted && (
             <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
-              <button onClick={openEdit} title="Edit" style={{ width: 26, height: 26, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#c4cbc2", transition: "all 0.12s" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#374151"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#c4cbc2"; }}
+              <button onClick={openEdit} title="Edit" style={{ width: 26, height: 26, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", transition: "all 0.12s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#111827"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#6b7280"; }}
               ><Pencil size={13} strokeWidth={2} /></button>
-              <button onClick={() => onDelete?.(task.id)} title="Delete" style={{ width: 26, height: 26, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#c4cbc2", transition: "all 0.12s" }}
+              <button onClick={() => onDelete?.(task.id)} title="Delete" style={{ width: 26, height: 26, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", transition: "all 0.12s" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#dc2626"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#c4cbc2"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#6b7280"; }}
               ><Trash2 size={13} strokeWidth={2} /></button>
             </div>
           )}
