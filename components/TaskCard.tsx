@@ -161,10 +161,25 @@ function TaskCardInner({
         }}
       >
 
-        {/* Row 1: title + edit/delete */}
+        {/* Row 1: circle + title + edit/delete */}
         <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:8 }}>
-          <div style={{ fontSize:15, fontWeight:700, color:isLocallyCompleted?"#b9d3c4":"#082d1d", lineHeight:1.35, textDecoration:isLocallyCompleted?"line-through":"none", flex:1, minWidth:0 }}>
-            {task.title}
+          <div style={{ display:"flex", alignItems:"flex-start", gap:9, flex:1, minWidth:0 }}>
+            {/* complete circle */}
+            <div onClick={()=>onMarkDone?.(task.id)} style={{
+              width:17, height:17, borderRadius:"50%", flexShrink:0, marginTop:2,
+              border:`1.5px solid ${isLocallyCompleted?"#059669":"#dde4de"}`,
+              background:isLocallyCompleted?"#059669":"white",
+              cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
+              transition:"border-color 0.15s, background 0.15s",
+            }}
+              onMouseEnter={e=>{ if(!isLocallyCompleted){ (e.currentTarget as HTMLElement).style.borderColor="#059669"; (e.currentTarget as HTMLElement).style.background="#f2fdec"; }}}
+              onMouseLeave={e=>{ if(!isLocallyCompleted){ (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; (e.currentTarget as HTMLElement).style.background="white"; }}}
+            >
+              {isLocallyCompleted && <Check size={9} color="white" strokeWidth={3} />}
+            </div>
+            <div style={{ fontSize:15, fontWeight:700, color:isLocallyCompleted?"#b9d3c4":"#082d1d", lineHeight:1.35, textDecoration:isLocallyCompleted?"line-through":"none", flex:1, minWidth:0 }}>
+              {task.title}
+            </div>
           </div>
           {!isLocallyCompleted && (
             <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0, marginTop:1 }}>
@@ -270,27 +285,6 @@ function TaskCardInner({
           </div>
         )}
 
-        {/* card-footer */}
-        <div style={{ display:"flex", alignItems:"center", gap:8, paddingTop:10, borderTop:"1px solid #f0f3f0" }}>
-          {/* complete-check */}
-          <div onClick={()=>onMarkDone?.(task.id)} style={{
-            width:16, height:16, borderRadius:4, flexShrink:0,
-            border:`1.5px solid ${isLocallyCompleted?"#059669":"#dde4de"}`,
-            background:isLocallyCompleted?"#059669":"white",
-            cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
-            transition:"border-color 0.15s, background 0.15s",
-          }}
-            onMouseEnter={e=>{ if(!isLocallyCompleted) (e.currentTarget as HTMLElement).style.borderColor="#059669"; }}
-            onMouseLeave={e=>{ if(!isLocallyCompleted) (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; }}
-          >
-            {isLocallyCompleted && <Check size={9} color="white" strokeWidth={3} />}
-          </div>
-          {/* complete-label */}
-          <span onClick={()=>onMarkDone?.(task.id)} style={{ fontSize:12, fontWeight:500, color:isLocallyCompleted?"#059669":"#b9d3c4", cursor:"pointer" }}
-            onMouseEnter={e=>{ if(!isLocallyCompleted) (e.currentTarget as HTMLElement).style.color="#3d5a4a"; }}
-            onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color=isLocallyCompleted?"#059669":"#b9d3c4"}
-          >{isLocallyCompleted?"Completed":"Mark complete"}</span>
-        </div>
       </div>
 
       {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d=>onDefer(task.id,d)} />}
