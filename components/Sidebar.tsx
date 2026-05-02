@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ListChecks, ScatterChart, CalendarDays,
-  Flag, Clock, CheckCircle2, List,
+  ListChecks, ScatterChart, CalendarDays, List,
   ChevronLeft, Plus, Sun, Moon,
 } from "lucide-react";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
@@ -18,9 +17,6 @@ import type { TaskWithSubtasks } from "@/lib/types";
 const VIEWS = [
   { href: "/",          Icon: ListChecks,   label: "To-do list" },
   { href: "/all",       Icon: List,         label: "All Tasks" },
-  { href: "/flagged",   Icon: Flag,         label: "Flagged" },
-  { href: "/scheduled", Icon: Clock,        label: "Scheduled" },
-  { href: "/completed", Icon: CheckCircle2, label: "Completed" },
   { href: "/quadrant",  Icon: ScatterChart, label: "Quadrant" },
   { href: "/calendar",  Icon: CalendarDays, label: "Calendar" },
 ];
