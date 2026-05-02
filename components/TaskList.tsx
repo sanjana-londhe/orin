@@ -316,7 +316,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               Today
             </h1>
           </div>
-          <button onClick={() => setModalOpen(true)} style={{
+          <button onClick={() => { setShowInlineForm(true); setTimeout(() => document.getElementById("inline-task-input")?.focus(), 50); }} style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "8px 18px", borderRadius: 8,
             background: "#059669", border: "none",
@@ -467,6 +467,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
           }}>
             <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
             <input
+              id="inline-task-input"
               value={inlineDraft}
               onChange={e => setInlineDraft(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter" && inlineDraft.trim()) setShowInlineForm(true); }}
@@ -638,6 +639,113 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             })()}
           </SortableContext>
         </DndContext>
+      )}
+
+      {/* ── Inline creation form — always shown below tasks ── */}
+      {(tasks.length > 0 || completedThisSession.size > 0) && (
+        <div style={{ marginBottom: 32 }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 12,
+            padding: "14px 18px", background: "#fff",
+            border: `1.5px solid ${showInlineForm ? "#059669" : "#dde4de"}`,
+            borderRadius: showInlineForm ? "12px 12px 0 0" : 12,
+            transition: "border-color 0.15s",
+          }}>
+            <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
+            <input
+              id="inline-task-input"
+              value={inlineDraft}
+              onChange={e => setInlineDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && inlineDraft.trim()) setShowInlineForm(true); }}
+              placeholder="What needs doing?"
+              style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }}
+            />
+            {inlineDraft.trim() && !showInlineForm && (
+              <button onClick={() => setShowInlineForm(true)} style={{
+                padding: "5px 14px", borderRadius: 7, background: "#059669", border: "none",
+                color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+              }}>Add →</button>
+            )}
+          </div>
+
+          {showInlineForm && (
+            <div style={{
+              background: "#fff", border: "1.5px solid #059669", borderTop: "none",
+              borderRadius: "0 0 12px 12px", padding: "16px 18px",
+              boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
+            }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
+                <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" />
+              </div>
+
+              <div style={{ marginBottom: 14 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>How do you feel about it?</p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {(["DREADING","ANXIOUS","NEUTRAL","WILLING","EXCITED"] as const).map(s => {
+                    const EM: Record<string,{e:string;bg:string;fg:string}> = {
+                      DREADING:{e:"😮‍💨",bg:"#FFF0EC",fg:"#D14626"},
+                      ANXIOUS:{e:"😟",bg:"#FFF8E8",fg:"#B07A10"},
+                      NEUTRAL:{e:"😐",bg:"#F3F2F0",fg:"#7A756E"},
+                      WILLING:{e:"🙂",bg:"#EEF9F7",fg:"#0E8A7D"},
+                      EXCITED:{e:"🤩",bg:"#EEFAF1",fg:"#1A9444"},
+                    };
+                    const em = EM[s];
+                    const active = inlineEmotion === s;
+                    return (
+                      <button key={s} onClick={() => setInlineEmotion(s)} style={{
+                        display:"inline-flex",alignItems:"center",gap:4,
+                        padding:"4px 10px",borderRadius:7,fontSize:11,fontWeight:600,
+                        background: active ? em.fg : em.bg,
+                        color: active ? "#fff" : em.fg,
+                        border:`1px solid ${em.fg}30`,cursor:"pointer",fontFamily:"inherit",
+                      }}>
+                        {em.e} {s.charAt(0)+s.slice(1).toLowerCase()}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Action items</p>
+                {inlineSubtasks.map((st, i) => (
+                  <div key={i} style={{ display:"flex",alignItems:"center",gap:8,padding:"3px 0" }}>
+                    <span style={{ width:10,height:10,borderRadius:3,border:"1.5px solid #dde4de",flexShrink:0 }} />
+                    <span style={{ flex:1,fontSize:12.5,color:"#082d1d" }}>{st}</span>
+                    <button onClick={() => setInlineSubtasks(p => p.filter((_,j)=>j!==i))} style={{ fontSize:11,color:"#c4cbc2",background:"none",border:"none",cursor:"pointer" }}>✕</button>
+                  </div>
+                ))}
+                <div style={{ display:"flex",alignItems:"center",gap:8,marginTop:4 }}>
+                  <span style={{ width:10,height:10,borderRadius:3,border:"1.5px dashed #dde4de",flexShrink:0 }} />
+                  <input value={inlineSubInput} onChange={e=>setInlineSubInput(e.target.value)}
+                    onKeyDown={e=>{ if(e.key==="Enter"&&inlineSubInput.trim()){setInlineSubtasks(p=>[...p,inlineSubInput.trim()]);setInlineSubInput("");}}}
+                    placeholder="Add action item…"
+                    style={{ flex:1,border:"none",borderBottom:"1px solid #dde4de",outline:"none",fontSize:12.5,color:"#082d1d",background:"transparent",fontFamily:"inherit",paddingBottom:2 }} />
+                </div>
+              </div>
+
+              <div style={{ display:"flex",justifyContent:"flex-end",gap:8 }}>
+                <button onClick={() => { setShowInlineForm(false); setInlineDraft(""); setInlineDueDate(new Date().toISOString().slice(0,10)); setInlineDueTime(""); setInlineEmotion("NEUTRAL"); setInlineSubtasks([]); setInlineSubInput(""); }}
+                  style={{ padding:"6px 14px",borderRadius:7,border:"1px solid #dde4de",background:"#fff",color:"#4a6d47",fontSize:12.5,cursor:"pointer",fontFamily:"inherit" }}>
+                  Cancel
+                </button>
+                <button onClick={() => createInline({
+                  title: inlineDraft.trim(),
+                  dueAt: inlineDueDate ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString() : null,
+                  emotion: inlineEmotion,
+                  subtasks: inlineSubtasks,
+                })} disabled={!inlineDraft.trim() || creatingInline} style={{
+                  padding:"6px 18px",borderRadius:7,border:"none",
+                  background: inlineDraft.trim() ? "#059669" : "#c4cbc2",
+                  color:"#fff",fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
+                }}>
+                  {creatingInline ? "Creating…" : "Create task"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       <TaskCreateModal open={modalOpen} onOpenChange={setModalOpen} />
