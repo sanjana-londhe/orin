@@ -185,7 +185,7 @@ function TaskCardInner({
           <button onClick={() => onMarkDone?.(task.id)}
             title={isLocallyCompleted ? "Mark as active" : "Complete"}
             style={{
-              width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
+              width: 20, height: 20, borderRadius: 4, flexShrink: 0,
               border: `2px solid ${isLocallyCompleted ? "#16a34a" : "#d1d5db"}`,
               background: isLocallyCompleted ? "#16a34a" : "#fff",
               cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
@@ -247,7 +247,7 @@ function TaskCardInner({
                 {task.subtasks.map(sub => (
                   <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <button onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)} style={{
-                      width: 14, height: 14, borderRadius: "50%", flexShrink: 0,
+                      width: 14, height: 14, borderRadius: 4, flexShrink: 0,
                       cursor: sub.isCompleted ? "default" : "pointer",
                       background: sub.isCompleted ? "#16a34a" : "#fff",
                       border: `1.5px solid ${sub.isCompleted ? "#16a34a" : "#d1d5db"}`,
@@ -271,7 +271,7 @@ function TaskCardInner({
             {!isLocallyCompleted && (
               showSubInput ? (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                  <div style={{ width: 14, height: 14, borderRadius: "50%", border: "1.5px dashed #d1d5db", flexShrink: 0 }} />
+                  <div style={{ width: 14, height: 14, borderRadius: 4, border: "1.5px dashed #d1d5db", flexShrink: 0 }} />
                   <input ref={subRef} value={subInput} onChange={e => setSubInput(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") addSubtask(); if (e.key === "Escape") { setSubInput(""); setShowSubInput(false); } }}
                     onBlur={() => { if (!subInput.trim()) setShowSubInput(false); else addSubtask(); }}
@@ -311,7 +311,7 @@ function TaskCardInner({
       </div>
 
       {/* Divider */}
-      <div style={{ height: 1, background: "#f0f0f0" }} />
+      <div style={{ height: 1, background: "#e4e4e4" }} />
 
       {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />}
     </>
