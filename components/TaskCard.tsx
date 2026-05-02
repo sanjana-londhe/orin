@@ -140,6 +140,12 @@ function TaskCardInner({
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e5e7eb"; (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
                   ><ArrowUp size={13} strokeWidth={2} /></button>
                 )}
+                {onDefer && (
+                  <button onClick={() => setDeferOpen(true)} title="Defer" style={{ width: 26, height: 26, borderRadius: 7, border: "1px solid #e5e7eb", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4b5563", transition: "all 0.12s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f9fafb"; (e.currentTarget as HTMLElement).style.color = "#111827"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
+                  ><Clock size={12} strokeWidth={2} /></button>
+                )}
                 <button onClick={() => setEditOpen(true)} title="Edit" style={{ width: 26, height: 26, borderRadius: 7, border: "1px solid #e5e7eb", background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4b5563", transition: "all 0.12s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f9fafb"; (e.currentTarget as HTMLElement).style.color = "#111827"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
@@ -222,21 +228,6 @@ function TaskCardInner({
             )
           )}
 
-          {/* ── Defer button ── */}
-          {!isLocallyCompleted && onDefer && (
-            <button onClick={() => setDeferOpen(true)} style={{
-              width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-              padding: "9px 0", borderRadius: 8,
-              border: "1.5px solid #e5e7eb", background: "#fff",
-              color: "#4b5563", fontSize: 13, fontWeight: 600,
-              cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f9fafb"; (e.currentTarget as HTMLElement).style.borderColor = "#d1d5db"; (e.currentTarget as HTMLElement).style.color = "#111827"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e5e7eb"; (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
-            >
-              <Clock size={14} strokeWidth={2} /> Defer
-            </button>
-          )}
 
           {/* Nudge */}
           {isNudged && !isLocallyCompleted && (
