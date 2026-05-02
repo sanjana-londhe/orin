@@ -537,36 +537,35 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             borderRadius: "0 0 12px 12px", padding: "16px 18px",
             boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
           }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 2fr", gap: 12, marginBottom: 14, alignItems: "end" }}>
               <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
               <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" />
-            </div>
-
-            <div style={{ marginBottom: 14 }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>How do you feel about it?</p>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {(["DREADING","ANXIOUS","NEUTRAL","WILLING","EXCITED"] as const).map(s => {
-                  const EM: Record<string,{e:string;bg:string;fg:string}> = {
-                    DREADING:{e:"😮‍💨",bg:"#FFF0EC",fg:"#D14626"},
-                    ANXIOUS:{e:"😟",bg:"#FFF8E8",fg:"#B07A10"},
-                    NEUTRAL:{e:"😐",bg:"#F3F2F0",fg:"#7A756E"},
-                    WILLING:{e:"🙂",bg:"#EEF9F7",fg:"#0E8A7D"},
-                    EXCITED:{e:"🤩",bg:"#EEFAF1",fg:"#1A9444"},
-                  };
-                  const em = EM[s];
-                  const active = inlineEmotion === s;
-                  return (
-                    <button key={s} onClick={() => setInlineEmotion(s)} style={{
-                      display:"inline-flex",alignItems:"center",gap:4,
-                      padding:"4px 10px",borderRadius:7,fontSize:11,fontWeight:600,
-                      background: active ? em.fg : em.bg,
-                      color: active ? "#fff" : em.fg,
-                      border:`1px solid ${em.fg}30`,cursor:"pointer",fontFamily:"inherit",
-                    }}>
-                      {em.e} {s.charAt(0)+s.slice(1).toLowerCase()}
-                    </button>
-                  );
-                })}
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 6 }}>Feeling</p>
+                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                  {(["DREADING","ANXIOUS","NEUTRAL","WILLING","EXCITED"] as const).map(s => {
+                    const EM: Record<string,{e:string;bg:string;fg:string}> = {
+                      DREADING:{e:"😮‍💨",bg:"#FFF0EC",fg:"#D14626"},
+                      ANXIOUS:{e:"😟",bg:"#FFF8E8",fg:"#B07A10"},
+                      NEUTRAL:{e:"😐",bg:"#F3F2F0",fg:"#7A756E"},
+                      WILLING:{e:"🙂",bg:"#EEF9F7",fg:"#0E8A7D"},
+                      EXCITED:{e:"🤩",bg:"#EEFAF1",fg:"#1A9444"},
+                    };
+                    const em = EM[s];
+                    const active = inlineEmotion === s;
+                    return (
+                      <button key={s} onClick={() => setInlineEmotion(s)} style={{
+                        display:"inline-flex",alignItems:"center",gap:4,
+                        padding:"4px 10px",borderRadius:7,fontSize:11,fontWeight:600,
+                        background: active ? em.fg : em.bg,
+                        color: active ? "#fff" : em.fg,
+                        border:`1px solid ${em.fg}30`,cursor:"pointer",fontFamily:"inherit",
+                      }}>
+                        {em.e} {s.charAt(0)+s.slice(1).toLowerCase()}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
