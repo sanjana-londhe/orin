@@ -178,18 +178,20 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
 
           {/* Promo card */}
           {!collapsed && (
-            <div style={{
-              padding: 14, borderRadius: 12,
-              background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-              color: "#fff", position: "relative", overflow: "hidden",
-            }}>
-              <div style={{ position: "absolute", top: -16, right: -16, width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
-              <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3 }}>Track your energy</p>
-              <p style={{ fontSize: 11.5, margin: "0 0 10px", opacity: 0.85, lineHeight: 1.5 }}>
-                Log how each task feels and Orin learns with you.
-              </p>
-              <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: "#059669", fontWeight: 700, fontSize: 14 }}>→</div>
-            </div>
+            <Link href="/energy" style={{ textDecoration: "none" }}>
+              <div style={{
+                padding: 14, borderRadius: 12,
+                background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+                color: "#fff", position: "relative", overflow: "hidden", cursor: "pointer",
+              }}>
+                <div style={{ position: "absolute", top: -16, right: -16, width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+                <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3 }}>Track your energy</p>
+                <p style={{ fontSize: 11.5, margin: "0 0 10px", opacity: 0.85, lineHeight: 1.5 }}>
+                  Log how each task feels and Orin learns with you.
+                </p>
+                <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: "#059669", fontWeight: 700, fontSize: 14 }}>→</div>
+              </div>
+            </Link>
           )}
         </div>
 
