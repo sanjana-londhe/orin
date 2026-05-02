@@ -569,11 +569,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   )}
 
                   {grid.length > 0 && (
-                    <div style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                      gap: 16, marginBottom: 32, alignItems: "start",
-                    }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 32 }}>
                       {grid.map(t => <SortableTaskCard key={t.id} {...cardProps(t)} />)}
                     </div>
                   )}
