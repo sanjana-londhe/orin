@@ -161,24 +161,13 @@ function TaskCardInner({
         }}
       >
 
-        {/* card-header */}
-        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:9 }}>
-
-          {/* emotion-pill */}
-          <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px 3px 7px", borderRadius:20, background:em.bg, color:em.fg, fontSize:11, fontWeight:600, letterSpacing:"0.01em", flexShrink:0 }}>
-            {em.emoji} {em.label}
-          </span>
-
-          {/* deferred-badge */}
-          {task.deferredCount > 0 && (
-            <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 8px", borderRadius:20, background:"#f8f9f5", border:"1px solid #dde4de", fontSize:10.5, fontWeight:600, color:"#3d5a4a" }}>
-              ↩ {task.deferredCount} deferred
-            </span>
-          )}
-
-          {/* card-actions — always visible top-right */}
+        {/* Row 1: title + edit/delete */}
+        <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:8 }}>
+          <div style={{ fontSize:15, fontWeight:700, color:isLocallyCompleted?"#b9d3c4":"#082d1d", lineHeight:1.35, textDecoration:isLocallyCompleted?"line-through":"none", flex:1, minWidth:0 }}>
+            {task.title}
+          </div>
           {!isLocallyCompleted && (
-            <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:6, flexShrink:0, marginTop:1 }}>
               <button onClick={openEdit} title="Edit" style={{ width:26, height:26, borderRadius:7, border:"1px solid #dde4de", background:"#f8f9f5", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#4a6d47", fontSize:13, transition:"background 0.15s, color 0.15s" }}
                 onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#e4f0eb"; (e.currentTarget as HTMLElement).style.color="#059669"; }}
                 onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#f8f9f5"; (e.currentTarget as HTMLElement).style.color="#4a6d47"; }}
@@ -191,28 +180,29 @@ function TaskCardInner({
           )}
         </div>
 
-        {/* card-title */}
-        <div style={{ fontSize:15, fontWeight:700, color:isLocallyCompleted?"#b9d3c4":"#082d1d", marginBottom:8, lineHeight:1.35, textDecoration:isLocallyCompleted?"line-through":"none" }}>
-          {task.title}
+        {/* Row 2: feeling | due | defer — all together */}
+        <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:10, flexWrap:"wrap" }}>
+          <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px 3px 7px", borderRadius:20, background:em.bg, color:em.fg, fontSize:11, fontWeight:600, letterSpacing:"0.01em", flexShrink:0 }}>
+            {em.emoji} {em.label}
+          </span>
+          {task.deferredCount > 0 && (
+            <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 8px", borderRadius:20, background:"#f8f9f5", border:"1px solid #dde4de", fontSize:10.5, fontWeight:600, color:"#3d5a4a" }}>
+              ↩ {task.deferredCount}×
+            </span>
+          )}
+          {due && (
+            <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20, background:"#f3f4f6", fontSize:11.5, fontWeight:500, color:due.overdue?"#c23934":"#3d5a4a" }}>
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
+              {due.label}
+            </span>
+          )}
+          {!isLocallyCompleted && onDefer && (
+            <span onClick={()=>setDeferOpen(true)} style={{ fontSize:11.5, fontWeight:600, color:"#059669", cursor:"pointer" }}
+              onMouseEnter={e=>(e.currentTarget as HTMLElement).style.textDecoration="underline"}
+              onMouseLeave={e=>(e.currentTarget as HTMLElement).style.textDecoration="none"}
+            >· Defer</span>
+          )}
         </div>
-
-        {/* card-meta: due | defer */}
-        {(due || (!isLocallyCompleted && onDefer)) && (
-          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
-            {due && (
-              <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20, background:"#f3f4f6", fontSize:11.5, fontWeight:500, color:due.overdue?"#c23934":"#3d5a4a" }}>
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
-                {due.label}
-              </span>
-            )}
-            {!isLocallyCompleted && onDefer && (
-              <span onClick={()=>setDeferOpen(true)} style={{ fontSize:11.5, fontWeight:600, color:"#059669", cursor:"pointer" }}
-                onMouseEnter={e=>(e.currentTarget as HTMLElement).style.textDecoration="underline"}
-                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.textDecoration="none"}
-              >· Defer</span>
-            )}
-          </div>
-        )}
 
         {/* progress-bar */}
         {totalSubs > 0 && (
