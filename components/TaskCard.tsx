@@ -170,10 +170,20 @@ function TaskCardInner({
     );
   }
 
-  // ── Plain list row ────────────────────────────────────────────────
+  // ── Card — styled like the creation form ─────────────────────────
   return (
     <>
-      <div style={{ padding: "12px 0", opacity: isLocallyCompleted ? 0.65 : 1 }}>
+      <div style={{
+        background: isLocallyCompleted ? "#fafcfa" : "#fff",
+        border: `1.5px solid ${isLocallyCompleted ? "#e0ede6" : "#dde4de"}`,
+        borderRadius: 12,
+        padding: "14px 18px",
+        opacity: isLocallyCompleted ? 0.65 : 1,
+        transition: "border-color 0.15s, box-shadow 0.15s",
+      }}
+        onMouseEnter={e => { if (!isLocallyCompleted) (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; }}
+        onMouseLeave={e => { if (!isLocallyCompleted) (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
+      >
 
         {/* Row: checkbox + title + actions */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -317,9 +327,6 @@ function TaskCardInner({
           )}
         </div>
       </div>
-
-      {/* Divider */}
-      <div style={{ height: 1, background: "#e8ece8" }} />
 
       {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />}
     </>
