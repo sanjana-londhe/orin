@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orin — Echo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #fcfdfc;
+      color: #082d1d;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: #f8f9f5;
+      border-right: 1px solid #dde4de;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      gap: 6px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 4px 20px;
+    }
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      background: #059669;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: #082d1d;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #3d5a4a;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+
+    .nav-item:hover { background: #edf0eb; color: #082d1d; }
+    .nav-item.active { background: #e4f0eb; color: #059669; font-weight: 600; }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .nav-section-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #b9d3c4;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 14px 12px 4px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid #dde4de;
+    }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background: #d1fae5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #059669;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #3d5a4a;
+    }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 48px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #082d1d;
+    }
+
+    .page-date {
+      font-size: 13px;
+      color: #b9d3c4;
+      font-weight: 500;
+    }
+
+    /* ── Creation Form ── */
+    .create-card {
+      background: white;
+      border: 1.5px solid #dde4de;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: text;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .create-card:focus-within {
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.08);
+    }
+
+    .create-marker {
+      color: #059669;
+      font-size: 14px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .create-input {
+      border: none;
+      outline: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #082d1d;
+      background: transparent;
+      flex: 1;
+    }
+
+    .create-input::placeholder { color: #b9d3c4; }
+
+    .create-hint {
+      font-size: 11.5px;
+      color: #b9d3c4;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    /* ── Task Cards ── */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-card {
+      background: white;
+      border: 1.5px solid #dde4de;
+      border-radius: 12px;
+      padding: 14px 18px;
+      transition: border-color 0.18s, box-shadow 0.18s, opacity 0.18s;
+      position: relative;
+    }
+
+    .task-card:hover {
+      border-color: #c4cbc2;
+      box-shadow: 0 2px 8px rgba(8, 45, 29, 0.05);
+    }
+
+    .task-card:hover .card-actions { opacity: 1; }
+
+    .task-card.completed {
+      opacity: 0.65;
+    }
+
+    /* Card header */
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .emotion-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px 3px 7px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      flex-shrink: 0;
+    }
+
+    .deferred-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #f8f9f5;
+      border: 1px solid #dde4de;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #3d5a4a;
+    }
+
+    .card-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .action-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      border: 1px solid #e8ece8;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #b9d3c4;
+      font-size: 13px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .action-btn:hover { background: #f8f9f5; color: #3d5a4a; }
+
+    /* Title */
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #082d1d;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    .task-card.completed .card-title {
+      text-decoration: line-through;
+      color: #b9d3c4;
+    }
+
+    /* Meta row */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .due-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: #f3f4f6;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #3d5a4a;
+    }
+
+    .defer-link {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #059669;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .defer-link:hover { text-decoration: underline; }
+
+    /* Progress bar */
+    .progress-bar {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 10px;
+    }
+
+    .progress-seg {
+      height: 4px;
+      flex: 1;
+      border-radius: 2px;
+      background: #f0f0f0;
+      transition: background 0.2s;
+    }
+
+    .progress-seg.done {
+      /* set via inline style */
+    }
+
+    /* Subtasks */
+    .subtasks {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+
+    .subtask-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subtask-check {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 1.5px solid #dde4de;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .subtask-check.done {
+      background: #059669;
+      border-color: #059669;
+    }
+
+    .subtask-check.done::after {
+      content: '';
+      width: 7px;
+      height: 5px;
+      border-left: 1.5px solid white;
+      border-bottom: 1.5px solid white;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+
+    .subtask-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #3d5a4a;
+    }
+
+    .subtask-label.done {
+      text-decoration: line-through;
+      color: #b9d3c4;
+    }
+
+    /* Footer */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid #f0f3f0;
+    }
+
+    .complete-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid #dde4de;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .complete-check:hover { border-color: #059669; }
+
+    .task-card.completed .complete-check {
+      background: #059669;
+      border-color: #059669;
+    }
+
+    .task-card.completed .complete-check::after {
+      content: '';
+      width: 8px;
+      height: 6px;
+      border-left: 1.5px solid white;
+      border-bottom: 1.5px solid white;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+
+    .complete-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #b9d3c4;
+      cursor: pointer;
+    }
+
+    .complete-label:hover { color: #3d5a4a; }
+
+    /* Emotion variants */
+    .em-dreading  { background: #FFF0EC; color: #D14626; }
+    .em-anxious   { background: #FFF8E8; color: #B07A10; }
+    .em-neutral   { background: #F3F2F0; color: #7A756E; }
+    .em-willing   { background: #EEF9F7; color: #0E8A7D; }
+    .em-excited   { background: #EEFAF1; color: #1A9444; }
+
+    /* Strip colors for progress */
+    .strip-dreading { background: #c23934; }
+    .strip-anxious  { background: #886a00; }
+    .strip-neutral  { background: #c4cbc2; }
+    .strip-willing  { background: #2b6b5e; }
+    .strip-excited  { background: #59d10b; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">O</div>
+    <span class="logo-text">Orin</span>
+  </div>
+
+  <a class="nav-item active" href="#">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="2" y="2" width="5" height="5" rx="1.5"/><rect x="9" y="2" width="5" height="5" rx="1.5"/>
+      <rect x="2" y="9" width="5" height="5" rx="1.5"/><rect x="9" y="9" width="5" height="5" rx="1.5"/>
+    </svg>
+    Today
+  </a>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="2" y="3" width="12" height="11" rx="2"/>
+      <path d="M5 1v4M11 1v4M2 7h12"/>
+    </svg>
+    Upcoming
+  </a>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="8" cy="8" r="6"/>
+      <path d="M8 5v3l2 2"/>
+    </svg>
+    Deferred
+  </a>
+
+  <div class="nav-section-label">Areas</div>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M2 4h12M2 8h8M2 12h5"/>
+    </svg>
+    Work
+  </a>
+  <a class="nav-item" href="#">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M8 2l1.5 3.5L13 6l-2.5 2.5.5 3.5L8 10.5 5 12l.5-3.5L3 6l3.5-.5L8 2z"/>
+    </svg>
+    Personal
+  </a>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">S</div>
+      <span class="user-name">Sanjana</span>
+    </div>
+  </div>
+</aside>
+
+<!-- Main content -->
+<main class="main">
+  <div class="page-header">
+    <h1 class="page-title">Today</h1>
+    <span class="page-date">Friday, May 2</span>
+  </div>
+
+  <!-- Creation form -->
+  <div class="create-card">
+    <span class="create-marker">✦</span>
+    <input class="create-input" type="text" placeholder="What needs doing?" />
+    <span class="create-hint">Press ↵ to add</span>
+  </div>
+
+  <!-- Task cards -->
+  <div class="cards">
+
+    <!-- 1. Finalize Q3 marketing report — DREADING -->
+    <div class="task-card">
+      <div class="card-header">
+        <span class="emotion-pill em-dreading">😰 Dreading</span>
+        <span class="deferred-badge">↩ 2 deferred</span>
+        <div class="card-actions">
+          <button class="action-btn" title="Edit">✏</button>
+          <button class="action-btn" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="card-title">Finalize Q3 marketing report</div>
+      <div class="card-meta">
+        <span class="due-pill">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
+          Today · 14:11
+        </span>
+        <span class="defer-link">· Defer</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-seg done strip-dreading"></div>
+        <div class="progress-seg"></div>
+        <div class="progress-seg"></div>
+      </div>
+      <div class="subtasks">
+        <div class="subtask-row">
+          <div class="subtask-check done"></div>
+          <span class="subtask-label done">Compile metrics</span>
+        </div>
+        <div class="subtask-row">
+          <div class="subtask-check"></div>
+          <span class="subtask-label">Draft summary</span>
+        </div>
+        <div class="subtask-row">
+          <div class="subtask-check"></div>
+          <span class="subtask-label">Review with stakeholders</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="complete-check"></div>
+        <span class="complete-label">Mark complete</span>
+      </div>
+    </div>
+
+    <!-- 2. Design system documentation — WILLING -->
+    <div class="task-card">
+      <div class="card-header">
+        <span class="emotion-pill em-willing">🙂 Willing</span>
+        <div class="card-actions">
+          <button class="action-btn" title="Edit">✏</button>
+          <button class="action-btn" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="card-title">Design system documentation</div>
+      <div class="card-meta">
+        <span class="due-pill">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
+          May 5
+        </span>
+        <span class="defer-link">· Defer</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-seg done strip-willing"></div>
+        <div class="progress-seg done strip-willing"></div>
+        <div class="progress-seg"></div>
+      </div>
+      <div class="subtasks">
+        <div class="subtask-row">
+          <div class="subtask-check done"></div>
+          <span class="subtask-label done">Typography</span>
+        </div>
+        <div class="subtask-row">
+          <div class="subtask-check done"></div>
+          <span class="subtask-label done">Color tokens</span>
+        </div>
+        <div class="subtask-row">
+          <div class="subtask-check"></div>
+          <span class="subtask-label">Components</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="complete-check"></div>
+        <span class="complete-label">Mark complete</span>
+      </div>
+    </div>
+
+    <!-- 3. Weekly team sync — NEUTRAL -->
+    <div class="task-card">
+      <div class="card-header">
+        <span class="emotion-pill em-neutral">😐 Neutral</span>
+        <span class="deferred-badge">↩ 1 deferred</span>
+        <div class="card-actions">
+          <button class="action-btn" title="Edit">✏</button>
+          <button class="action-btn" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="card-title">Weekly team sync</div>
+      <div class="card-meta">
+        <span class="due-pill">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
+          Tomorrow · 10:00
+        </span>
+        <span class="defer-link">· Defer</span>
+      </div>
+      <div class="card-footer">
+        <div class="complete-check"></div>
+        <span class="complete-label">Mark complete</span>
+      </div>
+    </div>
+
+    <!-- 4. Refactor auth module — ANXIOUS -->
+    <div class="task-card">
+      <div class="card-header">
+        <span class="emotion-pill em-anxious">😟 Anxious</span>
+        <div class="card-actions">
+          <button class="action-btn" title="Edit">✏</button>
+          <button class="action-btn" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="card-title">Refactor auth module</div>
+      <div class="card-meta">
+        <span class="due-pill">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
+          May 8
+        </span>
+        <span class="defer-link">· Defer</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-seg"></div>
+        <div class="progress-seg"></div>
+      </div>
+      <div class="subtasks">
+        <div class="subtask-row">
+          <div class="subtask-check"></div>
+          <span class="subtask-label">Write tests</span>
+        </div>
+        <div class="subtask-row">
+          <div class="subtask-check"></div>
+          <span class="subtask-label">Update endpoints</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="complete-check"></div>
+        <span class="complete-label">Mark complete</span>
+      </div>
+    </div>
+
+    <!-- 5. Launch prep checklist — EXCITED -->
+    <div class="task-card">
+      <div class="card-header">
+        <span class="emotion-pill em-excited">🚀 Excited</span>
+        <div class="card-actions">
+          <button class="action-btn" title="Edit">✏</button>
+          <button class="action-btn" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="card-title">Launch prep checklist</div>
+      <div class="card-meta">
+        <span class="due-pill">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
+          May 10
+        </span>
+        <span class="defer-link">· Defer</span>
+      </div>
+      <div class="card-footer">
+        <div class="complete-check"></div>
+        <span class="complete-label">Mark complete</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
