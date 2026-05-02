@@ -602,7 +602,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               });
 
               return (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 32, alignItems: "start", overflow: "hidden" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 32, alignItems: "start" }}>
                   {allActive.map((t, idx) => (
                     <SortableTaskCard key={t.id} {...cardProps(t, idx)} />
                   ))}
