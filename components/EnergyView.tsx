@@ -224,7 +224,7 @@ export function EnergyView() {
             }}>
               <span style={{ fontSize: 20 }}>{LEVELS[Math.round(todayAvg) - 1]?.emoji}</span>
               <div>
-                <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Today's energy</p>
+                <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Today&apos;s energy</p>
                 <p style={{ fontSize: 16, fontWeight: 800, color: "#059669", margin: 0, letterSpacing: "-0.02em" }}>
                   {todayAvg.toFixed(1)} / 5
                 </p>
@@ -241,7 +241,7 @@ export function EnergyView() {
         boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
       }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 4px", letterSpacing: "-0.01em" }}>
-          How's your energy today?
+          How&apos;s your energy today?
         </h2>
         <p style={{ fontSize: 12.5, color: "#4a6d47", margin: "0 0 20px" }}>
           Log each time slot to build your weekly trend.
