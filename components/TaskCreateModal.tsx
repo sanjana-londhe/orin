@@ -68,15 +68,11 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
   const [selectedTime, setSelectedTime] = useState(initTime);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async () => {
-      const dueTime = selectedTime || initTime;
-      const dueAt = selectedDate
-        ? new Date(`${selectedDate}T${dueTime || "00:00"}`).toISOString()
-        : null;
+    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof emotion; subtasks: string[] }) => {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), dueAt, emotionalState: emotion }),
+        body: JSON.stringify({ title: vars.title, dueAt: vars.dueAt, emotionalState: vars.emotion }),
       });
       if (!res.ok) {
         let msg = "Failed to create task";
@@ -84,20 +80,55 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
         throw new Error(msg);
       }
       const task = await res.json();
-      for (const st of subtasks) {
-        await fetch("/api/tasks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: st, parentTaskId: task.id }),
-        });
+      if (vars.subtasks.length > 0) {
+        await Promise.all(vars.subtasks.map(st =>
+          fetch("/api/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: st, parentTaskId: task.id }),
+          })
+        ));
       }
       return task;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      const snap = queryClient.getQueriesData({ queryKey: ["tasks"] });
+
+      // Insert optimistic task into every tasks query so it appears instantly
+      const optimistic = {
+        id: `optimistic-${Date.now()}`,
+        userId: "",
+        title: vars.title,
+        dueAt: vars.dueAt ? new Date(vars.dueAt) : null,
+        emotionalState: vars.emotion,
+        isCompleted: false,
+        deferredCount: 0,
+        sortOrder: 99999,
+        lastTouchedAt: new Date(),
+        recurrenceRule: null,
+        parentTaskId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        subtasks: [],
+      };
+
+      queryClient.setQueriesData({ queryKey: ["tasks"] }, (old: unknown) =>
+        Array.isArray(old) ? [...old, optimistic] : old
+      );
+
+      // Close modal immediately — don't wait for the server
       handleClose();
+
+      return { snap };
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (_e, _v, ctx) => {
+      ctx?.snap.forEach(([key, data]: [unknown, unknown]) => queryClient.setQueryData(key as Parameters<typeof queryClient.setQueryData>[0], data));
+      setError("Failed to create task — please try again");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
   });
 
   function handleClose() {
@@ -182,7 +213,17 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           }}>
             Cancel
           </button>
-          <button onClick={() => { if (!title.trim()) { setError("Add a title first"); return; } setError(""); mutate(); }}
+          <button onClick={() => {
+              if (!title.trim()) { setError("Add a title first"); return; }
+              setError("");
+              const dueTime = selectedTime || initTime;
+              mutate({
+                title: title.trim(),
+                dueAt: selectedDate ? new Date(`${selectedDate}T${dueTime}`).toISOString() : null,
+                emotion,
+                subtasks,
+              });
+            }}
             disabled={isPending || !title.trim()}
             style={{
               padding: "7px 20px", borderRadius: 8, border: "none",
