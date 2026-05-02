@@ -277,14 +277,14 @@ function TaskCardInner({
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     {due && <span style={{ fontSize: 11, color: due.overdue ? "#ef4444" : "#6b7280", fontWeight: 500 }}>{due.overdue ? "⚑ " : ""}{due.label}</span>}
                     {!isLocallyCompleted && onDefer && (
-                      <button onClick={() => setDeferOpen(true)} title="Defer" style={{
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        width: 18, height: 18, borderRadius: 4, border: "1px solid #e5e7eb",
-                        background: "#fff", cursor: "pointer", color: "#9ca3af", flexShrink: 0,
+                      <button onClick={() => setDeferOpen(true)} style={{
+                        background: "none", border: "none", cursor: "pointer",
+                        fontSize: 11, fontWeight: 500, color: "#9ca3af",
+                        padding: 0, fontFamily: "inherit",
                       }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#4b5563"; (e.currentTarget as HTMLElement).style.borderColor = "#d1d5db"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#9ca3af"; (e.currentTarget as HTMLElement).style.borderColor = "#e5e7eb"; }}
-                      ><Clock size={10} strokeWidth={2} /></button>
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#4b5563"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9ca3af"}
+                      >· Defer</button>
                     )}
                   </div>
                 )}
