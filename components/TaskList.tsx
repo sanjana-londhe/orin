@@ -63,6 +63,76 @@ async function fetchTodaysTasks(): Promise<TaskWithSubtasks[]> {
   return res.json();
 }
 
+// ── Sort dropdown — matches DatePickerField design tokens ────────────
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: "due_date",  label: "Due date" },
+  { value: "emotional", label: "Emotional state" },
+  { value: "manual",    label: "Manual" },
+];
+
+function SortDropdown({ value, onChange }: { value: SortMode; onChange: (m: SortMode) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function h(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); }
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const current = SORT_OPTIONS.find(o => o.value === value)!;
+
+  return (
+    <div ref={ref} style={{ position: "relative", display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Sort</span>
+      <button onClick={() => setOpen(o => !o)} style={{
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "8px 12px", height: 38, borderRadius: 8,
+        border: `1.5px solid ${open ? "#059669" : "#dde4de"}`,
+        background: "#fcfdfc", color: "#082d1d",
+        fontSize: 13.5, fontWeight: 500,
+        cursor: "pointer", fontFamily: "inherit", transition: "border-color 0.14s",
+        outline: "none",
+      }}
+        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; }}
+        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
+      >
+        {current.label}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4a6d47" strokeWidth="2"
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.14s", flexShrink: 0 }}>
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
+          background: "#fff", border: "1.5px solid #dde4de",
+          borderRadius: 10, padding: "4px 0",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 180,
+        }}>
+          {SORT_OPTIONS.map(opt => (
+            <button key={opt.value} onClick={() => { onChange(opt.value); setOpen(false); }} style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              width: "100%", padding: "9px 14px", border: "none",
+              background: value === opt.value ? "#f2fdec" : "none",
+              cursor: "pointer", fontFamily: "inherit",
+            }}
+              onMouseEnter={e => { if (value !== opt.value) (e.currentTarget as HTMLElement).style.background = "#f1f3ef"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = value === opt.value ? "#f2fdec" : "none"; }}
+            >
+              <span style={{ fontSize: 13.5, color: "#082d1d", fontWeight: value === opt.value ? 600 : 400 }}>{opt.label}</span>
+              {value === opt.value && (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function TaskList({ userName = "there", timeGreeting = "morning" }: { userName?: string; timeGreeting?: string }) {
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
@@ -332,78 +402,58 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
         {/* Sort + Filter row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-          <span style={{ fontSize: 12, color: "#4a6d47" }}>Sort by</span>
-          <select
-            value={sortMode}
-            onChange={e => setSortMode(e.target.value as SortMode)}
-            style={{
-              padding: "5px 32px 5px 10px", borderRadius: 7,
-              border: "1.5px solid #dde4de", background: "#fff",
-              color: "#082d1d", fontSize: 12.5, fontWeight: 500,
-              cursor: "pointer", fontFamily: "inherit", outline: "none",
-              appearance: "none",
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a6d47' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 10px center",
-            }}>
-            <option value="due_date">Due date</option>
-            <option value="emotional">Emotional state</option>
-            <option value="manual">Manual</option>
-          </select>
 
-          {/* Filter button */}
+          {/* ── Sort by custom dropdown ── */}
+          <SortDropdown value={sortMode} onChange={setSortMode} />
+
+          {/* ── Filter dropdown ── */}
           <div ref={filterRef} style={{ position: "relative" }}>
             <button
               onClick={() => { setPendingFilters(new Set(activeFilters)); setFilterOpen(o => !o); }}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
-                padding: "5px 12px", borderRadius: 7,
+                padding: "8px 12px", height: 38, borderRadius: 8,
                 border: `1.5px solid ${activeFilters.size > 0 ? "#059669" : "#dde4de"}`,
-                background: activeFilters.size > 0 ? "#f2fdec" : "#fff",
+                background: activeFilters.size > 0 ? "#f2fdec" : "#fcfdfc",
                 color: activeFilters.size > 0 ? "#059669" : "#082d1d",
-                fontSize: 12.5, fontWeight: 500,
-                cursor: "pointer", fontFamily: "inherit",
+                fontSize: 13.5, fontWeight: 500,
+                cursor: "pointer", fontFamily: "inherit", transition: "border-color 0.14s",
               }}
+              onMouseEnter={e => { if (!activeFilters.size) (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; }}
+              onMouseLeave={e => { if (!activeFilters.size) (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
               Filter
               {activeFilters.size > 0 && (
-                <span style={{
-                  width: 16, height: 16, borderRadius: "50%",
-                  background: "#059669", color: "#fff",
-                  fontSize: 11, fontWeight: 700,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>{activeFilters.size}</span>
+                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#059669", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {activeFilters.size}
+                </span>
               )}
             </button>
 
             {filterOpen && (
               <div style={{
                 position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
-                background: "#fff", border: "1.5px solid #e9ede9",
-                borderRadius: 12, padding: "14px 14px 12px",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                minWidth: 210,
+                background: "#fff", border: "1.5px solid #dde4de",
+                borderRadius: 12, padding: "4px 0",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
+                minWidth: 220,
               }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#c4cbc2", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 10px" }}>Filter by feeling</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#b9d3c4", textTransform: "uppercase", letterSpacing: "0.07em", margin: "8px 14px 8px" }}>Filter by feeling</p>
+                <div style={{ display: "flex", flexDirection: "column" }}>
                   {(Object.entries(EMOTION_MAP) as [EmotionKey, typeof EMOTION_MAP[EmotionKey]][]).map(([key, em]) => {
                     const checked = pendingFilters.has(key);
                     return (
-                      <button
-                        key={key}
-                        onClick={() => togglePending(key)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "8px 10px", borderRadius: 8, border: "none",
-                          background: checked ? em.pillBg : "transparent",
-                          cursor: "pointer", fontFamily: "inherit", width: "100%", textAlign: "left",
-                          transition: "background 0.1s",
-                        }}
-                        onMouseEnter={e => { if (!checked) (e.currentTarget as HTMLElement).style.background = "#f8f9f5"; }}
-                        onMouseLeave={e => { if (!checked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                      <button key={key} onClick={() => togglePending(key)} style={{
+                        display: "flex", alignItems: "center", gap: 10,
+                        padding: "9px 14px", border: "none",
+                        background: checked ? em.pillBg : "none",
+                        cursor: "pointer", fontFamily: "inherit", width: "100%", textAlign: "left",
+                        transition: "background 0.1s",
+                      }}
+                        onMouseEnter={e => { if (!checked) (e.currentTarget as HTMLElement).style.background = "#f1f3ef"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = checked ? em.pillBg : "none"; }}
                       >
-                        {/* Custom checkbox */}
                         <span style={{
                           width: 16, height: 16, borderRadius: 4, flexShrink: 0,
                           border: `2px solid ${checked ? em.pillText : "#dde4de"}`,
@@ -413,38 +463,42 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                         }}>
                           {checked && <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="2 6 5 9 10 3"/></svg>}
                         </span>
-                        <span style={{ fontSize: 13 }}>{em.emoji}</span>
-                        <span style={{ fontSize: 13, fontWeight: checked ? 600 : 450, color: checked ? em.pillText : "#082d1d", flex: 1 }}>{em.label}</span>
+                        <span style={{ fontSize: 14 }}>{em.emoji}</span>
+                        <span style={{ fontSize: 13.5, fontWeight: checked ? 600 : 400, color: checked ? em.pillText : "#082d1d", flex: 1 }}>{em.label}</span>
                         <span style={{ width: 8, height: 8, borderRadius: "50%", background: em.strip, flexShrink: 0 }} />
                       </button>
                     );
                   })}
                 </div>
 
-                <div style={{ display: "flex", gap: 8, marginTop: 12, paddingTop: 12, borderTop: "1px solid #f1f3ef" }}>
+                <div style={{ height: 1, background: "#dde4de", margin: "4px 0" }} />
+                <div style={{ display: "flex", gap: 8, padding: "8px 14px" }}>
                   <button onClick={clearFilter} style={{
                     flex: 1, padding: "7px 0", borderRadius: 8,
-                    border: "1px solid #e9ede9", background: "#fff",
-                    color: "#4a6d47", fontSize: 12.5, cursor: "pointer", fontFamily: "inherit",
-                  }}>Clear</button>
+                    border: "1.5px solid #dde4de", background: "#fff",
+                    color: "#4a6d47", fontSize: 13.5, cursor: "pointer", fontFamily: "inherit",
+                  }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"}
+                  >Clear</button>
                   <button onClick={applyFilter} style={{
                     flex: 1, padding: "7px 0", borderRadius: 8,
                     border: "none", background: "#059669",
-                    color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-                  }}>Apply</button>
+                    color: "#fff", fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                  }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}
+                  >Apply</button>
                 </div>
               </div>
             )}
           </div>
 
           {activeFilters.size > 0 && (
-            <button onClick={clearFilter} style={{
-              fontSize: 11.5, color: "#c4cbc2", background: "none",
-              border: "none", cursor: "pointer", padding: 0,
-            }}
+            <button onClick={clearFilter} style={{ fontSize: 13, color: "#b9d3c4", background: "none", border: "none", cursor: "pointer", padding: 0 }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#059669"}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#c4cbc2"}
-            >✕ Clear filter</button>
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#b9d3c4"}
+            >✕ Clear</button>
           )}
         </div>
 
