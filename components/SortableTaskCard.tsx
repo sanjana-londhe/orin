@@ -18,6 +18,7 @@ interface Props {
   onDeleteSubtask?: (id: string) => void;
   onPushUp?: (id: string) => void;
   canPushUp?: boolean;
+  isLocallyCompleted?: boolean;
   dragActive?: boolean;
   featured?: boolean;
 }

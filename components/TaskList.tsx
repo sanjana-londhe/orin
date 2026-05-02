@@ -185,6 +185,15 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   // All shared mutations from hook — no duplication with SimpleTaskView
   const { markDone, updateTask, deferTask, deleteTask, addSubtask, completeSubtask, deleteSubtask } = m;
 
+  // Keep completed tasks in session so they sink to bottom with strikethrough
+  const [completedThisSession, setCompletedThisSession] = useState<Map<string, TaskWithSubtasks>>(new Map());
+
+  function handleMarkDone(id: string) {
+    const task = displayTasks.find(t => t.id === id);
+    if (task) setCompletedThisSession(prev => new Map(prev).set(id, { ...task, isCompleted: true }));
+    markDone(id);
+  }
+
   function pushTaskUp(id: string) {
     const idx = manualOrder.indexOf(id);
     if (idx <= 0) return;
@@ -565,29 +574,32 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 ? [...filteredTasks.slice(0, urgentIdx), ...filteredTasks.slice(urgentIdx + 1)]
                 : filteredTasks;
 
-              const allTasks = featured ? [featured, ...grid] : grid;
+              const allActive = featured ? [featured, ...grid] : grid;
+              // Completed this session — show at bottom with strikethrough
+              const completedList = [...completedThisSession.values()].filter(
+                ct => !allActive.some(t => t.id === ct.id)
+              );
 
-              const cardProps = (t: typeof displayTasks[0], idx: number) => ({
+              const cardProps = (t: typeof displayTasks[0], idx: number, isCompleted = false) => ({
                 task: t,
                 featured: false,
+                isLocallyCompleted: isCompleted,
                 dragActive: sortMode === "manual",
-                canPushUp: idx > 0,
+                canPushUp: !isCompleted && idx > 0,
                 onPushUp: pushTaskUp,
-                onMarkDone: markDone, onDefer: deferTask, onUpdate: updateTask,
+                onMarkDone: handleMarkDone,
+                onDefer: deferTask, onUpdate: updateTask,
                 onDelete: deleteTask, onAddSubtask: addSubtask,
                 onCompleteSubtask: completeSubtask, onDeleteSubtask: deleteSubtask,
               });
 
               return (
-                <div style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: 10,
-                  marginBottom: 32,
-                  alignItems: "start",
-                }}>
-                  {allTasks.map((t, idx) => (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 32, alignItems: "start" }}>
+                  {allActive.map((t, idx) => (
                     <SortableTaskCard key={t.id} {...cardProps(t, idx)} />
+                  ))}
+                  {completedList.map((t, idx) => (
+                    <SortableTaskCard key={`done-${t.id}`} {...cardProps(t, idx, true)} />
                   ))}
                 </div>
               );
