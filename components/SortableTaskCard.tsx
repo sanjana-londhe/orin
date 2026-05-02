@@ -34,25 +34,12 @@ function SortableTaskCardInner({ task, dragActive = false, featured = false, ...
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="relative">
-      {/* Drag handle — only visible in manual sort mode */}
-      {dragActive && (
-        <div
-          {...attributes}
-          {...listeners}
-          aria-label="Drag to reorder"
-          className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing z-10 opacity-30 hover:opacity-70 transition-opacity"
-        >
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor">
-            <circle cx="3" cy="3" r="1.5" /><circle cx="7" cy="3" r="1.5" />
-            <circle cx="3" cy="8" r="1.5" /><circle cx="7" cy="8" r="1.5" />
-            <circle cx="3" cy="13" r="1.5" /><circle cx="7" cy="13" r="1.5" />
-          </svg>
-        </div>
-      )}
-      <div className={dragActive ? "pl-6" : ""}>
-        <TaskCard task={task} featured={featured} {...props} />
-      </div>
+    <div
+      ref={setNodeRef}
+      style={{ ...style, cursor: dragActive ? "grab" : "default" }}
+      {...(dragActive ? { ...attributes, ...listeners } : {})}
+    >
+      <TaskCard task={task} featured={featured} {...props} />
     </div>
   );
 }
