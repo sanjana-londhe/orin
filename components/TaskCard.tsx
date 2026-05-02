@@ -9,7 +9,7 @@ import { TimePickerField } from "@/components/TimePickerField";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
 import { getEmotion } from "@/lib/emotions";
-import { Pencil, Trash2, Check, Plus, X } from "lucide-react";
+import { Pencil, Trash2, Check, Plus, X, MoreHorizontal, CalendarDays } from "lucide-react";
 
 function formatDue(dueAt: Date | string | null) {
   if (!dueAt) return null;
@@ -17,9 +17,11 @@ function formatDue(dueAt: Date | string | null) {
   const now = new Date();
   const overdue = d < now;
   const isToday = d.toDateString() === now.toDateString();
-  const dateStr = isToday ? "Today" : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const timeStr = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  return { label: `${dateStr} · ${timeStr}`, overdue, isoDate: d.toISOString().slice(0, 10), isoTime: d.toISOString().slice(11, 16) };
+  const isTomorrow = d.toDateString() === new Date(now.getTime() + 86400000).toDateString();
+  const label = isToday ? "Today"
+    : isTomorrow ? "Tomorrow"
+    : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return { label, overdue, isoDate: d.toISOString().slice(0, 10), isoTime: d.toISOString().slice(11, 16) };
 }
 
 const EMOTIONS = [
@@ -55,14 +57,15 @@ function TaskCardInner({
   const due           = formatDue(task.dueAt);
   const completedSubs = task.subtasks.filter(s => s.isCompleted).length;
   const totalSubs     = task.subtasks.length;
-  const progress      = totalSubs > 0 ? Math.round((completedSubs / totalSubs) * 100) : 0;
 
   const [deferOpen, setDeferOpen]       = useState(false);
   const [editing, setEditing]           = useState(false);
+  const [menuOpen, setMenuOpen]         = useState(false);
   const [subInput, setSubInput]         = useState("");
   const [showSubInput, setShowSubInput] = useState(false);
   const [subsExpanded, setSubsExpanded] = useState(true);
-  const subRef = useRef<HTMLInputElement>(null);
+  const subRef  = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [editTitle, setEditTitle]     = useState(task.title);
   const [editDate, setEditDate]       = useState(due?.isoDate ?? "");
@@ -73,14 +76,18 @@ function TaskCardInner({
 
   useEffect(() => { if (showSubInput) subRef.current?.focus(); }, [showSubInput]);
   useEffect(() => { if (editing) editTitleRef.current?.focus(); }, [editing]);
+  useEffect(() => {
+    function h(e: MouseEvent) { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false); }
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
 
   function openEdit() {
     setEditTitle(task.title);
     setEditDate(due?.isoDate ?? "");
     setEditTime(due?.isoTime ?? "");
     setEditEmotion(task.emotionalState as typeof EMOTIONS[number]["value"]);
-    setNewSub("");
-    setEditing(true);
+    setNewSub(""); setMenuOpen(false); setEditing(true);
   }
 
   function saveEdit() {
@@ -102,74 +109,66 @@ function TaskCardInner({
     setNewSub("");
   }
 
-  // ── Inline edit form ──────────────────────────────────────────────
+  // ── Inline edit ───────────────────────────────────────────────────
   if (editing) {
     return (
-      <div>
-        <div style={{ padding: "14px 0", display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#fcfdfc", border: "1.5px solid #059669", borderRadius: 10 }}>
-            <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
-            <input ref={editTitleRef} value={editTitle} onChange={e => setEditTitle(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(false); }}
-              style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, fontWeight: 600, color: "#082d1d", background: "transparent" }}
-            />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <DatePickerField value={editDate} onChange={setEditDate} label="Due date" />
-            <TimePickerField value={editTime} onChange={setEditTime} label="Due time" />
-          </div>
-          <div>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>How do you feel about it?</p>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {EMOTIONS.map(s => {
-                const active = editEmotion === s.value;
-                return (
-                  <button key={s.value} onClick={() => setEditEmotion(s.value)} style={{
-                    display: "inline-flex", alignItems: "center", gap: 4,
-                    padding: "4px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
-                    background: active ? s.activeBg : s.bg, color: active ? "#fff" : s.fg,
-                    border: `1px solid ${s.fg}30`, cursor: "pointer", fontFamily: "inherit",
-                  }}>{s.emoji} {s.label}</button>
-                );
-              })}
-            </div>
-          </div>
-          {task.subtasks.length > 0 && (
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Action items</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {task.subtasks.map(sub => (
-                  <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <button onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)} style={{ width: 14, height: 14, borderRadius: 3, flexShrink: 0, border: `1.5px solid ${sub.isCompleted ? "#059669" : "#dde4de"}`, background: sub.isCompleted ? "#059669" : "#fff", cursor: sub.isCompleted ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {sub.isCompleted && <Check size={8} color="#fff" strokeWidth={3} />}
-                    </button>
-                    <span style={{ flex: 1, fontSize: 12.5, color: sub.isCompleted ? "#b9d3c4" : "#082d1d", textDecoration: sub.isCompleted ? "line-through" : "none" }}>{sub.title}</span>
-                    <button onClick={() => onDeleteSubtask?.(sub.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dde4de", padding: 0 }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c23934"}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#dde4de"}
-                    ><X size={11} /></button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 3, border: "1.5px dashed #dde4de", flexShrink: 0 }} />
-            <input value={newSub} onChange={e => setNewSub(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && newSub.trim()) addNewSub(); }}
-              placeholder="Add action item…"
-              style={{ flex: 1, border: "none", borderBottom: "1px solid #dde4de", outline: "none", fontSize: 12.5, color: "#082d1d", background: "transparent", fontFamily: "inherit", paddingBottom: 2 }}
-            />
-          </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-            <button onClick={() => setEditing(false)} style={{ padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de", background: "#fff", color: "#4a6d47", fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
-            <button onClick={saveEdit} disabled={!editTitle.trim()} style={{ padding: "7px 20px", borderRadius: 8, border: "none", background: editTitle.trim() ? "#059669" : "#c4cbc2", color: "#fff", fontSize: 13, fontWeight: 600, cursor: editTitle.trim() ? "pointer" : "default", fontFamily: "inherit" }}
-              onMouseEnter={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = "#047857"; }}
-              onMouseLeave={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = "#059669"; }}
-            >Save changes</button>
+      <div style={{ background: "#fff", borderRadius: 20, border: "1.5px solid #059669", padding: "20px", boxShadow: "0 4px 16px rgba(5,150,105,0.1)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "#fcfdfc", border: "1.5px solid #059669", borderRadius: 12, marginBottom: 14 }}>
+          <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
+          <input ref={editTitleRef} value={editTitle} onChange={e => setEditTitle(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(false); }}
+            style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 15, fontWeight: 600, color: "#082d1d", background: "transparent" }}
+          />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+          <DatePickerField value={editDate} onChange={setEditDate} label="Due date" />
+          <TimePickerField value={editTime} onChange={setEditTime} label="Due time" />
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>How do you feel about it?</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {EMOTIONS.map(s => {
+              const active = editEmotion === s.value;
+              return (
+                <button key={s.value} onClick={() => setEditEmotion(s.value)} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600, background: active ? s.activeBg : s.bg, color: active ? "#fff" : s.fg, border: `1px solid ${s.fg}30`, cursor: "pointer", fontFamily: "inherit" }}>
+                  {s.emoji} {s.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-        <div style={{ height: 1, background: "#f0f0f0" }} />
+        {task.subtasks.length > 0 && (
+          <div style={{ marginBottom: 14 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Action items</p>
+            {task.subtasks.map(sub => (
+              <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                <button onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)} style={{ width: 14, height: 14, borderRadius: 3, flexShrink: 0, border: `1.5px solid ${sub.isCompleted ? "#059669" : "#dde4de"}`, background: sub.isCompleted ? "#059669" : "#fff", cursor: sub.isCompleted ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {sub.isCompleted && <Check size={8} color="#fff" strokeWidth={3} />}
+                </button>
+                <span style={{ flex: 1, fontSize: 12.5, color: sub.isCompleted ? "#b9d3c4" : "#082d1d", textDecoration: sub.isCompleted ? "line-through" : "none" }}>{sub.title}</span>
+                <button onClick={() => onDeleteSubtask?.(sub.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dde4de", padding: 0 }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c23934"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#dde4de"}
+                ><X size={11} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 3, border: "1.5px dashed #dde4de", flexShrink: 0 }} />
+          <input value={newSub} onChange={e => setNewSub(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && newSub.trim()) addNewSub(); }}
+            placeholder="Add action item…"
+            style={{ flex: 1, border: "none", borderBottom: "1px solid #dde4de", outline: "none", fontSize: 12.5, color: "#082d1d", background: "transparent", fontFamily: "inherit", paddingBottom: 2 }}
+          />
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button onClick={() => setEditing(false)} style={{ padding: "7px 16px", borderRadius: 10, border: "1.5px solid #dde4de", background: "#fff", color: "#4a6d47", fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
+          <button onClick={saveEdit} disabled={!editTitle.trim()} style={{ padding: "7px 20px", borderRadius: 10, border: "none", background: editTitle.trim() ? "#059669" : "#c4cbc2", color: "#fff", fontSize: 13, fontWeight: 600, cursor: editTitle.trim() ? "pointer" : "default", fontFamily: "inherit" }}
+            onMouseEnter={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = "#047857"; }}
+            onMouseLeave={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = "#059669"; }}
+          >Save changes</button>
+        </div>
       </div>
     );
   }
@@ -179,150 +178,199 @@ function TaskCardInner({
     <>
       <div style={{
         background: isLocallyCompleted ? "#fafcfa" : "#fff",
-        borderRadius: 12,
-        border: `1px solid ${isLocallyCompleted ? "#e8f5f0" : "#e8ece8"}`,
-        padding: "12px 14px",
-        opacity: isLocallyCompleted ? 0.75 : 1,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-        transition: "box-shadow 0.15s",
+        borderRadius: 20,
+        border: `1px solid ${isLocallyCompleted ? "#e8f5f0" : "#efefef"}`,
+        padding: "18px 20px",
+        opacity: isLocallyCompleted ? 0.72 : 1,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        transition: "box-shadow 0.15s, transform 0.15s",
+        display: "flex", flexDirection: "column", gap: 14,
       }}
-        onMouseEnter={e => { if (!isLocallyCompleted) (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; }}
-        onMouseLeave={e => (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"}
+        onMouseEnter={e => { if (!isLocallyCompleted) { (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; } }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
       >
 
-        {/* Main row: circle + title + actions */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+        {/* ── Row 1: badges + menu ── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Emotion badge */}
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 5,
+              padding: "5px 12px", borderRadius: 999,
+              background: em.pillBg, color: em.pillText,
+              fontSize: 13, fontWeight: 700,
+            }}>
+              {em.emoji} {em.label}
+            </span>
 
-          {/* Complete circle */}
-          <button onClick={() => onMarkDone?.(task.id)}
-            title={isLocallyCompleted ? "Mark as active" : "Complete"}
-            style={{
-              width: 20, height: 20, borderRadius: 4, flexShrink: 0,
-              border: `2px solid ${isLocallyCompleted ? "#16a34a" : "#d1d5db"}`,
-              background: isLocallyCompleted ? "#16a34a" : "#fff",
-              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.15s", marginTop: 2,
-            }}
-            onMouseEnter={e => { isLocallyCompleted ? ((e.currentTarget as HTMLElement).style.background = "#dc2626", (e.currentTarget as HTMLElement).style.borderColor = "#dc2626") : ((e.currentTarget as HTMLElement).style.borderColor = "#16a34a", (e.currentTarget as HTMLElement).style.background = "#dcfce7"); }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isLocallyCompleted ? "#16a34a" : "#fff"; (e.currentTarget as HTMLElement).style.borderColor = isLocallyCompleted ? "#16a34a" : "#d1d5db"; }}
-          >
-            {isLocallyCompleted && <Check size={10} color="#fff" strokeWidth={3} />}
-          </button>
+            {/* Deferred badge */}
+            {task.deferredCount > 0 && (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 999, background: "#FFF0EC", color: "#D14626", fontSize: 13, fontWeight: 700 }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#D14626", display: "inline-block" }} />
+                Deferred {task.deferredCount}×
+              </span>
+            )}
+          </div>
 
-          {/* Title + meta */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{
-              fontSize: 14, fontWeight: 600,
-              color: isLocallyCompleted ? "#9ca3af" : "#0a2010",
-              margin: 0, lineHeight: 1.4,
-              cursor: "default",
-              textDecoration: isLocallyCompleted ? "line-through" : "none",
-            }}>{task.title}</p>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
-              {!isLocallyCompleted && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 7px", borderRadius: 999, background: em.pillBg, color: em.pillText, fontSize: 12, fontWeight: 600 }}>
-                  {em.emoji} {em.label}
-                </span>
-              )}
-              {(due || (!isLocallyCompleted && onDefer)) && (
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  {due && <span style={{ fontSize: 12, color: due.overdue ? "#ef4444" : "#6b7280", fontWeight: 500 }}>{due.overdue ? "⚑ " : ""}{due.label}</span>}
-                  {!isLocallyCompleted && onDefer && (
-                    <button onClick={() => setDeferOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, color: "#059669", padding: 0, fontFamily: "inherit" }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#047857"}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#059669"}
-                    >· Defer</button>
-                  )}
+          {/* ⋯ menu */}
+          {!isLocallyCompleted && (
+            <div ref={menuRef} style={{ position: "relative" }}>
+              <button onClick={() => setMenuOpen(o => !o)} style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#374151"; (e.currentTarget as HTMLElement).style.background = "#f3f4f6"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#9ca3af"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+              >
+                <MoreHorizontal size={18} />
+              </button>
+              {menuOpen && (
+                <div style={{ position: "absolute", top: 36, right: 0, zIndex: 50, background: "#fff", border: "1px solid #e5e7eb", borderRadius: 12, padding: "4px 0", boxShadow: "0 8px 24px rgba(0,0,0,0.1)", minWidth: 150 }}>
+                  {[
+                    { label: "Edit task", fn: openEdit, color: "#374151", hover: "#f9fafb" },
+                    { label: "Defer task", fn: () => { setDeferOpen(true); setMenuOpen(false); }, color: "#059669", hover: "#f2fdec" },
+                    { label: "Delete", fn: () => { onDelete?.(task.id); setMenuOpen(false); }, color: "#dc2626", hover: "#fff5f5" },
+                  ].map(item => (
+                    <button key={item.label} onClick={item.fn} style={{ display: "flex", width: "100%", padding: "9px 16px", background: "none", border: "none", cursor: "pointer", fontSize: 13.5, color: item.color, fontFamily: "inherit", textAlign: "left" }}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = item.hover}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+                    >{item.label}</button>
+                  ))}
                 </div>
               )}
-              {task.deferredCount > 0 && !isLocallyCompleted && (
-                <span style={{ fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: "#FFF0EC", color: "#D14626" }}>×{task.deferredCount}</span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Row 2: title ── */}
+        <div>
+          <h3 style={{
+            fontSize: 19, fontWeight: 800, color: isLocallyCompleted ? "#9ca3af" : "#111827",
+            margin: 0, lineHeight: 1.25, letterSpacing: "-0.02em",
+            textDecoration: isLocallyCompleted ? "line-through" : "none",
+          }}>{task.title}</h3>
+
+          {/* Due date */}
+          {due && (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, marginTop: 10, padding: "7px 12px", borderRadius: 12, background: "#f3f4f6" }}>
+              <CalendarDays size={14} color={due.overdue ? "#dc2626" : "#6b7280"} />
+              <span style={{ fontSize: 13.5, color: due.overdue ? "#dc2626" : "#374151", fontWeight: 500 }}>{due.label}</span>
+              {!isLocallyCompleted && onDefer && (
+                <button onClick={() => setDeferOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: "#059669", padding: 0, fontFamily: "inherit" }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#047857"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#059669"}
+                >· Defer</button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ── Row 3: segmented progress bar ── */}
+        {totalSubs > 0 && (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ display: "flex", flex: 1, gap: 4 }}>
+                {task.subtasks.map((sub, i) => (
+                  <div key={i} style={{ flex: 1, height: 5, borderRadius: 999, background: sub.isCompleted ? em.strip : "#e5e7eb", transition: "background 0.2s" }} />
+                ))}
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: em.pillText, flexShrink: 0 }}>{completedSubs}/{totalSubs}</span>
+              {totalSubs > 1 && (
+                <button onClick={() => setSubsExpanded(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#9ca3af", padding: 0, fontFamily: "inherit", flexShrink: 0 }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#374151"}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9ca3af"}
+                >{subsExpanded ? "Hide" : "Show"}</button>
               )}
             </div>
 
-            {/* Progress bar + collapse toggle */}
-            {totalSubs > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                  <div style={{ flex: 1, height: 3, background: "#f3f4f6", borderRadius: 999, overflow: "hidden" }}>
-                    <div style={{ height: "100%", borderRadius: 999, background: progress === 100 ? "#16a34a" : "#059669", width: `${progress}%`, transition: "width 0.3s" }} />
-                  </div>
-                  <span style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500, flexShrink: 0 }}>{completedSubs}/{totalSubs}</span>
-                  {totalSubs > 1 && (
-                    <button onClick={() => setSubsExpanded(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#9ca3af", padding: 0, fontFamily: "inherit", flexShrink: 0 }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#374151"}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9ca3af"}
-                    >{subsExpanded ? "Hide" : "Show"}</button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Subtasks */}
-            {task.subtasks.length > 0 && subsExpanded && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 6 }}>
+            {/* Subtask list */}
+            {subsExpanded && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
                 {task.subtasks.map(sub => (
-                  <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <button onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)} style={{
-                      width: 14, height: 14, borderRadius: 4, flexShrink: 0,
+                      width: 16, height: 16, borderRadius: 4, flexShrink: 0,
                       cursor: sub.isCompleted ? "default" : "pointer",
-                      background: sub.isCompleted ? "#16a34a" : "#fff",
-                      border: `1.5px solid ${sub.isCompleted ? "#16a34a" : "#d1d5db"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.12s",
+                      background: sub.isCompleted ? em.strip : "#fff",
+                      border: `2px solid ${sub.isCompleted ? em.strip : "#d1d5db"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s",
                     }}>
-                      {sub.isCompleted && <Check size={7} color="#fff" strokeWidth={3} />}
+                      {sub.isCompleted && <Check size={9} color="#fff" strokeWidth={3} />}
                     </button>
-                    <span style={{ flex: 1, fontSize: 12.5, color: sub.isCompleted ? "#9ca3af" : "#374151", textDecoration: sub.isCompleted ? "line-through" : "none" }}>{sub.title}</span>
+                    <span style={{ flex: 1, fontSize: 13.5, color: sub.isCompleted ? "#9ca3af" : "#374151", textDecoration: sub.isCompleted ? "line-through" : "none" }}>{sub.title}</span>
                     {!isLocallyCompleted && (
                       <button onClick={() => onDeleteSubtask?.(sub.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#e5e7eb", padding: 0, display: "flex" }}
                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#dc2626"}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#e5e7eb"}
-                      ><X size={11} /></button>
+                      ><X size={12} /></button>
                     )}
                   </div>
                 ))}
               </div>
             )}
-
-            {/* Add subtask */}
-            {!isLocallyCompleted && (
-              showSubInput ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                  <div style={{ width: 14, height: 14, borderRadius: 4, border: "1.5px dashed #d1d5db", flexShrink: 0 }} />
-                  <input ref={subRef} value={subInput} onChange={e => setSubInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") addSubtask(); if (e.key === "Escape") { setSubInput(""); setShowSubInput(false); } }}
-                    onBlur={() => { if (!subInput.trim()) setShowSubInput(false); else addSubtask(); }}
-                    placeholder="Subtask…"
-                    style={{ flex: 1, fontSize: 12.5, color: "#082d1d", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }}
-                  />
-                </div>
-              ) : (
-                <button onClick={() => setShowSubInput(true)} style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6, background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#c4cbc2", fontFamily: "inherit", padding: 0 }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#059669"}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#c4cbc2"}
-                ><Plus size={11} strokeWidth={2.5} /> Add subtask</button>
-              )
-            )}
-
-            {isNudged && !isLocallyCompleted && (
-              <div style={{ marginTop: 8 }}>
-                <NudgeBanner task={task} onDefer={onDefer ? d => onDefer(task.id, d) : undefined} onMarkDone={() => onMarkDone?.(task.id)} />
-              </div>
-            )}
           </div>
+        )}
 
-          {/* Edit + Delete */}
+        {/* Add subtask */}
+        {!isLocallyCompleted && (
+          showSubInput ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 16, height: 16, borderRadius: 4, border: "2px dashed #d1d5db", flexShrink: 0 }} />
+              <input ref={subRef} value={subInput} onChange={e => setSubInput(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") addSubtask(); if (e.key === "Escape") { setSubInput(""); setShowSubInput(false); } }}
+                onBlur={() => { if (!subInput.trim()) setShowSubInput(false); else addSubtask(); }}
+                placeholder="Add subtask…"
+                style={{ flex: 1, fontSize: 13, color: "#082d1d", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }}
+              />
+            </div>
+          ) : (
+            <button onClick={() => setShowSubInput(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "#c4cbc2", fontFamily: "inherit", padding: 0, alignSelf: "flex-start" }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#059669"}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#c4cbc2"}
+            ><Plus size={13} strokeWidth={2.5} /> Add subtask</button>
+          )
+        )}
+
+        {/* Nudge */}
+        {isNudged && !isLocallyCompleted && (
+          <NudgeBanner task={task} onDefer={onDefer ? d => onDefer(task.id, d) : undefined} onMarkDone={() => onMarkDone?.(task.id)} />
+        )}
+
+        {/* ── Divider ── */}
+        <div style={{ height: 1, background: "#f0f0f0", margin: "0 -20px" }} />
+
+        {/* ── Footer ── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Complete */}
+          <button onClick={() => onMarkDone?.(task.id)}
+            title={isLocallyCompleted ? "Mark as active" : "Complete task"}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
+              padding: 0,
+            }}>
+            <span style={{
+              width: 20, height: 20, borderRadius: 5, flexShrink: 0,
+              border: `2px solid ${isLocallyCompleted ? "#16a34a" : "#d1d5db"}`,
+              background: isLocallyCompleted ? "#16a34a" : "#fff",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.15s",
+            }}>
+              {isLocallyCompleted && <Check size={11} color="#fff" strokeWidth={3} />}
+            </span>
+            <span style={{ fontSize: 13, color: isLocallyCompleted ? "#16a34a" : "#9ca3af", fontWeight: 500 }}>
+              {isLocallyCompleted ? "Completed" : "Mark complete"}
+            </span>
+          </button>
+
+          {/* Edit + delete */}
           {!isLocallyCompleted && (
-            <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
-              <button onClick={openEdit} title="Edit" style={{ width: 26, height: 26, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", transition: "all 0.12s" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#111827"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#6b7280"; }}
-              ><Pencil size={13} strokeWidth={2} /></button>
-              <button onClick={() => onDelete?.(task.id)} title="Delete" style={{ width: 26, height: 26, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280", transition: "all 0.12s" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#dc2626"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#6b7280"; }}
-              ><Trash2 size={13} strokeWidth={2} /></button>
+            <div style={{ display: "flex", gap: 4 }}>
+              <button onClick={openEdit} title="Edit" style={{ width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#111827"; (e.currentTarget as HTMLElement).style.background = "#f3f4f6"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#6b7280"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+              ><Pencil size={14} strokeWidth={2} /></button>
+              <button onClick={() => onDelete?.(task.id)} title="Delete" style={{ width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#dc2626"; (e.currentTarget as HTMLElement).style.background = "#fff5f5"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#6b7280"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+              ><Trash2 size={14} strokeWidth={2} /></button>
             </div>
           )}
         </div>
