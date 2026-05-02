@@ -257,6 +257,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
   // Keep completed tasks in session so they sink to bottom with strikethrough
   const [completedThisSession, setCompletedThisSession] = useState<Map<string, TaskWithSubtasks>>(new Map());
+  // Tasks the user un-completed this session — shown at bottom of active list
+  const [recentlyUncompleted, setRecentlyUncompleted] = useState<Map<string, TaskWithSubtasks>>(new Map());
 
   function handleMarkDone(id: string) {
     const task = displayTasks.find(t => t.id === id);
@@ -265,12 +267,20 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   }
 
   function handleUncomplete(id: string) {
+    // Get the task data from completedThisSession before removing it
+    const taskData = completedThisSession.get(id);
     setCompletedThisSession(prev => { const next = new Map(prev); next.delete(id); return next; });
+    // Add to recently uncompleted so it appears at bottom of active list
+    if (taskData) setRecentlyUncompleted(prev => new Map(prev).set(id, { ...taskData, isCompleted: false }));
     fetch(`/api/tasks/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isCompleted: false }),
-    }).then(() => queryClient.invalidateQueries({ queryKey: ["tasks"] }));
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      // Remove from recentlyUncompleted after server refetch brings it back
+      setTimeout(() => setRecentlyUncompleted(prev => { const next = new Map(prev); next.delete(id); return next; }), 1500);
+    });
   }
 
   function pushTaskUp(id: string) {
@@ -638,9 +648,13 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 : filteredTasks;
 
               const allActive = featured ? [featured, ...grid] : grid;
-              // Completed this session — show at bottom with strikethrough
+              // Exclude tasks already shown in active list or recently uncompleted
               const completedList = [...completedThisSession.values()].filter(
                 ct => !allActive.some(t => t.id === ct.id)
+              );
+              // Recently uncompleted — active but shown at bottom (not yet back from server)
+              const uncompletedList = [...recentlyUncompleted.values()].filter(
+                t => !allActive.some(a => a.id === t.id)
               );
 
               const cardProps = (t: typeof displayTasks[0], idx: number, isCompleted = false) => ({
@@ -661,6 +675,15 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   {allActive.map((t, idx) => (
                     <SortableTaskCard key={t.id} {...cardProps(t, idx)} />
                   ))}
+                  {/* Recently un-completed — active, at bottom */}
+                  {uncompletedList.map((t) => (
+                    <SortableTaskCard key={`uncompleted-${t.id}`} task={t}
+                      onMarkDone={handleMarkDone} onDefer={deferTask} onUpdate={updateTask}
+                      onDelete={deleteTask} onAddSubtask={addSubtask}
+                      onCompleteSubtask={completeSubtask} onDeleteSubtask={deleteSubtask}
+                    />
+                  ))}
+                  {/* Completed this session — strikethrough at very bottom */}
                   {completedList.map((t) => (
                     <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
                       onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
