@@ -279,11 +279,11 @@ function TaskCardInner({
                     {!isLocallyCompleted && onDefer && (
                       <button onClick={() => setDeferOpen(true)} style={{
                         background: "none", border: "none", cursor: "pointer",
-                        fontSize: 11, fontWeight: 500, color: "#9ca3af",
+                        fontSize: 11, fontWeight: 600, color: "#059669",
                         padding: 0, fontFamily: "inherit",
                       }}
-                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#4b5563"}
-                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#9ca3af"}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#047857"}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#059669"}
                       >· Defer</button>
                     )}
                   </div>
