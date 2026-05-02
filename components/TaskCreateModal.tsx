@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 
@@ -39,19 +38,29 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
     if (open) setOpenCount(c => c + 1);
   }, [open]);
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden rounded-[12px] border border-[#dde4de]" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.1)", background: "#fff" }}>
-        {open && (
-          <ModalForm
-            key={openCount}
-            defaultDate={defaultDate}
-            defaultTitle={defaultTitle}
-            onClose={() => onOpenChange(false)}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+    /* Backdrop */
+    <div
+      onClick={() => onOpenChange(false)}
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)",
+        display: "flex", alignItems: "flex-start", justifyContent: "center",
+        paddingTop: 80,
+      }}
+    >
+      {/* Form — same style as inline creation form */}
+      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 580, margin: "0 24px" }}>
+        <ModalForm
+          key={openCount}
+          defaultDate={defaultDate}
+          defaultTitle={defaultTitle}
+          onClose={() => onOpenChange(false)}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -158,70 +167,77 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
 
   return (
     <>
-        {/* Title */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 20px 14px", borderBottom: "1px solid #e9ede9" }}>
-          <span style={{ fontSize: 13, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
-          <input autoFocus value={title} onChange={e => setTitle(e.target.value)}
-            placeholder="What needs doing?"
-            style={{ flex: 1, border: "none", outline: "none", fontSize: 14, fontWeight: 500, color: "#082d1d", background: "transparent", fontFamily: "inherit" }} />
+      {/* Title input — same as inline form header */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "14px 18px", background: "#fff",
+        border: "1.5px solid #059669",
+        borderRadius: "12px 12px 0 0",
+      }}>
+        <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
+        <input autoFocus value={title} onChange={e => setTitle(e.target.value)}
+          onKeyDown={e => { if (e.key === "Escape") handleClose(); }}
+          placeholder="What needs doing?"
+          style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }} />
+      </div>
+
+      {/* Expanded body — same as inline form */}
+      <div style={{
+        background: "#fff", border: "1.5px solid #059669", borderTop: "none",
+        borderRadius: "0 0 12px 12px", padding: "16px 18px",
+        boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
+      }}>
+        {/* Date + Time */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+          <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
+          <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time" />
         </div>
 
-        <div style={{ padding: "16px 20px 14px" }}>
-
-          {/* Date + Time side by side */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-            <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
-            <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time" />
+        {/* Feeling */}
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>How do you feel about it?</p>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {STATES.map(s => {
+              const active = emotion === s.value;
+              return (
+                <button key={s.value} onClick={() => setEmotion(s.value)} style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "4px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                  background: active ? s.activeBg : s.bg,
+                  color: active ? "#fff" : s.fg,
+                  border: `1px solid ${s.fg}30`, cursor: "pointer", fontFamily: "inherit",
+                }}>
+                  {s.emoji} {s.label}
+                </button>
+              );
+            })}
           </div>
-
-          {/* Feeling */}
-          <div style={{ marginBottom: 14 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "#082d1d", marginBottom: 10 }}>How do you feel about it?</p>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {STATES.map(s => {
-                const active = emotion === s.value;
-                return (
-                  <button key={s.value} onClick={() => setEmotion(s.value)} style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    padding: "8px 16px", borderRadius: 10,
-                    background: active ? s.activeBg : s.bg,
-                    color: active ? "#fff" : s.fg,
-                    border: "none",
-                    fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-                    transition: "all 0.12s",
-                  }}>
-                    <span style={{ fontSize: 16 }}>{s.emoji}</span> {s.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Action items */}
-          <div style={{ marginBottom: 10 }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 6 }}>Action items</p>
-            {subtasks.map((st, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, padding: "3px 0" }}>
-                <span style={{ width: 12, height: 12, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
-                <span style={{ flex: 1, fontSize: 12, color: "#082d1d" }}>{st}</span>
-                <button onClick={() => setSubtasks(p => p.filter((_, j) => j !== i))}
-                  style={{ fontSize: 11, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
-              </div>
-            ))}
-            <div style={{ display: "flex", alignItems: "center", gap: 7, paddingTop: 3 }}>
-              <span style={{ width: 12, height: 12, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
-              <input value={subInput} onChange={e => setSubInput(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSubtask(); } }}
-                placeholder="Add action item..."
-                style={{ flex: 1, border: "none", borderBottom: "1px solid #e9ede9", outline: "none", fontSize: 12, color: "#082d1d", background: "transparent", fontFamily: "inherit", paddingBottom: 3 }} />
-            </div>
-          </div>
-
-          {error && <p style={{ fontSize: 11.5, color: "#c23934", marginTop: 6 }}>{error}</p>}
         </div>
 
-        {/* Footer */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "12px 20px 16px", borderTop: "1px solid #e9ede9" }}>
+        {/* Action items */}
+        <div style={{ marginBottom: 16 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Action items</p>
+          {subtasks.map((st, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
+              <span style={{ width: 10, height: 10, borderRadius: 3, border: "1.5px solid #dde4de", flexShrink: 0 }} />
+              <span style={{ flex: 1, fontSize: 12.5, color: "#082d1d" }}>{st}</span>
+              <button onClick={() => setSubtasks(p => p.filter((_, j) => j !== i))}
+                style={{ fontSize: 11, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+            </div>
+          ))}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 3, border: "1.5px dashed #dde4de", flexShrink: 0 }} />
+            <input value={subInput} onChange={e => setSubInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSubtask(); } }}
+              placeholder="Add action item…"
+              style={{ flex: 1, border: "none", borderBottom: "1px solid #dde4de", outline: "none", fontSize: 12.5, color: "#082d1d", background: "transparent", fontFamily: "inherit", paddingBottom: 2 }} />
+          </div>
+        </div>
+
+        {error && <p style={{ fontSize: 11.5, color: "#c23934", marginBottom: 8 }}>{error}</p>}
+
+        {/* Actions */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button onClick={handleClose} style={{
             padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de",
             background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500,
@@ -253,6 +269,7 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
             {isPending ? "Creating…" : "Create task"}
           </button>
         </div>
+      </div>
     </>
   );
 }
