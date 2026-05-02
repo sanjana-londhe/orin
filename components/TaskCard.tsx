@@ -218,16 +218,31 @@ function TaskCardInner({
             </span>
           )}
           {due && (
-            <span style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20, background:"#f3f4f6", fontSize:11.5, fontWeight:500, color:due.overdue?"#c23934":"#3d5a4a" }}>
+            <span
+              onClick={() => !isLocallyCompleted && setDeferOpen(true)}
+              title={isLocallyCompleted ? undefined : "Click to change due time"}
+              style={{
+                display:"inline-flex", alignItems:"center", gap:5,
+                padding:"3px 9px", borderRadius:20,
+                background: due.overdue ? "#FFF0EC" : "#f3f4f6",
+                border: `1px solid ${due.overdue ? "#fecaca" : "transparent"}`,
+                fontSize:11.5, fontWeight:500,
+                color:due.overdue?"#c23934":"#3d5a4a",
+                cursor: isLocallyCompleted ? "default" : "pointer",
+                transition: "background 0.12s",
+              }}
+              onMouseEnter={e => { if (!isLocallyCompleted) (e.currentTarget as HTMLElement).style.background = due.overdue ? "#fee2e2" : "#e8ece8"; }}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = due.overdue ? "#FFF0EC" : "#f3f4f6"}
+            >
               <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
               {due.label}
             </span>
           )}
-          {!isLocallyCompleted && onDefer && (
+          {!isLocallyCompleted && !due && onDefer && (
             <span onClick={()=>setDeferOpen(true)} style={{ fontSize:11.5, fontWeight:600, color:"#059669", cursor:"pointer" }}
               onMouseEnter={e=>(e.currentTarget as HTMLElement).style.textDecoration="underline"}
               onMouseLeave={e=>(e.currentTarget as HTMLElement).style.textDecoration="none"}
-            >· Defer</span>
+            >+ Set due time</span>
           )}
         </div>
 

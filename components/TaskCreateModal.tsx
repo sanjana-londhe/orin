@@ -190,7 +190,7 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
         {/* Date + Time */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
           <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
-          <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time" />
+          <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time" selectedDate={selectedDate} />
         </div>
 
         {/* Feeling */}

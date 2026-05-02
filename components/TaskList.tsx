@@ -549,7 +549,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
           }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
               <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
-              <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" />
+              <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" selectedDate={inlineDueDate} />
             </div>
 
             <div style={{ marginBottom: 14 }}>
@@ -603,12 +603,18 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 style={{ padding:"6px 14px",borderRadius:7,border:"1px solid #dde4de",background:"#fff",color:"#4a6d47",fontSize:12.5,cursor:"pointer",fontFamily:"inherit" }}>
                 Cancel
               </button>
-              <button onClick={() => createInline({
-                title: inlineDraft.trim(),
-                dueAt: inlineDueDate ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString() : null,
-                emotion: inlineEmotion,
-                subtasks: inlineSubtasks,
-              })} disabled={!inlineDraft.trim() || creatingInline} style={{
+              <button onClick={() => {
+                if (inlineDueDate && inlineDueTime) {
+                  const chosen = new Date(`${inlineDueDate}T${inlineDueTime}`);
+                  if (chosen <= new Date()) { alert("Please pick a time in the future."); return; }
+                }
+                createInline({
+                  title: inlineDraft.trim(),
+                  dueAt: inlineDueDate ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString() : null,
+                  emotion: inlineEmotion,
+                  subtasks: inlineSubtasks,
+                });
+              }} disabled={!inlineDraft.trim() || creatingInline} style={{
                 padding:"6px 18px",borderRadius:7,border:"none",
                 background: inlineDraft.trim() ? "#059669" : "#c4cbc2",
                 color:"#fff",fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",

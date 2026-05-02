@@ -38,11 +38,15 @@ interface Props {
   value: string;         // "HH:MM"
   onChange: (t: string) => void;
   label?: string;
+  selectedDate?: string; // "YYYY-MM-DD" — used to grey out past times when today
 }
 
-export function TimePickerField({ value, onChange, label = "Due time" }: Props) {
+export function TimePickerField({ value, onChange, label = "Due time", selectedDate }: Props) {
   const [open, setOpen]           = useState(false);
   const [showCustom, setShowCustom] = useState(false);
+
+  const isToday = selectedDate === new Date().toISOString().slice(0, 10);
+  const nowHHMM = `${String(new Date().getHours()).padStart(2,"0")}:${String(new Date().getMinutes()).padStart(2,"0")}`;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,19 +108,28 @@ export function TimePickerField({ value, onChange, label = "Due time" }: Props) 
             borderRadius: 10, padding: "4px 0",
             boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 180,
           }}>
-            {QUICK_TIMES.map(opt => (
-              <button key={opt.time} type="button" onClick={() => select(opt.time)} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                width: "100%", padding: "9px 14px",
-                background: value === opt.time ? D.accentSubtle : "none",
-                border: "none", cursor: "pointer", fontFamily: "inherit",
-              }}
-                onMouseEnter={e => { if (value !== opt.time) (e.currentTarget as HTMLElement).style.background = D.surfaceMuted; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = value === opt.time ? D.accentSubtle : "none"; }}>
-                <span style={{ fontSize: 13, color: D.textPrimary }}>{opt.label}</span>
-                <span style={{ fontSize: 11, color: D.textMuted }}>{opt.sub}</span>
-              </button>
-            ))}
+            {QUICK_TIMES.map(opt => {
+              const isPast = isToday && opt.time <= nowHHMM;
+              return (
+                <button key={opt.time} type="button"
+                  onClick={() => !isPast && select(opt.time)}
+                  disabled={isPast}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    width: "100%", padding: "9px 14px",
+                    background: value === opt.time ? D.accentSubtle : "none",
+                    border: "none", cursor: isPast ? "not-allowed" : "pointer", fontFamily: "inherit",
+                    opacity: isPast ? 0.4 : 1,
+                  }}
+                  onMouseEnter={e => { if (value !== opt.time && !isPast) (e.currentTarget as HTMLElement).style.background = D.surfaceMuted; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = value === opt.time ? D.accentSubtle : "none"; }}>
+                  <span style={{ fontSize: 13, color: D.textPrimary }}>{opt.label}</span>
+                  <span style={{ fontSize: 11, color: isPast ? D.textMuted : D.textMuted }}>
+                    {isPast ? "past" : opt.sub}
+                  </span>
+                </button>
+              );
+            })}
 
             <div style={{ height: 1, background: D.border, margin: "4px 0" }} />
 
@@ -151,6 +164,7 @@ export function TimePickerField({ value, onChange, label = "Due time" }: Props) 
               <input
                 type="time"
                 value={value}
+                min={isToday ? nowHHMM : undefined}
                 onChange={e => onChange(e.target.value)}
                 autoFocus
                 style={{
