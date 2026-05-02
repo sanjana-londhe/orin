@@ -387,31 +387,13 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     <>
       {/* ── Page header (5.html style) ── */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 12 }}>
-          <div>
-            <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
-              Daily workspace · {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-            </p>
-            <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1 }}>
-              Today
-            </h1>
-          </div>
-          <button onClick={() => { setShowInlineForm(true); setTimeout(() => document.getElementById("inline-task-input")?.focus(), 50); }} style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "8px 18px", borderRadius: 8,
-            background: "#059669", border: "none",
-            color: "#fff", fontSize: 13.5, fontWeight: 600,
-            cursor: "pointer", fontFamily: "inherit",
-            transition: "background 0.15s", flexShrink: 0,
-          }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
-            + New task
-          </button>
-        </div>
+        {/* Single row: Today + sort + filter + new task */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1, flexShrink: 0 }}>
+            Today
+          </h1>
 
-        {/* Sort + Filter row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
 
           {/* ── Sort by custom dropdown ── */}
           <SortDropdown value={sortMode} onChange={setSortMode} />
@@ -510,8 +492,22 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#b9d3c4"}
             >✕ Clear</button>
           )}
-        </div>
+          </div>
 
+          {/* New task button — right-aligned */}
+          <button onClick={() => { setShowInlineForm(true); setTimeout(() => document.getElementById("inline-task-input")?.focus(), 50); }} style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "8px 16px", height: 38, borderRadius: 8,
+            background: "#059669", border: "none",
+            color: "#fff", fontSize: 13.5, fontWeight: 600,
+            cursor: "pointer", fontFamily: "inherit",
+            transition: "background 0.15s", flexShrink: 0,
+          }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
+            + New task
+          </button>
+        </div>
 
       </div>
 
