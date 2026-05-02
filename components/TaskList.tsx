@@ -278,11 +278,6 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1 }}>
               Today
             </h1>
-            {userName !== "there" && (
-              <p style={{ fontSize: 12.5, color: "#4a6d47", marginTop: 4 }}>
-                Good {timeGreeting}, {userName} ☀️ &nbsp;·&nbsp; {tasks.length} task{tasks.length !== 1 ? "s" : ""} &nbsp;·&nbsp; {tasks.length} remaining
-              </p>
-            )}
           </div>
           <button onClick={() => setModalOpen(true)} style={{
             display: "flex", alignItems: "center", gap: 6,

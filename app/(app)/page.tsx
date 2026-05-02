@@ -21,8 +21,7 @@ export default async function TodayPage() {
         {/* Greeting card */}
         <div style={{
           background: "#fff", borderRadius: 16, border: "1px solid #e9ede9",
-          padding: "22px 28px", marginBottom: 14,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "16px 24px", marginBottom: 8,
           boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
         }}>
           <div>
@@ -35,17 +34,6 @@ export default async function TodayPage() {
             <p style={{ fontSize: 13.5, color: "#4a6d47", margin: 0 }}>
               What would you like to move forward today?
             </p>
-          </div>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            background: "#f8f9f5", border: "1px solid #e9ede9",
-            borderRadius: 12, padding: "8px 14px",
-          }}>
-            <span style={{ fontSize: 20 }}>🌿</span>
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 700, color: "#082d1d", margin: 0 }}>Orin</p>
-              <p style={{ fontSize: 10.5, color: "#4a6d47", margin: 0 }}>Emotional task mgmt</p>
-            </div>
           </div>
         </div>
 
