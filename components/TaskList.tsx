@@ -205,31 +205,64 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const [inlineSubInput, setInlineSubInput] = useState("");
 
   const { mutate: createInline, isPending: creatingInline } = useMutation({
-    mutationFn: async () => {
-      const dueAt = inlineDueDate
-        ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString()
-        : null;
+    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof inlineEmotion; subtasks: string[] }) => {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: inlineDraft.trim(), dueAt, emotionalState: inlineEmotion }),
+        body: JSON.stringify({ title: vars.title, dueAt: vars.dueAt, emotionalState: vars.emotion }),
       });
       if (!res.ok) throw new Error("Failed");
       const task = await res.json();
-      for (const st of inlineSubtasks) {
-        await fetch("/api/tasks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: st, parentTaskId: task.id }),
-        });
+      // Create subtasks in parallel instead of sequentially
+      if (vars.subtasks.length > 0) {
+        await Promise.all(vars.subtasks.map(st =>
+          fetch("/api/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: st, parentTaskId: task.id }),
+          })
+        ));
       }
       return task;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onMutate: async (vars) => {
+      // Cancel in-flight refetches so they don't overwrite the optimistic update
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      const snap = queryClient.getQueriesData<TaskWithSubtasks[]>({ queryKey: ["tasks"] });
+
+      // Build an optimistic task that looks like the real thing
+      const optimistic: TaskWithSubtasks = {
+        id: `optimistic-${Date.now()}`,
+        userId: "",
+        title: vars.title,
+        dueAt: vars.dueAt ? new Date(vars.dueAt) : null,
+        emotionalState: vars.emotion as TaskWithSubtasks["emotionalState"],
+        isCompleted: false,
+        deferredCount: 0,
+        sortOrder: 99999,
+        lastTouchedAt: new Date(),
+        recurrenceRule: null,
+        parentTaskId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        subtasks: [],
+      };
+
+      queryClient.setQueryData(["tasks", selectedDate], (old: TaskWithSubtasks[] = []) => [...old, optimistic]);
+
+      // Reset form immediately — user sees instant feedback
       setInlineDraft(""); setShowInlineForm(false);
-      setInlineDueDate(""); setInlineDueTime(""); setInlineEmotion("NEUTRAL");
+      setInlineDueDate(new Date().toISOString().slice(0, 10));
+      setInlineDueTime(""); setInlineEmotion("NEUTRAL");
       setInlineSubtasks([]); setInlineSubInput("");
+
+      return { snap };
+    },
+    onError: (_e, _v, ctx) => {
+      ctx?.snap.forEach(([key, data]) => queryClient.setQueryData(key, data));
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 
@@ -489,7 +522,12 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   style={{ padding:"6px 14px",borderRadius:7,border:"1px solid #dde4de",background:"#fff",color:"#4a6d47",fontSize:12.5,cursor:"pointer",fontFamily:"inherit" }}>
                   Cancel
                 </button>
-                <button onClick={() => createInline()} disabled={!inlineDraft.trim() || creatingInline} style={{
+                <button onClick={() => createInline({
+                  title: inlineDraft.trim(),
+                  dueAt: inlineDueDate ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString() : null,
+                  emotion: inlineEmotion,
+                  subtasks: inlineSubtasks,
+                })} disabled={!inlineDraft.trim() || creatingInline} style={{
                   padding:"6px 18px",borderRadius:7,border:"none",
                   background: inlineDraft.trim() ? "#059669" : "#c4cbc2",
                   color:"#fff",fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
