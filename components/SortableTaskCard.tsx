@@ -16,6 +16,8 @@ interface Props {
   onAddSubtask?: (parentId: string, title: string) => void;
   onCompleteSubtask?: (id: string) => void;
   onDeleteSubtask?: (id: string) => void;
+  onPushUp?: (id: string) => void;
+  canPushUp?: boolean;
   dragActive?: boolean;
   featured?: boolean;
 }

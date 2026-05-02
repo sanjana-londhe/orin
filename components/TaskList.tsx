@@ -185,6 +185,17 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   // All shared mutations from hook — no duplication with SimpleTaskView
   const { markDone, updateTask, deferTask, deleteTask, addSubtask, completeSubtask, deleteSubtask } = m;
 
+  function pushTaskUp(id: string) {
+    const idx = manualOrder.indexOf(id);
+    if (idx <= 0) return;
+    if (sortMode !== "manual") setSortMode("manual");
+    const newOrder = [...manualOrder];
+    [newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
+    setManualOrder(newOrder);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => reorderTasks(newOrder), 400);
+  }
+
   const filteredTasks = useMemo(() =>
     activeFilters.size === 0
       ? displayTasks
@@ -554,26 +565,31 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 ? [...filteredTasks.slice(0, urgentIdx), ...filteredTasks.slice(urgentIdx + 1)]
                 : filteredTasks;
 
-              const cardProps = (t: typeof displayTasks[0], isFeatured = false) => ({
-                task: t, featured: isFeatured,
-                dragActive: true,
+              const allTasks = featured ? [featured, ...grid] : grid;
+
+              const cardProps = (t: typeof displayTasks[0], idx: number) => ({
+                task: t,
+                featured: false,
+                dragActive: sortMode === "manual",
+                canPushUp: idx > 0,
+                onPushUp: pushTaskUp,
                 onMarkDone: markDone, onDefer: deferTask, onUpdate: updateTask,
                 onDelete: deleteTask, onAddSubtask: addSubtask,
                 onCompleteSubtask: completeSubtask, onDeleteSubtask: deleteSubtask,
               });
 
               return (
-                <>
-                  {featured && (
-                    <SortableTaskCard key={featured.id} {...cardProps(featured, true)} />
-                  )}
-
-                  {grid.length > 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 32 }}>
-                      {grid.map(t => <SortableTaskCard key={t.id} {...cardProps(t)} />)}
-                    </div>
-                  )}
-                </>
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: 10,
+                  marginBottom: 32,
+                  alignItems: "start",
+                }}>
+                  {allTasks.map((t, idx) => (
+                    <SortableTaskCard key={t.id} {...cardProps(t, idx)} />
+                  ))}
+                </div>
               );
             })()}
           </SortableContext>
