@@ -537,9 +537,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             borderRadius: "0 0 12px 12px", padding: "16px 18px",
             boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
           }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 2fr", gap: 12, marginBottom: 14, alignItems: "end" }}>
-              <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
-              <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" />
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 14, alignItems: "end" }}>
               <div>
                 <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 6 }}>Feeling</p>
                 <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
@@ -567,6 +565,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   })}
                 </div>
               </div>
+              <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
+              <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" />
             </div>
 
             <div style={{ marginBottom: 16 }}>

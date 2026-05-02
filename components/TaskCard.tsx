@@ -179,13 +179,13 @@ function TaskCardInner({
           {/* card-actions — always visible top-right */}
           {!isLocallyCompleted && (
             <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:6 }}>
-              <button onClick={openEdit} title="Edit" style={{ width:26, height:26, borderRadius:7, border:"1px solid #e8ece8", background:"white", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#b9d3c4", fontSize:13, transition:"background 0.15s, color 0.15s" }}
-                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#f8f9f5"; (e.currentTarget as HTMLElement).style.color="#3d5a4a"; }}
-                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="white"; (e.currentTarget as HTMLElement).style.color="#b9d3c4"; }}
+              <button onClick={openEdit} title="Edit" style={{ width:26, height:26, borderRadius:7, border:"1px solid #dde4de", background:"#f8f9f5", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#4a6d47", fontSize:13, transition:"background 0.15s, color 0.15s" }}
+                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#e4f0eb"; (e.currentTarget as HTMLElement).style.color="#059669"; }}
+                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#f8f9f5"; (e.currentTarget as HTMLElement).style.color="#4a6d47"; }}
               >✏</button>
-              <button onClick={()=>onDelete?.(task.id)} title="Delete" style={{ width:26, height:26, borderRadius:7, border:"1px solid #e8ece8", background:"white", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#b9d3c4", fontSize:14, transition:"background 0.15s, color 0.15s" }}
-                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#fff0f0"; (e.currentTarget as HTMLElement).style.color="#c23934"; }}
-                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="white"; (e.currentTarget as HTMLElement).style.color="#b9d3c4"; }}
+              <button onClick={()=>onDelete?.(task.id)} title="Delete" style={{ width:26, height:26, borderRadius:7, border:"1px solid #fecaca", background:"#fff0f0", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#c23934", fontSize:14, transition:"background 0.15s" }}
+                onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#fee2e2"}
+                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#fff0f0"}
               >✕</button>
             </div>
           )}
