@@ -1,4 +1,5 @@
-import { SimpleTaskView } from "@/components/SimpleTaskView";
+import { AllTasksView } from "@/components/AllTasksView";
+
 export default function AllPage() {
-  return <SimpleTaskView title="All" emoji="📋" filter="all" emptyText="No tasks created yet" />;
+  return <AllTasksView />;
 }
