@@ -165,15 +165,26 @@ function TaskCardInner({
         <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:8 }}>
           <div style={{ display:"flex", alignItems:"flex-start", gap:9, flex:1, minWidth:0 }}>
             {/* complete circle */}
-            <div onClick={()=>onMarkDone?.(task.id)} style={{
+            <div onClick={()=>onMarkDone?.(task.id)} title={isLocallyCompleted?"Mark as active":"Mark complete"} style={{
               width:17, height:17, borderRadius:"50%", flexShrink:0, marginTop:2,
               border:`1.5px solid ${isLocallyCompleted?"#059669":"#dde4de"}`,
               background:isLocallyCompleted?"#059669":"white",
               cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
               transition:"border-color 0.15s, background 0.15s",
             }}
-              onMouseEnter={e=>{ if(!isLocallyCompleted){ (e.currentTarget as HTMLElement).style.borderColor="#059669"; (e.currentTarget as HTMLElement).style.background="#f2fdec"; }}}
-              onMouseLeave={e=>{ if(!isLocallyCompleted){ (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; (e.currentTarget as HTMLElement).style.background="white"; }}}
+              onMouseEnter={e=>{
+                if(isLocallyCompleted){
+                  (e.currentTarget as HTMLElement).style.background="#dc2626";
+                  (e.currentTarget as HTMLElement).style.borderColor="#dc2626";
+                } else {
+                  (e.currentTarget as HTMLElement).style.borderColor="#059669";
+                  (e.currentTarget as HTMLElement).style.background="#f2fdec";
+                }
+              }}
+              onMouseLeave={e=>{
+                (e.currentTarget as HTMLElement).style.background=isLocallyCompleted?"#059669":"white";
+                (e.currentTarget as HTMLElement).style.borderColor=isLocallyCompleted?"#059669":"#dde4de";
+              }}
             >
               {isLocallyCompleted && <Check size={9} color="white" strokeWidth={3} />}
             </div>
