@@ -265,7 +265,15 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
         parentTaskId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        subtasks: [],
+        subtasks: vars.subtasks.map((title, i) => ({
+          id: `optimistic-sub-${Date.now()}-${i}`,
+          userId: "", title,
+          parentTaskId: `optimistic-${Date.now()}`,
+          isCompleted: false, deferredCount: 0, sortOrder: i,
+          lastTouchedAt: new Date(), recurrenceRule: null, dueAt: null,
+          emotionalState: "NEUTRAL" as const,
+          createdAt: new Date(), updatedAt: new Date(), subtasks: [],
+        })),
       };
 
       queryClient.setQueryData(["tasks", selectedDate], (old: TaskWithSubtasks[] = []) => [...old, optimistic]);
@@ -354,7 +362,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 <span style={{
                   width: 16, height: 16, borderRadius: "50%",
                   background: "#059669", color: "#fff",
-                  fontSize: 10, fontWeight: 700,
+                  fontSize: 11, fontWeight: 700,
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>{activeFilters.size}</span>
               )}

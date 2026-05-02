@@ -95,9 +95,10 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
       await queryClient.cancelQueries({ queryKey: ["tasks"] });
       const snap = queryClient.getQueriesData({ queryKey: ["tasks"] });
 
-      // Insert optimistic task into every tasks query so it appears instantly
+      // Insert optimistic task with subtasks so they appear instantly
+      const taskId = `optimistic-${Date.now()}`;
       const optimistic = {
-        id: `optimistic-${Date.now()}`,
+        id: taskId,
         userId: "",
         title: vars.title,
         dueAt: vars.dueAt ? new Date(vars.dueAt) : null,
@@ -110,7 +111,22 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
         parentTaskId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        subtasks: [],
+        subtasks: vars.subtasks.map((title, i) => ({
+          id: `optimistic-sub-${Date.now()}-${i}`,
+          userId: "",
+          title,
+          parentTaskId: taskId,
+          isCompleted: false,
+          deferredCount: 0,
+          sortOrder: i,
+          lastTouchedAt: new Date(),
+          recurrenceRule: null,
+          dueAt: null,
+          emotionalState: "NEUTRAL" as const,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          subtasks: [],
+        })),
       };
 
       queryClient.setQueriesData({ queryKey: ["tasks"] }, (old: unknown) =>
@@ -189,7 +205,7 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
                 <span style={{ width: 12, height: 12, borderRadius: "50%", border: "1.5px solid #dde4de", flexShrink: 0 }} />
                 <span style={{ flex: 1, fontSize: 12, color: "#082d1d" }}>{st}</span>
                 <button onClick={() => setSubtasks(p => p.filter((_, j) => j !== i))}
-                  style={{ fontSize: 10, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+                  style={{ fontSize: 11, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
               </div>
             ))}
             <div style={{ display: "flex", alignItems: "center", gap: 7, paddingTop: 3 }}>
