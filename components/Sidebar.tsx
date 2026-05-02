@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { ProfileModal } from "@/components/ProfileModal";
-import { getEmotion, EMOTION_MAP } from "@/lib/emotions";
+import { getEmotion } from "@/lib/emotions";
 import { signOut } from "@/app/actions/auth";
 import type { TaskWithSubtasks } from "@/lib/types";
 
@@ -46,11 +46,6 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
     },
     retry: 1,
   });
-
-  const emotionCounts = Object.keys(EMOTION_MAP).reduce<Record<string, number>>((acc, key) => {
-    acc[key] = tasks.filter(t => t.emotionalState === key).length;
-    return acc;
-  }, {});
 
   const deferred = tasks.filter(t => t.deferredCount > 0).length;
   const pending  = tasks.length;
@@ -151,39 +146,6 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
               );
             })}
           </nav>
-
-          {/* Mood filter */}
-          {!collapsed && (
-            <>
-              <p style={{
-                fontSize: 10, fontWeight: 700, color: "#c4cbc2",
-                textTransform: "uppercase", letterSpacing: "0.08em",
-                padding: "4px 8px 6px", margin: 0,
-              }}>Mood Filter</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 1, marginBottom: 14 }}>
-                {Object.entries(EMOTION_MAP).map(([key, em]) => {
-                  const count = emotionCounts[key] ?? 0;
-                  return (
-                    <button key={key} style={{
-                      display: "flex", alignItems: "center", gap: 8, padding: "7px 10px",
-                      borderRadius: 8, background: "none", border: "none", cursor: "pointer",
-                      fontSize: 13, color: "#3d5a4a", fontFamily: "inherit",
-                      textAlign: "left", width: "100%",
-                    }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f1f3ef"}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
-                    >
-                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: em.strip, flexShrink: 0 }} />
-                      <span style={{ flex: 1 }}>{em.label}</span>
-                      {count > 0 && (
-                        <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: "#f1f3ef", color: "#4a6d47" }}>{count}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
 
           {/* Stats */}
           {!collapsed && (

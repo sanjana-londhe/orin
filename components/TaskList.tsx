@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
 import {
@@ -18,6 +18,7 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import { useUIStore, type SortMode } from "@/store/ui";
+import { EMOTION_MAP, type EmotionKey } from "@/lib/emotions";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 const EMOTIONAL_WEIGHT: Record<string, number> = {
@@ -67,6 +68,39 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const [modalOpen, setModalOpen] = useState(false);
   const { sortMode, setSortMode } = useUIStore();
   const m = useTaskMutations();
+
+  // Emotion filter
+  const [filterOpen, setFilterOpen]         = useState(false);
+  const [pendingFilters, setPendingFilters]  = useState<Set<EmotionKey>>(new Set());
+  const [activeFilters, setActiveFilters]    = useState<Set<EmotionKey>>(new Set());
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setFilterOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const togglePending = useCallback((key: EmotionKey) => {
+    setPendingFilters(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }, []);
+
+  function applyFilter() {
+    setActiveFilters(new Set(pendingFilters));
+    setFilterOpen(false);
+  }
+
+  function clearFilter() {
+    setPendingFilters(new Set());
+    setActiveFilters(new Set());
+    setFilterOpen(false);
+  }
 
   // Date navigation
   const todayISO = new Date().toISOString().slice(0, 10);
@@ -151,6 +185,13 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   // All shared mutations from hook — no duplication with SimpleTaskView
   const { markDone, updateTask, deferTask, deleteTask, addSubtask, completeSubtask, deleteSubtask } = m;
 
+  const filteredTasks = useMemo(() =>
+    activeFilters.size === 0
+      ? displayTasks
+      : displayTasks.filter(t => activeFilters.has(t.emotionalState as EmotionKey)),
+    [displayTasks, activeFilters]
+  );
+
   const overdue = tasks.filter(t => t.dueAt && new Date(t.dueAt) < new Date()).length;
   const totalDeferred = tasks.reduce((s, t) => s + (t.deferredCount ?? 0), 0);
 
@@ -224,7 +265,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
           </button>
         </div>
 
-        {/* Sort dropdown — below Today heading */}
+        {/* Sort + Filter row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
           <span style={{ fontSize: 12, color: "#4a6d47" }}>Sort by</span>
           <select
@@ -244,6 +285,102 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             <option value="emotional">Emotional state</option>
             <option value="manual">Manual</option>
           </select>
+
+          {/* Filter button */}
+          <div ref={filterRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => { setPendingFilters(new Set(activeFilters)); setFilterOpen(o => !o); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "5px 12px", borderRadius: 7,
+                border: `1.5px solid ${activeFilters.size > 0 ? "#059669" : "#dde4de"}`,
+                background: activeFilters.size > 0 ? "#f2fdec" : "#fff",
+                color: activeFilters.size > 0 ? "#059669" : "#082d1d",
+                fontSize: 12.5, fontWeight: 500,
+                cursor: "pointer", fontFamily: "inherit",
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              Filter
+              {activeFilters.size > 0 && (
+                <span style={{
+                  width: 16, height: 16, borderRadius: "50%",
+                  background: "#059669", color: "#fff",
+                  fontSize: 10, fontWeight: 700,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>{activeFilters.size}</span>
+              )}
+            </button>
+
+            {filterOpen && (
+              <div style={{
+                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
+                background: "#fff", border: "1.5px solid #e9ede9",
+                borderRadius: 12, padding: "14px 14px 12px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                minWidth: 210,
+              }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#c4cbc2", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 10px" }}>Filter by feeling</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {(Object.entries(EMOTION_MAP) as [EmotionKey, typeof EMOTION_MAP[EmotionKey]][]).map(([key, em]) => {
+                    const checked = pendingFilters.has(key);
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => togglePending(key)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 10,
+                          padding: "8px 10px", borderRadius: 8, border: "none",
+                          background: checked ? em.pillBg : "transparent",
+                          cursor: "pointer", fontFamily: "inherit", width: "100%", textAlign: "left",
+                          transition: "background 0.1s",
+                        }}
+                        onMouseEnter={e => { if (!checked) (e.currentTarget as HTMLElement).style.background = "#f8f9f5"; }}
+                        onMouseLeave={e => { if (!checked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                      >
+                        {/* Custom checkbox */}
+                        <span style={{
+                          width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                          border: `2px solid ${checked ? em.pillText : "#dde4de"}`,
+                          background: checked ? em.pillText : "#fff",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "all 0.1s",
+                        }}>
+                          {checked && <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.5"><polyline points="2 6 5 9 10 3"/></svg>}
+                        </span>
+                        <span style={{ fontSize: 13 }}>{em.emoji}</span>
+                        <span style={{ fontSize: 13, fontWeight: checked ? 600 : 450, color: checked ? em.pillText : "#082d1d", flex: 1 }}>{em.label}</span>
+                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: em.strip, flexShrink: 0 }} />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div style={{ display: "flex", gap: 8, marginTop: 12, paddingTop: 12, borderTop: "1px solid #f1f3ef" }}>
+                  <button onClick={clearFilter} style={{
+                    flex: 1, padding: "7px 0", borderRadius: 8,
+                    border: "1px solid #e9ede9", background: "#fff",
+                    color: "#4a6d47", fontSize: 12.5, cursor: "pointer", fontFamily: "inherit",
+                  }}>Clear</button>
+                  <button onClick={applyFilter} style={{
+                    flex: 1, padding: "7px 0", borderRadius: 8,
+                    border: "none", background: "#059669",
+                    color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                  }}>Apply</button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {activeFilters.size > 0 && (
+            <button onClick={clearFilter} style={{
+              fontSize: 11.5, color: "#c4cbc2", background: "none",
+              border: "none", cursor: "pointer", padding: 0,
+            }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#059669"}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#c4cbc2"}
+            >✕ Clear filter</button>
+          )}
         </div>
 
 
@@ -373,16 +510,16 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={displayTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={filteredTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
             {(() => {
               // Split: first DREADING or overdue task → featured; rest → 2-col grid
-              const urgentIdx = displayTasks.findIndex(t =>
+              const urgentIdx = filteredTasks.findIndex(t =>
                 t.emotionalState === "DREADING" || (t.dueAt && new Date(t.dueAt) < new Date())
               );
-              const featured = urgentIdx >= 0 ? displayTasks[urgentIdx] : null;
+              const featured = urgentIdx >= 0 ? filteredTasks[urgentIdx] : null;
               const grid = featured
-                ? [...displayTasks.slice(0, urgentIdx), ...displayTasks.slice(urgentIdx + 1)]
-                : displayTasks;
+                ? [...filteredTasks.slice(0, urgentIdx), ...filteredTasks.slice(urgentIdx + 1)]
+                : filteredTasks;
 
               const cardProps = (t: typeof displayTasks[0], isFeatured = false) => ({
                 task: t, featured: isFeatured,
