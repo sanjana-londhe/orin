@@ -194,6 +194,15 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     markDone(id);
   }
 
+  function handleUncomplete(id: string) {
+    setCompletedThisSession(prev => { const next = new Map(prev); next.delete(id); return next; });
+    fetch(`/api/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isCompleted: false }),
+    }).then(() => queryClient.invalidateQueries({ queryKey: ["tasks"] }));
+  }
+
   function pushTaskUp(id: string) {
     const idx = manualOrder.indexOf(id);
     if (idx <= 0) return;
@@ -572,9 +581,9 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       ) : tasks.length === 0 && completedThisSession.size > 0 ? (
         /* All tasks completed this session — show them with strikethrough */
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
-          {[...completedThisSession.values()].map((t, idx) => (
+          {[...completedThisSession.values()].map((t) => (
             <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
-              onMarkDone={handleMarkDone} onDefer={deferTask} onUpdate={updateTask}
+              onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
               onDelete={deleteTask} onAddSubtask={addSubtask}
               onCompleteSubtask={completeSubtask} onDeleteSubtask={deleteSubtask}
             />
@@ -617,8 +626,12 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   {allActive.map((t, idx) => (
                     <SortableTaskCard key={t.id} {...cardProps(t, idx)} />
                   ))}
-                  {completedList.map((t, idx) => (
-                    <SortableTaskCard key={`done-${t.id}`} {...cardProps(t, idx, true)} />
+                  {completedList.map((t) => (
+                    <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
+                      onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
+                      onDelete={deleteTask} onAddSubtask={addSubtask}
+                      onCompleteSubtask={completeSubtask} onDeleteSubtask={deleteSubtask}
+                    />
                   ))}
                 </div>
               );

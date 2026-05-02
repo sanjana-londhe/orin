@@ -71,7 +71,7 @@ function TaskCardInner({
         borderRadius: 12,
         border: `1.5px solid ${isLocallyCompleted ? "#e8f5f0" : "#eaeaea"}`,
         overflow: "hidden",
-        opacity: isLocallyCompleted ? 0.6 : 1,
+        opacity: isLocallyCompleted ? 0.82 : 1,
         boxShadow: isLocallyCompleted ? "none" : "0 1px 4px rgba(0,0,0,0.05)",
         display: "flex", flexDirection: "column",
       }}>
@@ -85,17 +85,29 @@ function TaskCardInner({
 
             {/* Complete circle */}
             <button
-              onClick={() => !isLocallyCompleted && onMarkDone?.(task.id)}
+              onClick={() => onMarkDone?.(task.id)}
+              title={isLocallyCompleted ? "Mark as active" : "Complete task"}
               style={{
                 width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
                 border: `2px solid ${isLocallyCompleted ? "#16a34a" : "#d1d5db"}`,
                 background: isLocallyCompleted ? "#16a34a" : "#fff",
-                cursor: isLocallyCompleted ? "default" : "pointer",
+                cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "all 0.2s", marginTop: 1,
               }}
-              onMouseEnter={e => { if (!isLocallyCompleted) { (e.currentTarget as HTMLElement).style.borderColor = "#16a34a"; (e.currentTarget as HTMLElement).style.background = "#dcfce7"; } }}
-              onMouseLeave={e => { if (!isLocallyCompleted) { (e.currentTarget as HTMLElement).style.borderColor = "#d1d5db"; (e.currentTarget as HTMLElement).style.background = "#fff"; } }}
+              onMouseEnter={e => {
+                if (isLocallyCompleted) {
+                  (e.currentTarget as HTMLElement).style.background = "#dc2626";
+                  (e.currentTarget as HTMLElement).style.borderColor = "#dc2626";
+                } else {
+                  (e.currentTarget as HTMLElement).style.borderColor = "#16a34a";
+                  (e.currentTarget as HTMLElement).style.background = "#dcfce7";
+                }
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = isLocallyCompleted ? "#16a34a" : "#fff";
+                (e.currentTarget as HTMLElement).style.borderColor = isLocallyCompleted ? "#16a34a" : "#d1d5db";
+              }}
             >
               {isLocallyCompleted && <Check size={11} color="#fff" strokeWidth={3} />}
             </button>
