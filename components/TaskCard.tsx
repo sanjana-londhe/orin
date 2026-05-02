@@ -222,36 +222,20 @@ function TaskCardInner({
             )
           )}
 
-          {/* ── Complete + Defer — equal weight ── */}
-          {!isLocallyCompleted && (
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => onMarkDone?.(task.id)} style={{
-                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                padding: "9px 0", borderRadius: 8,
-                border: "1.5px solid #16a34a", background: "#fff",
-                color: "#16a34a", fontSize: 13, fontWeight: 600,
-                cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#16a34a"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.color = "#16a34a"; }}
-              >
-                <Check size={14} strokeWidth={2.5} /> Complete
-              </button>
-              {onDefer && (
-                <button onClick={() => setDeferOpen(true)} style={{
-                  flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                  padding: "9px 0", borderRadius: 8,
-                  border: "1.5px solid #e5e7eb", background: "#fff",
-                  color: "#4b5563", fontSize: 13, fontWeight: 600,
-                  cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f9fafb"; (e.currentTarget as HTMLElement).style.borderColor = "#d1d5db"; (e.currentTarget as HTMLElement).style.color = "#111827"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e5e7eb"; (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
-                >
-                  <Clock size={14} strokeWidth={2} /> Defer
-                </button>
-              )}
-            </div>
+          {/* ── Defer button ── */}
+          {!isLocallyCompleted && onDefer && (
+            <button onClick={() => setDeferOpen(true)} style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              padding: "9px 0", borderRadius: 8,
+              border: "1.5px solid #e5e7eb", background: "#fff",
+              color: "#4b5563", fontSize: 13, fontWeight: 600,
+              cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f9fafb"; (e.currentTarget as HTMLElement).style.borderColor = "#d1d5db"; (e.currentTarget as HTMLElement).style.color = "#111827"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e5e7eb"; (e.currentTarget as HTMLElement).style.color = "#4b5563"; }}
+            >
+              <Clock size={14} strokeWidth={2} /> Defer
+            </button>
           )}
 
           {/* Nudge */}
