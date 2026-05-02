@@ -174,10 +174,21 @@ function TaskCardInner({
     );
   }
 
-  // ── List row view ─────────────────────────────────────────────────
+  // ── Card view ─────────────────────────────────────────────────────
   return (
     <>
-      <div style={{ padding: "12px 0", opacity: isLocallyCompleted ? 0.6 : 1 }}>
+      <div style={{
+        background: isLocallyCompleted ? "#fafcfa" : "#fff",
+        borderRadius: 12,
+        border: `1px solid ${isLocallyCompleted ? "#e8f5f0" : "#e8ece8"}`,
+        padding: "12px 14px",
+        opacity: isLocallyCompleted ? 0.75 : 1,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        transition: "box-shadow 0.15s",
+      }}
+        onMouseEnter={e => { if (!isLocallyCompleted) (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; }}
+        onMouseLeave={e => (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"}
+      >
 
         {/* Main row: circle + title + actions */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -316,9 +327,6 @@ function TaskCardInner({
           )}
         </div>
       </div>
-
-      {/* Divider */}
-      <div style={{ height: 1, background: "#e4e4e4" }} />
 
       {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />}
     </>

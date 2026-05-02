@@ -615,7 +615,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
         <SkeletonTaskList count={5} />
       ) : tasks.length === 0 && completedThisSession.size > 0 ? (
         /* All tasks completed this session — show them with strikethrough */
-        <div style={{ display: "flex", flexDirection: "column", marginBottom: 32 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
           {[...completedThisSession.values()].map((t) => (
             <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
               onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
@@ -657,7 +657,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               });
 
               return (
-                <div style={{ display: "flex", flexDirection: "column", marginBottom: 32 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
                   {allActive.map((t, idx) => (
                     <SortableTaskCard key={t.id} {...cardProps(t, idx)} />
                   ))}
