@@ -19,7 +19,7 @@ export function AppShell({ userName, email, initial, children }: Props) {
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#fcfdfc" }}>
       <Sidebar userName={userName} email={email} initial={initial} />
 
-      <main style={{ flex: 1, overflowY: "auto", minWidth: 0, position: "relative" }}>
+      <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minWidth: 0, position: "relative" }}>
         {!aiOpen && (
           <button
             onClick={() => setAiOpen(true)}
