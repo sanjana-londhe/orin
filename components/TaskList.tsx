@@ -85,7 +85,6 @@ function SortDropdown({ value, onChange }: { value: SortMode; onChange: (m: Sort
 
   return (
     <div ref={ref} style={{ position: "relative", display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Sort</span>
       <button onClick={() => setOpen(o => !o)} style={{
         display: "flex", alignItems: "center", gap: 8,
         padding: "8px 12px", height: 38, borderRadius: 8,
