@@ -8,29 +8,23 @@ import { DeferralModal } from "@/components/DeferralModal";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
 import { getEmotion } from "@/lib/emotions";
-import { Calendar, ArrowRight, Check, MoreHorizontal, Trash2 } from "lucide-react";
+import {
+  Calendar, Check, Trash2, Clock,
+  ChevronRight, ChevronDown, MoreHorizontal, Plus, X,
+} from "lucide-react";
 
 function formatDue(dueAt: Date | string | null) {
-  if (!dueAt) return { label: null, overdue: false, isoDate: "", isoTime: "" };
+  if (!dueAt) return null;
   const d   = new Date(dueAt);
   const now = new Date();
-  const overdue    = d < now;
   const isToday    = d.toDateString() === now.toDateString();
   const isTomorrow = d.toDateString() === new Date(now.getTime() + 86400000).toDateString();
-  const label = isToday
-    ? `Today · ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-    : isTomorrow ? "Tomorrow"
+  const overdue    = d < now && !isToday;
+  const dateLabel  = isToday ? "Today"
+    : isTomorrow   ? "Tomorrow"
     : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  return { label, overdue, isoDate: d.toISOString().slice(0, 10), isoTime: d.toISOString().slice(11, 16) };
-}
-
-function recurrenceLabel(rule: string | null) {
-  if (!rule) return null;
-  if (rule.includes("BYDAY=MO,TU,WE,TH,FR")) return "Weekdays";
-  if (rule.includes("INTERVAL=2")) return "Biweekly";
-  if (rule.includes("WEEKLY")) return "Weekly";
-  if (rule.includes("DAILY")) return "Daily";
-  return "Recurring";
+  const timeLabel  = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return { dateLabel, timeLabel, overdue, isoDate: d.toISOString().slice(0, 10), isoTime: d.toISOString().slice(11, 16) };
 }
 
 interface Props {
@@ -50,33 +44,32 @@ function TaskCardInner({
   onAddSubtask, onCompleteSubtask, onDeleteSubtask,
 }: Props) {
   const { nudgedTaskIds } = useUIStore();
-  const isNudged       = nudgedTaskIds.has(task.id);
-  const em             = getEmotion(task.emotionalState);
-  const { label: dueLabel, overdue, isoDate, isoTime } = formatDue(task.dueAt);
-  const recur          = recurrenceLabel(task.recurrenceRule);
-  const completedSubs  = task.subtasks.filter(s => s.isCompleted).length;
-  const totalSubs      = task.subtasks.length;
+  const isNudged = nudgedTaskIds.has(task.id);
+  const em       = getEmotion(task.emotionalState);
+  const due      = formatDue(task.dueAt);
 
-  const [done, setDone]               = useState(false);
-  const [deferOpen, setDeferOpen]     = useState(false);
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [titleDraft, setTitleDraft]   = useState(task.title);
-  const [editingState, setEditingState] = useState(false);
-  const [editingDue, setEditingDue]   = useState(false);
-  const [dateDraft, setDateDraft]     = useState(isoDate);
-  const [timeDraft, setTimeDraft]     = useState(isoTime);
-  const [addingSubtask, setAddingSubtask] = useState(false);
-  const [subtaskDraft, setSubtaskDraft]   = useState("");
-  const [menuOpen, setMenuOpen]       = useState(false);
-  const titleRef   = useRef<HTMLInputElement>(null);
-  const subtaskRef = useRef<HTMLInputElement>(null);
+  const [done, setDone]                     = useState(false);
+  const [expanded, setExpanded]             = useState(false);
+  const [deferOpen, setDeferOpen]           = useState(false);
+  const [editingTitle, setEditingTitle]     = useState(false);
+  const [titleDraft, setTitleDraft]         = useState(task.title);
+  const [editingEmotion, setEditingEmotion] = useState(false);
+  const [editingDue, setEditingDue]         = useState(false);
+  const [dateDraft, setDateDraft]           = useState(due?.isoDate ?? "");
+  const [timeDraft, setTimeDraft]           = useState(due?.isoTime ?? "");
+  const [showMenu, setShowMenu]             = useState(false);
+  const [subtaskInput, setSubtaskInput]     = useState("");
+  const [showSubInput, setShowSubInput]     = useState(false);
+
   const menuRef    = useRef<HTMLDivElement>(null);
+  const titleRef   = useRef<HTMLInputElement>(null);
+  const subRef     = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (editingTitle) titleRef.current?.focus(); }, [editingTitle]);
-  useEffect(() => { if (addingSubtask) subtaskRef.current?.focus(); }, [addingSubtask]);
+  useEffect(() => { if (showSubInput) subRef.current?.focus(); }, [showSubInput]);
   useEffect(() => {
     function h(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowMenu(false);
     }
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
@@ -95,207 +88,298 @@ function TaskCardInner({
     setEditingDue(false);
   }
 
-  function submitSubtask() {
-    const t = subtaskDraft.trim();
-    if (t) onAddSubtask?.(task.id, t);
-    setSubtaskDraft(""); setAddingSubtask(false);
+  function addSubtask() {
+    const t = subtaskInput.trim();
+    if (t) { onAddSubtask?.(task.id, t); }
+    setSubtaskInput(""); setShowSubInput(false);
   }
 
   function handleMarkDone() { setDone(true); onMarkDone?.(task.id); }
   if (done) return null;
 
+  const completedSubs = task.subtasks.filter(s => s.isCompleted).length;
+  const totalSubs     = task.subtasks.length;
+  const hasSubs       = totalSubs > 0;
+
   return (
     <>
       <div style={{
         background: "#fff",
-        borderRadius: 12,
-        border: "1px solid #e4e8e4",
-        marginBottom: 8,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-        transition: "box-shadow 0.15s, border-color 0.15s",
+        borderRadius: 10,
+        border: "1px solid #e8ece8",
+        marginBottom: 6,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+        transition: "box-shadow 0.15s",
         overflow: "hidden",
       }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.05)"; (e.currentTarget as HTMLElement).style.borderColor = "#e4e8e4"; }}
+        onMouseEnter={e => (e.currentTarget as HTMLElement).style.boxShadow = "0 3px 10px rgba(0,0,0,0.07)"}
+        onMouseLeave={e => (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 2px rgba(0,0,0,0.04)"}
       >
-        <div style={{ padding: "14px 16px" }}>
+        {/* ── Main row ── */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10,
+          padding: "10px 14px",
+        }}>
 
-          {/* ── Row 1: Title + menu ── */}
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {editingTitle ? (
-                <input ref={titleRef} value={titleDraft}
-                  onChange={e => setTitleDraft(e.target.value)}
-                  onBlur={commitTitle}
-                  onKeyDown={e => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setTitleDraft(task.title); setEditingTitle(false); } }}
-                  style={{ width: "100%", fontSize: 15, fontWeight: 700, color: "#082d1d", border: "none", borderBottom: "2px solid #059669", background: "transparent", outline: "none", fontFamily: "inherit", letterSpacing: "-0.01em" }}
-                />
-              ) : (
-                <p onClick={() => setEditingTitle(true)} style={{
-                  fontSize: 15, fontWeight: 700, color: "#1a2e1a",
-                  margin: 0, lineHeight: 1.35, letterSpacing: "-0.01em", cursor: "text",
-                }}>
-                  {task.title}
-                </p>
-              )}
-            </div>
-
-            {/* ⋯ menu */}
-            <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
-              <button onClick={() => setMenuOpen(o => !o)} style={{
-                width: 26, height: 26, borderRadius: 6, border: "1px solid transparent",
-                background: "transparent", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3a0",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e.currentTarget as HTMLElement).style.color = "#4a6d47"; }}
-                onMouseLeave={e => { if (!menuOpen) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#94a3a0"; } }}
+          {/* Emotion emoji + expand chevron */}
+          <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+            <button
+              onClick={() => setEditingEmotion(true)}
+              title={em.label}
+              style={{ fontSize: 18, background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1 }}
+            >
+              {em.emoji}
+            </button>
+            {hasSubs && (
+              <button
+                onClick={() => setExpanded(e => !e)}
+                style={{
+                  width: 18, height: 18, display: "flex", alignItems: "center",
+                  justifyContent: "center", background: "none", border: "none",
+                  cursor: "pointer", color: "#94a3a0", borderRadius: 4,
+                }}
               >
-                <MoreHorizontal size={14} />
+                {expanded
+                  ? <ChevronDown size={13} strokeWidth={2} />
+                  : <ChevronRight size={13} strokeWidth={2} />}
               </button>
-              {menuOpen && (
+            )}
+          </div>
+
+          {/* Title */}
+          {editingTitle ? (
+            <input
+              ref={titleRef}
+              value={titleDraft}
+              onChange={e => setTitleDraft(e.target.value)}
+              onBlur={commitTitle}
+              onKeyDown={e => { if (e.key === "Enter") commitTitle(); if (e.key === "Escape") { setTitleDraft(task.title); setEditingTitle(false); } }}
+              style={{
+                flex: 1, fontSize: 14, fontWeight: 500, color: "#082d1d",
+                border: "none", borderBottom: "1.5px solid #059669",
+                background: "transparent", outline: "none", fontFamily: "inherit",
+              }}
+            />
+          ) : (
+            <span
+              onClick={() => setEditingTitle(true)}
+              style={{
+                flex: 1, fontSize: 14, fontWeight: 500,
+                color: "#1a2e1a", cursor: "text", lineHeight: 1.4,
+                minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}
+            >
+              {task.title}
+            </span>
+          )}
+
+          {/* Subtask count badge */}
+          {hasSubs && !expanded && (
+            <span style={{
+              fontSize: 11, fontWeight: 600, padding: "2px 7px", borderRadius: 999,
+              background: completedSubs === totalSubs ? "#f2fdec" : "#f1f3ef",
+              color: completedSubs === totalSubs ? "#059669" : "#4a6d47",
+              flexShrink: 0,
+            }}>
+              {completedSubs}/{totalSubs}
+            </span>
+          )}
+
+          {/* Due date */}
+          {editingDue ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+              <input type="date" value={dateDraft} onChange={e => setDateDraft(e.target.value)}
+                style={{ fontSize: 11, border: "1px solid #dde4de", borderRadius: 5, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
+              <input type="time" value={timeDraft} onChange={e => setTimeDraft(e.target.value)} disabled={!dateDraft}
+                style={{ fontSize: 11, border: "1px solid #dde4de", borderRadius: 5, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
+              <button onClick={commitDue} style={{ fontSize: 11, fontWeight: 700, color: "#059669", background: "none", border: "none", cursor: "pointer" }}>Save</button>
+              <button onClick={() => setEditingDue(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#c4cbc2" }}><X size={12} /></button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditingDue(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
+                background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
+                color: due?.overdue ? "#D14626" : "#94a3a0",
+              }}
+            >
+              <Calendar size={13} />
+              {due ? (
+                <span style={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                  {due.dateLabel}, {due.timeLabel}
+                </span>
+              ) : (
+                <span style={{ fontSize: 12, color: "#c4cbc2" }}>Set date</span>
+              )}
+            </button>
+          )}
+
+          {/* Actions: ✓ + ⋯ */}
+          <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
+            <button
+              onClick={handleMarkDone}
+              title="Complete"
+              style={{
+                width: 28, height: 28, borderRadius: 7, border: "none",
+                background: "transparent", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#c4cbc2", transition: "all 0.12s",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f2fdec"; (e.currentTarget as HTMLElement).style.color = "#059669"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#c4cbc2"; }}
+            >
+              <Check size={15} strokeWidth={2.5} />
+            </button>
+
+            <div ref={menuRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => setShowMenu(o => !o)}
+                style={{
+                  width: 28, height: 28, borderRadius: 7, border: "none",
+                  background: showMenu ? "#f1f3ef" : "transparent", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "#94a3a0", transition: "all 0.12s",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e.currentTarget as HTMLElement).style.color = "#4a6d47"; }}
+                onMouseLeave={e => { if (!showMenu) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "#94a3a0"; } }}
+              >
+                <MoreHorizontal size={15} />
+              </button>
+
+              {showMenu && (
                 <div style={{
-                  position: "absolute", top: 30, right: 0, zIndex: 50,
-                  background: "#fff", border: "1px solid #e4e8e4", borderRadius: 10,
-                  padding: "4px 0", boxShadow: "0 8px 24px rgba(0,0,0,0.1)", minWidth: 148,
+                  position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 50,
+                  background: "#fff", border: "1px solid #e8ece8", borderRadius: 10,
+                  padding: "4px 0", boxShadow: "0 8px 24px rgba(0,0,0,0.10)", minWidth: 148,
                 }}>
                   {[
-                    { icon: <Check size={12} />, label: "Mark done",  color: "#059669", bg: "#f2fdec", action: () => { handleMarkDone(); setMenuOpen(false); } },
-                    { icon: <ArrowRight size={12} />, label: "Push task", color: "#4a6d47", bg: "#f8f9f5", action: () => { setDeferOpen(true); setMenuOpen(false); } },
+                    { icon: <Check size={13} />, label: "Mark done",  color: "#059669", hover: "#f2fdec", action: () => { handleMarkDone(); setShowMenu(false); } },
+                    { icon: <Clock size={13} />,  label: "Push task",  color: "#4a6d47", hover: "#f8f9f5", action: () => { setDeferOpen(true); setShowMenu(false); } },
+                    { icon: <Trash2 size={13} />, label: "Delete",     color: "#c23934", hover: "#fff0f0", action: () => { onDelete?.(task.id); setShowMenu(false); } },
                   ].map(item => (
                     <button key={item.label} onClick={item.action} style={{
-                      display: "flex", alignItems: "center", gap: 8, width: "100%",
+                      display: "flex", alignItems: "center", gap: 9, width: "100%",
                       padding: "8px 14px", background: "none", border: "none",
-                      cursor: "pointer", fontSize: 13, color: item.color, fontFamily: "inherit", textAlign: "left",
+                      cursor: "pointer", fontSize: 13, color: item.color,
+                      fontFamily: "inherit", textAlign: "left",
                     }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = item.bg}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = item.hover}
                       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
-                    >{item.icon} {item.label}</button>
+                    >{item.icon}{item.label}</button>
                   ))}
-                  <div style={{ height: 1, background: "#f1f3ef", margin: "4px 0" }} />
-                  <button onClick={() => { onDelete?.(task.id); setMenuOpen(false); }} style={{
-                    display: "flex", alignItems: "center", gap: 8, width: "100%",
-                    padding: "8px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 13, color: "#c23934", fontFamily: "inherit", textAlign: "left",
-                  }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0f0"}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
-                  ><Trash2 size={12} /> Delete</button>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Nudge */}
-          {isNudged && (
-            <div style={{ marginBottom: 10 }}>
-              <NudgeBanner task={task} onDefer={onDefer ? d => onDefer(task.id, d) : undefined} onMarkDone={onMarkDone ? handleMarkDone : undefined} />
-            </div>
-          )}
-
-          {/* ── Subtasks ── */}
-          {totalSubs > 0 && (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "#94a3a0", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0 }}>
-                  Sub tasks
-                </p>
-                {/* Segmented bar */}
-                <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  {task.subtasks.map((sub, i) => (
-                    <div key={i} style={{ width: 16, height: 3, borderRadius: 999, background: sub.isCompleted ? "#059669" : "#e4e8e4", transition: "background 0.2s" }} />
-                  ))}
-                  <span style={{ fontSize: 10.5, fontWeight: 700, color: "#059669", marginLeft: 5 }}>{completedSubs}/{totalSubs}</span>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {task.subtasks.map(sub => (
-                  <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <button
-                      onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)}
-                      style={{
-                        width: 16, height: 16, borderRadius: 4, flexShrink: 0,
-                        cursor: sub.isCompleted ? "default" : "pointer",
-                        background: sub.isCompleted ? "#059669" : "#fff",
-                        border: `1.5px solid ${sub.isCompleted ? "#059669" : "#c8d5cc"}`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      {sub.isCompleted && <Check size={9} color="#fff" strokeWidth={3} />}
-                    </button>
-                    <span style={{
-                      fontSize: 13, color: sub.isCompleted ? "#b0c0b8" : "#2d4a3a",
-                      textDecoration: sub.isCompleted ? "line-through" : "none", flex: 1,
-                    }}>
-                      {sub.title}
-                    </span>
-                    <button onClick={() => onDeleteSubtask?.(sub.id)}
-                      style={{ fontSize: 10, color: "#dde4de", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#c23934"}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#dde4de"}
-                    >✕</button>
-                  </div>
-                ))}
-              </div>
-
-              {addingSubtask ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
-                  <div style={{ width: 16, height: 16, borderRadius: 4, border: "1.5px dashed #c8d5cc", flexShrink: 0 }} />
-                  <input ref={subtaskRef} value={subtaskDraft} onChange={e => setSubtaskDraft(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") submitSubtask(); if (e.key === "Escape") { setSubtaskDraft(""); setAddingSubtask(false); } }}
-                    onBlur={() => { if (!subtaskDraft.trim()) setAddingSubtask(false); else submitSubtask(); }}
-                    placeholder="Add subtask…"
-                    style={{ flex: 1, fontSize: 13, color: "#082d1d", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }}
-                  />
-                </div>
-              ) : (
-                <button onClick={() => setAddingSubtask(true)}
-                  style={{ fontSize: 12, color: "#b0c0b8", background: "none", border: "none", cursor: "pointer", marginTop: 5, padding: 0, fontFamily: "inherit" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#4a6d47"}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#b0c0b8"}
-                >+ Add subtask</button>
-              )}
-            </div>
-          )}
-
-          {!totalSubs && !addingSubtask && (
-            <button onClick={() => setAddingSubtask(true)}
-              style={{ fontSize: 12, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: "inherit", display: "block" }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "#4a6d47"}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "#c4cbc2"}
-            >+ Add subtask</button>
-          )}
-          {!totalSubs && addingSubtask && (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 16, height: 16, borderRadius: 4, border: "1.5px dashed #c8d5cc", flexShrink: 0 }} />
-              <input ref={subtaskRef} value={subtaskDraft} onChange={e => setSubtaskDraft(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") submitSubtask(); if (e.key === "Escape") { setSubtaskDraft(""); setAddingSubtask(false); } }}
-                onBlur={() => { if (!subtaskDraft.trim()) setAddingSubtask(false); else submitSubtask(); }}
-                placeholder="Add subtask…"
-                style={{ flex: 1, fontSize: 13, color: "#082d1d", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }}
-              />
-            </div>
-          )}
         </div>
 
-        {/* ── Footer: emotion tag + due date + actions ── */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "8px 16px",
-          borderTop: "1px solid #f0f4f0",
-          background: "#fafcfa",
-        }}>
-          {/* Left: emotion tag + badges */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            {editingState ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <EmotionalStatePicker value={task.emotionalState as EmotionalState} compact
-                  onChange={v => { if (v !== task.emotionalState) onUpdate?.(task.id, { emotionalState: v }); setEditingState(false); }} />
-                <button onClick={() => setEditingState(false)} style={{ fontSize: 10, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+        {/* ── Nudge ── */}
+        {isNudged && (
+          <div style={{ padding: "0 14px 10px" }}>
+            <NudgeBanner task={task} onDefer={onDefer ? d => onDefer(task.id, d) : undefined} onMarkDone={onMarkDone ? handleMarkDone : undefined} />
+          </div>
+        )}
+
+        {/* ── Expanded: subtasks ── */}
+        {expanded && (
+          <div style={{ borderTop: "1px solid #f0f4f0", padding: "10px 14px 12px", background: "#fafcfa" }}>
+            {/* Emotion picker (if editing) */}
+            {editingEmotion && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <EmotionalStatePicker
+                  value={task.emotionalState as EmotionalState}
+                  compact
+                  onChange={v => { if (v !== task.emotionalState) onUpdate?.(task.id, { emotionalState: v }); setEditingEmotion(false); }}
+                />
+                <button onClick={() => setEditingEmotion(false)} style={{ fontSize: 10, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
               </div>
-            ) : (
-              <button onClick={() => setEditingState(true)} style={{
+            )}
+
+            {/* Progress bar */}
+            {hasSubs && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                <div style={{ flex: 1, height: 3, background: "#e8ece8", borderRadius: 999, overflow: "hidden" }}>
+                  <div style={{ height: "100%", borderRadius: 999, background: "#059669", width: `${totalSubs ? (completedSubs / totalSubs) * 100 : 0}%`, transition: "width 0.3s" }} />
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#059669", flexShrink: 0 }}>{completedSubs}/{totalSubs}</span>
+              </div>
+            )}
+
+            {/* Subtask list */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingLeft: 4 }}>
+              {task.subtasks.map(sub => (
+                <div key={sub.id} style={{ display: "flex", alignItems: "center", gap: 9 }}
+                  onMouseEnter={e => { const btn = (e.currentTarget as HTMLElement).querySelector<HTMLElement>(".del-btn"); if (btn) btn.style.opacity = "1"; }}
+                  onMouseLeave={e => { const btn = (e.currentTarget as HTMLElement).querySelector<HTMLElement>(".del-btn"); if (btn) btn.style.opacity = "0"; }}
+                >
+                  <button
+                    onClick={() => !sub.isCompleted && onCompleteSubtask?.(sub.id)}
+                    style={{
+                      width: 15, height: 15, borderRadius: 4, flexShrink: 0,
+                      cursor: sub.isCompleted ? "default" : "pointer",
+                      background: sub.isCompleted ? "#059669" : "#fff",
+                      border: `1.5px solid ${sub.isCompleted ? "#059669" : "#c8d5cc"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {sub.isCompleted && <Check size={9} color="#fff" strokeWidth={3} />}
+                  </button>
+                  <span style={{
+                    flex: 1, fontSize: 13, color: sub.isCompleted ? "#b0c0b8" : "#3d5a4a",
+                    textDecoration: sub.isCompleted ? "line-through" : "none",
+                  }}>{sub.title}</span>
+                  <button
+                    className="del-btn"
+                    onClick={() => onDeleteSubtask?.(sub.id)}
+                    style={{ opacity: 0, background: "none", border: "none", cursor: "pointer", padding: 2, color: "#c23934", transition: "opacity 0.15s", borderRadius: 4 }}
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              ))}
+
+              {/* Add subtask */}
+              {showSubInput ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                  <div style={{ width: 15, height: 15, borderRadius: 4, border: "1.5px dashed #c8d5cc", flexShrink: 0 }} />
+                  <input
+                    ref={subRef}
+                    value={subtaskInput}
+                    onChange={e => setSubtaskInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") addSubtask(); if (e.key === "Escape") { setSubtaskInput(""); setShowSubInput(false); } }}
+                    onBlur={() => { if (!subtaskInput.trim()) setShowSubInput(false); else addSubtask(); }}
+                    placeholder="Enter subtask…"
+                    style={{ flex: 1, fontSize: 13, color: "#082d1d", background: "transparent", border: "none", borderBottom: "1px solid #059669", outline: "none", fontFamily: "inherit" }}
+                  />
+                  <button onClick={addSubtask} style={{ background: "#059669", border: "none", borderRadius: 5, padding: "3px 5px", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                    <Check size={11} color="#fff" strokeWidth={3} />
+                  </button>
+                  <button onClick={() => { setSubtaskInput(""); setShowSubInput(false); }} style={{ background: "#f1f3ef", border: "none", borderRadius: 5, padding: "3px 5px", cursor: "pointer", display: "flex", alignItems: "center", color: "#4a6d47" }}>
+                    <X size={11} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowSubInput(true)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, marginTop: 2,
+                    width: "100%", padding: "5px 0", background: "none", border: "none",
+                    cursor: "pointer", fontSize: 12.5, color: "#94a3a0", fontFamily: "inherit",
+                    transition: "color 0.12s",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#059669"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#94a3a0"; }}
+                >
+                  <Plus size={13} strokeWidth={2} /> Add subtask
+                </button>
+              )}
+            </div>
+
+            {/* Badges row */}
+            <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+              <button onClick={() => setEditingEmotion(true)} style={{
                 display: "inline-flex", alignItems: "center", gap: 4,
                 padding: "3px 9px", borderRadius: 6,
                 background: em.pillBg, color: em.pillText,
@@ -304,70 +388,30 @@ function TaskCardInner({
               }}>
                 {em.emoji} {em.label}
               </button>
-            )}
-            {task.deferredCount > 0 && (
-              <span style={{ padding: "3px 8px", borderRadius: 6, background: "#FFF0EC", color: "#D14626", fontSize: 11, fontWeight: 600 }}>
-                Deferred {task.deferredCount}×
-              </span>
-            )}
-            {recur && (
-              <span style={{ padding: "3px 8px", borderRadius: 6, background: "#F0F0FF", color: "#5555CC", fontSize: 11, fontWeight: 600 }}>
-                ↺ {recur}
-              </span>
-            )}
-          </div>
-
-          {/* Right: due date + quick actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-            {editingDue ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <input type="date" value={dateDraft} onChange={e => setDateDraft(e.target.value)}
-                  style={{ fontSize: 11, border: "1px solid #dde4de", borderRadius: 5, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
-                <input type="time" value={timeDraft} onChange={e => setTimeDraft(e.target.value)} disabled={!dateDraft}
-                  style={{ fontSize: 11, border: "1px solid #dde4de", borderRadius: 5, padding: "2px 6px", outline: "none", fontFamily: "inherit" }} />
-                <button onClick={commitDue} style={{ fontSize: 11, fontWeight: 700, color: "#059669", background: "none", border: "none", cursor: "pointer" }}>Save</button>
-                <button onClick={() => { setDateDraft(isoDate); setTimeDraft(isoTime); setEditingDue(false); }} style={{ fontSize: 11, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
-              </div>
-            ) : (
-              <button onClick={() => setEditingDue(true)} style={{
-                display: "flex", alignItems: "center", gap: 5,
-                padding: dueLabel ? "3px 8px" : "3px 4px", borderRadius: 6,
-                background: overdue ? "#FFF0EC" : dueLabel ? "#f1f3ef" : "transparent",
-                border: "none", cursor: "pointer", fontFamily: "inherit",
-              }}>
-                <Calendar size={12} color={overdue ? "#D14626" : "#94a3a0"} />
-                <span style={{ fontSize: 11.5, color: overdue ? "#D14626" : dueLabel ? "#4a6d47" : "#b0c0b8", fontWeight: 500 }}>
-                  {dueLabel ?? "Due date"}
+              {task.deferredCount > 0 && (
+                <span style={{ padding: "3px 8px", borderRadius: 6, background: "#FFF0EC", color: "#D14626", fontSize: 11, fontWeight: 600 }}>
+                  Deferred {task.deferredCount}×
                 </span>
-              </button>
-            )}
-
-            <button onClick={handleMarkDone} title="Mark done" style={{
-              width: 26, height: 26, borderRadius: 7, border: "1.5px solid #e4e8e4",
-              background: "#fff", color: "#059669", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.12s",
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#059669"; (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e4e8e4"; (e.currentTarget as HTMLElement).style.color = "#059669"; }}
-            ><Check size={12} strokeWidth={2.5} /></button>
-
-            {onDefer && (
-              <button onClick={() => setDeferOpen(true)} title="Push task" style={{
-                width: 26, height: 26, borderRadius: 7, border: "1.5px solid #e4e8e4",
-                background: "#fff", color: "#4a6d47", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.12s",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f2fdec"; (e.currentTarget as HTMLElement).style.borderColor = "#c8f7ae"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#e4e8e4"; }}
-              ><ArrowRight size={12} strokeWidth={2} /></button>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Emotion picker when collapsed */}
+        {!expanded && editingEmotion && (
+          <div style={{ padding: "6px 14px 10px", borderTop: "1px solid #f0f4f0", display: "flex", alignItems: "center", gap: 8 }}>
+            <EmotionalStatePicker
+              value={task.emotionalState as EmotionalState}
+              compact
+              onChange={v => { if (v !== task.emotionalState) onUpdate?.(task.id, { emotionalState: v }); setEditingEmotion(false); }}
+            />
+            <button onClick={() => setEditingEmotion(false)} style={{ fontSize: 10, color: "#c4cbc2", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+          </div>
+        )}
       </div>
 
       {onDefer && (
-        <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task}
-          onConfirm={d => onDefer(task.id, d)} />
+        <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />
       )}
     </>
   );
