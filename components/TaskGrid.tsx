@@ -45,6 +45,7 @@ export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: P
           onDelete={m.deleteTask}
           onAddSubtask={m.addSubtask}
           onCompleteSubtask={m.completeSubtask}
+          onUncompleteSubtask={m.uncompleteSubtask}
           onDeleteSubtask={m.deleteSubtask}
         />
       ))}

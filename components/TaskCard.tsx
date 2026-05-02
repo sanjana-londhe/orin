@@ -44,12 +44,13 @@ interface Props {
   onDelete?: (id: string) => void;
   onAddSubtask?: (parentId: string, title: string) => void;
   onCompleteSubtask?: (id: string) => void;
+  onUncompleteSubtask?: (id: string) => void;
   onDeleteSubtask?: (id: string) => void;
 }
 
 function TaskCardInner({
   task, isLocallyCompleted=false, onMarkDone, onDefer, onUpdate, onDelete,
-  onAddSubtask, onCompleteSubtask, onDeleteSubtask,
+  onAddSubtask, onCompleteSubtask, onUncompleteSubtask, onDeleteSubtask,
 }: Props) {
   const { nudgedTaskIds } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
@@ -244,17 +245,30 @@ function TaskCardInner({
           <div style={{ display:"flex", flexDirection:"column", gap:5, marginBottom:12 }}>
             {task.subtasks.map(sub => (
               <div key={sub.id} style={{ display:"flex", alignItems:"center", gap:8 }}>
-                {/* subtask-check */}
-                <div onClick={()=>!sub.isCompleted&&onCompleteSubtask?.(sub.id)} style={{
-                  width:15, height:15, borderRadius:"50%", flexShrink:0,
-                  border:`1.5px solid ${sub.isCompleted?"#059669":"#dde4de"}`,
-                  background:sub.isCompleted?"#059669":"white",
-                  cursor:sub.isCompleted?"default":"pointer",
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  transition:"border-color 0.15s, background 0.15s",
-                }}
-                  onMouseEnter={e=>{ if(!sub.isCompleted) (e.currentTarget as HTMLElement).style.borderColor="#059669"; }}
-                  onMouseLeave={e=>{ if(!sub.isCompleted) (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; }}
+                {/* subtask-check — click to toggle complete/incomplete */}
+                <div
+                  onClick={() => sub.isCompleted ? onUncompleteSubtask?.(sub.id) : onCompleteSubtask?.(sub.id)}
+                  title={sub.isCompleted ? "Mark as incomplete" : "Mark as complete"}
+                  style={{
+                    width:15, height:15, borderRadius:"50%", flexShrink:0,
+                    border:`1.5px solid ${sub.isCompleted?"#059669":"#dde4de"}`,
+                    background:sub.isCompleted?"#059669":"white",
+                    cursor:"pointer",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    transition:"border-color 0.15s, background 0.15s",
+                  }}
+                  onMouseEnter={e=>{
+                    if(sub.isCompleted){
+                      (e.currentTarget as HTMLElement).style.background="#dc2626";
+                      (e.currentTarget as HTMLElement).style.borderColor="#dc2626";
+                    } else {
+                      (e.currentTarget as HTMLElement).style.borderColor="#059669";
+                    }
+                  }}
+                  onMouseLeave={e=>{
+                    (e.currentTarget as HTMLElement).style.background=sub.isCompleted?"#059669":"white";
+                    (e.currentTarget as HTMLElement).style.borderColor=sub.isCompleted?"#059669":"#dde4de";
+                  }}
                 >
                   {sub.isCompleted && <Check size={8} color="white" strokeWidth={3} />}
                 </div>

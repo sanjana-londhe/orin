@@ -176,13 +176,41 @@ export function useTaskMutations() {
     onSettled: settle,
   });
 
+  // ── uncompleteSubtask: mark subtask as incomplete instantly ──────────
+  const uncompleteSubtask = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isCompleted: false }),
+      });
+      if (!res.ok) throw new Error("Failed to uncomplete subtask");
+      return res.json();
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      const snap = snapshot();
+      queryClient.setQueriesData({ queryKey: ["tasks"] }, (old: unknown) =>
+        Array.isArray(old)
+          ? (old as TaskWithSubtasks[]).map(t => ({
+              ...t,
+              subtasks: t.subtasks.map(s => s.id === id ? { ...s, isCompleted: false } : s),
+            }))
+          : old
+      );
+      return { snap };
+    },
+    onError: (_e, _v, ctx) => rollback(ctx!.snap),
+    onSettled: settle,
+  });
+
   return {
-    markDone:        markDone.mutate,
-    updateTask:      (id: string, patch: Partial<Task>) => updateTask.mutate({ id, patch }),
-    deferTask:       (id: string, newDueAt: Date) => deferTask.mutate({ id, newDueAt }),
-    deleteTask:      deleteTask.mutate,
-    addSubtask:      (parentId: string, title: string) => addSubtask.mutate({ parentId, title }),
-    completeSubtask: completeSubtask.mutate,
-    deleteSubtask:   deleteTask.mutate,
+    markDone:          markDone.mutate,
+    updateTask:        (id: string, patch: Partial<Task>) => updateTask.mutate({ id, patch }),
+    deferTask:         (id: string, newDueAt: Date) => deferTask.mutate({ id, newDueAt }),
+    deleteTask:        deleteTask.mutate,
+    addSubtask:        (parentId: string, title: string) => addSubtask.mutate({ parentId, title }),
+    completeSubtask:   completeSubtask.mutate,
+    uncompleteSubtask: uncompleteSubtask.mutate,
+    deleteSubtask:     deleteTask.mutate,
   };
 }

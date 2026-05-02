@@ -253,7 +253,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   }
 
   // All shared mutations from hook — no duplication with SimpleTaskView
-  const { markDone, updateTask, deferTask, deleteTask, addSubtask, completeSubtask, deleteSubtask } = m;
+  const { markDone, updateTask, deferTask, deleteTask, addSubtask, completeSubtask, uncompleteSubtask, deleteSubtask } = m;
 
   // Keep completed tasks in session so they sink to bottom with strikethrough
   const [completedThisSession, setCompletedThisSession] = useState<Map<string, TaskWithSubtasks>>(new Map());
@@ -630,7 +630,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
               onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
               onDelete={deleteTask} onAddSubtask={addSubtask}
-              onCompleteSubtask={completeSubtask} onDeleteSubtask={deleteSubtask}
+              onCompleteSubtask={completeSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
             />
           ))}
         </div>
@@ -667,7 +667,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 onMarkDone: handleMarkDone,
                 onDefer: deferTask, onUpdate: updateTask,
                 onDelete: deleteTask, onAddSubtask: addSubtask,
-                onCompleteSubtask: completeSubtask, onDeleteSubtask: deleteSubtask,
+                onCompleteSubtask: completeSubtask, onUncompleteSubtask: uncompleteSubtask, onDeleteSubtask: deleteSubtask,
               });
 
               return (
@@ -680,7 +680,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     <SortableTaskCard key={`uncompleted-${t.id}`} task={t}
                       onMarkDone={handleMarkDone} onDefer={deferTask} onUpdate={updateTask}
                       onDelete={deleteTask} onAddSubtask={addSubtask}
-                      onCompleteSubtask={completeSubtask} onDeleteSubtask={deleteSubtask}
+                      onCompleteSubtask={completeSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
                     />
                   ))}
                   {/* Completed this session — strikethrough at very bottom */}
@@ -688,7 +688,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
                       onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
                       onDelete={deleteTask} onAddSubtask={addSubtask}
-                      onCompleteSubtask={completeSubtask} onDeleteSubtask={deleteSubtask}
+                      onCompleteSubtask={completeSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
                     />
                   ))}
                 </div>
