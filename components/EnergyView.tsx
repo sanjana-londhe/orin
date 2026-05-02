@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Zap } from "lucide-react";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EMOTION_MAP } from "@/lib/emotions";
 import {
@@ -186,28 +185,13 @@ export function EnergyView() {
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "24px 28px 64px" }}>
 
       {/* ── Header ── */}
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24 }}>
-        <div>
-          <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
-            Workspace · My Energy
-          </p>
-          <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", margin: 0, lineHeight: 1 }}>
-            My Energy
-          </h1>
-        </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "10px 20px", borderRadius: 12, border: "none",
-            background: "#059669", color: "#fff",
-            fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
-            boxShadow: "0 4px 14px rgba(5,150,105,0.3)",
-          }}
-        >
-          <Zap size={15} strokeWidth={2.5} />
-          Log my feelings
-        </button>
+      <div style={{ marginBottom: 24 }}>
+        <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
+          Workspace · My Energy
+        </p>
+        <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", margin: 0, lineHeight: 1 }}>
+          My Energy
+        </h1>
       </div>
 
       {/* ── Today's check-in ── */}
