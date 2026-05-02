@@ -17,6 +17,7 @@ import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 import { SkeletonTaskList } from "@/components/Skeleton";
+import { Plus } from "lucide-react";
 import { useUIStore, type SortMode } from "@/store/ui";
 import { EMOTION_MAP, type EmotionKey } from "@/lib/emotions";
 import type { TaskWithSubtasks } from "@/lib/types";
@@ -505,38 +506,31 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
       </div>
 
-      {/* ── Inline creation — always at top ── */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 12,
-          padding: "14px 18px", background: "#fff",
-          border: `1.5px solid ${showInlineForm ? "#059669" : "#dde4de"}`,
-          borderRadius: showInlineForm ? "12px 12px 0 0" : 12,
-          transition: "border-color 0.15s",
-        }}>
-          <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
+      {/* ── Inline creation — plain with divider ── */}
+      <div style={{ marginBottom: 20 }}>
+        {/* Input row — no card, just text */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 0" }}>
+          <Plus size={16} color={showInlineForm ? "#059669" : "#c4cbc2"} strokeWidth={2.5} style={{ flexShrink: 0 }} />
           <input
             id="inline-task-input"
             value={inlineDraft}
             onChange={e => setInlineDraft(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && inlineDraft.trim()) setShowInlineForm(true); }}
-            placeholder="What needs doing?"
+            onFocus={() => {}}
+            placeholder="Add a task…"
             style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }}
           />
           {inlineDraft.trim() && !showInlineForm && (
             <button onClick={() => setShowInlineForm(true)} style={{
-              padding: "5px 14px", borderRadius: 7, background: "#059669", border: "none",
-              color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+              padding: "5px 14px", borderRadius: 8, background: "#059669", border: "none",
+              color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
             }}>Add →</button>
           )}
         </div>
+        <div style={{ height: 1, background: "#e8ece8" }} />
 
         {showInlineForm && (
-          <div style={{
-            background: "#fff", border: "1.5px solid #059669", borderTop: "none",
-            borderRadius: "0 0 12px 12px", padding: "16px 18px",
-            boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
-          }}>
+          <div style={{ padding: "16px 0 4px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
               <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
               <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" />
