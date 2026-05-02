@@ -4,14 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { X, Check, Trash2, Plus } from "lucide-react";
 import type { Task } from "@prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
-import { EMOTION_MAP } from "@/lib/emotions";
 
 const EMOTIONS = [
-  { value: "DREADING", label: "Dreading", emoji: "😮‍💨" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩" },
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626", activeBg: "#D14626" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10", activeBg: "#B07A10" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#3a3a3a", fg: "#fff",    activeBg: "#3a3a3a" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D", activeBg: "#0E8A7D" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444", activeBg: "#1A9444" },
 ] as const;
 
 interface Props {
@@ -106,21 +105,21 @@ export function TaskEditModal({ task, onClose, onUpdate, onAddSubtask, onDeleteS
 
           {/* Emotion */}
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 8 }}>How do you feel about it?</label>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {EMOTIONS.map(e => {
-                const em = EMOTION_MAP[e.value as keyof typeof EMOTION_MAP];
-                const active = emotion === e.value;
+            <label style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", display: "block", marginBottom: 7 }}>Feeling</label>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {EMOTIONS.map(s => {
+                const active = emotion === s.value;
                 return (
-                  <button key={e.value} onClick={() => setEmotion(e.value)} style={{
-                    display: "inline-flex", alignItems: "center", gap: 5,
-                    padding: "6px 12px", borderRadius: 999,
-                    background: active ? em.pillText : em.pillBg,
-                    color: active ? "#fff" : em.pillText,
-                    border: "none", fontSize: 13, fontWeight: 600,
-                    cursor: "pointer", fontFamily: "inherit", transition: "all 0.12s",
+                  <button key={s.value} onClick={() => setEmotion(s.value)} style={{
+                    display: "inline-flex", alignItems: "center", gap: 3,
+                    padding: "4px 10px", borderRadius: 999,
+                    background: active ? s.activeBg : s.bg,
+                    color: active ? "#fff" : s.fg,
+                    border: `1.5px solid ${active ? s.activeBg : s.bg}`,
+                    fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                    transition: "all 0.12s",
                   }}>
-                    {e.emoji} {e.label}
+                    {s.emoji} {s.label}
                   </button>
                 );
               })}
