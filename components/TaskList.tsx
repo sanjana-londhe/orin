@@ -445,7 +445,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       {/* ── Cards (5.html: featured + 2-col grid) ── */}
       {isLoading ? (
         <SkeletonTaskList count={5} />
-      ) : tasks.length === 0 ? (
+      ) : tasks.length === 0 && completedThisSession.size === 0 ? (
         /* Empty — inline add input only */
         <div style={{ marginBottom: 32 }}>
           {/* Inline task input */}
@@ -568,6 +568,17 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               <p style={{ fontSize:13 }}>Type above to add your first task</p>
             </div>
           )}
+        </div>
+      ) : tasks.length === 0 && completedThisSession.size > 0 ? (
+        /* All tasks completed this session — show them with strikethrough */
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
+          {[...completedThisSession.values()].map((t, idx) => (
+            <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
+              onMarkDone={handleMarkDone} onDefer={deferTask} onUpdate={updateTask}
+              onDelete={deleteTask} onAddSubtask={addSubtask}
+              onCompleteSubtask={completeSubtask} onDeleteSubtask={deleteSubtask}
+            />
+          ))}
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
