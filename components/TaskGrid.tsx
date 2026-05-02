@@ -33,7 +33,7 @@ export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: P
   }
 
   return (
-    <div style={{ columnCount: 3, columnGap: 14 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, alignItems: "start" }}>
       {tasks.map(task => (
         <SortableTaskCard
           key={task.id}
