@@ -78,7 +78,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
   const [customDate, setCustomDate] = useState("");
   const [customTime, setCustomTime] = useState("09:00");
 
-  const base = task.dueAt ? new Date(task.dueAt) : new Date();
+  const base = new Date(); // always add hours from right now
 
   const preview = useMemo<Date | null>(() => {
     if (!selected) return null;
