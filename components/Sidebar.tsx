@@ -17,7 +17,7 @@ import type { TaskWithSubtasks } from "@/lib/types";
 const VIEWS = [
   { href: "/",          Icon: ListChecks,   label: "To-do list" },
   { href: "/all",       Icon: List,         label: "All Tasks" },
-  { href: "/energy",    Icon: Zap,          label: "Energy" },
+  { href: "/energy",    Icon: Zap,          label: "Flow" },
   { href: "/quadrant",  Icon: ScatterChart, label: "Quadrant" },
   { href: "/calendar",  Icon: CalendarDays, label: "Calendar" },
 ];
@@ -179,22 +179,21 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
 
           {/* Promo card */}
           {!collapsed && (
-            <div
-              role="button"
+            <button
               onClick={() => router.push("/energy")}
               style={{
-                padding: 14, borderRadius: 12,
+                width: "100%", textAlign: "left",
+                padding: 14, borderRadius: 12, border: "none",
                 background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-                color: "#fff", position: "relative", overflow: "hidden", cursor: "pointer",
+                color: "#fff", cursor: "pointer", fontFamily: "inherit",
               }}
             >
-              <div style={{ position: "absolute", top: -16, right: -16, width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
               <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3 }}>Track your energy</p>
               <p style={{ fontSize: 11.5, margin: "0 0 10px", opacity: 0.85, lineHeight: 1.5 }}>
-                Log how each task feels and Orin learns with you.
+                Log how each task feels and see your flow patterns.
               </p>
-              <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: "#059669", fontWeight: 700, fontSize: 14 }}>→</div>
-            </div>
+              <span style={{ fontSize: 12, fontWeight: 700 }}>Open Flow →</span>
+            </button>
           )}
         </div>
 
