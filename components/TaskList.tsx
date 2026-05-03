@@ -266,6 +266,20 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     markDone(id);
   }
 
+  function handleCompleteSubtask(subtaskId: string) {
+    // Complete the subtask
+    completeSubtask(subtaskId);
+    // Find the parent task
+    const parent = displayTasks.find(t => t.subtasks.some(s => s.id === subtaskId));
+    if (!parent) return;
+    // Check if this was the last incomplete subtask
+    const otherIncomplete = parent.subtasks.filter(s => s.id !== subtaskId && !s.isCompleted);
+    if (otherIncomplete.length === 0 && parent.subtasks.length > 0) {
+      // All subtasks done — auto-complete parent after a brief moment
+      setTimeout(() => handleMarkDone(parent.id), 400);
+    }
+  }
+
   function handleUncomplete(id: string) {
     // Get the task data from completedThisSession before removing it
     const taskData = completedThisSession.get(id);
@@ -634,7 +648,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
               onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
               onDelete={deleteTask} onAddSubtask={addSubtask}
-              onCompleteSubtask={completeSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
+              onCompleteSubtask={handleCompleteSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
             />
           ))}
         </div>
@@ -671,7 +685,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 onMarkDone: handleMarkDone,
                 onDefer: deferTask, onUpdate: updateTask,
                 onDelete: deleteTask, onAddSubtask: addSubtask,
-                onCompleteSubtask: completeSubtask, onUncompleteSubtask: uncompleteSubtask, onDeleteSubtask: deleteSubtask,
+                onCompleteSubtask: handleCompleteSubtask, onUncompleteSubtask: uncompleteSubtask, onDeleteSubtask: deleteSubtask,
               });
 
               return (
@@ -684,7 +698,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     <SortableTaskCard key={`uncompleted-${t.id}`} task={t}
                       onMarkDone={handleMarkDone} onDefer={deferTask} onUpdate={updateTask}
                       onDelete={deleteTask} onAddSubtask={addSubtask}
-                      onCompleteSubtask={completeSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
+                      onCompleteSubtask={handleCompleteSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
                     />
                   ))}
                   {/* Completed this session — strikethrough at very bottom */}
@@ -692,7 +706,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
                       onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
                       onDelete={deleteTask} onAddSubtask={addSubtask}
-                      onCompleteSubtask={completeSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
+                      onCompleteSubtask={handleCompleteSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
                     />
                   ))}
                 </div>
