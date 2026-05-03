@@ -305,27 +305,6 @@ function TaskCardInner({
                     {sub.title}
                   </span>
 
-                  {/* Subtask due time — compact chip or + button */}
-                  {!isLocallyCompleted && (
-                    editingSubDue === sub.id ? null : (
-                      sub.dueAt ? (
-                        <button onClick={()=>openSubDue(sub)} style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"2px 7px", borderRadius:999, background:"#f3f4f6", border:"none", fontSize:11, color:"#3d5a4a", cursor:"pointer", fontFamily:"inherit" }}
-                          onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#e8ece8"}
-                          onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#f3f4f6"}
-                        >
-                          <CalendarDays size={10} />
-                          {fmtShort(sub.dueAt)}
-                          <span onClick={ev=>{ ev.stopPropagation(); onUpdate?.(sub.id,{dueAt:null as unknown as Date}); }} style={{ marginLeft:2, color:"#c4cbc2", fontSize:10 }}>×</span>
-                        </button>
-                      ) : (
-                        <button onClick={()=>openSubDue(sub)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:11, color:"#c4cbc2", padding:0, fontFamily:"inherit" }}
-                          onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
-                          onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#c4cbc2"}
-                        >+ time</button>
-                      )
-                    )
-                  )}
-
                   {/* Delete subtask */}
                   {!isLocallyCompleted && (
                     <span onClick={()=>onDeleteSubtask?.(sub.id)} style={{ color:"#e8ece8", cursor:"pointer", display:"flex", fontSize:12 }}
@@ -335,18 +314,6 @@ function TaskCardInner({
                   )}
                 </div>
 
-                {/* Inline subtask due picker */}
-                {editingSubDue === sub.id && (
-                  <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:6, marginLeft:24, padding:"8px 10px", background:"#f8f9f5", borderRadius:8, border:"1px solid #dde4de" }}>
-                    <input type="date" value={subDueDate} min={parentMin} max={parentMax}
-                      onChange={e=>setSubDueDate(e.target.value)}
-                      style={{ fontSize:12, border:"1px solid #dde4de", borderRadius:6, padding:"3px 7px", outline:"none", fontFamily:"inherit" }} />
-                    <input type="time" value={subDueTime} onChange={e=>setSubDueTime(e.target.value)} disabled={!subDueDate}
-                      style={{ fontSize:12, border:"1px solid #dde4de", borderRadius:6, padding:"3px 7px", outline:"none", fontFamily:"inherit" }} />
-                    <button onClick={()=>saveSubDue(sub.id)} style={{ fontSize:11, fontWeight:700, color:"#059669", background:"none", border:"none", cursor:"pointer" }}>Save</button>
-                    <button onClick={()=>setEditingSubDue(null)} style={{ fontSize:11, color:"#c4cbc2", background:"none", border:"none", cursor:"pointer" }}>✕</button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
