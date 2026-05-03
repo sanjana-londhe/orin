@@ -272,7 +272,7 @@ function TaskCardInner({
         {totalSubs > 0 && (
           <div style={{ display:"flex", gap:3, marginBottom:10 }}>
             {task.subtasks.map((sub,i) => (
-              <div key={i} style={{ height:4, flex:1, borderRadius:2, background:sub.isCompleted?em.strip:"#f0f0f0", transition:"background 0.2s" }} />
+              <div key={i} style={{ height:4, flex:1, borderRadius:2, background:sub.isCompleted ? (completedSubs === totalSubs ? "#047857" : "#059669") : "#f0f0f0", transition:"background 0.2s" }} />
             ))}
           </div>
         )}
