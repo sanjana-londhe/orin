@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
@@ -26,39 +26,21 @@ function getDefaultDate() {
 
 function getDefaultTime() {
   const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
-  const h = String(d.getHours()).padStart(2, "0");
-  const m = String(d.getMinutes()).padStart(2, "0");
-  return `${h}:${m}`;
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
 export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle }: Props) {
   const [openCount, setOpenCount] = useState(0);
-
-  useEffect(() => {
-    if (open) setOpenCount(c => c + 1);
-  }, [open]);
-
+  useEffect(() => { if (open) setOpenCount(c => c + 1); }, [open]);
   if (!open) return null;
 
   return (
-    /* Backdrop */
     <div
       onClick={() => onOpenChange(false)}
-      style={{
-        position: "fixed", inset: 0, zIndex: 200,
-        background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)",
-        display: "flex", alignItems: "flex-start", justifyContent: "center",
-        paddingTop: 80,
-      }}
+      style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 80 }}
     >
-      {/* Form — same style as inline creation form */}
       <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 580, margin: "0 24px" }}>
-        <ModalForm
-          key={openCount}
-          defaultDate={defaultDate}
-          defaultTitle={defaultTitle}
-          onClose={() => onOpenChange(false)}
-        />
+        <ModalForm key={openCount} defaultDate={defaultDate} defaultTitle={defaultTitle} onClose={() => onOpenChange(false)} />
       </div>
     </div>
   );
@@ -68,16 +50,14 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
   const queryClient = useQueryClient();
   const [title, setTitle]     = useState(defaultTitle ?? "");
   const [emotion, setEmotion] = useState<typeof STATES[number]["value"]>("NEUTRAL");
-  const [subtasks, setSubtasks] = useState<string[]>([]);
-  const [subInput, setSubInput] = useState("");
+  const [note, setNote]       = useState("");
   const [error, setError]     = useState("");
-  const timeRef = useRef<HTMLInputElement>(null);
   const initTime = getDefaultTime();
   const [selectedDate, setSelectedDate] = useState(defaultDate ?? getDefaultDate());
   const [selectedTime, setSelectedTime] = useState(initTime);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof emotion; subtasks: string[]; note?: string }) => {
+    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof emotion; note?: string }) => {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,115 +69,52 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
         throw new Error(msg);
       }
       const task = await res.json();
-      // Save note to localStorage after we have the real task ID
       if (vars.note?.trim()) {
         try { localStorage.setItem(`orin_note_${task.id}`, vars.note.trim()); } catch {}
-      }
-      if (vars.subtasks.length > 0) {
-        await Promise.all(vars.subtasks.map(st =>
-          fetch("/api/tasks", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: st, parentTaskId: task.id }),
-          })
-        ));
       }
       return task;
     },
     onMutate: async (vars) => {
       await queryClient.cancelQueries({ queryKey: ["tasks"] });
       const snap = queryClient.getQueriesData({ queryKey: ["tasks"] });
-
-      // Insert optimistic task with subtasks so they appear instantly
-      const taskId = `optimistic-${Date.now()}`;
       const optimistic = {
-        id: taskId,
-        userId: "",
-        title: vars.title,
+        id: `optimistic-${Date.now()}`,
+        userId: "", title: vars.title,
         dueAt: vars.dueAt ? new Date(vars.dueAt) : null,
         emotionalState: vars.emotion,
-        isCompleted: false,
-        deferredCount: 0,
-        sortOrder: 99999,
-        lastTouchedAt: new Date(),
-        recurrenceRule: null,
-        parentTaskId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        subtasks: vars.subtasks.map((title, i) => ({
-          id: `optimistic-sub-${Date.now()}-${i}`,
-          userId: "",
-          title,
-          parentTaskId: taskId,
-          isCompleted: false,
-          deferredCount: 0,
-          sortOrder: i,
-          lastTouchedAt: new Date(),
-          recurrenceRule: null,
-          dueAt: null,
-          emotionalState: "NEUTRAL" as const,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          subtasks: [],
-        })),
+        isCompleted: false, deferredCount: 0, sortOrder: 99999,
+        lastTouchedAt: new Date(), recurrenceRule: null, parentTaskId: null,
+        createdAt: new Date(), updatedAt: new Date(), subtasks: [],
       };
-
       queryClient.setQueriesData({ queryKey: ["tasks"] }, (old: unknown) =>
         Array.isArray(old) ? [...old, optimistic] : old
       );
-
-      // Close modal immediately — don't wait for the server
-      handleClose();
-
+      onClose();
       return { snap };
     },
     onError: (_e, _v, ctx) => {
       ctx?.snap.forEach(([key, data]: [unknown, unknown]) => queryClient.setQueryData(key as Parameters<typeof queryClient.setQueryData>[0], data));
       setError("Failed to create task — please try again");
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-    },
+    onSettled: () => { queryClient.invalidateQueries({ queryKey: ["tasks"] }); },
   });
-
-  function handleClose() {
-    onClose();
-  }
-
-  function addSubtask() {
-    const t = subInput.trim();
-    if (t) { setSubtasks(p => [...p, t]); setSubInput(""); }
-  }
 
   return (
     <>
-      {/* Title input — same as inline form header */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 12,
-        padding: "14px 18px", background: "#fff",
-        border: "1.5px solid #059669",
-        borderRadius: "12px 12px 0 0",
-      }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", background: "#fff", border: "1.5px solid #059669", borderRadius: "12px 12px 0 0" }}>
         <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
         <input autoFocus value={title} onChange={e => setTitle(e.target.value)}
-          onKeyDown={e => { if (e.key === "Escape") handleClose(); }}
+          onKeyDown={e => { if (e.key === "Escape") onClose(); }}
           placeholder="What needs doing?"
           style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }} />
       </div>
 
-      {/* Expanded body — same as inline form */}
-      <div style={{
-        background: "#fff", border: "1.5px solid #059669", borderTop: "none",
-        borderRadius: "0 0 12px 12px", padding: "16px 18px",
-        boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
-      }}>
-        {/* Date + Time */}
+      <div style={{ background: "#fff", border: "1.5px solid #059669", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "16px 18px", boxShadow: "0 4px 16px rgba(5,150,105,0.08)" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
           <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
           <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time" selectedDate={selectedDate} />
         </div>
 
-        {/* Feeling */}
         <div style={{ marginBottom: 14 }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>How do you feel about it?</p>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -205,10 +122,8 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
               const active = emotion === s.value;
               return (
                 <button key={s.value} onClick={() => setEmotion(s.value)} style={{
-                  display: "inline-flex", alignItems: "center", gap: 4,
-                  padding: "4px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
-                  background: active ? s.activeBg : s.bg,
-                  color: active ? "#fff" : s.fg,
+                  display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
+                  background: active ? s.activeBg : s.bg, color: active ? "#fff" : s.fg,
                   border: `1px solid ${s.fg}30`, cursor: "pointer", fontFamily: "inherit",
                 }}>
                   {s.emoji} {s.label}
@@ -218,20 +133,11 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           </div>
         </div>
 
-        {/* Note */}
         <div style={{ marginBottom: 16 }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Note</p>
-          <textarea
-            value={subInput}
-            onChange={e => setSubInput(e.target.value)}
-            placeholder="Add a note or description…"
-            rows={2}
-            style={{
-              width: "100%", fontSize: 12.5, color: "#082d1d", background: "#f8f9f5",
-              border: "1.5px solid #dde4de", borderRadius: 8, padding: "8px 10px",
-              outline: "none", fontFamily: "inherit", resize: "vertical",
-              lineHeight: 1.5, boxSizing: "border-box", transition: "border-color 0.14s",
-            }}
+          <textarea value={note} onChange={e => setNote(e.target.value)}
+            placeholder="Add a note or description…" rows={2}
+            style={{ width: "100%", fontSize: 12.5, color: "#082d1d", background: "#f8f9f5", border: "1.5px solid #dde4de", borderRadius: 8, padding: "8px 10px", outline: "none", fontFamily: "inherit", resize: "vertical", lineHeight: 1.5, boxSizing: "border-box", transition: "border-color 0.14s" }}
             onFocus={e => (e.currentTarget.style.borderColor = "#059669")}
             onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")}
           />
@@ -239,37 +145,21 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
 
         {error && <p style={{ fontSize: 11.5, color: "#c23934", marginBottom: 8 }}>{error}</p>}
 
-        {/* Actions */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={handleClose} style={{
-            padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de",
-            background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500,
-            cursor: "pointer", fontFamily: "inherit",
-          }}>
+          <button onClick={onClose} style={{ padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
             Cancel
           </button>
-          <button onClick={() => {
+          <button
+            onClick={() => {
               if (!title.trim()) { setError("Add a title first"); return; }
               setError("");
-              const dueTime = selectedTime || initTime;
-              mutate({
-                title: title.trim(),
-                dueAt: selectedDate ? new Date(`${selectedDate}T${dueTime}`).toISOString() : null,
-                emotion,
-                subtasks: [],
-                note: subInput,
-              });
+              mutate({ title: title.trim(), dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || initTime}`).toISOString() : null, emotion, note });
             }}
             disabled={isPending || !title.trim()}
-            style={{
-              padding: "7px 20px", borderRadius: 8, border: "none",
-              background: title.trim() ? "#059669" : "#c4cbc2",
-              color: "#fff", fontSize: 13, fontWeight: 700,
-              cursor: title.trim() ? "pointer" : "default", fontFamily: "inherit",
-              transition: "background 0.13s",
-            }}
+            style={{ padding: "7px 20px", borderRadius: 8, border: "none", background: title.trim() ? "#059669" : "#c4cbc2", color: "#fff", fontSize: 13, fontWeight: 700, cursor: title.trim() ? "pointer" : "default", fontFamily: "inherit", transition: "background 0.13s" }}
             onMouseEnter={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = "#047857"; }}
-            onMouseLeave={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = "#059669"; }}>
+            onMouseLeave={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = "#059669"; }}
+          >
             {isPending ? "Creating…" : "Create task"}
           </button>
         </div>

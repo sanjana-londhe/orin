@@ -15,9 +15,7 @@ interface Props {
 export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: Props) {
   const m = useTaskMutations();
 
-  if (isLoading) {
-    return <SkeletonTaskList count={4} />;
-  }
+  if (isLoading) return <SkeletonTaskList count={4} />;
 
   if (tasks.length === 0) {
     return (
@@ -40,13 +38,10 @@ export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: P
           task={task}
           dragActive={dragActive}
           onMarkDone={m.markDone}
+          onUncomplete={m.uncompleteTask}
           onDefer={m.deferTask}
           onUpdate={m.updateTask}
           onDelete={m.deleteTask}
-          onAddSubtask={m.addSubtask}
-          onCompleteSubtask={m.completeSubtask}
-          onUncompleteSubtask={m.uncompleteSubtask}
-          onDeleteSubtask={m.deleteSubtask}
         />
       ))}
     </div>

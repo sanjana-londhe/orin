@@ -9,7 +9,7 @@ import { TimePickerField } from "@/components/TimePickerField";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
 import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 
 function fmtDue(dueAt: Date | string | null) {
   if (!dueAt) return null;
@@ -17,10 +17,10 @@ function fmtDue(dueAt: Date | string | null) {
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
   const isTomorrow = d.toDateString() === new Date(now.getTime() + 86400000).toDateString();
-  const date = isToday ? "Today" : isTomorrow ? "Tomorrow"
+  const dateLabel = isToday ? "Today" : isTomorrow ? "Tomorrow"
     : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  return { label: `${date} · ${time}`, overdue: d < now, isoDate: d.toISOString().slice(0,10), isoTime: d.toISOString().slice(11,16) };
+  const timeLabel = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return { dateLabel, timeLabel, overdue: d < now, isoDate: d.toISOString().slice(0,10), isoTime: d.toISOString().slice(11,16) };
 }
 
 const EMOTIONS = [
@@ -34,48 +34,43 @@ const EMOTIONS = [
 function loadNote(id: string) {
   try { return localStorage.getItem(`orin_note_${id}`) ?? ""; } catch { return ""; }
 }
-function saveNote(id: string, text: string) {
+function persistNote(id: string, text: string) {
   try { if (text) localStorage.setItem(`orin_note_${id}`, text); else localStorage.removeItem(`orin_note_${id}`); } catch {}
 }
 
 interface Props {
   task: TaskWithSubtasks;
   featured?: boolean;
-  isLocallyCompleted?: boolean;
   canPushUp?: boolean;
   onPushUp?: (id: string) => void;
   onMarkDone?: (id: string) => void;
+  onUncomplete?: (id: string) => void;
   onDefer?: (id: string, newDueAt: Date) => void;
   onUpdate?: (id: string, patch: Partial<Pick<Task, "title"|"dueAt"|"emotionalState">>) => void;
   onDelete?: (id: string) => void;
-  onAddSubtask?: (parentId: string, title: string) => void;
-  onCompleteSubtask?: (id: string) => void;
-  onUncompleteSubtask?: (id: string) => void;
-  onDeleteSubtask?: (id: string) => void;
 }
 
-function TaskCardInner({
-  task, isLocallyCompleted=false, onMarkDone, onDefer, onUpdate, onDelete,
-}: Props) {
+function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDelete }: Props) {
+  const done = task.isCompleted;
   const { nudgedTaskIds } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
   const em = EMOTIONS.find(e => e.value === task.emotionalState) ?? EMOTIONS[2];
   const due = fmtDue(task.dueAt);
 
-  const [deferOpen, setDeferOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [deferOpen, setDeferOpen]     = useState(false);
+  const [editing, setEditing]         = useState(false);
   const [editingEmotion, setEditingEmotion] = useState(false);
-  const [note, setNote] = useState("");
+  const [note, setNote]               = useState("");
   const [editingNote, setEditingNote] = useState(false);
-  const [noteDraft, setNoteDraft] = useState("");
-  const [mounted, setMounted] = useState(false);
+  const [noteDraft, setNoteDraft]     = useState("");
+  const [mounted, setMounted]         = useState(false);
 
-  const noteRef = useRef<HTMLTextAreaElement>(null);
-  const [editTitle, setEditTitle] = useState(task.title);
-  const [editDate, setEditDate] = useState(due?.isoDate ?? "");
-  const [editTime, setEditTime] = useState(due?.isoTime ?? "");
-  const [editEmotion, setEditEmotion] = useState(task.emotionalState as typeof EMOTIONS[number]["value"]);
+  const noteRef     = useRef<HTMLTextAreaElement>(null);
   const editTitleRef = useRef<HTMLInputElement>(null);
+  const [editTitle, setEditTitle]   = useState(task.title);
+  const [editDate, setEditDate]     = useState(due?.isoDate ?? "");
+  const [editTime, setEditTime]     = useState(due?.isoTime ?? "");
+  const [editEmotion, setEditEmotion] = useState(task.emotionalState as typeof EMOTIONS[number]["value"]);
 
   useEffect(() => { setMounted(true); setNote(loadNote(task.id)); }, [task.id]);
   useEffect(() => { if (editing) editTitleRef.current?.focus(); }, [editing]);
@@ -92,13 +87,9 @@ function TaskCardInner({
     onUpdate?.(task.id, { title: editTitle.trim(), dueAt: dueAt as unknown as Date, emotionalState: editEmotion as Task["emotionalState"] });
     setEditing(false);
   }
-  function saveNote() {
-    saveNote(task.id, noteDraft);
-    setNote(noteDraft);
-    setEditingNote(false);
-  }
+  function handleSaveNote() { persistNote(task.id, noteDraft); setNote(noteDraft); setEditingNote(false); }
   function openNote() { setNoteDraft(note); setEditingNote(true); }
-  function deleteNote() { saveNote(task.id, ""); setNote(""); setEditingNote(false); }
+  function deleteNote() { persistNote(task.id, ""); setNote(""); setEditingNote(false); }
 
   // ── Edit form ──────────────────────────────────────────────────────
   if (editing) {
@@ -124,7 +115,9 @@ function TaskCardInner({
         </div>
         <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
           <button onClick={()=>setEditing(false)} style={{ padding:"7px 16px", borderRadius:8, border:"1.5px solid #dde4de", background:"#fff", color:"#4a6d47", fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
-          <button onClick={saveEdit} style={{ padding:"7px 20px", borderRadius:8, border:"none", background:"#059669", color:"#fff", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }} onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#047857"} onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#059669"}>Save changes</button>
+          <button onClick={saveEdit} style={{ padding:"7px 20px", borderRadius:8, border:"none", background:"#059669", color:"#fff", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}
+            onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#047857"}
+            onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#059669"}>Save changes</button>
         </div>
       </div>
     );
@@ -134,145 +127,155 @@ function TaskCardInner({
   return (
     <>
       <div style={{
-        background:"white", border:"1.5px solid #dde4de", borderRadius:12,
-        padding:"14px 18px", opacity:isLocallyCompleted?0.65:1,
-        transition:"border-color 0.15s, box-shadow 0.15s",
+        background:"white", border:"1.5px solid #e4e9e4", borderRadius:14,
+        padding:"14px 16px", opacity:done ? 0.6 : 1,
+        transition:"box-shadow 0.15s, border-color 0.15s",
       }}
-        onMouseEnter={e=>{ if(!isLocallyCompleted){ (e.currentTarget as HTMLElement).style.borderColor="#c4cbc2"; (e.currentTarget as HTMLElement).style.boxShadow="0 2px 8px rgba(8,45,29,0.05)"; }}}
-        onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; (e.currentTarget as HTMLElement).style.boxShadow="none"; }}
+        onMouseEnter={e=>{ if(!done){ (e.currentTarget as HTMLElement).style.boxShadow="0 2px 10px rgba(8,45,29,0.07)"; (e.currentTarget as HTMLElement).style.borderColor="#c8d5cb"; }}}
+        onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.boxShadow="none"; (e.currentTarget as HTMLElement).style.borderColor="#e4e9e4"; }}
       >
-        {/* Row 1: circle + title + edit/delete */}
-        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-          <div onClick={()=>onMarkDone?.(task.id)} title={isLocallyCompleted?"Mark as active":"Complete"} style={{
-            width:17, height:17, borderRadius:"50%", flexShrink:0,
-            border:`1.5px solid ${isLocallyCompleted?"#059669":"#dde4de"}`,
-            background:isLocallyCompleted?"#059669":"white",
-            cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
-            transition:"border-color 0.15s, background 0.15s",
-          }}
-            onMouseEnter={e=>{ isLocallyCompleted?((e.currentTarget as HTMLElement).style.background="#dc2626",(e.currentTarget as HTMLElement).style.borderColor="#dc2626"):((e.currentTarget as HTMLElement).style.borderColor="#059669",(e.currentTarget as HTMLElement).style.background="#f2fdec"); }}
-            onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background=isLocallyCompleted?"#059669":"white"; (e.currentTarget as HTMLElement).style.borderColor=isLocallyCompleted?"#059669":"#dde4de"; }}
-          >
-            {isLocallyCompleted && <Check size={9} color="white" strokeWidth={3} />}
-          </div>
+        <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
 
-          <span style={{ flex:1, fontSize:15, fontWeight:700, color:isLocallyCompleted?"#b9d3c4":"#082d1d", lineHeight:1.35, textDecoration:isLocallyCompleted?"line-through":"none" }}>
-            {task.title}
-          </span>
-
-          {!isLocallyCompleted && (
-            <div style={{ display:"flex", gap:6, flexShrink:0 }}>
-              <button onClick={openEdit} title="Edit" style={{ width:28, height:28, borderRadius:8, border:"1px solid #dde4de", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#3d5a4a", transition:"all 0.12s" }}
-                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#f1f3ef"; (e.currentTarget as HTMLElement).style.borderColor="#c4cbc2"; }}
-                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-              <button onClick={()=>onDelete?.(task.id)} title="Delete" style={{ width:28, height:28, borderRadius:8, border:"1px solid #dde4de", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#3d5a4a", transition:"all 0.12s" }}
-                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#f1f3ef"; (e.currentTarget as HTMLElement).style.color="#c23934"; (e.currentTarget as HTMLElement).style.borderColor="#e9c3c1"; }}
-                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.color="#3d5a4a"; (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Row 2: feeling | due (click=defer) | deferred count */}
-        <div style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap" }}>
-          {editingEmotion ? (
-            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-              <EmotionalStatePicker value={task.emotionalState as EmotionalState} compact
-                onChange={v=>{ if(v!==task.emotionalState) onUpdate?.(task.id,{emotionalState:v}); setEditingEmotion(false); }} />
-              <button onClick={()=>setEditingEmotion(false)} style={{ fontSize:10, color:"#c4cbc2", background:"none", border:"none", cursor:"pointer" }}>✕</button>
-            </div>
-          ) : (
-            <button onClick={()=>!isLocallyCompleted&&setEditingEmotion(true)} style={{
-              display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px 3px 7px", borderRadius:20,
-              background:em.bg, color:em.fg, fontSize:11, fontWeight:600, letterSpacing:"0.01em",
-              border:"none", cursor:isLocallyCompleted?"default":"pointer", fontFamily:"inherit",
-            }}>
-              {em.emoji} {em.label}
-            </button>
-          )}
-
-          {due ? (
-            <button onClick={()=>!isLocallyCompleted&&setDeferOpen(true)} style={{
-              display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20,
-              background:due.overdue?"#FFF0EC":"#f3f4f6",
-              border:`1px solid ${due.overdue?"#fecaca":"transparent"}`,
-              fontSize:11.5, fontWeight:500, color:due.overdue?"#c23934":"#3d5a4a",
-              cursor:isLocallyCompleted?"default":"pointer", fontFamily:"inherit", transition:"background 0.12s",
+          {/* Circle — binary toggle */}
+          <div
+            onClick={() => done ? onUncomplete?.(task.id) : onMarkDone?.(task.id)}
+            title={done ? "Mark incomplete" : "Mark complete"}
+            style={{
+              width:26, height:26, borderRadius:"50%", flexShrink:0,
+              border:`2px solid ${done ? "#059669" : "#c8d5cb"}`,
+              background: done ? "#059669" : "white",
+              cursor:"pointer",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              marginTop:2, transition:"all 0.15s",
             }}
-              onMouseEnter={e=>{ if(!isLocallyCompleted) (e.currentTarget as HTMLElement).style.background=due.overdue?"#fee2e2":"#e8ece8"; }}
-              onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background=due.overdue?"#FFF0EC":"#f3f4f6"}
-            >
-              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
-              {due.label}
-            </button>
-          ) : (!isLocallyCompleted && (
-            <button onClick={()=>setDeferOpen(true)} style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 9px", borderRadius:20, background:"#f3f4f6", border:"1px dashed #dde4de", fontSize:11, fontWeight:500, color:"#b9d3c4", cursor:"pointer", fontFamily:"inherit" }}>
-              + Set deadline
-            </button>
-          ))}
+            onMouseEnter={e=>{
+              const el = e.currentTarget as HTMLElement;
+              if (done) { el.style.background="#dc2626"; el.style.borderColor="#dc2626"; }
+              else { el.style.borderColor="#059669"; el.style.background="#f0fdf4"; }
+            }}
+            onMouseLeave={e=>{
+              const el = e.currentTarget as HTMLElement;
+              el.style.background = done ? "#059669" : "white";
+              el.style.borderColor = done ? "#059669" : "#c8d5cb";
+            }}
+          >
+            {done && <Check size={11} color="white" strokeWidth={3} />}
+          </div>
 
-          {task.deferredCount > 0 && (
-            <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 8px", borderRadius:20, background:"#f8f9f5", border:"1px solid #dde4de", fontSize:10.5, fontWeight:600, color:"#3d5a4a" }}>
-              ↩ {task.deferredCount} deferred
-            </span>
-          )}
-        </div>
+          {/* Content */}
+          <div style={{ flex:1, minWidth:0 }}>
 
-        {/* Note */}
-        {mounted && (
-          <div style={{ marginTop: note || editingNote ? 10 : 0 }}>
-            {editingNote ? (
-              <div>
-                <textarea
-                  ref={noteRef}
-                  value={noteDraft}
-                  onChange={e=>setNoteDraft(e.target.value)}
-                  onKeyDown={e=>{ if(e.key==="Escape") setEditingNote(false); }}
-                  placeholder="Add a note…"
-                  rows={3}
-                  style={{
-                    width:"100%", fontSize:13, color:"#3d5a4a", background:"#f8f9f5",
-                    border:"1.5px solid #059669", borderRadius:8, padding:"8px 10px",
-                    outline:"none", fontFamily:"inherit", resize:"vertical",
-                    lineHeight:1.5, boxSizing:"border-box",
-                  }}
-                />
-                <div style={{ display:"flex", justifyContent:"flex-end", gap:8, marginTop:6 }}>
-                  {note && <button onClick={deleteNote} style={{ fontSize:12, color:"#c23934", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Delete note</button>}
-                  <button onClick={()=>setEditingNote(false)} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
-                  <button onClick={saveNote} style={{ fontSize:12, fontWeight:600, color:"#059669", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Save</button>
-                </div>
+            {/* Top row: date/time + edit/delete */}
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:5 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, fontSize:12 }}>
+                {due ? (
+                  <>
+                    <span style={{ display:"inline-flex", alignItems:"center", gap:3, color: due.overdue ? "#c23934" : "#6b7280" }}>
+                      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
+                      {due.dateLabel}
+                    </span>
+                    <span style={{ display:"inline-flex", alignItems:"center", gap:3, color:"#6b7280" }}>
+                      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg>
+                      {due.timeLabel}
+                    </span>
+                  </>
+                ) : !done && (
+                  <button onClick={()=>setDeferOpen(true)} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
+                    onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
+                    onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#b9d3c4"}
+                  >+ Set deadline</button>
+                )}
               </div>
-            ) : note ? (
-              <div onClick={()=>!isLocallyCompleted&&openNote()} style={{
-                fontSize:13, color:"#4a6d47", lineHeight:1.6,
-                background:"#f8f9f5", borderRadius:8, padding:"8px 10px",
-                cursor:isLocallyCompleted?"default":"pointer",
-                borderLeft:"3px solid #c8f7ae",
-                whiteSpace:"pre-wrap",
-              }}
-                onMouseEnter={e=>{ if(!isLocallyCompleted) (e.currentTarget as HTMLElement).style.background="#f2fdec"; }}
-                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#f8f9f5"}
-              >{note}</div>
-            ) : !isLocallyCompleted ? (
-              <button onClick={openNote} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", padding:0, marginTop:6 }}
-                onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
-                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#b9d3c4"}
-              >+ Add a note</button>
-            ) : null}
-          </div>
-        )}
 
-        {isNudged && !isLocallyCompleted && (
-          <div style={{ marginTop:8 }}>
-            <NudgeBanner task={task} onDefer={onDefer?d=>onDefer(task.id,d):undefined} onMarkDone={()=>onMarkDone?.(task.id)} />
+              {!done && (
+                <div style={{ display:"flex", gap:4, flexShrink:0 }}>
+                  <button onClick={openEdit} title="Edit" style={{ width:26, height:26, borderRadius:7, border:"1px solid #e4e9e4", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#6b7280", transition:"all 0.12s" }}
+                    onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#f1f3ef"; (e.currentTarget as HTMLElement).style.borderColor="#c8d5cb"; }}
+                    onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.borderColor="#e4e9e4"; }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button onClick={()=>onDelete?.(task.id)} title="Delete" style={{ width:26, height:26, borderRadius:7, border:"1px solid #e4e9e4", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#6b7280", transition:"all 0.12s" }}
+                    onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#fff0ee"; (e.currentTarget as HTMLElement).style.color="#c23934"; (e.currentTarget as HTMLElement).style.borderColor="#f5c6c3"; }}
+                    onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.color="#6b7280"; (e.currentTarget as HTMLElement).style.borderColor="#e4e9e4"; }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Title */}
+            <div style={{ fontSize:15, fontWeight:700, color:done?"#a0b4a8":"#082d1d", lineHeight:1.35, textDecoration:done?"line-through":"none", marginBottom:10 }}>
+              {task.title}
+            </div>
+
+            {/* Emotion + deferred */}
+            <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+              {editingEmotion ? (
+                <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                  <EmotionalStatePicker value={task.emotionalState as EmotionalState} compact
+                    onChange={v=>{ if(v!==task.emotionalState) onUpdate?.(task.id,{emotionalState:v}); setEditingEmotion(false); }} />
+                  <button onClick={()=>setEditingEmotion(false)} style={{ fontSize:10, color:"#c4cbc2", background:"none", border:"none", cursor:"pointer" }}>✕</button>
+                </div>
+              ) : (
+                <button onClick={()=>!done&&setEditingEmotion(true)} style={{
+                  display:"inline-flex", alignItems:"center", gap:4, padding:"2px 8px 2px 6px", borderRadius:20,
+                  background:em.bg, color:em.fg, fontSize:11, fontWeight:600,
+                  border:"none", cursor:done?"default":"pointer", fontFamily:"inherit",
+                }}>
+                  {em.emoji} {em.label}
+                </button>
+              )}
+
+              {task.deferredCount > 0 && (
+                <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"2px 8px", borderRadius:20, background:"#f8f9f5", border:"1px solid #dde4de", fontSize:10.5, fontWeight:600, color:"#3d5a4a" }}>
+                  ↩ {task.deferredCount}×
+                </span>
+              )}
+
+              {due?.overdue && !done && (
+                <span style={{ fontSize:11, color:"#c23934", fontWeight:600 }}>Overdue</span>
+              )}
+            </div>
+
+            {/* Note */}
+            {mounted && (
+              <div style={{ marginTop: note || editingNote ? 8 : 0 }}>
+                {editingNote ? (
+                  <div>
+                    <textarea ref={noteRef} value={noteDraft} onChange={e=>setNoteDraft(e.target.value)}
+                      onKeyDown={e=>{ if(e.key==="Escape") setEditingNote(false); }}
+                      placeholder="Add a note…" rows={3}
+                      style={{ width:"100%", fontSize:13, color:"#3d5a4a", background:"#f8f9f5", border:"1.5px solid #059669", borderRadius:8, padding:"8px 10px", outline:"none", fontFamily:"inherit", resize:"vertical", lineHeight:1.5, boxSizing:"border-box" }}
+                    />
+                    <div style={{ display:"flex", justifyContent:"flex-end", gap:8, marginTop:6 }}>
+                      {note && <button onClick={deleteNote} style={{ fontSize:12, color:"#c23934", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Delete note</button>}
+                      <button onClick={()=>setEditingNote(false)} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
+                      <button onClick={handleSaveNote} style={{ fontSize:12, fontWeight:600, color:"#059669", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Save</button>
+                    </div>
+                  </div>
+                ) : note ? (
+                  <div onClick={()=>!done&&openNote()} style={{ fontSize:13, color:"#4a6d47", lineHeight:1.6, background:"#f8f9f5", borderRadius:8, padding:"8px 10px", cursor:done?"default":"pointer", borderLeft:"3px solid #c8f7ae", whiteSpace:"pre-wrap" }}
+                    onMouseEnter={e=>{ if(!done) (e.currentTarget as HTMLElement).style.background="#f2fdec"; }}
+                    onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#f8f9f5"}
+                  >{note}</div>
+                ) : !done ? (
+                  <button onClick={openNote} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
+                    onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
+                    onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#b9d3c4"}
+                  >+ Add a note</button>
+                ) : null}
+              </div>
+            )}
+
+            {isNudged && !done && (
+              <div style={{ marginTop:8 }}>
+                <NudgeBanner task={task} onDefer={onDefer?d=>onDefer(task.id,d):undefined} onMarkDone={()=>onMarkDone?.(task.id)} />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d=>onDefer(task.id,d)} />}

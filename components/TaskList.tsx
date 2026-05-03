@@ -252,50 +252,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     debounceRef.current = setTimeout(() => reorderTasks(newOrder), 500);
   }
 
-  // All shared mutations from hook — no duplication with SimpleTaskView
-  const { markDone, updateTask, deferTask, deleteTask, addSubtask, completeSubtask, uncompleteSubtask, deleteSubtask } = m;
-
-  // Keep completed tasks in session so they sink to bottom with strikethrough
-  const [completedThisSession, setCompletedThisSession] = useState<Map<string, TaskWithSubtasks>>(new Map());
-  // Tasks the user un-completed this session — shown at bottom of active list
-  const [recentlyUncompleted, setRecentlyUncompleted] = useState<Map<string, TaskWithSubtasks>>(new Map());
-
-  function handleMarkDone(id: string) {
-    const task = displayTasks.find(t => t.id === id);
-    if (task) setCompletedThisSession(prev => new Map(prev).set(id, { ...task, isCompleted: true }));
-    markDone(id);
-  }
-
-  function handleCompleteSubtask(subtaskId: string) {
-    // Complete the subtask
-    completeSubtask(subtaskId);
-    // Find the parent task
-    const parent = displayTasks.find(t => t.subtasks.some(s => s.id === subtaskId));
-    if (!parent) return;
-    // Check if this was the last incomplete subtask
-    const otherIncomplete = parent.subtasks.filter(s => s.id !== subtaskId && !s.isCompleted);
-    if (otherIncomplete.length === 0 && parent.subtasks.length > 0) {
-      // All subtasks done — auto-complete parent after a brief moment
-      setTimeout(() => handleMarkDone(parent.id), 400);
-    }
-  }
-
-  function handleUncomplete(id: string) {
-    // Get the task data from completedThisSession before removing it
-    const taskData = completedThisSession.get(id);
-    setCompletedThisSession(prev => { const next = new Map(prev); next.delete(id); return next; });
-    // Add to recently uncompleted so it appears at bottom of active list
-    if (taskData) setRecentlyUncompleted(prev => new Map(prev).set(id, { ...taskData, isCompleted: false }));
-    fetch(`/api/tasks/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isCompleted: false }),
-    }).then(() => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      // Remove from recentlyUncompleted after server refetch brings it back
-      setTimeout(() => setRecentlyUncompleted(prev => { const next = new Map(prev); next.delete(id); return next; }), 1500);
-    });
-  }
+  const { markDone, uncompleteTask, updateTask, deferTask, deleteTask } = m;
 
   function pushTaskUp(id: string) {
     const idx = manualOrder.indexOf(id);
@@ -324,11 +281,10 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const [inlineDueDate, setInlineDueDate] = useState(new Date().toISOString().slice(0, 10));
   const [inlineDueTime, setInlineDueTime] = useState("");
   const [inlineEmotion, setInlineEmotion] = useState<"DREADING"|"ANXIOUS"|"NEUTRAL"|"WILLING"|"EXCITED">("NEUTRAL");
-  const [inlineSubtasks, setInlineSubtasks] = useState<string[]>([]);
-  const [inlineSubInput, setInlineSubInput] = useState("");
+  const [inlineNote, setInlineNote] = useState("");
 
   const { mutate: createInline, isPending: creatingInline } = useMutation({
-    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof inlineEmotion; subtasks: string[]; note?: string }) => {
+    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof inlineEmotion; note?: string }) => {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -362,15 +318,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
         parentTaskId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        subtasks: vars.subtasks.map((title, i) => ({
-          id: `optimistic-sub-${Date.now()}-${i}`,
-          userId: "", title,
-          parentTaskId: `optimistic-${Date.now()}`,
-          isCompleted: false, deferredCount: 0, sortOrder: i,
-          lastTouchedAt: new Date(), recurrenceRule: null, dueAt: null,
-          emotionalState: "NEUTRAL" as const,
-          createdAt: new Date(), updatedAt: new Date(), subtasks: [],
-        })),
+        subtasks: [],
       };
 
       queryClient.setQueryData(["tasks", selectedDate], (old: TaskWithSubtasks[] = []) => [...old, optimistic]);
@@ -378,8 +326,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       // Reset form immediately — user sees instant feedback
       setInlineDraft(""); setShowInlineForm(false);
       setInlineDueDate(new Date().toISOString().slice(0, 10));
-      setInlineDueTime(""); setInlineEmotion("NEUTRAL");
-      setInlineSubtasks([]); setInlineSubInput("");
+      setInlineDueTime(""); setInlineEmotion("NEUTRAL"); setInlineNote("");
 
       return { snap };
     },
@@ -589,8 +536,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             <div style={{ marginBottom: 16 }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Note</p>
               <textarea
-                value={inlineSubInput}
-                onChange={e => setInlineSubInput(e.target.value)}
+                value={inlineNote}
+                onChange={e => setInlineNote(e.target.value)}
                 placeholder="Add a note or description…"
                 rows={2}
                 style={{
@@ -605,7 +552,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             </div>
 
             <div style={{ display:"flex",justifyContent:"flex-end",gap:8 }}>
-              <button onClick={() => { setShowInlineForm(false); setInlineDraft(""); setInlineDueDate(new Date().toISOString().slice(0,10)); setInlineDueTime(""); setInlineEmotion("NEUTRAL"); setInlineSubtasks([]); setInlineSubInput(""); }}
+              <button onClick={() => { setShowInlineForm(false); setInlineDraft(""); setInlineDueDate(new Date().toISOString().slice(0,10)); setInlineDueTime(""); setInlineEmotion("NEUTRAL"); setInlineNote(""); }}
                 style={{ padding:"6px 14px",borderRadius:7,border:"1px solid #dde4de",background:"#fff",color:"#4a6d47",fontSize:12.5,cursor:"pointer",fontFamily:"inherit" }}>
                 Cancel
               </button>
@@ -618,8 +565,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   title: inlineDraft.trim(),
                   dueAt: inlineDueDate ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString() : null,
                   emotion: inlineEmotion,
-                  subtasks: [],
-                  note: inlineSubInput,
+                  note: inlineNote,
                 });
               }} disabled={!inlineDraft.trim() || creatingInline} style={{
                 padding:"6px 18px",borderRadius:7,border:"none",
@@ -636,77 +582,25 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       {/* ── Cards ── */}
       {isLoading ? (
         <SkeletonTaskList count={5} />
-      ) : tasks.length === 0 && completedThisSession.size > 0 ? (
-        /* All tasks completed this session — show them with strikethrough */
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
-          {[...completedThisSession.values()].map((t) => (
-            <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
-              onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
-              onDelete={deleteTask} onAddSubtask={addSubtask}
-              onCompleteSubtask={handleCompleteSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
-            />
-          ))}
-        </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={filteredTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-            {(() => {
-              // Split: first DREADING or overdue task → featured; rest → 2-col grid
-              const urgentIdx = filteredTasks.findIndex(t =>
-                t.emotionalState === "DREADING" || (t.dueAt && new Date(t.dueAt) < new Date())
-              );
-              const featured = urgentIdx >= 0 ? filteredTasks[urgentIdx] : null;
-              const grid = featured
-                ? [...filteredTasks.slice(0, urgentIdx), ...filteredTasks.slice(urgentIdx + 1)]
-                : filteredTasks;
-
-              const allActive = featured ? [featured, ...grid] : grid;
-              // Exclude tasks already shown in active list or recently uncompleted
-              const completedList = [...completedThisSession.values()].filter(
-                ct => !allActive.some(t => t.id === ct.id)
-              );
-              // Recently uncompleted — active but shown at bottom (not yet back from server)
-              const uncompletedList = [...recentlyUncompleted.values()].filter(
-                t => !allActive.some(a => a.id === t.id)
-              );
-
-              const cardProps = (t: typeof displayTasks[0], idx: number, isCompleted = false) => ({
-                task: t,
-                featured: false,
-                isLocallyCompleted: isCompleted,
-                dragActive: sortMode === "manual",
-                canPushUp: !isCompleted && idx > 0,
-                onPushUp: pushTaskUp,
-                onMarkDone: handleMarkDone,
-                onDefer: deferTask, onUpdate: updateTask,
-                onDelete: deleteTask, onAddSubtask: addSubtask,
-                onCompleteSubtask: handleCompleteSubtask, onUncompleteSubtask: uncompleteSubtask, onDeleteSubtask: deleteSubtask,
-              });
-
-              return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
-                  {allActive.map((t, idx) => (
-                    <SortableTaskCard key={t.id} {...cardProps(t, idx)} />
-                  ))}
-                  {/* Recently un-completed — active, at bottom */}
-                  {uncompletedList.map((t) => (
-                    <SortableTaskCard key={`uncompleted-${t.id}`} task={t}
-                      onMarkDone={handleMarkDone} onDefer={deferTask} onUpdate={updateTask}
-                      onDelete={deleteTask} onAddSubtask={addSubtask}
-                      onCompleteSubtask={handleCompleteSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
-                    />
-                  ))}
-                  {/* Completed this session — strikethrough at very bottom */}
-                  {completedList.map((t) => (
-                    <SortableTaskCard key={`done-${t.id}`} task={t} isLocallyCompleted
-                      onMarkDone={handleUncomplete} onDefer={deferTask} onUpdate={updateTask}
-                      onDelete={deleteTask} onAddSubtask={addSubtask}
-                      onCompleteSubtask={handleCompleteSubtask} onUncompleteSubtask={uncompleteSubtask} onDeleteSubtask={deleteSubtask}
-                    />
-                  ))}
-                </div>
-              );
-            })()}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
+              {filteredTasks.map((t, idx) => (
+                <SortableTaskCard
+                  key={t.id}
+                  task={t}
+                  dragActive={sortMode === "manual"}
+                  canPushUp={idx > 0}
+                  onPushUp={pushTaskUp}
+                  onMarkDone={markDone}
+                  onUncomplete={uncompleteTask}
+                  onDefer={deferTask}
+                  onUpdate={updateTask}
+                  onDelete={deleteTask}
+                />
+              ))}
+            </div>
           </SortableContext>
         </DndContext>
       )}
