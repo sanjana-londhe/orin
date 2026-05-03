@@ -328,7 +328,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const [inlineSubInput, setInlineSubInput] = useState("");
 
   const { mutate: createInline, isPending: creatingInline } = useMutation({
-    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof inlineEmotion; subtasks: string[] }) => {
+    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof inlineEmotion; subtasks: string[]; note?: string }) => {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -336,15 +336,9 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       });
       if (!res.ok) throw new Error("Failed");
       const task = await res.json();
-      // Create subtasks in parallel instead of sequentially
-      if (vars.subtasks.length > 0) {
-        await Promise.all(vars.subtasks.map(st =>
-          fetch("/api/tasks", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: st, parentTaskId: task.id }),
-          })
-        ));
+      // Save note to localStorage after we have the real task ID
+      if (vars.note?.trim()) {
+        try { localStorage.setItem(`orin_note_${task.id}`, vars.note.trim()); } catch {}
       }
       return task;
     },
@@ -593,21 +587,21 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Action items</p>
-              {inlineSubtasks.map((st, i) => (
-                <div key={i} style={{ display:"flex",alignItems:"center",gap:8,padding:"3px 0" }}>
-                  <span style={{ width:10,height:10,borderRadius:3,border:"1.5px solid #dde4de",flexShrink:0 }} />
-                  <span style={{ flex:1,fontSize:12.5,color:"#082d1d" }}>{st}</span>
-                  <button onClick={() => setInlineSubtasks(p => p.filter((_,j)=>j!==i))} style={{ fontSize:11,color:"#c4cbc2",background:"none",border:"none",cursor:"pointer" }}>✕</button>
-                </div>
-              ))}
-              <div style={{ display:"flex",alignItems:"center",gap:8,marginTop:4 }}>
-                <span style={{ width:10,height:10,borderRadius:3,border:"1.5px dashed #dde4de",flexShrink:0 }} />
-                <input value={inlineSubInput} onChange={e=>setInlineSubInput(e.target.value)}
-                  onKeyDown={e=>{ if(e.key==="Enter"&&inlineSubInput.trim()){setInlineSubtasks(p=>[...p,inlineSubInput.trim()]);setInlineSubInput("");}}}
-                  placeholder="Add action item…"
-                  style={{ flex:1,border:"none",borderBottom:"1px solid #dde4de",outline:"none",fontSize:12.5,color:"#082d1d",background:"transparent",fontFamily:"inherit",paddingBottom:2 }} />
-              </div>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Note</p>
+              <textarea
+                value={inlineSubInput}
+                onChange={e => setInlineSubInput(e.target.value)}
+                placeholder="Add a note or description…"
+                rows={2}
+                style={{
+                  width:"100%", fontSize:12.5, color:"#082d1d", background:"#f8f9f5",
+                  border:"1.5px solid #dde4de", borderRadius:8, padding:"8px 10px",
+                  outline:"none", fontFamily:"inherit", resize:"vertical",
+                  lineHeight:1.5, boxSizing:"border-box", transition:"border-color 0.14s",
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = "#059669")}
+                onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")}
+              />
             </div>
 
             <div style={{ display:"flex",justifyContent:"flex-end",gap:8 }}>
@@ -624,7 +618,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   title: inlineDraft.trim(),
                   dueAt: inlineDueDate ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString() : null,
                   emotion: inlineEmotion,
-                  subtasks: inlineSubtasks,
+                  subtasks: [],
+                  note: inlineSubInput,
                 });
               }} disabled={!inlineDraft.trim() || creatingInline} style={{
                 padding:"6px 18px",borderRadius:7,border:"none",
