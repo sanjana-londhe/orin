@@ -199,14 +199,18 @@ function TaskCardInner({
 
           {!isLocallyCompleted && (
             <div style={{ display:"flex", gap:6, flexShrink:0 }}>
-              <button onClick={openEdit} style={{ width:26, height:26, borderRadius:7, border:"1px solid #dde4de", background:"#f8f9f5", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#4a6d47", fontSize:13, transition:"all 0.12s" }}
-                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#e4f0eb"; (e.currentTarget as HTMLElement).style.color="#059669"; }}
-                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#f8f9f5"; (e.currentTarget as HTMLElement).style.color="#4a6d47"; }}
-              >✏</button>
-              <button onClick={()=>onDelete?.(task.id)} style={{ width:26, height:26, borderRadius:7, border:"1px solid #fecaca", background:"#fff0f0", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#c23934", fontSize:14, transition:"all 0.12s" }}
-                onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#fee2e2"}
-                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#fff0f0"}
-              >✕</button>
+              <button onClick={openEdit} title="Edit" style={{ width:28, height:28, borderRadius:8, border:"1px solid #dde4de", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#3d5a4a", transition:"all 0.12s" }}
+                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#f1f3ef"; (e.currentTarget as HTMLElement).style.borderColor="#c4cbc2"; }}
+                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button onClick={()=>onDelete?.(task.id)} title="Delete" style={{ width:28, height:28, borderRadius:8, border:"1px solid #dde4de", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#3d5a4a", transition:"all 0.12s" }}
+                onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#f1f3ef"; (e.currentTarget as HTMLElement).style.color="#c23934"; (e.currentTarget as HTMLElement).style.borderColor="#e9c3c1"; }}
+                onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.color="#3d5a4a"; (e.currentTarget as HTMLElement).style.borderColor="#dde4de"; }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              </button>
             </div>
           )}
         </div>
