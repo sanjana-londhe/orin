@@ -8,9 +8,8 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
-import { getEmotion } from "@/lib/emotions";
 import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
-import { Check, Plus, X, Pencil, Trash2, CalendarDays } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 function fmtDue(dueAt: Date | string | null) {
   if (!dueAt) return null;
@@ -24,22 +23,20 @@ function fmtDue(dueAt: Date | string | null) {
   return { label: `${date} · ${time}`, overdue: d < now, isoDate: d.toISOString().slice(0,10), isoTime: d.toISOString().slice(11,16) };
 }
 
-function fmtShort(dueAt: Date | string | null) {
-  if (!dueAt) return null;
-  const d = new Date(dueAt);
-  const isToday = d.toDateString() === new Date().toDateString();
-  return isToday
-    ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
 const EMOTIONS = [
-  { value:"DREADING", label:"Dreading", emoji:"😰", bg:"#FFF0EC", fg:"#D14626", strip:"#c23934", activeBg:"#D14626" },
-  { value:"ANXIOUS",  label:"Anxious",  emoji:"😟", bg:"#FFF8E8", fg:"#B07A10", strip:"#886a00", activeBg:"#B07A10" },
-  { value:"NEUTRAL",  label:"Neutral",  emoji:"😐", bg:"#F3F2F0", fg:"#7A756E", strip:"#c4cbc2", activeBg:"#3a3a3a" },
-  { value:"WILLING",  label:"Willing",  emoji:"🙂", bg:"#EEF9F7", fg:"#0E8A7D", strip:"#2b6b5e", activeBg:"#0E8A7D" },
-  { value:"EXCITED",  label:"Excited",  emoji:"🤩", bg:"#EEFAF1", fg:"#1A9444", strip:"#59d10b", activeBg:"#1A9444" },
+  { value:"DREADING", label:"Dreading", emoji:"😰", bg:"#FFF0EC", fg:"#D14626", activeBg:"#D14626" },
+  { value:"ANXIOUS",  label:"Anxious",  emoji:"😟", bg:"#FFF8E8", fg:"#B07A10", activeBg:"#B07A10" },
+  { value:"NEUTRAL",  label:"Neutral",  emoji:"😐", bg:"#F3F2F0", fg:"#7A756E", activeBg:"#3a3a3a" },
+  { value:"WILLING",  label:"Willing",  emoji:"🙂", bg:"#EEF9F7", fg:"#0E8A7D", activeBg:"#0E8A7D" },
+  { value:"EXCITED",  label:"Excited",  emoji:"🤩", bg:"#EEFAF1", fg:"#1A9444", activeBg:"#1A9444" },
 ] as const;
+
+function loadNote(id: string) {
+  try { return localStorage.getItem(`orin_note_${id}`) ?? ""; } catch { return ""; }
+}
+function saveNote(id: string, text: string) {
+  try { if (text) localStorage.setItem(`orin_note_${id}`, text); else localStorage.removeItem(`orin_note_${id}`); } catch {}
+}
 
 interface Props {
   task: TaskWithSubtasks;
@@ -59,40 +56,35 @@ interface Props {
 
 function TaskCardInner({
   task, isLocallyCompleted=false, onMarkDone, onDefer, onUpdate, onDelete,
-  onAddSubtask, onCompleteSubtask, onUncompleteSubtask, onDeleteSubtask,
 }: Props) {
   const { nudgedTaskIds } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
   const em = EMOTIONS.find(e => e.value === task.emotionalState) ?? EMOTIONS[2];
   const due = fmtDue(task.dueAt);
-  const completedSubs = task.subtasks.filter(s => s.isCompleted).length;
-  const totalSubs = task.subtasks.length;
 
   const [deferOpen, setDeferOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editingEmotion, setEditingEmotion] = useState(false);
-  const [subInput, setSubInput] = useState("");
-  const [showSubInput, setShowSubInput] = useState(false);
-  // Per-subtask due editing
-  const [editingSubDue, setEditingSubDue] = useState<string | null>(null);
-  const [subDueDate, setSubDueDate] = useState("");
-  const [subDueTime, setSubDueTime] = useState("");
+  const [note, setNote] = useState("");
+  const [editingNote, setEditingNote] = useState(false);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [mounted, setMounted] = useState(false);
 
-  const subRef = useRef<HTMLInputElement>(null);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDate, setEditDate] = useState(due?.isoDate ?? "");
   const [editTime, setEditTime] = useState(due?.isoTime ?? "");
   const [editEmotion, setEditEmotion] = useState(task.emotionalState as typeof EMOTIONS[number]["value"]);
-  const [newSub, setNewSub] = useState("");
   const editTitleRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { if (showSubInput) subRef.current?.focus(); }, [showSubInput]);
+  useEffect(() => { setMounted(true); setNote(loadNote(task.id)); }, [task.id]);
   useEffect(() => { if (editing) editTitleRef.current?.focus(); }, [editing]);
+  useEffect(() => { if (editingNote) noteRef.current?.focus(); }, [editingNote]);
 
   function openEdit() {
     setEditTitle(task.title); setEditDate(due?.isoDate ?? "");
     setEditTime(due?.isoTime ?? ""); setEditEmotion(task.emotionalState as typeof EMOTIONS[number]["value"]);
-    setNewSub(""); setEditing(true);
+    setEditing(true);
   }
   function saveEdit() {
     if (!editTitle.trim()) return;
@@ -100,28 +92,15 @@ function TaskCardInner({
     onUpdate?.(task.id, { title: editTitle.trim(), dueAt: dueAt as unknown as Date, emotionalState: editEmotion as Task["emotionalState"] });
     setEditing(false);
   }
-  function addSubtask() {
-    const t = subInput.trim(); if (t) onAddSubtask?.(task.id, t);
-    setSubInput(""); setShowSubInput(false);
+  function saveNote() {
+    saveNote(task.id, noteDraft);
+    setNote(noteDraft);
+    setEditingNote(false);
   }
+  function openNote() { setNoteDraft(note); setEditingNote(true); }
+  function deleteNote() { saveNote(task.id, ""); setNote(""); setEditingNote(false); }
 
-  // Subtask due date: constrained between parent createdAt → parent dueAt
-  const parentMin = task.createdAt ? new Date(task.createdAt).toISOString().slice(0,10) : undefined;
-  const parentMax = task.dueAt    ? new Date(task.dueAt).toISOString().slice(0,10)    : undefined;
-
-  function openSubDue(sub: Task) {
-    const d = sub.dueAt ? new Date(sub.dueAt) : null;
-    setSubDueDate(d ? d.toISOString().slice(0,10) : "");
-    setSubDueTime(d ? d.toISOString().slice(11,16) : "");
-    setEditingSubDue(sub.id);
-  }
-  function saveSubDue(subId: string) {
-    const dueAt = subDueDate ? new Date(`${subDueDate}T${subDueTime||"00:00"}`).toISOString() : null;
-    onUpdate?.(subId, { dueAt: dueAt as unknown as Date });
-    setEditingSubDue(null);
-  }
-
-  // ── Inline edit form ──────────────────────────────────────────────
+  // ── Edit form ──────────────────────────────────────────────────────
   if (editing) {
     return (
       <div style={{ background:"#fff", border:"1.5px solid #059669", borderRadius:12, padding:"14px 18px", boxShadow:"0 0 0 3px #f2fdec" }}>
@@ -143,22 +122,6 @@ function TaskCardInner({
             ); })}
           </div>
         </div>
-        {task.subtasks.length > 0 && (
-          <div style={{ marginBottom:14 }}>
-            <p style={{ fontSize:11, fontWeight:600, color:"#4a6d47", marginBottom:8 }}>Action items</p>
-            {task.subtasks.map(sub => (
-              <div key={sub.id} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
-                <div style={{ width:12, height:12, borderRadius:"50%", border:`1.5px solid ${sub.isCompleted?"#059669":"#dde4de"}`, background:sub.isCompleted?"#059669":"#fff", flexShrink:0 }} />
-                <span style={{ flex:1, fontSize:12.5, color:sub.isCompleted?"#b9d3c4":"#3d5a4a", textDecoration:sub.isCompleted?"line-through":"none" }}>{sub.title}</span>
-                <button onClick={()=>onDeleteSubtask?.(sub.id)} style={{ background:"none", border:"none", cursor:"pointer", color:"#dde4de", padding:0 }} onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#c23934"} onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#dde4de"}><X size={11} /></button>
-              </div>
-            ))}
-          </div>
-        )}
-        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-          <span style={{ width:10, height:10, borderRadius:3, border:"1.5px dashed #dde4de", flexShrink:0 }} />
-          <input value={newSub} onChange={e=>setNewSub(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"&&newSub.trim()){ onAddSubtask?.(task.id,newSub.trim()); setNewSub(""); }}} placeholder="Add action item…" style={{ flex:1, border:"none", borderBottom:"1px solid #dde4de", outline:"none", fontSize:12.5, color:"#082d1d", background:"transparent", fontFamily:"inherit", paddingBottom:2 }} />
-        </div>
         <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
           <button onClick={()=>setEditing(false)} style={{ padding:"7px 16px", borderRadius:8, border:"1.5px solid #dde4de", background:"#fff", color:"#4a6d47", fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
           <button onClick={saveEdit} style={{ padding:"7px 20px", borderRadius:8, border:"none", background:"#059669", color:"#fff", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }} onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#047857"} onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#059669"}>Save changes</button>
@@ -167,7 +130,7 @@ function TaskCardInner({
     );
   }
 
-  // ── Card ─────────────────────────────────────────────────────────
+  // ── Card ──────────────────────────────────────────────────────────
   return (
     <>
       <div style={{
@@ -215,9 +178,8 @@ function TaskCardInner({
           )}
         </div>
 
-        {/* Row 2: feeling | due date | subtask count | deferred count */}
-        <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom: totalSubs > 0 ? 12 : 0, flexWrap:"wrap" }}>
-          {/* Feeling — clickable to change */}
+        {/* Row 2: feeling | due (click=defer) | deferred count */}
+        <div style={{ display:"flex", alignItems:"center", gap:7, flexWrap:"wrap" }}>
           {editingEmotion ? (
             <div style={{ display:"flex", alignItems:"center", gap:6 }}>
               <EmotionalStatePicker value={task.emotionalState as EmotionalState} compact
@@ -234,17 +196,14 @@ function TaskCardInner({
             </button>
           )}
 
-          {/* Due date — clickable to change (= defer) */}
           {due ? (
-            <button
-              onClick={()=>!isLocallyCompleted&&setDeferOpen(true)}
-              style={{
-                display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20,
-                background:due.overdue?"#FFF0EC":"#f3f4f6",
-                border:`1px solid ${due.overdue?"#fecaca":"transparent"}`,
-                fontSize:11.5, fontWeight:500, color:due.overdue?"#c23934":"#3d5a4a",
-                cursor:isLocallyCompleted?"default":"pointer", fontFamily:"inherit", transition:"background 0.12s",
-              }}
+            <button onClick={()=>!isLocallyCompleted&&setDeferOpen(true)} style={{
+              display:"inline-flex", alignItems:"center", gap:5, padding:"3px 9px", borderRadius:20,
+              background:due.overdue?"#FFF0EC":"#f3f4f6",
+              border:`1px solid ${due.overdue?"#fecaca":"transparent"}`,
+              fontSize:11.5, fontWeight:500, color:due.overdue?"#c23934":"#3d5a4a",
+              cursor:isLocallyCompleted?"default":"pointer", fontFamily:"inherit", transition:"background 0.12s",
+            }}
               onMouseEnter={e=>{ if(!isLocallyCompleted) (e.currentTarget as HTMLElement).style.background=due.overdue?"#fee2e2":"#e8ece8"; }}
               onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background=due.overdue?"#FFF0EC":"#f3f4f6"}
             >
@@ -257,14 +216,6 @@ function TaskCardInner({
             </button>
           ))}
 
-          {/* Subtask count */}
-          {totalSubs > 0 && (
-            <span style={{ fontSize:11, fontWeight:500, color:"#b9d3c4", padding:"3px 0" }}>
-              {completedSubs}/{totalSubs} tasks
-            </span>
-          )}
-
-          {/* Deferred count — only if > 0 */}
           {task.deferredCount > 0 && (
             <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 8px", borderRadius:20, background:"#f8f9f5", border:"1px solid #dde4de", fontSize:10.5, fontWeight:600, color:"#3d5a4a" }}>
               ↩ {task.deferredCount} deferred
@@ -272,75 +223,49 @@ function TaskCardInner({
           )}
         </div>
 
-        {/* Progress bar */}
-        {totalSubs > 0 && (
-          <div style={{ display:"flex", gap:3, marginBottom:10 }}>
-            {task.subtasks.map((sub,i) => (
-              <div key={i} style={{ height:4, flex:1, borderRadius:2, background:sub.isCompleted ? (completedSubs === totalSubs ? "#047857" : "#059669") : "#f0f0f0", transition:"background 0.2s" }} />
-            ))}
-          </div>
-        )}
-
-        {/* Divider before subtasks */}
-        {totalSubs > 0 && <div style={{ height:1, background:"#f0f0f0", marginBottom:10 }} />}
-
-        {/* Subtasks */}
-        {task.subtasks.length > 0 && (
-          <div style={{ display:"flex", flexDirection:"column", gap:6, marginBottom:10 }}>
-            {task.subtasks.map(sub => (
-              <div key={sub.id}>
-                <div style={{ display:"flex", alignItems:"center", gap:9 }}>
-                  {/* Subtask circle */}
-                  <div onClick={()=>sub.isCompleted?onUncompleteSubtask?.(sub.id):onCompleteSubtask?.(sub.id)} style={{
-                    width:15, height:15, borderRadius:"50%", flexShrink:0,
-                    border:`1.5px solid ${sub.isCompleted?"#059669":"#dde4de"}`,
-                    background:sub.isCompleted?"#059669":"white",
-                    cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
-                    transition:"border-color 0.15s, background 0.15s",
+        {/* Note */}
+        {mounted && (
+          <div style={{ marginTop: note || editingNote ? 10 : 0 }}>
+            {editingNote ? (
+              <div>
+                <textarea
+                  ref={noteRef}
+                  value={noteDraft}
+                  onChange={e=>setNoteDraft(e.target.value)}
+                  onKeyDown={e=>{ if(e.key==="Escape") setEditingNote(false); }}
+                  placeholder="Add a note…"
+                  rows={3}
+                  style={{
+                    width:"100%", fontSize:13, color:"#3d5a4a", background:"#f8f9f5",
+                    border:"1.5px solid #059669", borderRadius:8, padding:"8px 10px",
+                    outline:"none", fontFamily:"inherit", resize:"vertical",
+                    lineHeight:1.5, boxSizing:"border-box",
                   }}
-                    onMouseEnter={e=>{ sub.isCompleted?((e.currentTarget as HTMLElement).style.background="#dc2626",(e.currentTarget as HTMLElement).style.borderColor="#dc2626"):((e.currentTarget as HTMLElement).style.borderColor="#059669"); }}
-                    onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background=sub.isCompleted?"#059669":"white"; (e.currentTarget as HTMLElement).style.borderColor=sub.isCompleted?"#059669":"#dde4de"; }}
-                  >
-                    {sub.isCompleted && <Check size={8} color="white" strokeWidth={3} />}
-                  </div>
-
-                  {/* Subtask title */}
-                  <span style={{ flex:1, fontSize:13, fontWeight:500, color:sub.isCompleted?"#b9d3c4":"#3d5a4a", textDecoration:sub.isCompleted?"line-through":"none" }}>
-                    {sub.title}
-                  </span>
-
-                  {/* Delete subtask */}
-                  {!isLocallyCompleted && (
-                    <span onClick={()=>onDeleteSubtask?.(sub.id)} style={{ color:"#e8ece8", cursor:"pointer", display:"flex", fontSize:12 }}
-                      onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#c23934"}
-                      onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#e8ece8"}
-                    ><X size={11} /></span>
-                  )}
+                />
+                <div style={{ display:"flex", justifyContent:"flex-end", gap:8, marginTop:6 }}>
+                  {note && <button onClick={deleteNote} style={{ fontSize:12, color:"#c23934", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Delete note</button>}
+                  <button onClick={()=>setEditingNote(false)} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
+                  <button onClick={saveNote} style={{ fontSize:12, fontWeight:600, color:"#059669", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Save</button>
                 </div>
-
               </div>
-            ))}
+            ) : note ? (
+              <div onClick={()=>!isLocallyCompleted&&openNote()} style={{
+                fontSize:13, color:"#4a6d47", lineHeight:1.6,
+                background:"#f8f9f5", borderRadius:8, padding:"8px 10px",
+                cursor:isLocallyCompleted?"default":"pointer",
+                borderLeft:"3px solid #c8f7ae",
+                whiteSpace:"pre-wrap",
+              }}
+                onMouseEnter={e=>{ if(!isLocallyCompleted) (e.currentTarget as HTMLElement).style.background="#f2fdec"; }}
+                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#f8f9f5"}
+              >{note}</div>
+            ) : !isLocallyCompleted ? (
+              <button onClick={openNote} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", padding:0, marginTop:6 }}
+                onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
+                onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#b9d3c4"}
+              >+ Add a note</button>
+            ) : null}
           </div>
-        )}
-
-        {/* Add subtask */}
-        {!isLocallyCompleted && (
-          showSubInput ? (
-            <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:4 }}>
-              <div style={{ width:15, height:15, borderRadius:"50%", border:"1.5px dashed #dde4de", flexShrink:0 }} />
-              <input ref={subRef} value={subInput} onChange={e=>setSubInput(e.target.value)}
-                onKeyDown={e=>{ if(e.key==="Enter") addSubtask(); if(e.key==="Escape"){ setSubInput(""); setShowSubInput(false); }}}
-                onBlur={()=>{ if(!subInput.trim()) setShowSubInput(false); else addSubtask(); }}
-                placeholder="Add subtask…"
-                style={{ flex:1, fontSize:13, color:"#082d1d", background:"transparent", border:"none", borderBottom:"1px solid #059669", outline:"none", fontFamily:"inherit" }}
-              />
-            </div>
-          ) : (
-            <button onClick={()=>setShowSubInput(true)} style={{ display:"inline-flex", alignItems:"center", gap:5, background:"none", border:"none", cursor:"pointer", fontSize:12, color:"#b9d3c4", fontFamily:"inherit", padding:0 }}
-              onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
-              onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#b9d3c4"}
-            ><Plus size={11} strokeWidth={2.5} /> Add subtask</button>
-          )
         )}
 
         {isNudged && !isLocallyCompleted && (
