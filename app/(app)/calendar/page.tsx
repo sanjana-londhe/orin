@@ -53,15 +53,9 @@ function isOverdue(task: TaskWithSubtasks): boolean {
 }
 
 function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
-  // Completed: keep semantic colour, opacity applied on container
-  if (isOverdue(task)) return { background: "#FFF0EC", color: "#D14626" };
-  if (task.isCompleted) return { background: "#EEFAF1", color: "#1A9444" };
-  return { background: "#EEFAF1", color: "#1A9444" };
-}
-
-// 90% opacity wrapper for completed tasks
-function doneOpacity(isCompleted: boolean): React.CSSProperties {
-  return isCompleted ? { opacity: 0.9 } : {};
+  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" }; // Neutral grey
+  if (isOverdue(task))  return { background: "#FFF0EC", color: "#D14626" }; // Dreading red
+  return { background: "#EEFAF1", color: "#1A9444" };                        // Excited green
 }
 
 // ── Task Detail Modal — matches TaskCard todo design ─────────────────
@@ -693,7 +687,6 @@ function MobileCalendar({
                         padding: "4px 10px", borderRadius: 6,
                         background: ps.background, cursor: "pointer",
                         display: "flex", alignItems: "center", gap: 6, overflow: "hidden",
-                        ...doneOpacity(task.isCompleted),
                       }}
                     >
                       <span style={{ fontSize: 12.5, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
@@ -917,7 +910,7 @@ export default function CalendarPage() {
                     return (
                       <div key={task.id}
                         onClick={e => { e.stopPropagation(); setSelectedTask(task); }}
-                        style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden", ...doneOpacity(task.isCompleted) }}
+                        style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden" }}
                       >
                         <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
                           {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
