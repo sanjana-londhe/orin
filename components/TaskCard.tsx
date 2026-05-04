@@ -263,7 +263,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         onMouseLeave={() => setHovered(false)}
         style={{
           display: "flex", alignItems: "flex-start",
-          padding: "12px 14px 12px 16px",
+          padding: isMobile ? "16px 14px" : "12px 14px 12px 16px",
           background: hovered ? T.stone200 : "transparent",
           transition: "background 0.1s",
         }}

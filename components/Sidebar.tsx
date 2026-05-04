@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ListChecks, ScatterChart, CalendarDays, List, Zap,
-  ChevronLeft, Plus, User,
+  ChevronLeft, Plus,
 } from "lucide-react";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { ProfileModal } from "@/components/ProfileModal";
@@ -29,13 +29,12 @@ interface Props { userName: string; email?: string; initial?: string }
 export function Sidebar({ userName, email = "", initial = "" }: Props) {
   const pathname   = usePathname();
   const isMobile   = useIsMobile();
-  const [modalOpen, setModalOpen]           = useState(false);
-  const [collapsed, setCollapsed]           = useState(false);
-  const [profileOpen, setProfileOpen]       = useState(false);
-  const [showUser, setShowUser]             = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [currentName, setCurrentName]       = useState(userName);
-  const [avatarSrc, setAvatarSrc]           = useState<string | null>(null);
+  const [modalOpen, setModalOpen]     = useState(false);
+  const [collapsed, setCollapsed]     = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [showUser, setShowUser]       = useState(false);
+  const [currentName, setCurrentName] = useState(userName);
+  const [avatarSrc, setAvatarSrc]     = useState<string | null>(null);
   const [energyModalOpen, setEnergyModalOpen] = useState(false);
 
   const isCollapsed = !isMobile && collapsed;
@@ -53,7 +52,7 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
   const deferred = tasks.filter(t => t.deferredCount > 0).length;
   const pending  = tasks.length;
 
-  // ── Mobile: bottom tab bar ────────────────────────────────────────────
+  // ── Mobile: bottom tab bar (nav only — profile/energy handled by AppShell top bar) ──
   if (isMobile) {
     return (
       <>
@@ -63,8 +62,7 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
           style={{
             position: "fixed", bottom: 72, right: 20, zIndex: 60,
             width: 52, height: 52, borderRadius: "50%",
-            background: "#059669",
-            border: "none",
+            background: "#059669", border: "none",
             boxShadow: "0 4px 12px rgba(5,150,105,0.35)",
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: "pointer", color: "#fff",
@@ -73,11 +71,10 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
           <Plus size={22} strokeWidth={2.5} />
         </button>
 
-        {/* Bottom navigation bar */}
+        {/* Bottom nav — 5 views */}
         <nav style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 50,
-          height: 60,
-          background: "#f8f9f5",
+          height: 60, background: "#f8f9f5",
           borderTop: "1.5px solid #dde4de",
           display: "flex", alignItems: "stretch",
         }}>
@@ -93,127 +90,14 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
                 borderTop: active ? "2px solid #059669" : "2px solid transparent",
                 transition: "background 0.1s",
               }}>
-                <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
-                <span style={{ fontSize: 9.5, fontWeight: active ? 700 : 450, letterSpacing: "0.01em" }}>
-                  {label}
-                </span>
+                <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+                <span style={{ fontSize: 10, fontWeight: active ? 700 : 450 }}>{label}</span>
               </Link>
             );
           })}
-
-          {/* Profile / Me */}
-          <button
-            onClick={() => setShowMobileMenu(o => !o)}
-            style={{
-              flex: 1,
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              gap: 3, background: "transparent", border: "none", cursor: "pointer",
-              color: "#4a6d47", borderTop: "2px solid transparent",
-              fontFamily: "inherit",
-            }}
-          >
-            <div style={{
-              width: 22, height: 22, borderRadius: "50%", background: "#059669",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 10, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
-            }}>
-              {avatarSrc
-                ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : (currentName.charAt(0) || initial).toUpperCase()
-              }
-            </div>
-            <span style={{ fontSize: 9.5, fontWeight: 450, letterSpacing: "0.01em" }}>Me</span>
-          </button>
         </nav>
 
-        {/* Mobile user menu sheet */}
-        {showMobileMenu && (
-          <>
-            <div
-              onClick={() => setShowMobileMenu(false)}
-              style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(8,45,29,0.2)" }}
-            />
-            <div style={{
-              position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 80,
-              background: "#fff", borderRadius: "16px 16px 0 0",
-              border: "1.5px solid #dde4de", borderBottom: "none",
-              padding: "16px 0 8px",
-              boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 20px 14px", borderBottom: "1px solid #e9ede9" }}>
-                <div style={{
-                  width: 38, height: 38, borderRadius: "50%", background: "#059669",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, fontWeight: 700, color: "#fff", overflow: "hidden",
-                }}>
-                  {avatarSrc
-                    ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    : (currentName.charAt(0) || initial).toUpperCase()
-                  }
-                </div>
-                <div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", margin: 0 }}>{currentName}</p>
-                  <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>Free plan</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setEnergyModalOpen(true)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 12, width: "100%",
-                  padding: "14px 20px", background: "none", border: "none",
-                  cursor: "pointer", fontSize: 14, color: "#082d1d", fontFamily: "inherit",
-                }}
-              >
-                <Zap size={16} color="#059669" /> Track your energy
-              </button>
-
-              <button
-                onClick={() => { setShowMobileMenu(false); setProfileOpen(true); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 12, width: "100%",
-                  padding: "14px 20px", background: "none", border: "none",
-                  cursor: "pointer", fontSize: 14, color: "#082d1d", fontFamily: "inherit",
-                }}
-              >
-                <User size={16} color="#4a6d47" /> Profile settings
-              </button>
-
-              <div style={{ height: 1, background: "#e9ede9", margin: "4px 0" }} />
-              <form action={signOut}>
-                <button type="submit" style={{
-                  display: "flex", alignItems: "center", gap: 12, width: "100%",
-                  padding: "14px 20px", background: "none", border: "none",
-                  cursor: "pointer", fontSize: 14, color: "#c23934", fontFamily: "inherit",
-                }}>
-                  <span style={{ fontSize: 16 }}>→</span> Log out
-                </button>
-              </form>
-            </div>
-          </>
-        )}
-
         <TaskCreateModal open={modalOpen} onOpenChange={setModalOpen} />
-        {energyModalOpen && (
-          <EnergyCheckInModal
-            onClose={() => setEnergyModalOpen(false)}
-            onSave={(entry: CheckIn) => {
-              const store = loadEnergyStore();
-              const key = todayKey();
-              store[key] = [...(store[key] ?? []), entry];
-              saveEnergyStore(store);
-            }}
-          />
-        )}
-        <ProfileModal
-          open={profileOpen}
-          onOpenChange={setProfileOpen}
-          name={currentName}
-          email={email}
-          initial={(currentName.charAt(0) || initial).toUpperCase()}
-          onNameUpdate={n => { setCurrentName(n); setShowMobileMenu(false); }}
-          onAvatarUpdate={url => setAvatarSrc(url)}
-        />
       </>
     );
   }

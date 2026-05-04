@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuery } from "@tanstack/react-query";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EMOTION_MAP } from "@/lib/emotions";
@@ -179,17 +180,21 @@ export function EnergyView() {
     return { key, em, total, done, rate: total ? Math.round((done / total) * 100) : 0 };
   }).filter(r => r.total > 0).sort((a, b) => b.rate - a.rate), [allForStats, completedTasks]);
 
+  const isMobile = useIsMobile();
+
   if (!mounted) return null;
 
+  const pad = isMobile ? "16px 14px 80px" : "24px 28px 64px";
+
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "24px 28px 64px" }}>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: pad }}>
 
       {/* ── Header ── */}
-      <div style={{ marginBottom: 24 }}>
-        <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
+      <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+        <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
           Workspace · My Energy
         </p>
-        <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", margin: 0, lineHeight: 1 }}>
+        <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", margin: 0, lineHeight: 1 }}>
           My Energy
         </h1>
       </div>
@@ -197,7 +202,7 @@ export function EnergyView() {
       {/* ── Today's check-in ── */}
       <div style={{
         background: "#fff", border: "1px solid #e9ede9", borderRadius: 16,
-        padding: "20px 24px", marginBottom: 16,
+        padding: isMobile ? "14px" : "20px 24px", marginBottom: isMobile ? 12 : 16,
         boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
@@ -303,7 +308,7 @@ export function EnergyView() {
       {/* ── 7-day mood trend ── */}
       <div style={{
         background: "#fff", border: "1px solid #e9ede9", borderRadius: 16,
-        padding: "20px 24px", marginBottom: 16,
+        padding: isMobile ? "14px" : "20px 24px", marginBottom: isMobile ? 12 : 16,
         boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
       }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 2px", letterSpacing: "-0.01em" }}>
@@ -314,12 +319,12 @@ export function EnergyView() {
       </div>
 
       {/* ── Top influences + emotional load ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
 
         {/* Top influences */}
         <div style={{
           background: "#fff", border: "1px solid #e9ede9", borderRadius: 16,
-          padding: "20px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          padding: isMobile ? "14px" : "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
         }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 2px", letterSpacing: "-0.01em" }}>
             What&apos;s affecting you
@@ -357,7 +362,7 @@ export function EnergyView() {
         {/* Emotional load from tasks */}
         <div style={{
           background: "#fff", border: "1px solid #e9ede9", borderRadius: 16,
-          padding: "20px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          padding: isMobile ? "14px" : "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
         }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 2px", letterSpacing: "-0.01em" }}>
             Task emotional load

@@ -1,10 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Sidebar } from "@/components/Sidebar";
 import { AIPanel } from "@/components/AIPanel";
-import { Sparkles } from "lucide-react";
+import { ProfileModal } from "@/components/ProfileModal";
+import {
+  EnergyCheckInModal, loadEnergyStore, saveEnergyStore,
+  todayKey, type CheckIn,
+} from "@/components/EnergyCheckInModal";
+import { Sparkles, Zap, User } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { signOut } from "@/app/actions/auth";
 
 interface Props {
   userName: string;
@@ -14,16 +21,65 @@ interface Props {
 }
 
 export function AppShell({ userName, email, initial, children }: Props) {
-  const [aiOpen, setAiOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const [aiOpen, setAiOpen]   = useState(false);
+  const isMobile              = useIsMobile();
+
+  // Mobile user state (profile + energy — desktop handled by Sidebar)
+  const [showMenu, setShowMenu]           = useState(false);
+  const [profileOpen, setProfileOpen]     = useState(false);
+  const [energyOpen, setEnergyOpen]       = useState(false);
+  const [currentName, setCurrentName]     = useState(userName);
+  const [avatarSrc, setAvatarSrc]         = useState<string | null>(null);
+
+  const avatarContent = avatarSrc
+    ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    : (currentName.charAt(0) || initial).toUpperCase();
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#fcfdfc" }}>
       <Sidebar userName={userName} email={email} initial={initial} />
 
+      {/* ── Mobile top bar ── */}
+      {isMobile && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+          height: 52,
+          background: "#f8f9f5",
+          borderBottom: "1.5px solid #dde4de",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 16px",
+        }}>
+          {/* Logo */}
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="22" fill="#02382a"/>
+              <circle cx="50" cy="41" r="18" fill="#059669"/>
+              <circle cx="50" cy="59" r="18" fill="#59d10b"/>
+            </svg>
+            <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
+          </Link>
+
+          {/* Profile avatar */}
+          <button
+            onClick={() => setShowMenu(o => !o)}
+            style={{
+              width: 34, height: 34, borderRadius: "50%",
+              background: "#059669", border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 13, fontWeight: 700, color: "#fff",
+              cursor: "pointer", overflow: "hidden", flexShrink: 0,
+            }}
+          >
+            {avatarContent}
+          </button>
+        </div>
+      )}
+
+      {/* ── Main content ── */}
       <main style={{
-        flex: 1, overflowY: "auto", overflowX: "hidden", minWidth: 0, position: "relative",
-        // Reserve space for the fixed bottom nav bar on mobile
+        flex: 1, overflowY: "auto", overflowX: "hidden",
+        minWidth: 0, position: "relative",
+        paddingTop: isMobile ? 52 : 0,
         paddingBottom: isMobile ? 68 : 0,
       }}>
         {!aiOpen && !isMobile && (
@@ -46,6 +102,93 @@ export function AppShell({ userName, email, initial, children }: Props) {
         )}
         {children}
       </main>
+
+      {/* ── Mobile user menu — bottom sheet ── */}
+      {isMobile && showMenu && (
+        <>
+          <div
+            onClick={() => setShowMenu(false)}
+            style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)" }}
+          />
+          <div style={{
+            position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
+            background: "#fff",
+            borderRadius: "16px 16px 0 0",
+            border: "1.5px solid #dde4de", borderBottom: "none",
+            boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
+            padding: "16px 0 8px",
+          }}>
+            {/* User identity row */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 12,
+              padding: "0 20px 14px",
+              borderBottom: "1px solid #e9ede9",
+            }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: "50%", background: "#059669",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 15, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
+              }}>
+                {avatarContent}
+              </div>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", margin: 0 }}>{currentName}</p>
+                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>Free plan</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            {([
+              { icon: <Zap size={17} color="#059669" />, label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
+              { icon: <User size={17} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+            ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
+              <button key={item.label} onClick={item.action} style={{
+                display: "flex", alignItems: "center", gap: 14, width: "100%",
+                padding: "15px 20px", background: "none", border: "none",
+                cursor: "pointer", fontSize: 15, color: "#082d1d", fontFamily: "inherit",
+              }}>
+                {item.icon} {item.label}
+              </button>
+            ))}
+
+            <div style={{ height: 1, background: "#e9ede9", margin: "4px 0" }} />
+            <form action={signOut}>
+              <button type="submit" style={{
+                display: "flex", alignItems: "center", gap: 14, width: "100%",
+                padding: "15px 20px", background: "none", border: "none",
+                cursor: "pointer", fontSize: 15, color: "#c23934", fontFamily: "inherit",
+              }}>
+                <span style={{ fontSize: 18 }}>→</span> Log out
+              </button>
+            </form>
+          </div>
+        </>
+      )}
+
+      {/* ── Mobile modals ── */}
+      {isMobile && energyOpen && (
+        <EnergyCheckInModal
+          onClose={() => setEnergyOpen(false)}
+          onSave={(entry: CheckIn) => {
+            const store = loadEnergyStore();
+            const key = todayKey();
+            store[key] = [...(store[key] ?? []), entry];
+            saveEnergyStore(store);
+            setEnergyOpen(false);
+          }}
+        />
+      )}
+      {isMobile && (
+        <ProfileModal
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          name={currentName}
+          email={email}
+          initial={(currentName.charAt(0) || initial).toUpperCase()}
+          onNameUpdate={n => setCurrentName(n)}
+          onAvatarUpdate={url => setAvatarSrc(url)}
+        />
+      )}
 
       {aiOpen && <AIPanel onClose={() => setAiOpen(false)} />}
     </div>
