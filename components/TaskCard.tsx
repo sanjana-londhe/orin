@@ -10,6 +10,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { FeelingPickerField, type Feeling } from "@/components/FeelingPickerField";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
+import { Pencil, Trash2 } from "lucide-react";
 
 // design.md tokens
 const T = {
@@ -403,21 +404,18 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         </div>
 
         {/* Right: edit/delete — always visible on mobile, hover-only on desktop */}
-        <div style={{ display: "flex", alignItems: "center", gap: 1, paddingLeft: 8, flexShrink: 0, paddingTop: 1, opacity: (isMobile || hovered) && !done ? 1 : 0, transition: "opacity 0.15s" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, paddingLeft: 8, flexShrink: 0, paddingTop: 1, opacity: (isMobile || hovered) && !done ? 1 : 0, transition: "opacity 0.15s" }}>
           <button onClick={openEdit} title="Edit"
-            style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.stone200; (e.currentTarget as HTMLElement).style.color = T.textSecondary; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = T.textTertiary; }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
+            style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.stone100, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s, border-color 0.1s" }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.stone200; el.style.color = T.textSecondary; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.stone100; el.style.color = T.textTertiary; }}>
+            <Pencil size={11} />
           </button>
           <button onClick={() => onDelete?.(task.id)} title="Delete"
-            style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, fontSize: 13, transition: "background 0.1s, color 0.1s" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.dangerBg; (e.currentTarget as HTMLElement).style.color = T.danger; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = T.textTertiary; }}>
-            ✕
+            style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.stone100, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s, border-color 0.1s" }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.dangerBg; el.style.color = T.danger; el.style.borderColor = "#e9c3c1"; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.stone100; el.style.color = T.textTertiary; el.style.borderColor = T.border; }}>
+            <Trash2 size={11} />
           </button>
         </div>
       </div>
