@@ -122,8 +122,8 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
       flex: 1, padding: "10px 8px", borderRadius: 8,
       border: `1.5px solid ${active ? T.accent : T.border}`,
       background: active ? T.accentSubtle : T.stone100,
-      color: active ? T.accent : T.textPrimary,
-      fontSize: 13, fontWeight: 700,
+      color: active ? T.accent : T.textSecondary,
+      fontSize: 13, fontWeight: active ? 600 : 400,
       cursor: "pointer", fontFamily: "inherit",
       transition: "all 0.12s ease",
     };
@@ -158,10 +158,10 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         width: "100%", maxWidth: isMobile ? "100%" : 460,
         background: T.surface,
         borderRadius: isMobile ? "16px 16px 0 0" : 12,
-        border: `1.5px solid ${T.accent}`,
+        border: `1.5px solid ${T.border}`,
         boxShadow: isMobile
           ? "0 -4px 24px rgba(0,0,0,0.08)"
-          : `0 0 0 3px ${T.accentRing}, 0 8px 24px rgba(0,0,0,0.08)`,
+          : "0 8px 24px rgba(0,0,0,0.08)",
         overflow: "hidden",
         paddingBottom: isMobile ? 24 : 0,
       }}>
@@ -173,14 +173,10 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           borderBottom: `1px solid ${T.border}`,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{
-              width: 20, height: 20, borderRadius: "50%",
-              border: `1.5px solid ${T.accent}`, flexShrink: 0,
-            }} />
             <div>
               <p style={{
-                fontFamily: "monospace", fontSize: 10, fontWeight: 700,
-                color: T.accent, textTransform: "uppercase", letterSpacing: "0.08em",
+                fontFamily: "monospace", fontSize: 10, fontWeight: 600,
+                color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em",
                 margin: "0 0 1px",
               }}>
                 {task.dueAt ? `Currently ${formatPreview(new Date(task.dueAt))}` : "No due date"}
