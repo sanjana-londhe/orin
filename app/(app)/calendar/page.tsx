@@ -39,6 +39,22 @@ function loadNote(id: string) {
   try { return localStorage.getItem(`orin_note_${id}`) ?? ""; } catch { return ""; }
 }
 
+function isOverdue(task: TaskWithSubtasks): boolean {
+  if (task.isCompleted || !task.dueAt) return false;
+  const iso = new Date(task.dueAt).toISOString();
+  // date-only sentinel: compare dates
+  if (iso.slice(11) === "00:00:00.000Z") {
+    return iso.slice(0, 10) < new Date().toISOString().slice(0, 10);
+  }
+  return new Date(task.dueAt) < new Date();
+}
+
+function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
+  if (task.isCompleted) return { background: "#f1f3ef", color: "#b9d3c4" };
+  if (isOverdue(task))  return { background: "#FFF0EC", color: "#D14626" };
+  return { background: "#f2fdec", color: "#059669" };
+}
+
 // ── Task Detail Modal (unified desktop + mobile) ─────────────────────
 
 function TaskDetailModal({ task, onClose, onMarkDone }: {
@@ -403,7 +419,7 @@ export default function CalendarPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
           {days.map((day, i) => {
             if (!day) return (
-              <div key={`empty-${i}`} style={{ height: 110, borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", background: "#fafbf7" }} />
+              <div key={`empty-${i}`} style={{ height: 130, borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", background: "#fafbf7" }} />
             );
 
             const key          = isoDate(day);
@@ -418,8 +434,7 @@ export default function CalendarPage() {
               <div key={key}
                 onClick={() => setCreateDate(key)}
                 style={{
-                  height: 110, // fixed height — never grows with task count
-                  overflow: "hidden",
+                  height: 130, overflow: "hidden",
                   borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
                   borderBottom: "1px solid #dde4de",
                   borderTop: isToday ? "2px solid #059669" : "none",
@@ -439,15 +454,18 @@ export default function CalendarPage() {
 
                 {/* Task pills */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {visible.map(task => (
-                    <div key={task.id}
-                      onClick={e => { e.stopPropagation(); setSelectedTask(task); }}
-                      style={{ display: "flex", alignItems: "center", gap: 4, padding: "2px 6px", borderRadius: 4, background: EMOTION_COLOUR[task.emotionalState] + "22", borderLeft: `3px solid ${EMOTION_COLOUR[task.emotionalState]}`, cursor: "pointer", overflow: "hidden" }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
-                        {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
-                      </span>
-                    </div>
-                  ))}
+                  {visible.map(task => {
+                    const ps = pillStyle(task);
+                    return (
+                      <div key={task.id}
+                        onClick={e => { e.stopPropagation(); setSelectedTask(task); }}
+                        style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden" }}>
+                        <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
+                          {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
+                        </span>
+                      </div>
+                    );
+                  })}
                   {overflow > 0 && (
                     <button
                       onClick={e => { e.stopPropagation(); setDayTaskList({ date: key, tasks: dayTasks }); }}
