@@ -262,8 +262,21 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
           <div style={{
             borderTop: `1px solid ${T.border}`,
             padding: "10px 14px",
-            display: "flex", justifyContent: "flex-end", gap: 8,
+            display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
           }}>
+            {/* Delete on mobile — red secondary button */}
+            {isMobile && onDelete && (
+              <button
+                onClick={() => { onDelete(task.id); closeEdit(); }}
+                style={{
+                  padding: "8px 16px", borderRadius: 6,
+                  border: `1px solid #e9c3c1`, background: "#FFF0EC",
+                  color: "#D14626", fontSize: 12.5, fontWeight: 600,
+                  cursor: "pointer", fontFamily: "inherit",
+                }}
+              >Delete</button>
+            )}
+            <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
             <button onClick={closeEdit} style={{
               padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
               background: T.surface, color: T.textSecondary, fontSize: 12.5,
@@ -283,6 +296,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               onMouseEnter={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = T.accentHover; }}
               onMouseLeave={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = T.accent; }}
             >Save</button>
+            </div>
           </div>
         </div>
       </div>
@@ -295,9 +309,11 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onClick={isMobile && !done ? openEdit : undefined}
         style={{
           display: "flex", alignItems: "flex-start",
           padding: isMobile ? "16px 14px" : "12px 14px 12px 16px",
+          cursor: isMobile && !done ? "pointer" : "default",
           background: hovered ? T.stone200 : "transparent",
           opacity: completing ? 0 : 1,
           transform: completing ? "translateX(8px)" : "none",
@@ -309,7 +325,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         {/* Circle checkbox */}
         <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
           <div
-            onClick={() => {
+            onClick={e => {
+              e.stopPropagation(); // prevent row click from also opening edit on mobile
               if (done) {
                 // Future tasks need a prompt to reschedule
                 const todayIso = new Date().toISOString().slice(0, 10);
@@ -413,8 +430,9 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
           )}
         </div>
 
-        {/* Right: edit/delete — always visible on mobile, hover-only on desktop */}
-        <div style={{ display: "flex", alignItems: "center", gap: 4, paddingLeft: 8, flexShrink: 0, paddingTop: 1, opacity: (isMobile || hovered) && !done ? 1 : 0, transition: "opacity 0.15s" }}>
+        {/* Right: edit/delete — desktop hover-only; hidden on mobile (tap row instead) */}
+        {!isMobile && (
+        <div style={{ display: "flex", alignItems: "center", gap: 4, paddingLeft: 8, flexShrink: 0, paddingTop: 1, opacity: hovered && !done ? 1 : 0, transition: "opacity 0.15s" }}>
           <button onClick={openEdit} title="Edit"
             style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.stone100, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s, border-color 0.1s" }}
             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.stone200; el.style.color = T.textSecondary; }}
@@ -428,6 +446,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
             <Trash2 size={11} />
           </button>
         </div>
+        )}
       </div>
 
       {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />}
