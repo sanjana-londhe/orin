@@ -182,7 +182,6 @@ export function AIPanel({ onClose }: Props) {
       position: "fixed", inset: 0, zIndex: 100,
       background: "#fff",
       display: "flex", flexDirection: "column",
-      paddingTop: 52, // clear mobile top bar
     } : {
       width: 320, flexShrink: 0,
       background: "#fff", borderLeft: "1px solid #e9ede9",
