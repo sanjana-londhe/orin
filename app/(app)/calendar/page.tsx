@@ -45,12 +45,24 @@ function isOverdue(task: TaskWithSubtasks): boolean {
   return new Date(task.dueAt) < new Date();
 }
 
+function taskDayState(task: TaskWithSubtasks): "overdue" | "today" | "future" | "none" {
+  if (!task.dueAt) return "none";
+  const iso = new Date(task.dueAt).toISOString();
+  const taskDate = iso.slice(11) === "00:00:00.000Z"
+    ? iso.slice(0, 10)
+    : (() => { const d = new Date(task.dueAt as string | Date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
+  const todayIso = new Date().toISOString().slice(0, 10);
+  if (taskDate < todayIso) return "overdue";
+  if (taskDate === todayIso) return "today";
+  return "future";
+}
+
 function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
-  // Completed → neutral grey (same ratio as green/red), with strikethrough on text
-  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" };
-  // Active/overdue → task's feeling colour (same as todo page chips)
-  const e = em(task.emotionalState);
-  return { background: e.pillBg, color: e.pillText };
+  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" }; // grey
+  const state = taskDayState(task);
+  if (state === "overdue") return { background: "#FFF0EC", color: "#D14626" }; // red
+  if (state === "today")   return { background: "#EEFAF1", color: "#1A9444" }; // green
+  return { background: "#F3F2F0", color: "#7A756E" };                          // future / no date → grey
 }
 
 // ── Task Detail Modal — matches TaskCard todo design ─────────────────
