@@ -28,7 +28,7 @@ export async function GET(request: Request) {
 
   switch (filter) {
     case "today":
-      where = { ...where, isCompleted: false, OR: [{ dueAt: null }, { dueAt: { lte: todayEnd } }] };
+      where = { ...where, isCompleted: false };
       break;
     case "scheduled":
       where = { ...where, isCompleted: false, dueAt: { gt: todayEnd } };
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       break;
     }
     case "today-active":
-      where = { ...where, isCompleted: false, OR: [{ dueAt: null }, { dueAt: { lte: todayEnd } }] };
+      where = { ...where, isCompleted: false };
       break;
     default:
       // "all" — all incomplete, newest first
