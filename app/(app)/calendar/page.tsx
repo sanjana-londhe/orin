@@ -559,7 +559,7 @@ export default function CalendarPage() {
 
       {/* Modals */}
       {selectedTask && (
-        <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} />
+        <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} />
       )}
       {dayTaskList && (
         <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onTaskClick={t => setSelectedTask(t)} />
