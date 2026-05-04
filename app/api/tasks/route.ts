@@ -43,8 +43,9 @@ export async function GET(request: Request) {
       orderBy = { updatedAt: "desc" };
       break;
     case "today-completed": {
+      // All tasks completed today (by updatedAt) — not limited to those due today
       const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-      where = { ...where, isCompleted: true, dueAt: { gte: todayStart, lte: todayEnd } };
+      where = { ...where, isCompleted: true, updatedAt: { gte: todayStart } };
       orderBy = { updatedAt: "desc" };
       break;
     }

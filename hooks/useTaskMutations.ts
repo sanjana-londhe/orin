@@ -27,11 +27,32 @@ export function useTaskMutations() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ["tasks"] });
       const snap = snapshot();
+
+      // Find the full task object before removing it from active lists
+      let taskData: TaskWithSubtasks | undefined;
+      for (const [, data] of queryClient.getQueriesData<TaskWithSubtasks[]>({ queryKey: ["tasks"] })) {
+        if (Array.isArray(data)) {
+          taskData = data.find(t => t.id === id);
+          if (taskData) break;
+        }
+      }
+
+      // Mark as completed in all cached query lists (removes from active filters)
       queryClient.setQueriesData({ queryKey: ["tasks"] }, (old: unknown) =>
         Array.isArray(old)
           ? (old as TaskWithSubtasks[]).map(t => t.id === id ? { ...t, isCompleted: true } : t)
           : old
       );
+
+      // Immediately push the task to today-completed so it appears at the bottom
+      if (taskData) {
+        const done = { ...taskData, isCompleted: true, updatedAt: new Date() };
+        queryClient.setQueryData<TaskWithSubtasks[]>(
+          ["tasks", "today-completed"],
+          old => [done, ...(old ?? []).filter(t => t.id !== id)]
+        );
+      }
+
       return { snap };
     },
     onError: (_e, _v, ctx) => rollback(ctx!.snap),
