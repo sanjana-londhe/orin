@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
+import { FeelingPickerField, type Feeling } from "@/components/FeelingPickerField";
+import { DatePickerField } from "@/components/DatePickerField";
+import { TimePickerField } from "@/components/TimePickerField";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import type { TaskWithSubtasks } from "@/lib/types";
-import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, X, Pencil, Trash2 } from "lucide-react";
 
 const EMOTION_COLOUR: Record<string, string> = {
   DREADING: "#c23934", ANXIOUS: "#886a00", NEUTRAL: "#c4cbc2",
@@ -289,87 +292,256 @@ function MonthPicker({ year, month, onSelect, onClose }: { year: number; month: 
 
 // ── Mobile agenda view ───────────────────────────────────────────────
 
-// ── Mobile full-screen task info ─────────────────────────────────────
+// ── Skeleton loaders ─────────────────────────────────────────────────
+
+function CalendarSkeleton() {
+  const pulse: React.CSSProperties = { background: "linear-gradient(90deg, #f1f3ef 25%, #e9ede9 50%, #f1f3ef 75%)", backgroundSize: "200% 100%", animation: "pulse 1.4s ease infinite", borderRadius: 4 };
+  return (
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "20px 28px 16px", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
+        <div style={{ ...pulse, height: 10, width: 70, marginBottom: 10 }} />
+        <div style={{ ...pulse, height: 28, width: 200 }} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} style={{ padding: "8px 0", display: "flex", justifyContent: "center" }}>
+            <div style={{ ...pulse, height: 10, width: 24 }} />
+          </div>
+        ))}
+      </div>
+      <div style={{ flex: 1, display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+        {Array.from({ length: 35 }).map((_, i) => (
+          <div key={i} style={{ height: 130, borderRight: (i + 1) % 7 !== 0 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", padding: "8px 6px" }}>
+            <div style={{ ...pulse, width: 22, height: 22, borderRadius: "50%", margin: "0 auto 6px" }} />
+            {i % 3 === 0 && <div style={{ ...pulse, height: 15, marginBottom: 3 }} />}
+            {i % 5 === 0 && <div style={{ ...pulse, height: 15, width: "70%" }} />}
+          </div>
+        ))}
+      </div>
+      <style>{`@keyframes pulse { 0%,100%{background-position:200% 0} 50%{background-position:0 0} }`}</style>
+    </div>
+  );
+}
+
+function MobileCalendarSkeleton() {
+  const pulse: React.CSSProperties = { background: "linear-gradient(90deg, #f1f3ef 25%, #e9ede9 50%, #f1f3ef 75%)", backgroundSize: "200% 100%", animation: "pulse 1.4s ease infinite", borderRadius: 4 };
+  return (
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", display: "flex", justifyContent: "center" }}>
+        <div style={{ ...pulse, height: 22, width: 160 }} />
+      </div>
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56 }}>
+            <div style={{ width: 56, borderRight: "2px solid #e9ede9", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 4, padding: "12px 0 8px" }}>
+              <div style={{ ...pulse, height: 10, width: 20 }} />
+              <div style={{ ...pulse, height: 24, width: 24, borderRadius: "50%" }} />
+            </div>
+            <div style={{ flex: 1, padding: "12px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+              {i % 2 === 0 && <div style={{ ...pulse, height: 20, width: "65%" }} />}
+              {i % 3 === 1 && <div style={{ ...pulse, height: 20, width: "45%" }} />}
+            </div>
+          </div>
+        ))}
+      </div>
+      <style>{`@keyframes pulse { 0%,100%{background-position:200% 0} 50%{background-position:0 0} }`}</style>
+    </div>
+  );
+}
+
+// ── Desktop right-side task panel ────────────────────────────────────
+
+function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, onUpdate }: {
+  task: TaskWithSubtasks; onClose: () => void;
+  onMarkDone: (id: string) => void; onMarkUndone: (id: string) => void;
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, patch: { title?: string; emotionalState?: string; dueAt?: string | null }) => void;
+}) {
+  const isDone  = task.isCompleted;
+  const overdue = isOverdue(task);
+  const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const time    = fmtTime(task.dueAt);
+  const note    = loadNote(task.id);
+
+  const taskIso  = task.dueAt ? new Date(task.dueAt).toISOString().slice(0, 10) : null;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const tmrwIso  = (() => { const d = new Date(); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
+  const dateLabel = !taskIso ? null : taskIso === todayIso ? "Today" : taskIso === tmrwIso ? "Tomorrow" : new Date(taskIso + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const [editing, setEditing]           = useState(false);
+  const [confirmDel, setConfirmDel]     = useState(false);
+  const [editTitle, setEditTitle]       = useState(task.title);
+  const [editEmotion, setEditEmotion]   = useState<Feeling>(task.emotionalState as Feeling);
+  const [editDate, setEditDate]         = useState(taskIso ?? "");
+  const [editTime, setEditTime]         = useState(() => {
+    if (!task.dueAt) return "";
+    const iso = new Date(task.dueAt).toISOString();
+    return iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16);
+  });
+
+  useEffect(() => {
+    setEditTitle(task.title);
+    setEditEmotion(task.emotionalState as Feeling);
+    setEditDate(taskIso ?? "");
+    setEditTime(() => {
+      if (!task.dueAt) return "";
+      const iso = new Date(task.dueAt).toISOString();
+      return iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16);
+    });
+    setEditing(false);
+    setConfirmDel(false);
+  }, [task.id]);
+
+  function saveEdit() {
+    const dueAt = editDate
+      ? (editTime ? new Date(`${editDate}T${editTime}`).toISOString() : `${editDate}T00:00:00.000Z`)
+      : null;
+    onUpdate(task.id, { title: editTitle.trim() || task.title, emotionalState: editEmotion, dueAt: dueAt ?? undefined });
+    setEditing(false);
+  }
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 49, background: "rgba(8,45,29,0.08)" }} />
+      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 320, zIndex: 50, background: "#fff", borderLeft: "1px solid #dde4de", boxShadow: "-4px 0 20px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column" }}>
+
+        {/* Header: circle + title + icons */}
+        <div style={{ padding: "16px", borderBottom: "1px solid #e9ede9", display: "flex", alignItems: "flex-start", gap: 10 }}>
+          {/* Complete circle */}
+          <div
+            onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
+            style={{ width: 22, height: 22, borderRadius: "50%", border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`, background: isDone ? "#059669" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2, cursor: "pointer", transition: "all 0.15s" }}
+          >
+            {isDone && <svg width="10" height="7" viewBox="0 0 11 8" fill="none"><path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+          </div>
+
+          <p style={{ flex: 1, fontSize: 14, fontWeight: 600, color: isDone ? "#b9d3c4" : "#082d1d", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none", paddingTop: 1 }}>{task.title}</p>
+
+          {/* Edit + Delete + Close */}
+          <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+            <button onClick={() => { setEditing(e => !e); setConfirmDel(false); }} title="Edit" style={{ width: 28, height: 28, borderRadius: 6, border: `1px solid ${editing ? "#059669" : "#dde4de"}`, background: editing ? "#f2fdec" : "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: editing ? "#059669" : "#4a6d47" }}>
+              <Pencil size={12} />
+            </button>
+            {!confirmDel
+              ? <button onClick={() => setConfirmDel(true)} title="Delete" style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}><Trash2 size={12} /></button>
+              : <button onClick={() => onDelete(task.id)} title="Confirm delete" style={{ height: 28, padding: "0 8px", borderRadius: 6, border: "1px solid #c23934", background: "#FFF0EC", cursor: "pointer", color: "#D14626", fontSize: 11, fontWeight: 700, fontFamily: "inherit" }}>Delete?</button>
+            }
+            <button onClick={onClose} title="Close" style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}><X size={12} /></button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+          {editing ? (
+            /* Edit form */
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 6px" }}>Title</p>
+                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1.5px solid #dde4de", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box", transition: "border-color 0.14s" }} onFocus={e => (e.currentTarget.style.borderColor = "#059669")} onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")} />
+              </div>
+              <FeelingPickerField value={editEmotion} onChange={v => setEditEmotion(v as Feeling)} label="Feeling" />
+              <DatePickerField value={editDate} onChange={setEditDate} label="Due date" />
+              <TimePickerField value={editTime} onChange={setEditTime} label="Due time (optional)" selectedDate={editDate} />
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                <button onClick={() => setEditing(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 12.5, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
+                <button onClick={saveEdit} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Save</button>
+              </div>
+            </div>
+          ) : (
+            /* Task info */
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ height: 3, background: colour, borderRadius: 2 }} />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: colour + "22", color: colour }}>
+                  {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+                </span>
+                {dateLabel && (
+                  <span style={{ fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
+                    {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
+                  </span>
+                )}
+                {task.deferredCount > 0 && <span style={{ fontSize: 12, padding: "3px 10px", borderRadius: 999, background: "#FFF0EC", color: "#D14626" }}>Deferred {task.deferredCount}×</span>}
+              </div>
+              {note && (
+                <div style={{ background: "#f8f9f5", borderRadius: 8, padding: "10px 12px" }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 4px" }}>Note</p>
+                  <p style={{ fontSize: 12.5, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{note}</p>
+                </div>
+              )}
+              <p style={{ fontSize: 11, color: "#b9d3c4", margin: 0 }}>
+                {isDone ? "Click circle to mark incomplete" : "Click circle to mark done"}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Mobile full-screen task info — creation UI style ─────────────────
 
 function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
   task: TaskWithSubtasks; onClose: () => void;
   onMarkDone: (id: string) => void; onMarkUndone: (id: string) => void;
 }) {
-  const isDone   = task.isCompleted;
-  const overdue  = isOverdue(task);
-  const colour   = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
-  const time     = fmtTime(task.dueAt);
-  const taskDate = task.dueAt ? new Date(task.dueAt).toISOString() : null;
-  const dateLabel = (() => {
-    if (!taskDate) return null;
-    const taskIso = taskDate.slice(0, 10);
-    const now = new Date();
-    const todayIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-    const tmrIso = (() => { const d = new Date(now); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
-    if (taskIso === todayIso) return "Today";
-    if (taskIso === tmrIso)   return "Tomorrow";
-    return new Date(taskIso + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-  })();
+  const isDone  = task.isCompleted;
+  const overdue = isOverdue(task);
+  const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const time    = fmtTime(task.dueAt);
+  const taskIso = task.dueAt ? new Date(task.dueAt).toISOString().slice(0, 10) : null;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const tmrIso   = (() => { const d = new Date(); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
+  const dateLabel = !taskIso ? null : taskIso === todayIso ? "Today" : taskIso === tmrIso ? "Tomorrow" : new Date(taskIso + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
   const note = (() => { try { return localStorage.getItem(`orin_note_${task.id}`) ?? ""; } catch { return ""; } })();
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column", paddingTop: 52 }}>
-      {/* Header */}
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column" }}>
+      {/* Title row — matches creation form header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
-        <p style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>Task</p>
-        <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: isDone ? "#b9d3c4" : "#082d1d", margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
+        <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0 }}>
           <X size={13} />
         </button>
       </div>
 
-      {/* Content */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 18px" }}>
-        {/* Emotion colour bar */}
-        <div style={{ height: 3, background: colour, borderRadius: 2, marginBottom: 16 }} />
-
-        {/* Title */}
-        <p style={{ fontSize: 18, fontWeight: 700, color: isDone ? "#b9d3c4" : "#082d1d", lineHeight: 1.3, margin: "0 0 16px", textDecoration: isDone ? "line-through" : "none" }}>
-          {task.title}
-        </p>
-
-        {/* Chips row */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: colour + "22", color: colour }}>
-            {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+      {/* Fields section — matches creation pickers style */}
+      <div style={{ borderBottom: "1px solid #e9ede9", padding: "12px 18px", display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: colour + "22", color: colour }}>
+          {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+        </span>
+        {dateLabel && (
+          <span style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
+            {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
           </span>
-          {dateLabel && (
-            <span style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
-              {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
-            </span>
-          )}
-          {task.deferredCount > 0 && (
-            <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 999, background: "#FFF0EC", color: "#D14626" }}>
-              Deferred {task.deferredCount}×
-            </span>
-          )}
-        </div>
-
-        {/* Note */}
-        {note && (
-          <div style={{ background: "#f8f9f5", borderRadius: 10, padding: "12px 14px", marginBottom: 16 }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 6px" }}>Note</p>
-            <p style={{ fontSize: 13, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{note}</p>
-          </div>
         )}
+        {task.deferredCount > 0 && <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 999, background: "#FFF0EC", color: "#D14626" }}>Deferred {task.deferredCount}×</span>}
       </div>
 
-      {/* Action */}
+      {/* Note */}
+      {note && (
+        <div style={{ borderBottom: "1px solid #e9ede9", padding: "12px 18px" }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 6px" }}>Note</p>
+          <p style={{ fontSize: 13, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{note}</p>
+        </div>
+      )}
+
+      {/* Spacer */}
+      <div style={{ flex: 1 }} />
+
+      {/* Primary CTA — full width, no icon */}
       <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9" }}>
         <button
-          onClick={() => { isDone ? onMarkUndone(task.id) : onMarkDone(task.id); onClose(); }}
+          onClick={() => { if (isDone) onMarkUndone(task.id); else onMarkDone(task.id); onClose(); }}
           style={{
             width: "100%", padding: "14px 0", borderRadius: 10, border: "none",
             background: isDone ? "#f1f3ef" : "#059669",
             color: isDone ? "#7A756E" : "#fff",
             fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+            transition: "background 0.12s",
           }}
         >
-          {isDone ? "↩ Mark as incomplete" : "✓ Mark as done"}
+          {isDone ? "Mark as incomplete" : "Mark as done"}
         </button>
       </div>
     </div>
@@ -508,9 +680,31 @@ export default function CalendarPage() {
       return res.json();
     },
     onMutate: (id) => optimisticToggle(id, false),
-    onError:  (_e, id) => optimisticToggle(id, true),         // rollback
+    onError:  (_e, id) => optimisticToggle(id, true),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["tasks", "calendar"] }),
   });
+
+  const { mutate: deleteTask } = useMutation({
+    mutationFn: async (id: string) => { const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" }); if (!res.ok) throw new Error("Failed"); return res.json(); },
+    onMutate: (id) => {
+      queryClient.setQueriesData<TaskWithSubtasks[]>({ queryKey: ["tasks", "calendar"], exact: false }, old => old ? old.filter(t => t.id !== id) : []);
+    },
+    onSettled: () => { queryClient.invalidateQueries({ queryKey: ["tasks", "calendar"] }); setSelectedTask(null); },
+  });
+
+  const { mutate: updateTask } = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
+      const res = await fetch(`/api/tasks/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    onMutate: ({ id, patch }) => {
+      queryClient.setQueriesData<TaskWithSubtasks[]>({ queryKey: ["tasks", "calendar"], exact: false }, old => old ? old.map(t => t.id === id ? { ...t, ...patch } : t) : []);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["tasks", "calendar"] }),
+  });
+
+  const todayIso = isoDate(today);
 
   const tasksByDate = useMemo(() => {
     const map = new Map<string, TaskWithSubtasks[]>();
@@ -538,12 +732,13 @@ export default function CalendarPage() {
 
   // ── Mobile render ─────────────────────────────────────────────────
   if (isMobile) {
+    if (tasksLoading) return <MobileCalendarSkeleton />;
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <MobileCalendar
           viewDate={viewDate} setViewDate={setViewDate}
           tasksByDate={tasksByDate} today={today}
-          onAddTask={date => setCreateDate(date)}
+          onAddTask={date => { if (date < todayIso) return; setCreateDate(date); }}
           onTaskTap={task => setSelectedTask(task)}
         />
 
@@ -560,6 +755,8 @@ export default function CalendarPage() {
   }
 
   // ── Desktop render ────────────────────────────────────────────────
+  if (tasksLoading) return <CalendarSkeleton />;
+
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
 
@@ -601,20 +798,22 @@ export default function CalendarPage() {
             const visible      = dayTasks.slice(0, MAX_VISIBLE);
             const overflow     = dayTasks.length - MAX_VISIBLE;
 
+            const isPast = key < todayIso;
+
             return (
               <div key={key}
-                onClick={() => setCreateDate(key)}
+                onClick={() => { if (!isPast) setCreateDate(key); }}
                 style={{
                   height: 130, overflow: "hidden",
                   borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
                   borderBottom: "1px solid #dde4de",
                   borderTop: isToday ? "2px solid #059669" : "none",
                   padding: "6px 6px 4px",
-                  background: isOtherMonth ? "#fafbf7" : "#fff",
-                  cursor: "pointer", transition: "background 0.1s",
+                  background: isOtherMonth || isPast ? "#fafbf7" : "#fff",
+                  cursor: isPast ? "default" : "pointer", transition: "background 0.1s",
                 }}
-                onMouseEnter={e => { if (!isOtherMonth) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isOtherMonth ? "#fafbf7" : "#fff"; }}
+                onMouseEnter={e => { if (!isOtherMonth && !isPast) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isOtherMonth || isPast ? "#fafbf7" : "#fff"; }}
               >
                 {/* Date number */}
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>
@@ -656,9 +855,16 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Desktop: right-side task panel */}
       {selectedTask && (
-        <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} />
+        <DesktopTaskPanel
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onMarkDone={id => { markDone(id); }}
+          onMarkUndone={id => { markUndone(id); }}
+          onDelete={id => { deleteTask(id); }}
+          onUpdate={(id, patch) => updateTask({ id, patch })}
+        />
       )}
       {dayTaskList && (
         <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
