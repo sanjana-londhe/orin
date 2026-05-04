@@ -210,7 +210,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
           {/* Note */}
           <div style={{ borderTop: `1px solid ${T.border}`, padding: "12px 14px" }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: T.textTertiary, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Note</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: T.textTertiary, margin: "0 0 8px" }}>Note</p>
             <textarea
               value={editNote}
               onChange={e => setEditNote(e.target.value)}
