@@ -419,7 +419,6 @@ export default function CalendarPage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 32, height: 32, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 16, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-          <button onClick={() => setViewDate(new Date(today.getFullYear(), today.getMonth(), 1))} style={{ padding: "0 12px", height: 32, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600, color: "#4a6d47" }}>Today</button>
           <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 32, height: 32, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 16, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
         </div>
       </div>
@@ -454,12 +453,13 @@ export default function CalendarPage() {
                   minHeight: 110,
                   borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
                   borderBottom: "1px solid #dde4de",
+                  borderTop: isToday ? "2px solid #059669" : "none",
                   padding: "6px 6px 4px",
-                  background: isOtherMonth ? "#fafbf7" : "#fff",
+                  background: isToday ? "#f2fdec" : isOtherMonth ? "#fafbf7" : "#fff",
                   cursor: "pointer", transition: "background 0.1s",
                 }}
-                onMouseEnter={e => { if (!isOtherMonth) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isOtherMonth ? "#fafbf7" : "#fff"; }}
+                onMouseEnter={e => { if (!isOtherMonth && !isToday) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isToday ? "#f2fdec" : isOtherMonth ? "#fafbf7" : "#fff"; }}
               >
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>
                   <span style={{
