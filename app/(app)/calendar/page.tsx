@@ -437,13 +437,12 @@ export default function CalendarPage() {
                   height: 130, overflow: "hidden",
                   borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
                   borderBottom: "1px solid #dde4de",
-                  borderTop: isToday ? "2px solid #059669" : "none",
                   padding: "6px 6px 4px",
-                  background: isToday ? "#f2fdec" : isOtherMonth ? "#fafbf7" : "#fff",
+                  background: isOtherMonth ? "#fafbf7" : "#fff",
                   cursor: "pointer", transition: "background 0.1s",
                 }}
-                onMouseEnter={e => { if (!isOtherMonth && !isToday) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isToday ? "#f2fdec" : isOtherMonth ? "#fafbf7" : "#fff"; }}
+                onMouseEnter={e => { if (!isOtherMonth) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isOtherMonth ? "#fafbf7" : "#fff"; }}
               >
                 {/* Date number */}
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>
