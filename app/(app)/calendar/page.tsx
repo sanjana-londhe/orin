@@ -916,9 +916,8 @@ export default function CalendarPage() {
                     const ps = pillStyle(task);
                     return (
                       <div key={task.id}
-                        onClick={e => { e.stopPropagation(); if (task.isCompleted) markUndone(task.id); else markDone(task.id); }}
+                        onClick={e => { e.stopPropagation(); setSelectedTask(task); }}
                         style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden", ...doneOpacity(task.isCompleted) }}
-                        title={task.isCompleted ? "Click to mark incomplete" : "Click to mark done"}
                       >
                         <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
                           {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
