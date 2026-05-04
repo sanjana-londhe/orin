@@ -57,8 +57,9 @@ function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
 
 // ── Task Detail Modal — matches TaskCard todo design ─────────────────
 
-function TaskDetailModal({ task, onClose, onMarkDone }: {
-  task: TaskWithSubtasks; onClose: () => void; onMarkDone: (id: string) => void;
+function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
+  task: TaskWithSubtasks; onClose: () => void;
+  onMarkDone: (id: string) => void; onMarkUndone: (id: string) => void;
 }) {
   const isMobile = useIsMobile();
   const time     = fmtTime(task.dueAt);
@@ -96,13 +97,18 @@ function TaskDetailModal({ task, onClose, onMarkDone }: {
       <div style={cardStyle}>
         {/* Title row — same layout as TaskCard */}
         <div style={{ display: "flex", alignItems: "flex-start", padding: "14px 16px", borderBottom: "1px solid #e9ede9" }}>
-          <div style={{
-            width: 20, height: 20, borderRadius: "50%",
-            border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
-            background: isDone ? "#059669" : "transparent",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0, marginTop: 2, marginRight: 12,
-          }}>
+          {/* Checkbox — click to toggle done/undone directly */}
+          <div
+            onClick={() => { isDone ? onMarkUndone(task.id) : onMarkDone(task.id); onClose(); }}
+            style={{
+              width: 20, height: 20, borderRadius: "50%",
+              border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
+              background: isDone ? "#059669" : "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0, marginTop: 2, marginRight: 12, cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
             {isDone && (
               <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
                 <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -144,15 +150,13 @@ function TaskDetailModal({ task, onClose, onMarkDone }: {
         )}
 
         {/* Actions */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "10px 16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
+          <p style={{ fontSize: 11, color: "#b9d3c4", margin: 0 }}>
+            {isDone ? "Tap circle to mark incomplete" : "Tap circle to mark done"}
+          </p>
           <button onClick={onClose} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 12.5, cursor: "pointer", fontFamily: "inherit" }}>
             Close
           </button>
-          {!isDone && (
-            <button onClick={() => { onMarkDone(task.id); onClose(); }} style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-              ✓ Mark as done
-            </button>
-          )}
         </div>
       </div>
     </>
@@ -380,14 +384,34 @@ export default function CalendarPage() {
   const [selectedTask, setSelectedTask] = useState<TaskWithSubtasks | null>(null);
   const [dayTaskList, setDayTaskList]   = useState<{ date: string; tasks: TaskWithSubtasks[] } | null>(null);
 
-  const { data: tasks = [] } = useQuery<TaskWithSubtasks[]>({
-    queryKey: ["tasks", "calendar"],
-    queryFn: async () => { const res = await fetch("/api/tasks?filter=calendar"); if (!res.ok) return []; return res.json(); },
+  // Fetch only the ±1 month window around the current view — much smaller payload
+  const viewYear  = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth();
+  const rangeFrom = new Date(viewYear, viewMonth - 1, 1).toISOString().slice(0, 10);
+  const rangeTo   = new Date(viewYear, viewMonth + 2, 0).toISOString().slice(0, 10);
+
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery<TaskWithSubtasks[]>({
+    queryKey: ["tasks", "calendar", rangeFrom, rangeTo],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks?filter=calendar&from=${rangeFrom}&to=${rangeTo}`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+    staleTime: 2 * 60 * 1000, // serve from cache for 2 min when navigating back
     retry: 1,
   });
 
   const { mutate: markDone } = useMutation({
     mutationFn: async (id: string) => { const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" }); if (!res.ok) throw new Error("Failed"); return res.json(); },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const { mutate: markUndone } = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isCompleted: false }) });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
@@ -428,7 +452,7 @@ export default function CalendarPage() {
         />
 
         {selectedTask && (
-          <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} />
+          <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} />
         )}
         {dayTaskList && (
           <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onTaskClick={t => setSelectedTask(t)} />

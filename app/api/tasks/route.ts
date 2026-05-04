@@ -51,11 +51,20 @@ export async function GET(request: Request) {
     case "today-active":
       where = { ...where, isCompleted: false };
       break;
-    case "calendar":
-      // All tasks (complete + incomplete) that have a due date — for calendar view
-      where = { ...where, dueAt: { not: null } };
+    case "calendar": {
+      // All tasks (complete + incomplete) within a date range passed by the client
+      const from = searchParams.get("from");
+      const to   = searchParams.get("to");
+      where = {
+        ...where,
+        dueAt: {
+          gte: from ? new Date(from + "T00:00:00Z") : new Date(new Date().getFullYear(), 0, 1),
+          lte: to   ? new Date(to   + "T23:59:59Z") : new Date(new Date().getFullYear() + 1, 11, 31),
+        },
+      };
       orderBy = { dueAt: "asc" };
       break;
+    }
     default:
       // "all" — all incomplete, newest first
       where = { ...where, isCompleted: false };
