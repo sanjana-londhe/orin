@@ -163,18 +163,20 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
   );
 }
 
-// ── Day Task List Modal — TaskCard-style rows ────────────────────────
+// ── Day Task List Modal — inline checkbox toggle, no second popup ─────
 
-function DayTaskListModal({ date, tasks, onClose, onTaskClick }: {
+function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone }: {
   date: string; tasks: TaskWithSubtasks[];
-  onClose: () => void; onTaskClick: (t: TaskWithSubtasks) => void;
+  onClose: () => void;
+  onMarkDone: (id: string) => void;
+  onMarkUndone: (id: string) => void;
 }) {
   const isMobile = useIsMobile();
   const cardStyle: React.CSSProperties = isMobile ? {
     position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
     background: "#fff", borderRadius: "16px 16px 0 0",
     border: "1.5px solid #dde4de", borderBottom: "none",
-    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)", maxHeight: "60vh", overflowY: "auto",
+    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)", maxHeight: "65vh", overflowY: "auto",
   } : {
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
@@ -199,47 +201,47 @@ function DayTaskListModal({ date, tasks, onClose, onTaskClick }: {
           </button>
         </div>
 
-        {/* Task rows — match TaskCard layout */}
+        {/* Task rows — checkbox toggles directly, no second modal */}
         {tasks.map((task, idx) => {
           const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
           const time    = fmtTime(task.dueAt);
           const isDone  = task.isCompleted;
           const overdue = isOverdue(task);
           return (
-            <button
+            <div
               key={task.id}
-              onClick={() => { onClose(); onTaskClick(task); }}
               style={{
                 display: "flex", alignItems: "flex-start",
-                width: "100%", padding: "12px 16px",
-                background: "none", border: "none", cursor: "pointer",
-                fontFamily: "inherit", textAlign: "left",
+                padding: "12px 16px",
                 borderBottom: idx < tasks.length - 1 ? "1px solid #f1f3ef" : "none",
+                background: "#fff", transition: "background 0.1s",
               }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#fff"}
             >
-              {/* Checkbox */}
-              <div style={{
-                width: 18, height: 18, borderRadius: "50%",
-                border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
-                background: isDone ? "#059669" : "transparent",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0, marginTop: 2, marginRight: 10,
-              }}>
+              {/* Clickable checkbox */}
+              <div
+                onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
+                style={{
+                  width: 20, height: 20, borderRadius: "50%",
+                  border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
+                  background: isDone ? "#059669" : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0, marginTop: 2, marginRight: 12, cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
                 {isDone && (
-                  <svg width="8" height="6" viewBox="0 0 11 8" fill="none">
+                  <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
                     <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 )}
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* Title */}
                 <p style={{ fontSize: 13.5, fontWeight: 450, color: isDone ? "#b9d3c4" : "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
                   {task.title}
                 </p>
-                {/* Date + emotion chip */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {time && (
                     <span style={{ fontSize: 11.5, fontWeight: 500, color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
@@ -251,7 +253,7 @@ function DayTaskListModal({ date, tasks, onClose, onTaskClick }: {
                   </span>
                 </div>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
@@ -289,13 +291,13 @@ function MonthPicker({ year, month, onSelect, onClose }: { year: number; month: 
 
 function MobileCalendar({
   viewDate, setViewDate, tasksByDate, today,
-  onAddTask, onTaskTap, onDayOverflow,
+  onAddTask, onMarkDone, onMarkUndone,
 }: {
   viewDate: Date; setViewDate: (d: Date) => void;
   tasksByDate: Map<string, TaskWithSubtasks[]>; today: Date;
   onAddTask: (date: string) => void;
-  onTaskTap: (task: TaskWithSubtasks) => void;
-  onDayOverflow: (date: string, tasks: TaskWithSubtasks[]) => void;
+  onMarkDone: (id: string) => void;
+  onMarkUndone: (id: string) => void;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const year  = viewDate.getFullYear();
@@ -316,51 +318,69 @@ function MobileCalendar({
 
       {pickerOpen && <MonthPicker year={year} month={month} onSelect={(y, m) => setViewDate(new Date(y, m, 1))} onClose={() => setPickerOpen(false)} />}
 
-      {/* Day rows */}
+      {/* Day rows — all tasks shown, inline checkbox toggle */}
       <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
         {daysArr.map(day => {
           const key      = isoDate(day);
           const dayTasks = tasksByDate.get(key) ?? [];
           const isToday  = key === isoDate(today);
           const dow      = DAY_NAMES[day.getDay()];
-          const MAX      = 2;
-          const visible  = dayTasks.slice(0, MAX);
-          const overflow = dayTasks.length - MAX;
 
           return (
             <div key={key} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : "#fff" }}>
-              {/* Left: day + date */}
-              <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, padding: "10px 0", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
+              {/* Left: day + date — top-aligned when there are multiple tasks */}
+              <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
                 <span style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: "0.04em", color: isToday ? "#059669" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
                 <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: isToday ? 800 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
               </div>
 
-              {/* Right: tasks + add */}
-              <div style={{ flex: 1, padding: "8px 12px 8px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
-                {visible.map(task => (
-                  <div key={task.id} onClick={e => { e.stopPropagation(); onTaskTap(task); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 8px", borderRadius: 6, background: EMOTION_COLOUR[task.emotionalState] + "18", borderLeft: `3px solid ${EMOTION_COLOUR[task.emotionalState]}`, cursor: "pointer" }}>
-                    <span style={{ fontSize: 12, fontWeight: 500, color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
-                      {fmtTime(task.dueAt) && <span style={{ color: "#b9d3c4", marginRight: 4, fontSize: 11, fontFamily: "monospace" }}>{fmtTime(task.dueAt)}</span>}
-                      {task.title}
-                    </span>
-                    {task.isCompleted && <span style={{ fontSize: 10, color: "#059669" }}>✓</span>}
-                  </div>
-                ))}
-                {overflow > 0 && (
-                  <button onClick={e => { e.stopPropagation(); onDayOverflow(key, dayTasks); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#059669", fontWeight: 600, textAlign: "left", padding: "2px 4px", fontFamily: "inherit" }}>
-                    +{overflow} more
-                  </button>
-                )}
-                {dayTasks.length === 0 && (
-                  <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#dde4de", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: 0 }}>
-                    <Plus size={12} /> Add task
-                  </button>
-                )}
-                {dayTasks.length > 0 && (
-                  <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "1px 0" }}>
-                    <Plus size={11} /> Add
-                  </button>
-                )}
+              {/* Right: all tasks with inline checkboxes */}
+              <div style={{ flex: 1, padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+                {dayTasks.map(task => {
+                  const isDone  = task.isCompleted;
+                  const overdue = isOverdue(task);
+                  const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+                  return (
+                    <div key={task.id} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                      {/* Tappable checkbox */}
+                      <div
+                        onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
+                        style={{
+                          width: 20, height: 20, borderRadius: "50%", flexShrink: 0, marginTop: 1,
+                          border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
+                          background: isDone ? "#059669" : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          cursor: "pointer", transition: "all 0.15s",
+                        }}
+                      >
+                        {isDone && (
+                          <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
+                            <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 13, fontWeight: 450, color: isDone ? "#b9d3c4" : "#082d1d", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
+                          {task.title}
+                        </p>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          {fmtTime(task.dueAt) && (
+                            <span style={{ fontSize: 11, color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47", fontFamily: "monospace" }}>
+                              {overdue && "⚠ "}{fmtTime(task.dueAt)}
+                            </span>
+                          )}
+                          <span style={{ fontSize: 10.5, fontWeight: 600, padding: "1px 5px", borderRadius: 999, background: colour + "22", color: colour }}>
+                            {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {/* Add task button */}
+                <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: dayTasks.length === 0 ? "#dde4de" : "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "2px 0", alignSelf: "flex-start" }}>
+                  <Plus size={11} /> {dayTasks.length === 0 ? "Add task" : "Add"}
+                </button>
               </div>
             </div>
           );
@@ -447,15 +467,15 @@ export default function CalendarPage() {
           viewDate={viewDate} setViewDate={setViewDate}
           tasksByDate={tasksByDate} today={today}
           onAddTask={date => setCreateDate(date)}
-          onTaskTap={task => setSelectedTask(task)}
-          onDayOverflow={(date, tasks) => setDayTaskList({ date, tasks })}
+          onMarkDone={id => markDone(id)}
+          onMarkUndone={id => markUndone(id)}
         />
 
         {selectedTask && (
           <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} />
         )}
         {dayTaskList && (
-          <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onTaskClick={t => setSelectedTask(t)} />
+          <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
         )}
         <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
       </div>
