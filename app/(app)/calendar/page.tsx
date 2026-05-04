@@ -289,15 +289,103 @@ function MonthPicker({ year, month, onSelect, onClose }: { year: number; month: 
 
 // ── Mobile agenda view ───────────────────────────────────────────────
 
+// ── Mobile full-screen task info ─────────────────────────────────────
+
+function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
+  task: TaskWithSubtasks; onClose: () => void;
+  onMarkDone: (id: string) => void; onMarkUndone: (id: string) => void;
+}) {
+  const isDone   = task.isCompleted;
+  const overdue  = isOverdue(task);
+  const colour   = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const time     = fmtTime(task.dueAt);
+  const taskDate = task.dueAt ? new Date(task.dueAt).toISOString() : null;
+  const dateLabel = (() => {
+    if (!taskDate) return null;
+    const taskIso = taskDate.slice(0, 10);
+    const now = new Date();
+    const todayIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+    const tmrIso = (() => { const d = new Date(now); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
+    if (taskIso === todayIso) return "Today";
+    if (taskIso === tmrIso)   return "Tomorrow";
+    return new Date(taskIso + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  })();
+  const note = (() => { try { return localStorage.getItem(`orin_note_${task.id}`) ?? ""; } catch { return ""; } })();
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column", paddingTop: 52 }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
+        <p style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>Task</p>
+        <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+          <X size={13} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px 18px" }}>
+        {/* Emotion colour bar */}
+        <div style={{ height: 3, background: colour, borderRadius: 2, marginBottom: 16 }} />
+
+        {/* Title */}
+        <p style={{ fontSize: 18, fontWeight: 700, color: isDone ? "#b9d3c4" : "#082d1d", lineHeight: 1.3, margin: "0 0 16px", textDecoration: isDone ? "line-through" : "none" }}>
+          {task.title}
+        </p>
+
+        {/* Chips row */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: colour + "22", color: colour }}>
+            {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+          </span>
+          {dateLabel && (
+            <span style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
+              {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
+            </span>
+          )}
+          {task.deferredCount > 0 && (
+            <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 999, background: "#FFF0EC", color: "#D14626" }}>
+              Deferred {task.deferredCount}×
+            </span>
+          )}
+        </div>
+
+        {/* Note */}
+        {note && (
+          <div style={{ background: "#f8f9f5", borderRadius: 10, padding: "12px 14px", marginBottom: 16 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 6px" }}>Note</p>
+            <p style={{ fontSize: 13, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{note}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Action */}
+      <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9" }}>
+        <button
+          onClick={() => { isDone ? onMarkUndone(task.id) : onMarkDone(task.id); onClose(); }}
+          style={{
+            width: "100%", padding: "14px 0", borderRadius: 10, border: "none",
+            background: isDone ? "#f1f3ef" : "#059669",
+            color: isDone ? "#7A756E" : "#fff",
+            fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+          }}
+        >
+          {isDone ? "↩ Mark as incomplete" : "✓ Mark as done"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Mobile agenda view ───────────────────────────────────────────────
+
 function MobileCalendar({
   viewDate, setViewDate, tasksByDate, today,
-  onAddTask, onMarkDone, onMarkUndone,
+  onAddTask, onTaskTap,
 }: {
   viewDate: Date; setViewDate: (d: Date) => void;
   tasksByDate: Map<string, TaskWithSubtasks[]>; today: Date;
   onAddTask: (date: string) => void;
-  onMarkDone: (id: string) => void;
-  onMarkUndone: (id: string) => void;
+  onTaskTap: (task: TaskWithSubtasks) => void;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const year  = viewDate.getFullYear();
@@ -334,50 +422,27 @@ function MobileCalendar({
                 <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: isToday ? 800 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
               </div>
 
-              {/* Right: all tasks with inline checkboxes */}
-              <div style={{ flex: 1, padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+              {/* Right: colored pill per task, no checkboxes */}
+              <div style={{ flex: 1, padding: "8px 10px", display: "flex", flexDirection: "column", gap: 5 }}>
                 {dayTasks.map(task => {
-                  const isDone  = task.isCompleted;
-                  const overdue = isOverdue(task);
-                  const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+                  const ps = pillStyle(task);
                   return (
-                    <div key={task.id} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      {/* Tappable checkbox */}
-                      <div
-                        onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
-                        style={{
-                          width: 20, height: 20, borderRadius: "50%", flexShrink: 0, marginTop: 1,
-                          border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
-                          background: isDone ? "#059669" : "transparent",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          cursor: "pointer", transition: "all 0.15s",
-                        }}
-                      >
-                        {isDone && (
-                          <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
-                            <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13, fontWeight: 450, color: isDone ? "#b9d3c4" : "#082d1d", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
-                          {task.title}
-                        </p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          {fmtTime(task.dueAt) && (
-                            <span style={{ fontSize: 11, color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47", fontFamily: "monospace" }}>
-                              {overdue && "⚠ "}{fmtTime(task.dueAt)}
-                            </span>
-                          )}
-                          <span style={{ fontSize: 10.5, fontWeight: 600, padding: "1px 5px", borderRadius: 999, background: colour + "22", color: colour }}>
-                            {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
-                          </span>
-                        </div>
-                      </div>
+                    <div
+                      key={task.id}
+                      onClick={() => onTaskTap(task)}
+                      style={{
+                        padding: "4px 10px", borderRadius: 6,
+                        background: ps.background, cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: 6, overflow: "hidden",
+                      }}
+                    >
+                      <span style={{ fontSize: 12.5, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
+                        {fmtTime(task.dueAt) && <span style={{ fontFamily: "monospace", marginRight: 4, opacity: 0.8 }}>{fmtTime(task.dueAt)}</span>}
+                        {task.title}
+                      </span>
                     </div>
                   );
                 })}
-                {/* Add task button */}
                 <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: dayTasks.length === 0 ? "#dde4de" : "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "2px 0", alignSelf: "flex-start" }}>
                   <Plus size={11} /> {dayTasks.length === 0 ? "Add task" : "Add"}
                 </button>
@@ -479,12 +544,12 @@ export default function CalendarPage() {
           viewDate={viewDate} setViewDate={setViewDate}
           tasksByDate={tasksByDate} today={today}
           onAddTask={date => setCreateDate(date)}
-          onMarkDone={id => markDone(id)}
-          onMarkUndone={id => markUndone(id)}
+          onTaskTap={task => setSelectedTask(task)}
         />
 
+        {/* Mobile: full-screen task info page */}
         {selectedTask && (
-          <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} />
+          <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} />
         )}
         {dayTaskList && (
           <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
