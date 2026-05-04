@@ -316,7 +316,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                 <span
                   onClick={() => !done && setDeferOpen(true)}
                   style={{
-                    fontSize: 11.5, fontWeight: 500,
+                    fontSize: 12, fontWeight: 500,
                     color: due.overdue ? T.danger : due.isToday ? T.accent : T.textTertiary,
                     cursor: done ? "default" : "pointer",
                     textDecoration: "none",
@@ -329,7 +329,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                 <span
                   onClick={() => setDeferOpen(true)}
                   style={{
-                    fontSize: 11.5, fontWeight: 500, color: T.textMuted,
+                    fontSize: 12, fontWeight: 500, color: T.textMuted,
                     cursor: "pointer", borderBottom: `1px dashed ${T.borderStrong}`,
                   }}
                 >+ Set date</span>
