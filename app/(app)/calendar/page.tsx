@@ -8,19 +8,12 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import type { TaskWithSubtasks } from "@/lib/types";
+import { EMOTION_MAP } from "@/lib/emotions";
 import { ChevronLeft, ChevronRight, Plus, X, Pencil, Trash2 } from "lucide-react";
 
-const EMOTION_COLOUR: Record<string, string> = {
-  DREADING: "#c23934", ANXIOUS: "#886a00", NEUTRAL: "#c4cbc2",
-  WILLING: "#2b6b5e", EXCITED: "#59d10b",
-};
-const EMOTION_EMOJI: Record<string, string> = {
-  DREADING: "😮‍💨", ANXIOUS: "😟", NEUTRAL: "😐", WILLING: "🙂", EXCITED: "🤩",
-};
-const EMOTION_LABEL: Record<string, string> = {
-  DREADING: "Dreading", ANXIOUS: "Anxious", NEUTRAL: "Neutral",
-  WILLING: "Willing", EXCITED: "Excited",
-};
+function em(key: string) {
+  return EMOTION_MAP[key as keyof typeof EMOTION_MAP] ?? EMOTION_MAP.NEUTRAL;
+}
 
 const DAY_NAMES   = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = ["January","February","March","April","May","June",
@@ -53,9 +46,11 @@ function isOverdue(task: TaskWithSubtasks): boolean {
 }
 
 function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
-  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" }; // Neutral grey
-  if (isOverdue(task))  return { background: "#FFF0EC", color: "#D14626" }; // Dreading red
-  return { background: "#EEFAF1", color: "#1A9444" };                        // Excited green
+  // Completed → neutral grey (same ratio as green/red), with strikethrough on text
+  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" };
+  // Active/overdue → task's feeling colour (same as todo page chips)
+  const e = em(task.emotionalState);
+  return { background: e.pillBg, color: e.pillText };
 }
 
 // ── Task Detail Modal — matches TaskCard todo design ─────────────────
@@ -67,7 +62,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
   const isMobile = useIsMobile();
   const time     = fmtTime(task.dueAt);
   const note     = loadNote(task.id);
-  const colour   = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const e = em(task.emotionalState); const colour = e.strip;
   const isDone   = task.isCompleted;
   const overdue  = isOverdue(task);
 
@@ -136,9 +131,9 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
           <span style={{
             display: "inline-flex", alignItems: "center", gap: 3,
             fontSize: 11, fontWeight: 600, padding: "1px 7px", borderRadius: 999,
-            background: colour + "22", color: colour,
+            background: e.pillBg, color: e.pillText,
           }}>
-            {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+            {em(task.emotionalState).emoji} {em(task.emotionalState).label}
           </span>
           {task.deferredCount > 0 && (
             <span style={{ fontSize: 11, color: "#c23934" }}>deferred {task.deferredCount}×</span>
@@ -206,7 +201,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone }: {
 
         {/* Task rows — checkbox toggles directly, no second modal */}
         {tasks.map((task, idx) => {
-          const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+          const e = em(task.emotionalState); const colour = e.strip;
           const time    = fmtTime(task.dueAt);
           const isDone  = task.isCompleted;
           const overdue = isOverdue(task);
@@ -251,8 +246,8 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone }: {
                       {overdue && "⚠ "}{time}
                     </span>
                   )}
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: colour + "22", color: colour }}>
-                    {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: e.pillBg, color: e.pillText }}>
+                    {em(task.emotionalState).emoji} {em(task.emotionalState).label}
                   </span>
                 </div>
               </div>
@@ -359,7 +354,7 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
 }) {
   const isDone  = task.isCompleted;
   const overdue = isOverdue(task);
-  const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const e = em(task.emotionalState); const colour = e.strip;
   const time    = fmtTime(task.dueAt);
   const note    = loadNote(task.id);
 
@@ -452,8 +447,8 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ height: 3, background: colour, borderRadius: 2 }} />
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: colour + "22", color: colour }}>
-                  {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+                <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: e.pillBg, color: e.pillText }}>
+                  {em(task.emotionalState).emoji} {em(task.emotionalState).label}
                 </span>
                 {dateLabel && (
                   <span style={{ fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
@@ -488,7 +483,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
 }) {
   const isDone  = task.isCompleted;
   const overdue = isOverdue(task);
-  const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const e = em(task.emotionalState); const colour = e.strip;
   const time    = fmtTime(task.dueAt);
   const taskIso = task.dueAt ? new Date(task.dueAt).toISOString().slice(0, 10) : null;
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -583,8 +578,8 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
 
       {/* Fields section */}
       <div style={{ borderBottom: "1px solid #e9ede9", padding: "12px 18px", display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: colour + "22", color: colour }}>
-          {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: e.pillBg, color: e.pillText }}>
+          {em(task.emotionalState).emoji} {em(task.emotionalState).label}
         </span>
         {dateLabel && (
           <span style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
@@ -909,7 +904,7 @@ export default function CalendarPage() {
                     const ps = pillStyle(task);
                     return (
                       <div key={task.id}
-                        onClick={e => { e.stopPropagation(); setSelectedTask(task); }}
+                        onClick={e => { e.stopPropagation(); setDayTaskList(key); }}
                         style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden" }}
                       >
                         <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
