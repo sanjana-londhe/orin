@@ -131,7 +131,9 @@ function ModalForm({
     setError("");
     mutate({
       title: title.trim(),
-      dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || "00:00"}`).toISOString() : null,
+      dueAt: selectedDate
+        ? (selectedTime ? new Date(`${selectedDate}T${selectedTime}`).toISOString() : `${selectedDate}T00:00:00.000Z`)
+        : null,
       emotion: emotion,
       note,
     });

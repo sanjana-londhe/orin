@@ -91,7 +91,7 @@ export function AllTasksView() {
     if (!title.trim() || submitting) return;
     setSubmitting(true);
     const dueAt = dueDate
-      ? new Date(`${dueDate}T${dueTime || "00:00"}`).toISOString()
+      ? (dueTime ? new Date(`${dueDate}T${dueTime}`).toISOString() : `${dueDate}T00:00:00.000Z`)
       : null;
 
     const optimisticId = `optimistic-${Date.now()}`;

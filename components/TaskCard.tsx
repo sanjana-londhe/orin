@@ -31,33 +31,55 @@ const T = {
 
 // ── helpers ────────────────────────────────────────────────────────────
 
+// UTC midnight (T00:00:00.000Z) is our sentinel for "date only — no time set"
 function fmtDue(dueAt: Date | string | null) {
   if (!dueAt) return null;
   const d   = new Date(dueAt);
-  const now = new Date();
-  const yd  = new Date(now); yd.setDate(yd.getDate() - 1);
-  const tm  = new Date(now); tm.setDate(tm.getDate() + 1);
+  const iso = d.toISOString();
 
-  const isToday     = d.toDateString() === now.toDateString();
-  const isYesterday = d.toDateString() === yd.toDateString();
-  const isTomorrow  = d.toDateString() === tm.toDateString();
+  const hasTime = iso.slice(11) !== "00:00:00.000Z";
 
-  const dateLabel = isToday ? "Today" : isYesterday ? "Yesterday" : isTomorrow ? "Tomorrow"
-    : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  // Canonical YYYY-MM-DD for comparison — avoids timezone drift on date-only tasks
+  function localDateIso(offset = 0): string {
+    const n = new Date(); n.setDate(n.getDate() + offset);
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+  }
+  const taskDate = hasTime
+    ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    : iso.slice(0, 10);
 
-  const timeStr  = d.toISOString().slice(11, 16);
-  const hasTime  = timeStr !== "00:00";
+  const todayIso    = localDateIso(0);
+  const yesterdayIso = localDateIso(-1);
+  const tomorrowIso = localDateIso(1);
+
+  const isToday    = taskDate === todayIso;
+  const isYesterday = taskDate === yesterdayIso;
+  const isTomorrow = taskDate === tomorrowIso;
+  const overdue    = taskDate < todayIso;
+
+  const dateLabel = isToday ? "Today"
+    : isYesterday ? "Yesterday"
+    : isTomorrow  ? "Tomorrow"
+    : new Date(taskDate + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
   const timeLabel = hasTime ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : null;
-  const overdue  = d < now && !isToday;
 
-  return { dateLabel, timeLabel, overdue, isToday, isoDate: d.toISOString().slice(0, 10), isoTime: timeStr };
+  return { dateLabel, timeLabel, overdue, isToday, isoDate: taskDate, isoTime: hasTime ? iso.slice(11, 16) : "" };
 }
 
 function getIsoDate(dueAt: Date | string | null) {
-  return dueAt ? new Date(dueAt).toISOString().slice(0, 10) : "";
+  if (!dueAt) return "";
+  const iso = new Date(dueAt).toISOString();
+  // date-only: use UTC date directly; timed: use local date
+  const d = new Date(dueAt);
+  return iso.slice(11) === "00:00:00.000Z"
+    ? iso.slice(0, 10)
+    : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 function getIsoTime(dueAt: Date | string | null) {
-  return dueAt ? new Date(dueAt).toISOString().slice(11, 16) : "";
+  if (!dueAt) return "";
+  const iso = new Date(dueAt).toISOString();
+  return iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16);
 }
 
 // ── emotion config ─────────────────────────────────────────────────────
@@ -141,7 +163,9 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
   function saveEdit() {
     if (!editTitle.trim()) return;
-    const dueAt = editDate ? new Date(`${editDate}T${editTime || "00:00"}`).toISOString() : null;
+    const dueAt = editDate
+      ? (editTime ? new Date(`${editDate}T${editTime}`).toISOString() : `${editDate}T00:00:00.000Z`)
+      : null;
     onUpdate?.(task.id, { title: editTitle.trim(), dueAt: dueAt as unknown as Date, emotionalState: editEmotion as Task["emotionalState"] });
     persistNote(task.id, editNote);
     setNote(editNote);
@@ -337,7 +361,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               {task.emotionalState && (
                 <span style={{
                   display: "inline-flex", alignItems: "center", gap: 3,
-                  fontSize: 11, fontWeight: 600, padding: "1px 7px", borderRadius: 999,
+                  fontSize: 12, fontWeight: 600, padding: "1px 7px", borderRadius: 999,
                   background: em.bg, color: em.fg,
                 }}>
                   {em.emoji} {em.label}

@@ -255,16 +255,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                     <ChevronRight size={14} color={D.textMuted} />
                   </button>
                   {value && (
-                    <>
-                      <div style={{ height: 1, background: D.stone400, margin: "4px 0" }} />
-                      <button type="button" onClick={() => select("")} style={{
-                        display: "flex", alignItems: "center",
-                        width: "100%", padding: "12px 16px",
-                        background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
-                      }}>
-                        <span style={{ fontSize: 14, color: D.textTertiary }}>Clear date</span>
-                      </button>
-                    </>
+                    null
                   )}
                 </>
               )}
@@ -325,18 +316,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                     </button>
                     {value && (
                       <>
-                        <div style={{ height: 1, background: D.stone400, margin: "4px 0" }} />
-                        <button type="button" onClick={() => select("")} style={{
-                          display: "flex", alignItems: "center",
-                          width: "100%", padding: "9px 14px",
-                          background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
-                        }}
-                          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = D.stone200}
-                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
-                        >
-                          <span style={{ fontSize: 13.5, color: D.textTertiary }}>Clear date</span>
-                        </button>
-                      </>
+                      null
                     )}
                   </div>
                   {showCal && <MiniCalendar selected={value} onSelect={iso => select(iso)} />}
