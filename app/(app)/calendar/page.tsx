@@ -421,9 +421,19 @@ export default function CalendarPage() {
     retry: 1,
   });
 
+  // Optimistic toggle helper — updates all calendar cache entries instantly
+  function optimisticToggle(id: string, isCompleted: boolean) {
+    queryClient.setQueriesData<TaskWithSubtasks[]>(
+      { queryKey: ["tasks", "calendar"], exact: false },
+      old => old ? old.map(t => t.id === id ? { ...t, isCompleted } : t) : []
+    );
+  }
+
   const { mutate: markDone } = useMutation({
     mutationFn: async (id: string) => { const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" }); if (!res.ok) throw new Error("Failed"); return res.json(); },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+    onMutate: (id) => optimisticToggle(id, true),
+    onError:  (_e, id) => optimisticToggle(id, false),        // rollback
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["tasks", "calendar"] }),
   });
 
   const { mutate: markUndone } = useMutation({
@@ -432,7 +442,9 @@ export default function CalendarPage() {
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+    onMutate: (id) => optimisticToggle(id, false),
+    onError:  (_e, id) => optimisticToggle(id, true),         // rollback
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["tasks", "calendar"] }),
   });
 
   const tasksByDate = useMemo(() => {
@@ -552,8 +564,10 @@ export default function CalendarPage() {
                     const ps = pillStyle(task);
                     return (
                       <div key={task.id}
-                        onClick={e => { e.stopPropagation(); setSelectedTask(task); }}
-                        style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden" }}>
+                        onClick={e => { e.stopPropagation(); if (task.isCompleted) markUndone(task.id); else markDone(task.id); }}
+                        style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden" }}
+                        title={task.isCompleted ? "Click to mark incomplete" : "Click to mark done"}
+                      >
                         <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
                           {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
                         </span>
