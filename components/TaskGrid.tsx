@@ -21,9 +21,9 @@ export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: P
     return (
       <>
         {emptyState ?? (
-          <div style={{ textAlign: "center", padding: "64px 0", color: "#B0A89E" }}>
+          <div style={{ textAlign: "center", padding: "64px 0", color: "#c7c7cc" }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🌿</div>
-            <p style={{ fontSize: 14 }}>Nothing here yet</p>
+            <p style={{ fontSize: 14, color: "#8e8e93" }}>Nothing here yet</p>
           </div>
         )}
       </>
@@ -31,18 +31,22 @@ export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: P
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {tasks.map(task => (
-        <SortableTaskCard
+    <div style={{ background: "white", borderRadius: 12, overflow: "hidden", border: "1px solid #dde4de" }}>
+      {tasks.map((task, i) => (
+        <div
           key={task.id}
-          task={task}
-          dragActive={dragActive}
-          onMarkDone={m.markDone}
-          onUncomplete={m.uncompleteTask}
-          onDefer={m.deferTask}
-          onUpdate={m.updateTask}
-          onDelete={m.deleteTask}
-        />
+          style={{ borderBottom: i < tasks.length - 1 ? "1px solid #dde4de" : "none" }}
+        >
+          <SortableTaskCard
+            task={task}
+            dragActive={dragActive}
+            onMarkDone={m.markDone}
+            onUncomplete={m.uncompleteTask}
+            onDefer={m.deferTask}
+            onUpdate={m.updateTask}
+            onDelete={m.deleteTask}
+          />
+        </div>
       ))}
     </div>
   );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { AIPanel } from "@/components/AIPanel";
 import { Sparkles } from "lucide-react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface Props {
   userName: string;
@@ -14,13 +15,18 @@ interface Props {
 
 export function AppShell({ userName, email, initial, children }: Props) {
   const [aiOpen, setAiOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#fcfdfc" }}>
       <Sidebar userName={userName} email={email} initial={initial} />
 
-      <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minWidth: 0, position: "relative" }}>
-        {!aiOpen && (
+      <main style={{
+        flex: 1, overflowY: "auto", overflowX: "hidden", minWidth: 0, position: "relative",
+        // Reserve space for the fixed bottom nav bar on mobile
+        paddingBottom: isMobile ? 68 : 0,
+      }}>
+        {!aiOpen && !isMobile && (
           <button
             onClick={() => setAiOpen(true)}
             style={{

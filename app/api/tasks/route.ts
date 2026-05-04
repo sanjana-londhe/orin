@@ -42,6 +42,15 @@ export async function GET(request: Request) {
       where = { ...where, isCompleted: true };
       orderBy = { updatedAt: "desc" };
       break;
+    case "today-completed": {
+      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+      where = { ...where, isCompleted: true, dueAt: { gte: todayStart, lte: todayEnd } };
+      orderBy = { updatedAt: "desc" };
+      break;
+    }
+    case "today-active":
+      where = { ...where, isCompleted: false, OR: [{ dueAt: null }, { dueAt: { lte: todayEnd } }] };
+      break;
     default:
       // "all" — all incomplete, newest first
       where = { ...where, isCompleted: false };

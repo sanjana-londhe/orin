@@ -38,36 +38,36 @@ export function SkeletonBox({ width = "100%", height = 16, radius = 6, style }: 
   );
 }
 
-/** Skeleton that matches a compact task row card */
+/** Single skeleton row — no border/radius, used inside SkeletonTaskList container */
 export function SkeletonTaskRow() {
   injectStyles();
   return (
-    <div style={{
-      display: "flex", overflow: "hidden", borderRadius: 10,
-      border: "1px solid #e9ede9", background: "#fff", marginBottom: 6,
-    }}>
-      {/* Left strip */}
-      <div className="orin-shimmer" style={{ width: 4, flexShrink: 0 }} />
-      {/* Content */}
-      <div style={{ flex: 1, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
-        <SkeletonBox height={13} width="60%" radius={4} />
-        <SkeletonBox height={10} width="40%" radius={4} />
+    <div style={{ display: "flex", alignItems: "center", background: "#fff", padding: "14px 16px", gap: 12 }}>
+      {/* Circle checkbox */}
+      <SkeletonBox width={18} height={18} radius={999} style={{ flexShrink: 0 }} />
+      {/* Text lines */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
+        <SkeletonBox height={13} width="55%" radius={4} />
+        <SkeletonBox height={10} width="35%" radius={4} />
       </div>
-      {/* Actions placeholder */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 14px" }}>
-        <SkeletonBox width={42} height={26} radius={6} />
-        <SkeletonBox width={28} height={26} radius={6} />
+      {/* Action buttons */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+        <SkeletonBox width={58} height={24} radius={6} />
+        <SkeletonBox width={24} height={24} radius={6} />
       </div>
     </div>
   );
 }
 
-/** Multiple skeleton rows */
+/** Multiple skeleton rows — matches TaskGrid's single-card container style */
 export function SkeletonTaskList({ count = 5 }: { count?: number }) {
+  injectStyles();
   return (
-    <div>
+    <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #dde4de", overflow: "hidden" }}>
       {Array.from({ length: count }).map((_, i) => (
-        <SkeletonTaskRow key={i} />
+        <div key={i} style={{ borderBottom: i < count - 1 ? "1px solid #dde4de" : "none" }}>
+          <SkeletonTaskRow />
+        </div>
       ))}
     </div>
   );

@@ -263,7 +263,7 @@ export function QuadrantMap({ tasks }: Props) {
                     border: "1px solid #e9c3c1",
                     borderRadius: 4,
                     padding: "0 5px",
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: 600,
                   }}>
                     deferred {activeTask.deferredCount}×

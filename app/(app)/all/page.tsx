@@ -1,5 +1,5 @@
-import { AllTasksView } from "@/components/AllTasksView";
+import { AllTasksPage } from "@/components/AllTasksPage";
 
 export default function AllPage() {
-  return <AllTasksView />;
+  return <AllTasksPage />;
 }

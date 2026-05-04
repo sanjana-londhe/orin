@@ -1,261 +1,313 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TaskGrid } from "@/components/TaskGrid";
+import { SkeletonTaskList } from "@/components/Skeleton";
+import { DatePickerField } from "@/components/DatePickerField";
+import { TimePickerField } from "@/components/TimePickerField";
+import { FeelingPickerField } from "@/components/FeelingPickerField";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import type { TaskWithSubtasks } from "@/lib/types";
 
-// ── Types ────────────────────────────────────────────────────────────
+const T = {
+  bg:           "#fcfdfc",
+  surface:      "#ffffff",
+  textPrimary:  "#082d1d",
+  textSecondary:"#3d5a4a",
+  textTertiary: "#4a6d47",
+  textMuted:    "#b9d3c4",
+  border:       "#dde4de",
+  borderStrong: "#c4cbc2",
+  accent:       "#059669",
+  accentHover:  "#047857",
+  stone100:     "#f8f9f5",
+  stone200:     "#f1f3ef",
+};
 
-type Tab       = "todo" | "deferred" | "completed" | "deleted";
-type Preset    = "today" | "tomorrow" | "7d" | "1m" | "quarter" | "year" | "custom" | null;
+type Emotion = "DREADING" | "ANXIOUS" | "NEUTRAL" | "WILLING" | "EXCITED" | "";
 
-const TABS: { key: Tab; label: string; filter: string; emoji: string }[] = [
-  { key: "todo",      label: "To-do",     filter: "all",       emoji: "📋" },
-  { key: "deferred",  label: "Deferred",  filter: "flagged",   emoji: "⏭️" },
-  { key: "completed", label: "Completed", filter: "completed", emoji: "✅" },
-  { key: "deleted",   label: "Deleted",   filter: "",          emoji: "🗑️" },
-];
-
-const PRESETS: { key: Preset; label: string }[] = [
-  { key: "today",   label: "Today" },
-  { key: "tomorrow",label: "Tomorrow" },
-  { key: "7d",      label: "7 days" },
-  { key: "1m",      label: "1 month" },
-  { key: "quarter", label: "Quarter" },
-  { key: "year",    label: "Year" },
-  { key: "custom",  label: "Custom" },
-];
-
-// ── Helpers ──────────────────────────────────────────────────────────
-
-function getRange(preset: Preset, from: string, to: string): [Date | null, Date | null] {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const eod   = (d: Date) => { const e = new Date(d); e.setHours(23, 59, 59, 999); return e; };
-
-  switch (preset) {
-    case "today":    return [today, eod(today)];
-    case "tomorrow": { const t = new Date(today); t.setDate(t.getDate() + 1); return [t, eod(t)]; }
-    case "7d":       { const e = new Date(today); e.setDate(e.getDate() + 7);  return [today, eod(e)]; }
-    case "1m":       { const e = new Date(today); e.setMonth(e.getMonth() + 1); return [today, eod(e)]; }
-    case "quarter":  { const e = new Date(today); e.setMonth(e.getMonth() + 3); return [today, eod(e)]; }
-    case "year":     { const e = new Date(today); e.setFullYear(e.getFullYear() + 1); return [today, eod(e)]; }
-    case "custom":   return [
-      from ? new Date(from + "T00:00:00") : null,
-      to   ? new Date(to   + "T23:59:59") : null,
-    ];
-    default: return [null, null];
-  }
+function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
-
-function filterByRange(tasks: TaskWithSubtasks[], from: Date | null, to: Date | null): TaskWithSubtasks[] {
-  if (!from && !to) return tasks;
-  return tasks.filter(t => {
-    if (!t.dueAt) return false;
-    const d = new Date(t.dueAt);
-    if (from && d < from) return false;
-    if (to   && d > to)   return false;
-    return true;
-  });
+function defaultTimeString() {
+  const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
-
-function formatPresetLabel(preset: Preset, from: string, to: string): string {
-  if (!preset) return "";
-  if (preset === "custom") {
-    if (from && to) return `${from} → ${to}`;
-    if (from) return `From ${from}`;
-    if (to)   return `To ${to}`;
-    return "Custom range";
-  }
-  const [start, end] = getRange(preset, from, to);
-  if (!start || !end) return "";
-  const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  return preset === "today" || preset === "tomorrow" ? fmt(start) : `${fmt(start)} – ${fmt(end)}`;
-}
-
-// ── Component ────────────────────────────────────────────────────────
 
 export function AllTasksView() {
-  const [tab, setTab]           = useState<Tab>("todo");
-  const [preset, setPreset]     = useState<Preset>(null);
-  const [customFrom, setFrom]   = useState("");
-  const [customTo, setTo]       = useState("");
+  const pathname    = usePathname();
+  const isAllPage   = pathname === "/all";
+  const queryClient = useQueryClient();
+  const isMobile    = useIsMobile();
 
-  const activeTab = TABS.find(t => t.key === tab)!;
+  const [completedOpen, setCompletedOpen] = useState(false);
+  const [formOpen, setFormOpen]     = useState(false);
+  const [title, setTitle]           = useState("");
+  const [emotion, setEmotion]       = useState<Emotion>("NEUTRAL");
+  const [dueDate, setDueDate]       = useState(todayString);
+  const [dueTime, setDueTime]       = useState("");
+  const [note, setNote]             = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const titleRef = useRef<HTMLInputElement>(null);
 
-  // Fetch for every tab so counts are always visible
-  const results = {
-    todo:      useQuery<TaskWithSubtasks[]>({ queryKey: ["tasks","all"],       queryFn: () => fetch("/api/tasks?filter=all").then(r => r.json()),       retry: 1 }),
-    deferred:  useQuery<TaskWithSubtasks[]>({ queryKey: ["tasks","flagged"],   queryFn: () => fetch("/api/tasks?filter=flagged").then(r => r.json()),   retry: 1 }),
-    completed: useQuery<TaskWithSubtasks[]>({ queryKey: ["tasks","completed"], queryFn: () => fetch("/api/tasks?filter=completed").then(r => r.json()), retry: 1 }),
-  };
+  const activeFilter    = isAllPage ? "all"             : "today-active";
+  const completedFilter = isAllPage ? "completed"       : "today-completed";
 
-  const [rangeFrom, rangeTo] = getRange(preset, customFrom, customTo);
+  const { data: allTasks = [], isLoading } = useQuery<TaskWithSubtasks[]>({
+    queryKey: ["tasks", activeFilter],
+    queryFn: () => fetch(`/api/tasks?filter=${activeFilter}`).then(r => r.json()),
+    retry: 1,
+  });
 
-  const tasksForTab = useMemo(() => {
-    if (tab === "deleted") return [];
-    const raw = results[tab as keyof typeof results]?.data ?? [];
-    return filterByRange(raw, rangeFrom, rangeTo);
-  }, [tab, results.todo.data, results.deferred.data, results.completed.data, rangeFrom, rangeTo]);
+  const { data: completedTasks = [] } = useQuery<TaskWithSubtasks[]>({
+    queryKey: ["tasks", completedFilter],
+    queryFn: () => fetch(`/api/tasks?filter=${completedFilter}`).then(r => r.json()),
+    retry: 1,
+  });
 
-  function countFor(t: Tab) {
-    if (t === "deleted") return 0;
-    const raw = results[t as keyof typeof results]?.data ?? [];
-    return filterByRange(raw, rangeFrom, rangeTo).length;
+  function openForm() {
+    setFormOpen(true);
+    setTimeout(() => titleRef.current?.focus(), 20);
   }
 
-  const isLoading = tab !== "deleted" && results[tab as keyof typeof results]?.isLoading;
+  function resetForm() {
+    setTitle(""); setEmotion("NEUTRAL");
+    setDueDate(todayString()); setDueTime(""); setNote("");
+    setFormOpen(false);
+  }
+
+  async function handleCreate() {
+    if (!title.trim() || submitting) return;
+    setSubmitting(true);
+    const dueAt = dueDate
+      ? new Date(`${dueDate}T${dueTime || "00:00"}`).toISOString()
+      : null;
+
+    const optimisticId = `optimistic-${Date.now()}`;
+    const optimistic: TaskWithSubtasks = {
+      id: optimisticId, userId: "",
+      title: title.trim(),
+      dueAt: dueAt ? new Date(dueAt) : null,
+      emotionalState: (emotion as TaskWithSubtasks["emotionalState"]) || "NEUTRAL",
+      isCompleted: false, deferredCount: 0, sortOrder: 0,
+      lastTouchedAt: new Date(), recurrenceRule: null, parentTaskId: null,
+      createdAt: new Date(), updatedAt: new Date(), subtasks: [],
+    };
+    const snap = queryClient.getQueryData<TaskWithSubtasks[]>(["tasks", activeFilter]);
+    queryClient.setQueryData<TaskWithSubtasks[]>(["tasks", activeFilter], old => [optimistic, ...(old ?? [])]);
+    resetForm();
+
+    try {
+      await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: optimistic.title, emotionalState: emotion || null, dueAt }),
+      });
+      queryClient.invalidateQueries({ queryKey: ["tasks", activeFilter] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", completedFilter] });
+    } catch {
+      queryClient.setQueryData(["tasks", activeFilter], snap);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const pad = isMobile ? "16px 14px 0" : "24px 28px 0";
+  const stickyBottom = isMobile ? 68 : 0;
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 28px 64px" }}>
+    <div style={{ background: T.bg, minHeight: "100%" }}>
+    <div style={{
+      maxWidth: 860, margin: "0 auto",
+      display: "flex", flexDirection: "column", minHeight: "100%",
+      padding: pad,
+    }}>
 
-      {/* Page title */}
-      <div style={{ marginBottom: 20 }}>
-        <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
-          Workspace · All Tasks
+      {/* Header */}
+      <div style={{ marginBottom: isMobile ? 16 : 24 }}>
+        <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: T.textTertiary, margin: "0 0 4px" }}>
+          {isAllPage
+            ? "Workspace · All Tasks"
+            : new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
         </p>
-        <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", margin: 0, lineHeight: 1 }}>
-          All Tasks
+        <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 800, letterSpacing: "-0.04em", color: T.textPrimary, margin: 0, lineHeight: 1 }}>
+          {isAllPage ? "All Tasks" : "Today"}
         </h1>
       </div>
 
-      {/* ── Date preset bar (Mixpanel-style) ── */}
-      <div style={{
-        background: "#fff", border: "1px solid #e9ede9", borderRadius: 12,
-        padding: "10px 14px", marginBottom: 16,
-        display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
-      }}>
-        <span style={{ fontSize: 11.5, fontWeight: 600, color: "#c4cbc2", textTransform: "uppercase", letterSpacing: "0.06em", marginRight: 4 }}>
-          Due
-        </span>
-
-        {/* "All time" pill (clear) */}
-        <button
-          onClick={() => { setPreset(null); setFrom(""); setTo(""); }}
-          style={{
-            padding: "5px 12px", borderRadius: 20, border: "none", cursor: "pointer",
-            fontSize: 12.5, fontWeight: preset === null ? 600 : 450,
-            background: preset === null ? "#082d1d" : "#f1f3ef",
-            color: preset === null ? "#fff" : "#4a6d47",
-            transition: "all 0.12s",
-          }}
-        >All time</button>
-
-        <div style={{ width: 1, height: 18, background: "#e9ede9", margin: "0 2px" }} />
-
-        {PRESETS.map(p => (
-          <button
-            key={p.key!}
-            onClick={() => { setPreset(p.key); if (p.key !== "custom") { setFrom(""); setTo(""); } }}
-            style={{
-              padding: "5px 12px", borderRadius: 20, border: "none", cursor: "pointer",
-              fontSize: 12.5, fontWeight: preset === p.key ? 600 : 450,
-              background: preset === p.key ? "#059669" : "#f1f3ef",
-              color: preset === p.key ? "#fff" : "#4a6d47",
-              transition: "all 0.12s",
-            }}
-          >{p.label}</button>
-        ))}
-
-        {/* Active range label */}
-        {preset && preset !== "custom" && (
-          <span style={{ fontSize: 11.5, color: "#4a6d47", marginLeft: 4, fontFamily: "monospace" }}>
-            · {formatPresetLabel(preset, customFrom, customTo)}
-          </span>
+      {/* Task list */}
+      <div style={{ marginBottom: 10 }}>
+        {isLoading ? (
+          <SkeletonTaskList count={4} />
+        ) : (
+          <TaskGrid
+            tasks={allTasks.filter(t => !t.isCompleted)}
+            isLoading={false}
+            emptyState={
+              <div style={{ background: T.surface, borderRadius: 12, border: `1px solid ${T.border}`, padding: "48px 24px", textAlign: "center" }}>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>🌿</div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary, marginBottom: 4 }}>No tasks yet</p>
+                <p style={{ fontSize: 13, color: T.textTertiary }}>Add your first task below.</p>
+              </div>
+            }
+          />
         )}
       </div>
 
-      {/* Custom date inputs */}
-      {preset === "custom" && (
-        <div style={{
-          display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
-          background: "#fff", border: "1px solid #e9ede9", borderRadius: 10,
-          padding: "10px 14px",
-        }}>
-          <span style={{ fontSize: 12.5, color: "#4a6d47", fontWeight: 500 }}>From</span>
-          <input
-            type="date" value={customFrom} onChange={e => setFrom(e.target.value)}
-            style={{ padding: "5px 10px", borderRadius: 7, border: "1.5px solid #dde4de", fontSize: 12.5, color: "#082d1d", fontFamily: "inherit", outline: "none", background: "#fff" }}
-          />
-          <span style={{ fontSize: 12.5, color: "#c4cbc2" }}>→</span>
-          <input
-            type="date" value={customTo} min={customFrom} onChange={e => setTo(e.target.value)}
-            style={{ padding: "5px 10px", borderRadius: 7, border: "1.5px solid #dde4de", fontSize: 12.5, color: "#082d1d", fontFamily: "inherit", outline: "none", background: "#fff" }}
-          />
-          {customFrom && customTo && (
-            <span style={{ fontSize: 11.5, color: "#059669", fontFamily: "monospace", marginLeft: 4 }}>
-              {formatPresetLabel("custom", customFrom, customTo)}
-            </span>
-          )}
-        </div>
-      )}
+      {/* Completed section */}
+      <div style={{ marginBottom: 10 }}>
+        <button
+          onClick={() => setCompletedOpen(o => !o)}
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "13px 18px", background: T.surface,
+            borderRadius: 12, border: `1px solid ${T.border}`,
+            cursor: "pointer", fontFamily: "inherit",
+            fontSize: 13.5, fontWeight: 600, color: T.textPrimary,
+            width: "100%", textAlign: "left", transition: "background 0.1s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = T.stone200)}
+          onMouseLeave={e => (e.currentTarget.style.background = T.surface)}
+        >
+          <svg
+            width="11" height="11" viewBox="0 0 12 12" fill="none"
+            stroke={T.borderStrong} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            style={{ transition: "transform 0.2s", transform: completedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}
+          >
+            <path d="M4 2l4 4-4 4"/>
+          </svg>
+          Completed
+          <span style={{ fontSize: 12.5, color: T.textMuted, fontWeight: 500, marginLeft: "auto" }}>
+            {completedTasks.length}
+          </span>
+        </button>
 
-      {/* ── Tabs ── */}
-      <div style={{
-        display: "flex", gap: 2, marginBottom: 20,
-        background: "#f1f3ef", borderRadius: 10, padding: 4,
-      }}>
-        {TABS.map(t => {
-          const count   = countFor(t.key);
-          const active  = tab === t.key;
-          return (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              style={{
-                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                padding: "8px 12px", borderRadius: 8, border: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: active ? 600 : 450,
-                background: active ? "#fff" : "transparent",
-                color: active ? "#082d1d" : "#4a6d47",
-                boxShadow: active ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-                transition: "all 0.12s",
-              }}
-            >
-              <span style={{ fontSize: 14 }}>{t.emoji}</span>
-              {t.label}
-              {t.key !== "deleted" && (
-                <span style={{
-                  fontSize: 10.5, fontWeight: 700,
-                  padding: "1px 7px", borderRadius: 999,
-                  background: active ? "#f1f3ef" : "#e9ede9",
-                  color: active ? "#059669" : "#4a6d47",
-                  minWidth: 22, textAlign: "center",
-                }}>{count}</span>
-              )}
-            </button>
-          );
-        })}
+        {completedOpen && completedTasks.length > 0 && (
+          <div style={{ marginTop: 6 }}>
+            <TaskGrid tasks={completedTasks} isLoading={false} />
+          </div>
+        )}
       </div>
 
-      {/* ── Task list ── */}
-      {tab === "deleted" ? (
-        <div style={{ textAlign: "center", padding: "64px 0", color: "#c4cbc2" }}>
-          <div style={{ fontSize: 44, marginBottom: 14 }}>🗑️</div>
-          <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", marginBottom: 6 }}>No deleted tasks</p>
-          <p style={{ fontSize: 13, color: "#4a6d47" }}>Deleted tasks are permanently removed and cannot be recovered.</p>
-        </div>
-      ) : (
-        <TaskGrid
-          tasks={tasksForTab}
-          isLoading={!!isLoading}
-          emptyState={
-            <div style={{ textAlign: "center", padding: "64px 0", color: "#c4cbc2" }}>
-              <div style={{ fontSize: 44, marginBottom: 14 }}>{activeTab.emoji}</div>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", marginBottom: 6 }}>
-                No {activeTab.label.toLowerCase()} tasks
-                {preset ? ` in this period` : ""}
-              </p>
-              {preset && (
-                <button onClick={() => setPreset(null)} style={{
-                  marginTop: 8, fontSize: 12.5, color: "#059669", background: "none",
-                  border: "none", cursor: "pointer", textDecoration: "underline",
-                }}>Clear date filter</button>
+      <div style={{ flex: 1 }} />
+
+      {/* ── New Task bar — sticky at bottom ── */}
+      <div style={{ position: "sticky", bottom: stickyBottom, padding: `10px 0 ${isMobile ? 12 : 28}px`, background: T.bg }}>
+
+        <div style={{
+          background: T.surface, borderRadius: 12,
+          border: `1px solid ${T.accent}`,
+          boxShadow: formOpen ? "0 0 0 3px rgba(5,150,105,0.07)" : "none",
+          transition: "border-color 0.15s, box-shadow 0.15s",
+        }}>
+
+          {/* Row: circle + title */}
+          <div
+            onClick={!formOpen ? openForm : undefined}
+            style={{
+              display: "flex", alignItems: "flex-start",
+              padding: "12px 14px 12px 16px",
+              cursor: !formOpen ? "pointer" : "default",
+              background: !formOpen ? "#f2fdec" : "transparent",
+              borderRadius: formOpen ? 0 : 11,
+              transition: "background 0.15s",
+            }}
+          >
+            <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: "50%",
+                background: "transparent", border: `1.5px solid ${T.accent}`,
+              }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {formOpen ? (
+                <input
+                  ref={titleRef}
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") handleCreate(); if (e.key === "Escape") resetForm(); }}
+                  placeholder="Task name"
+                  style={{
+                    width: "100%", border: "none", outline: "none", fontFamily: "inherit",
+                    fontSize: 14, fontWeight: 450, color: T.textPrimary,
+                    background: "transparent", display: "block",
+                  }}
+                />
+              ) : (
+                <span style={{ fontSize: 14, fontWeight: 500, color: T.accent, userSelect: "none" }}>
+                  New Task…
+                </span>
               )}
             </div>
-          }
-        />
-      )}
+          </div>
+
+          {/* Pickers row */}
+          {formOpen && (
+            <div style={{ borderTop: `1px solid ${T.border}`, padding: "12px 14px" }}>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+                gap: isMobile ? 8 : 10,
+              }}>
+                <FeelingPickerField value={emotion} onChange={v => setEmotion(v as Emotion)} label="Feeling" dropUp={isMobile} />
+                <DatePickerField value={dueDate} onChange={setDueDate} label="Due date" dropUp={isMobile} />
+                <TimePickerField value={dueTime} onChange={setDueTime} label="Due time (optional)" selectedDate={dueDate} dropUp={isMobile} />
+              </div>
+            </div>
+          )}
+
+          {/* Note + actions */}
+          {formOpen && (
+            <>
+              <div style={{ borderTop: `1px solid ${T.border}` }}>
+                <textarea
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  placeholder="Add a note…"
+                  rows={2}
+                  style={{
+                    width: "100%", border: "none", outline: "none", fontFamily: "inherit",
+                    fontSize: 13, color: T.textSecondary, background: "transparent",
+                    resize: "none", boxSizing: "border-box", lineHeight: 1.6,
+                    padding: "10px 14px 10px 48px",
+                  }}
+                />
+              </div>
+
+              <div style={{
+                borderTop: `1px solid ${T.border}`,
+                padding: "10px 14px",
+                display: "flex", justifyContent: "flex-end", gap: 8,
+              }}>
+                <button onClick={resetForm} style={{
+                  padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
+                  background: T.surface, color: T.textSecondary, fontSize: 12.5,
+                  cursor: "pointer", fontFamily: "inherit",
+                }}>Cancel</button>
+                <button
+                  onClick={handleCreate}
+                  disabled={!title.trim() || submitting}
+                  style={{
+                    padding: "6px 16px", borderRadius: 6, border: "none",
+                    background: title.trim() ? T.accent : T.stone200,
+                    color: title.trim() ? "#fff" : T.textMuted,
+                    fontSize: 12.5, fontWeight: 600,
+                    cursor: title.trim() ? "pointer" : "default",
+                    fontFamily: "inherit", transition: "background 0.12s",
+                  }}
+                  onMouseEnter={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = T.accentHover; }}
+                  onMouseLeave={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = T.accent; }}
+                >Add Task</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+    </div>
     </div>
   );
 }

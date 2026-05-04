@@ -4,14 +4,8 @@ import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
-
-const STATES = [
-  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626", activeBg: "#D14626" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10", activeBg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#3a3a3a", fg: "#fff",    activeBg: "#3a3a3a" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D", activeBg: "#0E8A7D" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444", activeBg: "#1A9444" },
-] as const;
+import { FeelingPickerField, type Feeling } from "@/components/FeelingPickerField";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface Props {
   open: boolean;
@@ -31,33 +25,64 @@ function getDefaultTime() {
 
 export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle }: Props) {
   const [openCount, setOpenCount] = useState(0);
+  const isMobile = useIsMobile();
   useEffect(() => { if (open) setOpenCount(c => c + 1); }, [open]);
   if (!open) return null;
 
   return (
     <div
       onClick={() => onOpenChange(false)}
-      style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 80 }}
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)",
+        display: "flex",
+        alignItems: isMobile ? "flex-end" : "flex-start",
+        justifyContent: "center",
+        paddingTop: isMobile ? 0 : 80,
+      }}
     >
-      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 580, margin: "0 24px" }}>
-        <ModalForm key={openCount} defaultDate={defaultDate} defaultTitle={defaultTitle} onClose={() => onOpenChange(false)} />
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: isMobile ? "100%" : 580,
+          margin: isMobile ? 0 : "0 24px",
+        }}
+      >
+        <ModalForm
+          key={openCount}
+          defaultDate={defaultDate}
+          defaultTitle={defaultTitle}
+          onClose={() => onOpenChange(false)}
+          isMobile={isMobile}
+        />
       </div>
     </div>
   );
 }
 
-function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: string; defaultTitle?: string; onClose: () => void }) {
+function ModalForm({
+  defaultDate,
+  defaultTitle,
+  onClose,
+  isMobile,
+}: {
+  defaultDate?: string;
+  defaultTitle?: string;
+  onClose: () => void;
+  isMobile: boolean;
+}) {
   const queryClient = useQueryClient();
   const [title, setTitle]     = useState(defaultTitle ?? "");
-  const [emotion, setEmotion] = useState<typeof STATES[number]["value"]>("NEUTRAL");
+  const [emotion, setEmotion] = useState<Feeling>("NEUTRAL");
   const [note, setNote]       = useState("");
   const [error, setError]     = useState("");
   const initTime = getDefaultTime();
   const [selectedDate, setSelectedDate] = useState(defaultDate ?? getDefaultDate());
-  const [selectedTime, setSelectedTime] = useState(initTime);
+  const [selectedTime, setSelectedTime] = useState("");
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof emotion; note?: string }) => {
+    mutationFn: async (vars: { title: string; dueAt: string | null; emotion: string; note?: string }) => {
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,45 +124,60 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
     onSettled: () => { queryClient.invalidateQueries({ queryKey: ["tasks"] }); },
   });
 
+  const radius = isMobile ? "16px 16px 0 0" : "12px";
+
   return (
-    <>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", background: "#fff", border: "1.5px solid #059669", borderRadius: "12px 12px 0 0" }}>
-        <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
-        <input autoFocus value={title} onChange={e => setTitle(e.target.value)}
+    <div style={{
+      background: "#fff",
+      borderRadius: radius,
+      border: "1.5px solid #059669",
+      boxShadow: isMobile ? "0 -4px 24px rgba(0,0,0,0.12)" : "0 4px 16px rgba(5,150,105,0.08)",
+      overflow: "hidden",
+      paddingBottom: isMobile ? 24 : 0,
+    }}>
+      {/* Title row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
+        <div style={{ width: 20, height: 20, borderRadius: "50%", border: "1.5px solid #059669", flexShrink: 0 }} />
+        <input
+          autoFocus
+          value={title}
+          onChange={e => setTitle(e.target.value)}
           onKeyDown={e => { if (e.key === "Escape") onClose(); }}
           placeholder="What needs doing?"
-          style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }} />
+          style={{
+            flex: 1, border: "none", outline: "none", fontFamily: "inherit",
+            fontSize: 14, color: "#082d1d", background: "transparent",
+          }}
+        />
       </div>
 
-      <div style={{ background: "#fff", border: "1.5px solid #059669", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "16px 18px", boxShadow: "0 4px 16px rgba(5,150,105,0.08)" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+      {/* Fields */}
+      <div style={{ padding: "14px 18px 0" }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+          gap: isMobile ? 10 : 12,
+          marginBottom: 14,
+        }}>
+          <FeelingPickerField value={emotion} onChange={setEmotion} label="Feeling" />
           <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
-          <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time" selectedDate={selectedDate} />
+          <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time (optional)" selectedDate={selectedDate} />
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>How do you feel about it?</p>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {STATES.map(s => {
-              const active = emotion === s.value;
-              return (
-                <button key={s.value} onClick={() => setEmotion(s.value)} style={{
-                  display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 7, fontSize: 11, fontWeight: 600,
-                  background: active ? s.activeBg : s.bg, color: active ? "#fff" : s.fg,
-                  border: `1px solid ${s.fg}30`, cursor: "pointer", fontFamily: "inherit",
-                }}>
-                  {s.emoji} {s.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
           <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Note</p>
-          <textarea value={note} onChange={e => setNote(e.target.value)}
-            placeholder="Add a note or description…" rows={2}
-            style={{ width: "100%", fontSize: 12.5, color: "#082d1d", background: "#f8f9f5", border: "1.5px solid #dde4de", borderRadius: 8, padding: "8px 10px", outline: "none", fontFamily: "inherit", resize: "vertical", lineHeight: 1.5, boxSizing: "border-box", transition: "border-color 0.14s" }}
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Add a note or description…"
+            rows={2}
+            style={{
+              width: "100%", fontSize: 12.5, color: "#082d1d",
+              background: "#f8f9f5", border: "1.5px solid #dde4de",
+              borderRadius: 8, padding: "8px 10px", outline: "none",
+              fontFamily: "inherit", resize: "vertical", lineHeight: 1.5,
+              boxSizing: "border-box", transition: "border-color 0.14s",
+            }}
             onFocus={e => (e.currentTarget.style.borderColor = "#059669")}
             onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")}
           />
@@ -145,18 +185,39 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
 
         {error && <p style={{ fontSize: 11.5, color: "#c23934", marginBottom: 8 }}>{error}</p>}
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <button onClick={onClose} style={{ padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, paddingBottom: 14 }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: isMobile ? "10px 20px" : "7px 16px",
+              borderRadius: 8, border: "1.5px solid #dde4de",
+              background: "#fff", color: "#3d5a4a",
+              fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+            }}
+          >
             Cancel
           </button>
           <button
             onClick={() => {
               if (!title.trim()) { setError("Add a title first"); return; }
               setError("");
-              mutate({ title: title.trim(), dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || initTime}`).toISOString() : null, emotion, note });
+              mutate({
+                title: title.trim(),
+                dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || initTime}`).toISOString() : null,
+                emotion: emotion,
+                note,
+              });
             }}
             disabled={isPending || !title.trim()}
-            style={{ padding: "7px 20px", borderRadius: 8, border: "none", background: title.trim() ? "#059669" : "#c4cbc2", color: "#fff", fontSize: 13, fontWeight: 700, cursor: title.trim() ? "pointer" : "default", fontFamily: "inherit", transition: "background 0.13s" }}
+            style={{
+              flex: isMobile ? 1 : undefined,
+              padding: isMobile ? "10px 20px" : "7px 20px",
+              borderRadius: 8, border: "none",
+              background: title.trim() ? "#059669" : "#c4cbc2",
+              color: "#fff", fontSize: 13, fontWeight: 700,
+              cursor: title.trim() ? "pointer" : "default",
+              fontFamily: "inherit", transition: "background 0.13s",
+            }}
             onMouseEnter={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = "#047857"; }}
             onMouseLeave={e => { if (title.trim()) (e.currentTarget as HTMLElement).style.background = "#059669"; }}
           >
@@ -164,6 +225,6 @@ function ModalForm({ defaultDate, defaultTitle, onClose }: { defaultDate?: strin
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

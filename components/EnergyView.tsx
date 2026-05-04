@@ -410,7 +410,7 @@ export function EnergyView() {
                   <div style={{ height: 6, background: "#f1f3ef", borderRadius: 999 }}>
                     <div style={{ height: "100%", borderRadius: 999, background: rate >= 70 ? "#059669" : rate >= 40 ? "#f59e0b" : "#ef4444", width: `${rate}%`, transition: "width 0.4s ease" }} />
                   </div>
-                  <p style={{ fontSize: 10.5, color: "#c4cbc2", margin: "3px 0 0" }}>{done} of {total} completed</p>
+                  <p style={{ fontSize: 11, color: "#c4cbc2", margin: "3px 0 0" }}>{done} of {total} completed</p>
                 </div>
               </div>
             ))}

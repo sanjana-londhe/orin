@@ -4,39 +4,79 @@ import { memo, useState, useRef, useEffect } from "react";
 import type { Task } from "@prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { DeferralModal } from "@/components/DeferralModal";
-import { DatePickerField } from "@/components/DatePickerField";
-import { TimePickerField } from "@/components/TimePickerField";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
-import { EmotionalStatePicker, type EmotionalState } from "@/components/EmotionalStatePicker";
-import { Check } from "lucide-react";
+import { useIsMobile } from "@/hooks/useIsMobile";
+
+// design.md tokens
+const T = {
+  textPrimary:   "#082d1d",
+  textSecondary: "#3d5a4a",
+  textTertiary:  "#4a6d47",
+  textMuted:     "#b9d3c4",
+  border:        "#dde4de",
+  borderStrong:  "#c4cbc2",
+  surface:       "#ffffff",
+  stone100:      "#f8f9f5",
+  stone200:      "#f1f3ef",
+  accent:        "#059669",
+  accentHover:   "#047857",
+  danger:        "#c23934",
+  dangerBg:      "#FFF0EC",
+  flagged:       "#ff9500",
+};
+
+// ── helpers ────────────────────────────────────────────────────────────
 
 function fmtDue(dueAt: Date | string | null) {
   if (!dueAt) return null;
-  const d = new Date(dueAt);
+  const d   = new Date(dueAt);
   const now = new Date();
-  const isToday = d.toDateString() === now.toDateString();
-  const isTomorrow = d.toDateString() === new Date(now.getTime() + 86400000).toDateString();
-  const dateLabel = isToday ? "Today" : isTomorrow ? "Tomorrow"
+  const yd  = new Date(now); yd.setDate(yd.getDate() - 1);
+  const tm  = new Date(now); tm.setDate(tm.getDate() + 1);
+
+  const isToday     = d.toDateString() === now.toDateString();
+  const isYesterday = d.toDateString() === yd.toDateString();
+  const isTomorrow  = d.toDateString() === tm.toDateString();
+
+  const dateLabel = isToday ? "Today" : isYesterday ? "Yesterday" : isTomorrow ? "Tomorrow"
     : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const timeLabel = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  return { dateLabel, timeLabel, overdue: d < now, isoDate: d.toISOString().slice(0,10), isoTime: d.toISOString().slice(11,16) };
+
+  const timeStr  = d.toISOString().slice(11, 16);
+  const hasTime  = timeStr !== "00:00";
+  const timeLabel = hasTime ? d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : null;
+  const overdue  = d < now && !isToday;
+
+  return { dateLabel, timeLabel, overdue, isToday, isoDate: d.toISOString().slice(0, 10), isoTime: timeStr };
 }
 
+function getIsoDate(dueAt: Date | string | null) {
+  return dueAt ? new Date(dueAt).toISOString().slice(0, 10) : "";
+}
+function getIsoTime(dueAt: Date | string | null) {
+  return dueAt ? new Date(dueAt).toISOString().slice(11, 16) : "";
+}
+
+// ── emotion config ─────────────────────────────────────────────────────
+
 const EMOTIONS = [
-  { value:"DREADING", label:"Dreading", emoji:"😰", bg:"#FFF0EC", fg:"#D14626", activeBg:"#D14626" },
-  { value:"ANXIOUS",  label:"Anxious",  emoji:"😟", bg:"#FFF8E8", fg:"#B07A10", activeBg:"#B07A10" },
-  { value:"NEUTRAL",  label:"Neutral",  emoji:"😐", bg:"#F3F2F0", fg:"#7A756E", activeBg:"#3a3a3a" },
-  { value:"WILLING",  label:"Willing",  emoji:"🙂", bg:"#EEF9F7", fg:"#0E8A7D", activeBg:"#0E8A7D" },
-  { value:"EXCITED",  label:"Excited",  emoji:"🤩", bg:"#EEFAF1", fg:"#1A9444", activeBg:"#1A9444" },
+  { value: "DREADING", label: "Dreading", emoji: "😰", bg: "#FFF0EC", fg: "#D14626" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟", bg: "#FFF8E8", fg: "#B07A10" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐", bg: "#F3F2F0", fg: "#7A756E" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂", bg: "#EEF9F7", fg: "#0E8A7D" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩", bg: "#EEFAF1", fg: "#1A9444" },
 ] as const;
+
+// ── note helpers ───────────────────────────────────────────────────────
 
 function loadNote(id: string) {
   try { return localStorage.getItem(`orin_note_${id}`) ?? ""; } catch { return ""; }
 }
 function persistNote(id: string, text: string) {
-  try { if (text) localStorage.setItem(`orin_note_${id}`, text); else localStorage.removeItem(`orin_note_${id}`); } catch {}
+  try { if (text.trim()) localStorage.setItem(`orin_note_${id}`, text); else localStorage.removeItem(`orin_note_${id}`); } catch {}
 }
+
+// ── types ──────────────────────────────────────────────────────────────
 
 interface Props {
   task: TaskWithSubtasks;
@@ -46,239 +86,242 @@ interface Props {
   onMarkDone?: (id: string) => void;
   onUncomplete?: (id: string) => void;
   onDefer?: (id: string, newDueAt: Date) => void;
-  onUpdate?: (id: string, patch: Partial<Pick<Task, "title"|"dueAt"|"emotionalState">>) => void;
+  onUpdate?: (id: string, patch: Partial<Pick<Task, "title" | "dueAt" | "emotionalState">>) => void;
   onDelete?: (id: string) => void;
 }
 
+// ── component ──────────────────────────────────────────────────────────
+
 function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDelete }: Props) {
-  const done = task.isCompleted;
+  const done    = task.isCompleted;
+  const flagged = (task.deferredCount ?? 0) > 0;
+  const em      = EMOTIONS.find(e => e.value === task.emotionalState) ?? EMOTIONS[2];
+  const due     = fmtDue(task.dueAt);
+  const isMobile = useIsMobile();
+
   const { nudgedTaskIds } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
-  const em = EMOTIONS.find(e => e.value === task.emotionalState) ?? EMOTIONS[2];
-  const due = fmtDue(task.dueAt);
 
   const [deferOpen, setDeferOpen]     = useState(false);
   const [editing, setEditing]         = useState(false);
-  const [editingEmotion, setEditingEmotion] = useState(false);
-  const [note, setNote]               = useState("");
-  const [editingNote, setEditingNote] = useState(false);
-  const [noteDraft, setNoteDraft]     = useState("");
-  const [mounted, setMounted]         = useState(false);
-
-  const noteRef     = useRef<HTMLTextAreaElement>(null);
-  const editTitleRef = useRef<HTMLInputElement>(null);
-  const [editTitle, setEditTitle]   = useState(task.title);
-  const [editDate, setEditDate]     = useState(due?.isoDate ?? "");
-  const [editTime, setEditTime]     = useState(due?.isoTime ?? "");
+  const [editTitle, setEditTitle]     = useState(task.title);
+  const [editDate, setEditDate]       = useState(getIsoDate(task.dueAt));
+  const [editTime, setEditTime]       = useState(getIsoTime(task.dueAt));
   const [editEmotion, setEditEmotion] = useState(task.emotionalState as typeof EMOTIONS[number]["value"]);
+  const [editNote, setEditNote]       = useState("");
+  const [note, setNote]               = useState("");
+  const [mounted, setMounted]         = useState(false);
+  const [hovered, setHovered]         = useState(false);
+  const [checkHov, setCheckHov]       = useState(false);
+
+  const editTitleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { setMounted(true); setNote(loadNote(task.id)); }, [task.id]);
-  useEffect(() => { if (editing) editTitleRef.current?.focus(); }, [editing]);
-  useEffect(() => { if (editingNote) noteRef.current?.focus(); }, [editingNote]);
+  useEffect(() => {
+    if (editing) {
+      setEditTitle(task.title);
+      setEditDate(getIsoDate(task.dueAt));
+      setEditTime(getIsoTime(task.dueAt));
+      setEditEmotion(task.emotionalState as typeof EMOTIONS[number]["value"]);
+      setEditNote(loadNote(task.id));
+      setTimeout(() => editTitleRef.current?.focus(), 10);
+    }
+  }, [editing]);
 
-  function openEdit() {
-    setEditTitle(task.title); setEditDate(due?.isoDate ?? "");
-    setEditTime(due?.isoTime ?? ""); setEditEmotion(task.emotionalState as typeof EMOTIONS[number]["value"]);
-    setEditing(true);
-  }
   function saveEdit() {
     if (!editTitle.trim()) return;
-    const dueAt = editDate ? new Date(`${editDate}T${editTime||"00:00"}`).toISOString() : null;
+    const dueAt = editDate ? new Date(`${editDate}T${editTime || "00:00"}`).toISOString() : null;
     onUpdate?.(task.id, { title: editTitle.trim(), dueAt: dueAt as unknown as Date, emotionalState: editEmotion as Task["emotionalState"] });
+    persistNote(task.id, editNote);
+    setNote(editNote);
     setEditing(false);
   }
-  function handleSaveNote() { persistNote(task.id, noteDraft); setNote(noteDraft); setEditingNote(false); }
-  function openNote() { setNoteDraft(note); setEditingNote(true); }
-  function deleteNote() { persistNote(task.id, ""); setNote(""); setEditingNote(false); }
 
   // ── Edit form ──────────────────────────────────────────────────────
   if (editing) {
     return (
-      <div style={{ background:"#fff", border:"1.5px solid #059669", borderRadius:12, padding:"14px 18px", boxShadow:"0 0 0 3px #f2fdec" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
-          <span style={{ color:"#059669", fontSize:14 }}>✦</span>
-          <input ref={editTitleRef} value={editTitle} onChange={e=>setEditTitle(e.target.value)}
-            onKeyDown={e=>{ if(e.key==="Enter") saveEdit(); if(e.key==="Escape") setEditing(false); }}
-            style={{ flex:1, border:"none", outline:"none", fontFamily:"inherit", fontSize:14, fontWeight:600, color:"#082d1d", background:"transparent" }} />
-        </div>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:14 }}>
-          <DatePickerField value={editDate} onChange={setEditDate} label="Due date" />
-          <TimePickerField value={editTime} onChange={setEditTime} label="Due time" selectedDate={editDate} />
-        </div>
-        <div style={{ marginBottom:14 }}>
-          <p style={{ fontSize:11, fontWeight:600, color:"#4a6d47", marginBottom:8 }}>How do you feel about it?</p>
-          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-            {EMOTIONS.map(s => { const active = editEmotion === s.value; return (
-              <button key={s.value} onClick={()=>setEditEmotion(s.value)} style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"4px 10px", borderRadius:7, fontSize:11, fontWeight:600, background:active?s.activeBg:s.bg, color:active?"#fff":s.fg, border:`1px solid ${s.fg}30`, cursor:"pointer", fontFamily:"inherit" }}>{s.emoji} {s.label}</button>
-            ); })}
+      <div style={{ padding: "6px 8px" }}>
+        <div style={{
+          background: T.surface, border: `1.5px solid ${T.accent}`, borderRadius: 10,
+          padding: "14px 16px", boxShadow: "0 0 0 3px rgba(5,150,105,0.08)",
+        }}>
+          <input
+            ref={editTitleRef}
+            value={editTitle}
+            onChange={e => setEditTitle(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(false); }}
+            style={{
+              width: "100%", border: "none", outline: "none", fontFamily: "inherit",
+              fontSize: 14, fontWeight: 500, color: T.textPrimary,
+              background: "transparent", marginBottom: 12, display: "block",
+            }}
+          />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+            <div>
+              <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Due date</label>
+              <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)}
+                style={{ width: "100%", fontSize: 13, padding: "6px 10px", borderRadius: 6, border: `1.5px solid ${T.border}`, outline: "none", fontFamily: "inherit", background: T.stone100, boxSizing: "border-box", color: T.textPrimary }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Due time</label>
+              <input type="time" value={editTime} onChange={e => setEditTime(e.target.value)} disabled={!editDate}
+                style={{ width: "100%", fontSize: 13, padding: "6px 10px", borderRadius: 6, border: `1.5px solid ${T.border}`, outline: "none", fontFamily: "inherit", background: editDate ? T.stone100 : T.stone200, boxSizing: "border-box", color: T.textPrimary }} />
+            </div>
           </div>
-        </div>
-        <div style={{ display:"flex", justifyContent:"flex-end", gap:8 }}>
-          <button onClick={()=>setEditing(false)} style={{ padding:"7px 16px", borderRadius:8, border:"1.5px solid #dde4de", background:"#fff", color:"#4a6d47", fontSize:13, cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
-          <button onClick={saveEdit} style={{ padding:"7px 20px", borderRadius:8, border:"none", background:"#059669", color:"#fff", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}
-            onMouseEnter={e=>(e.currentTarget as HTMLElement).style.background="#047857"}
-            onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#059669"}>Save changes</button>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Feeling</label>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {EMOTIONS.map(s => { const active = editEmotion === s.value; return (
+                <button key={s.value} onClick={() => setEditEmotion(s.value)} style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "3px 10px 3px 7px", borderRadius: 999,
+                  fontSize: 11.5, fontWeight: 600,
+                  background: active ? s.fg : s.bg, color: active ? "#fff" : s.fg,
+                  border: "none", cursor: "pointer", fontFamily: "inherit",
+                }}>{s.emoji} {s.label}</button>
+              ); })}
+            </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Note</label>
+            <textarea value={editNote} onChange={e => setEditNote(e.target.value)} placeholder="Add a note…" rows={2}
+              style={{ width: "100%", fontSize: 13, padding: "7px 10px", borderRadius: 6, border: `1.5px solid ${T.border}`, outline: "none", fontFamily: "inherit", background: T.stone100, resize: "vertical", boxSizing: "border-box", color: T.textPrimary }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <button onClick={() => setEditing(false)}
+              style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${T.border}`, background: T.surface, color: T.textSecondary, fontSize: 12.5, cursor: "pointer", fontFamily: "inherit" }}>
+              Cancel
+            </button>
+            <button onClick={saveEdit}
+              style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: T.accent, color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+              onMouseEnter={e => (e.currentTarget.style.background = T.accentHover)}
+              onMouseLeave={e => (e.currentTarget.style.background = T.accent)}>
+              Save
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // ── Card ──────────────────────────────────────────────────────────
+  // ── Row ────────────────────────────────────────────────────────────
   return (
     <>
-      <div style={{
-        background:"white", border:"1.5px solid #e4e9e4", borderRadius:14,
-        padding:"14px 16px", opacity:done ? 0.6 : 1,
-        transition:"box-shadow 0.15s, border-color 0.15s",
-      }}
-        onMouseEnter={e=>{ if(!done){ (e.currentTarget as HTMLElement).style.boxShadow="0 2px 10px rgba(8,45,29,0.07)"; (e.currentTarget as HTMLElement).style.borderColor="#c8d5cb"; }}}
-        onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.boxShadow="none"; (e.currentTarget as HTMLElement).style.borderColor="#e4e9e4"; }}
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          display: "flex", alignItems: "flex-start",
+          padding: "12px 14px 12px 16px",
+          background: hovered ? T.stone200 : "transparent",
+          transition: "background 0.1s",
+        }}
       >
-        <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
-
-          {/* Circle — binary toggle */}
+        {/* Circle checkbox */}
+        <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
           <div
             onClick={() => done ? onUncomplete?.(task.id) : onMarkDone?.(task.id)}
-            title={done ? "Mark incomplete" : "Mark complete"}
+            onMouseEnter={() => setCheckHov(true)}
+            onMouseLeave={() => setCheckHov(false)}
             style={{
-              width:26, height:26, borderRadius:"50%", flexShrink:0,
-              border:`2px solid ${done ? "#059669" : "#c8d5cb"}`,
-              background: done ? "#059669" : "white",
-              cursor:"pointer",
-              display:"flex", alignItems:"center", justifyContent:"center",
-              marginTop:2, transition:"all 0.15s",
-            }}
-            onMouseEnter={e=>{
-              const el = e.currentTarget as HTMLElement;
-              if (done) { el.style.background="#dc2626"; el.style.borderColor="#dc2626"; }
-              else { el.style.borderColor="#059669"; el.style.background="#f0fdf4"; }
-            }}
-            onMouseLeave={e=>{
-              const el = e.currentTarget as HTMLElement;
-              el.style.background = done ? "#059669" : "white";
-              el.style.borderColor = done ? "#059669" : "#c8d5cb";
+              width: isMobile ? 26 : 20, height: isMobile ? 26 : 20, borderRadius: "50%",
+              border: `1.5px solid ${done ? T.accent : checkHov ? T.accent : T.border}`,
+              background: done ? T.accent : "transparent",
+              cursor: "pointer", flexShrink: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "border-color 0.15s, background 0.15s",
             }}
           >
-            {done && <Check size={11} color="white" strokeWidth={3} />}
-          </div>
-
-          {/* Content */}
-          <div style={{ flex:1, minWidth:0 }}>
-
-            {/* Top row: date/time + edit/delete */}
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:5 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10, fontSize:12 }}>
-                {due ? (
-                  <>
-                    <span style={{ display:"inline-flex", alignItems:"center", gap:3, color: due.overdue ? "#c23934" : "#6b7280" }}>
-                      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>
-                      {due.dateLabel}
-                    </span>
-                    <span style={{ display:"inline-flex", alignItems:"center", gap:3, color:"#6b7280" }}>
-                      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg>
-                      {due.timeLabel}
-                    </span>
-                  </>
-                ) : !done && (
-                  <button onClick={()=>setDeferOpen(true)} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
-                    onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
-                    onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#b9d3c4"}
-                  >+ Set deadline</button>
-                )}
-              </div>
-
-              {!done && (
-                <div style={{ display:"flex", gap:4, flexShrink:0 }}>
-                  <button onClick={openEdit} title="Edit" style={{ width:26, height:26, borderRadius:7, border:"1px solid #e4e9e4", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#6b7280", transition:"all 0.12s" }}
-                    onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#f1f3ef"; (e.currentTarget as HTMLElement).style.borderColor="#c8d5cb"; }}
-                    onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.borderColor="#e4e9e4"; }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button onClick={()=>onDelete?.(task.id)} title="Delete" style={{ width:26, height:26, borderRadius:7, border:"1px solid #e4e9e4", background:"#fff", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:"#6b7280", transition:"all 0.12s" }}
-                    onMouseEnter={e=>{ (e.currentTarget as HTMLElement).style.background="#fff0ee"; (e.currentTarget as HTMLElement).style.color="#c23934"; (e.currentTarget as HTMLElement).style.borderColor="#f5c6c3"; }}
-                    onMouseLeave={e=>{ (e.currentTarget as HTMLElement).style.background="#fff"; (e.currentTarget as HTMLElement).style.color="#6b7280"; (e.currentTarget as HTMLElement).style.borderColor="#e4e9e4"; }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Title */}
-            <div style={{ fontSize:15, fontWeight:700, color:done?"#a0b4a8":"#082d1d", lineHeight:1.35, textDecoration:done?"line-through":"none", marginBottom:10 }}>
-              {task.title}
-            </div>
-
-            {/* Emotion + deferred */}
-            <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
-              {editingEmotion ? (
-                <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                  <EmotionalStatePicker value={task.emotionalState as EmotionalState} compact
-                    onChange={v=>{ if(v!==task.emotionalState) onUpdate?.(task.id,{emotionalState:v}); setEditingEmotion(false); }} />
-                  <button onClick={()=>setEditingEmotion(false)} style={{ fontSize:10, color:"#c4cbc2", background:"none", border:"none", cursor:"pointer" }}>✕</button>
-                </div>
-              ) : (
-                <button onClick={()=>!done&&setEditingEmotion(true)} style={{
-                  display:"inline-flex", alignItems:"center", gap:4, padding:"2px 8px 2px 6px", borderRadius:20,
-                  background:em.bg, color:em.fg, fontSize:11, fontWeight:600,
-                  border:"none", cursor:done?"default":"pointer", fontFamily:"inherit",
-                }}>
-                  {em.emoji} {em.label}
-                </button>
-              )}
-
-              {task.deferredCount > 0 && (
-                <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"2px 8px", borderRadius:20, background:"#f8f9f5", border:"1px solid #dde4de", fontSize:10.5, fontWeight:600, color:"#3d5a4a" }}>
-                  ↩ {task.deferredCount}×
-                </span>
-              )}
-
-              {due?.overdue && !done && (
-                <span style={{ fontSize:11, color:"#c23934", fontWeight:600 }}>Overdue</span>
-              )}
-            </div>
-
-            {/* Note */}
-            {mounted && (
-              <div style={{ marginTop: note || editingNote ? 8 : 0 }}>
-                {editingNote ? (
-                  <div>
-                    <textarea ref={noteRef} value={noteDraft} onChange={e=>setNoteDraft(e.target.value)}
-                      onKeyDown={e=>{ if(e.key==="Escape") setEditingNote(false); }}
-                      placeholder="Add a note…" rows={3}
-                      style={{ width:"100%", fontSize:13, color:"#3d5a4a", background:"#f8f9f5", border:"1.5px solid #059669", borderRadius:8, padding:"8px 10px", outline:"none", fontFamily:"inherit", resize:"vertical", lineHeight:1.5, boxSizing:"border-box" }}
-                    />
-                    <div style={{ display:"flex", justifyContent:"flex-end", gap:8, marginTop:6 }}>
-                      {note && <button onClick={deleteNote} style={{ fontSize:12, color:"#c23934", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Delete note</button>}
-                      <button onClick={()=>setEditingNote(false)} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Cancel</button>
-                      <button onClick={handleSaveNote} style={{ fontSize:12, fontWeight:600, color:"#059669", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>Save</button>
-                    </div>
-                  </div>
-                ) : note ? (
-                  <div onClick={()=>!done&&openNote()} style={{ fontSize:13, color:"#4a6d47", lineHeight:1.6, background:"#f8f9f5", borderRadius:8, padding:"8px 10px", cursor:done?"default":"pointer", borderLeft:"3px solid #c8f7ae", whiteSpace:"pre-wrap" }}
-                    onMouseEnter={e=>{ if(!done) (e.currentTarget as HTMLElement).style.background="#f2fdec"; }}
-                    onMouseLeave={e=>(e.currentTarget as HTMLElement).style.background="#f8f9f5"}
-                  >{note}</div>
-                ) : !done ? (
-                  <button onClick={openNote} style={{ fontSize:12, color:"#b9d3c4", background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", padding:0 }}
-                    onMouseEnter={e=>(e.currentTarget as HTMLElement).style.color="#059669"}
-                    onMouseLeave={e=>(e.currentTarget as HTMLElement).style.color="#b9d3c4"}
-                  >+ Add a note</button>
-                ) : null}
-              </div>
-            )}
-
-            {isNudged && !done && (
-              <div style={{ marginTop:8 }}>
-                <NudgeBanner task={task} onDefer={onDefer?d=>onDefer(task.id,d):undefined} onMarkDone={()=>onMarkDone?.(task.id)} />
-              </div>
+            {done && (
+              <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
+                <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             )}
           </div>
         </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 14, fontWeight: 450,
+            color: done ? T.textMuted : T.textPrimary,
+            lineHeight: 1.4,
+            textDecoration: done ? "line-through" : "none",
+            marginBottom: due || task.emotionalState ? 3 : 0,
+          }}>
+            {task.title}
+          </div>
+
+          {(due || task.emotionalState || !done) && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: note && mounted ? 3 : 0 }}>
+              {due ? (
+                <span
+                  onClick={() => !done && setDeferOpen(true)}
+                  style={{
+                    fontSize: 11.5, fontWeight: 500,
+                    color: due.overdue ? T.danger : due.isToday ? T.accent : T.textTertiary,
+                    cursor: done ? "default" : "pointer",
+                    textDecoration: "none",
+                    borderBottom: done ? "none" : `1px dashed ${due.overdue ? T.danger : T.borderStrong}`,
+                  }}
+                >
+                  {due.overdue && "⚠ "}{due.dateLabel}{due.timeLabel && ` · ${due.timeLabel}`}
+                </span>
+              ) : !done && (
+                <span
+                  onClick={() => setDeferOpen(true)}
+                  style={{
+                    fontSize: 11.5, fontWeight: 500, color: T.textMuted,
+                    cursor: "pointer", borderBottom: `1px dashed ${T.borderStrong}`,
+                  }}
+                >+ Set date</span>
+              )}
+              {task.emotionalState && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 3,
+                  fontSize: 11, fontWeight: 600, padding: "1px 7px", borderRadius: 999,
+                  background: em.bg, color: em.fg,
+                }}>
+                  {em.emoji} {em.label}
+                </span>
+              )}
+            </div>
+          )}
+
+          {mounted && note && (
+            <div style={{ fontSize: 12, color: T.textMuted, lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {note}
+            </div>
+          )}
+
+          {isNudged && !done && (
+            <div style={{ marginTop: 8 }}>
+              <NudgeBanner task={task} onDefer={onDefer ? d => onDefer(task.id, d) : undefined} onMarkDone={() => onMarkDone?.(task.id)} />
+            </div>
+          )}
+        </div>
+
+        {/* Right: edit/delete — always visible on mobile, hover-only on desktop */}
+        <div style={{ display: "flex", alignItems: "center", gap: 1, paddingLeft: 8, flexShrink: 0, paddingTop: 1, opacity: (isMobile || hovered) && !done ? 1 : 0, transition: "opacity 0.15s" }}>
+          <button onClick={() => setEditing(true)} title="Edit"
+            style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.stone200; (e.currentTarget as HTMLElement).style.color = T.textSecondary; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = T.textTertiary; }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button onClick={() => onDelete?.(task.id)} title="Delete"
+            style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, fontSize: 13, transition: "background 0.1s, color 0.1s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.dangerBg; (e.currentTarget as HTMLElement).style.color = T.danger; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = T.textTertiary; }}>
+            ✕
+          </button>
+        </div>
       </div>
 
-      {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d=>onDefer(task.id,d)} />}
+      {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />}
     </>
   );
 }
