@@ -326,7 +326,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontSize: 14, fontWeight: 450,
-            color: done ? T.textMuted : T.textPrimary,
+            color: T.textPrimary,
             lineHeight: 1.4,
             textDecoration: done ? "line-through" : "none",
             marginBottom: due || task.emotionalState ? 3 : 0,

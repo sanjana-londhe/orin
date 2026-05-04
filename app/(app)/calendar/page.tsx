@@ -58,11 +58,11 @@ function taskDayState(task: TaskWithSubtasks): "overdue" | "today" | "future" | 
 }
 
 function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
-  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" }; // grey
+  // Colour based on due date only — strikethrough on text handles completion visually
   const state = taskDayState(task);
-  if (state === "overdue") return { background: "#FFF0EC", color: "#D14626" }; // red
-  if (state === "today")   return { background: "#EEFAF1", color: "#1A9444" }; // green
-  return { background: "#F3F2F0", color: "#7A756E" };                          // future / no date → grey
+  if (state === "overdue") return { background: "#FFF0EC", color: "#D14626" };
+  if (state === "today")   return { background: "#EEFAF1", color: "#1A9444" };
+  return { background: "#F3F2F0", color: "#7A756E" }; // future / no date
 }
 
 // ── Task Detail Modal — matches TaskCard todo design ─────────────────
@@ -125,7 +125,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
               </svg>
             )}
           </div>
-          <p style={{ fontSize: 14, fontWeight: 450, color: isDone ? "#b9d3c4" : "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
+          <p style={{ fontSize: 14, fontWeight: 450, color: "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
             {task.title}
           </p>
           <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 10 }}>
@@ -136,7 +136,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
         {/* Date + emotion — same chips as TaskCard row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "10px 16px", borderBottom: note ? "1px solid #e9ede9" : "none" }}>
           {dateLabel && (
-            <span style={{ fontSize: 12, fontWeight: 500, color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#059669" }}>
+            <span style={{ fontSize: 12, fontWeight: 500, color: overdue ? "#c23934" : "#059669" }}>
               {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
             </span>
           )}
@@ -249,12 +249,12 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone }: {
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13.5, fontWeight: 450, color: isDone ? "#b9d3c4" : "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
+                <p style={{ fontSize: 13.5, fontWeight: 450, color: "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
                   {task.title}
                 </p>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {time && (
-                    <span style={{ fontSize: 11.5, fontWeight: 500, color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 500, color: overdue ? "#c23934" : "#4a6d47" }}>
                       {overdue && "⚠ "}{time}
                     </span>
                   )}
@@ -422,7 +422,7 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
             {isDone && <svg width="10" height="7" viewBox="0 0 11 8" fill="none"><path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           </div>
 
-          <p style={{ flex: 1, fontSize: 14, fontWeight: 600, color: isDone ? "#b9d3c4" : "#082d1d", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none", paddingTop: 1 }}>{task.title}</p>
+          <p style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "#082d1d", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none", paddingTop: 1 }}>{task.title}</p>
 
           {/* Edit + Delete + Close */}
           <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
@@ -463,7 +463,7 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
                   {em(task.emotionalState).emoji} {em(task.emotionalState).label}
                 </span>
                 {dateLabel && (
-                  <span style={{ fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
+                  <span style={{ fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
                     {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
                   </span>
                 )}
@@ -582,7 +582,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
     <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column" }}>
       {/* Title row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
-        <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", opacity: isDone ? 0.9 : 1, margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
         <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0 }}>
           <X size={13} />
         </button>
@@ -594,7 +594,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
           {em(task.emotionalState).emoji} {em(task.emotionalState).label}
         </span>
         {dateLabel && (
-          <span style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
+          <span style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
             {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
           </span>
         )}
