@@ -499,7 +499,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
     <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column" }}>
       {/* Title row — matches creation form header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
-        <p style={{ fontSize: 14, fontWeight: 600, color: isDone ? "#b9d3c4" : "#082d1d", margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", opacity: isDone ? 0.9 : 1, margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
         <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0 }}>
           <X size={13} />
         </button>
@@ -529,15 +529,14 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* Primary CTA — full width, no icon */}
-      <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9" }}>
+      {/* CTA — green both states, right-aligned, compact */}
+      <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9", display: "flex", justifyContent: "flex-end" }}>
         <button
           onClick={() => { if (isDone) onMarkUndone(task.id); else onMarkDone(task.id); onClose(); }}
           style={{
-            width: "100%", padding: "14px 0", borderRadius: 10, border: "none",
-            background: isDone ? "#f1f3ef" : "#059669",
-            color: isDone ? "#7A756E" : "#fff",
-            fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+            padding: "10px 24px", borderRadius: 8, border: "none",
+            background: "#059669", color: "#fff",
+            fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
             transition: "background 0.12s",
           }}
         >
