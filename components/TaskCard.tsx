@@ -262,26 +262,27 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
           <div style={{
             borderTop: `1px solid ${T.border}`,
             padding: "10px 14px",
-            display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
+            display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8,
           }}>
-            {/* Delete on mobile — red secondary button */}
-            {isMobile && onDelete && (
+            <div style={{ display: "flex", gap: 8 }}>
+            {/* Mobile: Delete (cancel-style, red) + Save only */}
+            {isMobile && onDelete ? (
               <button
                 onClick={() => { onDelete(task.id); closeEdit(); }}
                 style={{
-                  padding: "8px 16px", borderRadius: 6,
-                  border: `1px solid #e9c3c1`, background: "#FFF0EC",
-                  color: "#D14626", fontSize: 12.5, fontWeight: 600,
-                  cursor: "pointer", fontFamily: "inherit",
+                  padding: "6px 14px", borderRadius: 6,
+                  border: `1px solid #e9c3c1`,
+                  background: T.surface, color: "#D14626",
+                  fontSize: 12.5, cursor: "pointer", fontFamily: "inherit",
                 }}
               >Delete</button>
+            ) : !isMobile && (
+              <button onClick={closeEdit} style={{
+                padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
+                background: T.surface, color: T.textSecondary, fontSize: 12.5,
+                cursor: "pointer", fontFamily: "inherit",
+              }}>Cancel</button>
             )}
-            <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
-            <button onClick={closeEdit} style={{
-              padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
-              background: T.surface, color: T.textSecondary, fontSize: 12.5,
-              cursor: "pointer", fontFamily: "inherit",
-            }}>Cancel</button>
             <button
               onClick={saveEdit}
               disabled={!editTitle.trim()}
