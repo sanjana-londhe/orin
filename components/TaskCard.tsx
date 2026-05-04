@@ -102,7 +102,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
   const due     = fmtDue(task.dueAt);
   const isMobile = useIsMobile();
 
-  const { nudgedTaskIds } = useUIStore();
+  const { nudgedTaskIds, editingTaskId, setEditingTaskId } = useUIStore();
   const isNudged = nudgedTaskIds.has(task.id);
 
   const [deferOpen, setDeferOpen]     = useState(false);
@@ -131,13 +131,21 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
     }
   }, [editing]);
 
+  // Close this edit form if another task or the create form takes focus
+  useEffect(() => {
+    if (editing && editingTaskId !== task.id) setEditing(false);
+  }, [editingTaskId]);
+
+  function openEdit() { setEditingTaskId(task.id); setEditing(true); }
+  function closeEdit() { setEditingTaskId(null); setEditing(false); }
+
   function saveEdit() {
     if (!editTitle.trim()) return;
     const dueAt = editDate ? new Date(`${editDate}T${editTime || "00:00"}`).toISOString() : null;
     onUpdate?.(task.id, { title: editTitle.trim(), dueAt: dueAt as unknown as Date, emotionalState: editEmotion as Task["emotionalState"] });
     persistNote(task.id, editNote);
     setNote(editNote);
-    setEditing(false);
+    closeEdit();
   }
 
   // ── Edit form — same structure as task creation bar ──────────────────
@@ -162,7 +170,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               ref={editTitleRef}
               value={editTitle}
               onChange={e => setEditTitle(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(false); }}
+              onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") closeEdit(); }}
               style={{
                 flex: 1, border: "none", outline: "none", fontFamily: "inherit",
                 fontSize: 14, fontWeight: 450, color: T.textPrimary,
@@ -222,7 +230,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
             padding: "10px 14px",
             display: "flex", justifyContent: "flex-end", gap: 8,
           }}>
-            <button onClick={() => setEditing(false)} style={{
+            <button onClick={closeEdit} style={{
               padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
               background: T.surface, color: T.textSecondary, fontSize: 12.5,
               cursor: "pointer", fontFamily: "inherit",
@@ -346,7 +354,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
         {/* Right: edit/delete — always visible on mobile, hover-only on desktop */}
         <div style={{ display: "flex", alignItems: "center", gap: 1, paddingLeft: 8, flexShrink: 0, paddingTop: 1, opacity: (isMobile || hovered) && !done ? 1 : 0, transition: "opacity 0.15s" }}>
-          <button onClick={() => setEditing(true)} title="Edit"
+          <button onClick={openEdit} title="Edit"
             style={{ width: 28, height: 28, borderRadius: 6, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.stone200; (e.currentTarget as HTMLElement).style.color = T.textSecondary; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = T.textTertiary; }}>

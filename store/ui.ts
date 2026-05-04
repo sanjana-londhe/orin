@@ -6,10 +6,10 @@ export type SortMode = "due_date" | "emotional" | "manual";
 interface UIState {
   sortMode: SortMode;
   openTooltipId: string | null;
-  // nudgedTaskIds: tasks currently showing a nudge banner
   nudgedTaskIds: Set<string>;
-  // dismissedUntil: taskId → epoch ms when suppression expires (2h window)
   dismissedUntil: Record<string, number>;
+  // which task card is currently in edit mode (null = none)
+  editingTaskId: string | null;
 
   setSortMode: (mode: SortMode) => void;
   setOpenTooltipId: (id: string | null) => void;
@@ -17,6 +17,7 @@ interface UIState {
   removeNudge: (taskId: string) => void;
   dismissNudge: (taskId: string) => void;
   isSuppressed: (taskId: string) => boolean;
+  setEditingTaskId: (id: string | null) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -26,9 +27,11 @@ export const useUIStore = create<UIState>()(
       openTooltipId: null,
       nudgedTaskIds: new Set<string>(),
       dismissedUntil: {},
+      editingTaskId: null,
 
       setSortMode: (mode) => set({ sortMode: mode }),
       setOpenTooltipId: (id) => set({ openTooltipId: id }),
+      setEditingTaskId: (id) => set({ editingTaskId: id }),
 
       addNudge: (taskId) =>
         set((s) => ({ nudgedTaskIds: new Set([...s.nudgedTaskIds, taskId]) })),

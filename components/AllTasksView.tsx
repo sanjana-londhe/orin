@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TaskGrid } from "@/components/TaskGrid";
@@ -9,6 +9,7 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
 import { FeelingPickerField } from "@/components/FeelingPickerField";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useUIStore } from "@/store/ui";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 const T = {
@@ -42,6 +43,7 @@ export function AllTasksView() {
   const isAllPage   = pathname === "/all";
   const queryClient = useQueryClient();
   const isMobile    = useIsMobile();
+  const { editingTaskId, setEditingTaskId } = useUIStore();
 
   const [completedOpen, setCompletedOpen] = useState(false);
   const [formOpen, setFormOpen]     = useState(false);
@@ -68,7 +70,13 @@ export function AllTasksView() {
     retry: 1,
   });
 
+  // Close create form if a task edit opens
+  useEffect(() => {
+    if (editingTaskId !== null && formOpen) resetForm();
+  }, [editingTaskId]);
+
   function openForm() {
+    setEditingTaskId(null); // close any open task edit
     setFormOpen(true);
     setTimeout(() => titleRef.current?.focus(), 20);
   }
