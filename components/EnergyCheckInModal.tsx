@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 // ── Data ─────────────────────────────────────────────────────────────
 
@@ -57,6 +58,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
   const [step, setStep]                   = useState<1 | 2 | 3>(1);
   const [mood, setMood]                   = useState<number | null>(null);
   const [contributions, setContributions] = useState<string[]>([]);
+  const isMobile                          = useIsMobile();
 
   function toggle(label: string) {
     setContributions(prev =>
@@ -80,8 +82,10 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "0 20px",
+      display: "flex",
+      alignItems: isMobile ? "flex-end" : "center",
+      justifyContent: "center",
+      padding: isMobile ? 0 : "0 20px",
     }}>
       {/* Backdrop */}
       <div onClick={onClose} style={{
@@ -93,20 +97,30 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
       {/* Card */}
       <div style={{
         position: "relative", zIndex: 1,
-        width: "100%", maxWidth: 520,
+        width: "100%",
+        maxWidth: isMobile ? "100%" : 520,
         background: "#ffffff",
-        borderRadius: 16,
+        borderRadius: isMobile ? "20px 20px 0 0" : 16,
         border: "1.5px solid #059669",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+        boxShadow: isMobile
+          ? "0 -4px 32px rgba(0,0,0,0.12)"
+          : "0 8px 32px rgba(0,0,0,0.12)",
         overflow: "hidden",
+        paddingBottom: isMobile ? 24 : 0,
       }}>
+
+        {/* Drag handle on mobile */}
+        {isMobile && (
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4 }}>
+            <div style={{ width: 36, height: 4, borderRadius: 99, background: "#dde4de" }} />
+          </div>
+        )}
 
         {/* Top bar */}
         <div style={{
-          padding: "16px 20px 0",
+          padding: isMobile ? "12px 20px 0" : "16px 20px 0",
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
-          {/* Step progress dots */}
           {step < 3 ? (
             <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
               {[1, 2].map(s => (
@@ -120,11 +134,10 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
             </div>
           ) : <div />}
 
-          {/* Close button */}
           <button
             onClick={onClose}
             style={{
-              width: 28, height: 28, borderRadius: 8,
+              width: 30, height: 30, borderRadius: 8,
               border: "1.5px solid #dde4de",
               background: "#f8f9f5",
               cursor: "pointer",
@@ -132,14 +145,13 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
               color: "#4a6d47",
             }}
           >
-            <X size={13} />
+            <X size={14} />
           </button>
         </div>
 
         {/* ── Step 1: How do you feel? ── */}
         {step === 1 && (
-          <div style={{ padding: "16px 20px 24px" }}>
-            {/* Eyebrow */}
+          <div style={{ padding: isMobile ? "14px 20px 20px" : "16px 20px 24px" }}>
             <p style={{
               fontFamily: "monospace",
               fontSize: 10, fontWeight: 700, color: "#059669",
@@ -150,17 +162,17 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
             </p>
 
             <h2 style={{
-              fontSize: 24, fontWeight: 800, color: "#082d1d",
-              margin: "0 0 4px", letterSpacing: "-0.03em", lineHeight: 1.15,
+              fontSize: isMobile ? 20 : 24, fontWeight: 800, color: "#082d1d",
+              margin: "0 0 4px", letterSpacing: "-0.03em", lineHeight: 1.2,
             }}>
               How are you feeling right now?
             </h2>
-            <p style={{ fontSize: 13, color: "#3d5a4a", margin: "0 0 20px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 13, color: "#3d5a4a", margin: "0 0 18px", lineHeight: 1.5 }}>
               Be honest — Orin uses this to spot patterns over time.
             </p>
 
             {/* Mood picker */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: isMobile ? 6 : 8, marginBottom: 18 }}>
               {MOODS.map(m => {
                 const active = mood === m.value;
                 return (
@@ -169,8 +181,9 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                     onClick={() => setMood(m.value)}
                     style={{
                       flex: 1,
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                      padding: "14px 4px",
+                      display: "flex", flexDirection: "column", alignItems: "center",
+                      gap: isMobile ? 5 : 6,
+                      padding: isMobile ? "12px 2px" : "14px 4px",
                       borderRadius: 12,
                       border: active ? "1.5px solid #059669" : "1.5px solid #dde4de",
                       background: active ? "#f2fdec" : "#f8f9f5",
@@ -178,9 +191,9 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       transition: "all 0.15s ease",
                     }}
                   >
-                    <span style={{ fontSize: 26 }}>{m.emoji}</span>
+                    <span style={{ fontSize: isMobile ? 22 : 26 }}>{m.emoji}</span>
                     <span style={{
-                      fontSize: 10, fontWeight: 600, textAlign: "center", lineHeight: 1.25,
+                      fontSize: 9.5, fontWeight: 600, textAlign: "center", lineHeight: 1.25,
                       color: active ? "#059669" : "#4a6d47",
                       whiteSpace: "nowrap",
                     }}>
@@ -191,19 +204,18 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
               })}
             </div>
 
-            {/* Primary CTA */}
             <PrimaryButton
               onClick={() => setStep(2)}
               disabled={mood === null}
               label="Next →"
+              isMobile={isMobile}
             />
           </div>
         )}
 
         {/* ── Step 2: What contributed? ── */}
         {step === 2 && (
-          <div style={{ padding: "16px 20px 24px" }}>
-            {/* Eyebrow */}
+          <div style={{ padding: isMobile ? "14px 20px 20px" : "16px 20px 24px" }}>
             <p style={{
               fontFamily: "monospace",
               fontSize: 10, fontWeight: 700, color: "#059669",
@@ -214,18 +226,21 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
             </p>
 
             <h2 style={{
-              fontSize: 24, fontWeight: 800, color: "#082d1d",
-              margin: "0 0 4px", letterSpacing: "-0.03em", lineHeight: 1.15,
+              fontSize: isMobile ? 20 : 24, fontWeight: 800, color: "#082d1d",
+              margin: "0 0 4px", letterSpacing: "-0.03em", lineHeight: 1.2,
             }}>
               What had an influence?
             </h2>
-            <p style={{ fontSize: 13, color: "#3d5a4a", margin: "0 0 16px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 13, color: "#3d5a4a", margin: "0 0 14px", lineHeight: 1.5 }}>
               Select all that apply — or skip straight to save.
             </p>
 
             {/* Contribution chips */}
             <div style={{
-              display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 20,
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: isMobile ? 6 : 8,
+              marginBottom: 18,
             }}>
               {CONTRIBUTIONS.map(c => {
                 const active = contributions.includes(c.label);
@@ -234,8 +249,9 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                     key={c.label}
                     onClick={() => toggle(c.label)}
                     style={{
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
-                      padding: "10px 6px",
+                      display: "flex", flexDirection: "column", alignItems: "center",
+                      gap: 4,
+                      padding: isMobile ? "10px 4px" : "10px 6px",
                       borderRadius: 8,
                       border: active ? "1.5px solid #059669" : "1.5px solid #dde4de",
                       background: active ? "#f2fdec" : "#f8f9f5",
@@ -243,7 +259,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       transition: "all 0.12s ease",
                     }}
                   >
-                    <span style={{ fontSize: 20 }}>{c.emoji}</span>
+                    <span style={{ fontSize: isMobile ? 18 : 20 }}>{c.emoji}</span>
                     <span style={{
                       fontSize: 10, fontWeight: 600,
                       color: active ? "#059669" : "#3d5a4a",
@@ -258,23 +274,23 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
             <PrimaryButton
               onClick={handleSave}
               label={contributions.length === 0 ? "Save check-in" : `Save  ·  ${contributions.length} selected`}
+              isMobile={isMobile}
             />
           </div>
         )}
 
         {/* ── Step 3: Confirmation ── */}
         {step === 3 && (
-          <div style={{ padding: "24px 20px 28px" }}>
-            {/* Lime callout bg strip */}
+          <div style={{ padding: isMobile ? "16px 20px 20px" : "24px 20px 28px" }}>
             <div style={{
               background: "#f2fdec",
               border: "1.5px solid #c8f7ae",
               borderRadius: 12,
-              padding: "20px 16px",
+              padding: isMobile ? "14px 16px" : "20px 16px",
               display: "flex", alignItems: "center", gap: 16,
-              marginBottom: 20,
+              marginBottom: 18,
             }}>
-              <span style={{ fontSize: 40, lineHeight: 1 }}>{selectedMood?.emoji}</span>
+              <span style={{ fontSize: isMobile ? 32 : 40, lineHeight: 1 }}>{selectedMood?.emoji}</span>
               <div>
                 <p style={{
                   fontSize: 15, fontWeight: 700, color: "#082d1d",
@@ -299,19 +315,19 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
               Logged
             </p>
             <h2 style={{
-              fontSize: 20, fontWeight: 800, color: "#082d1d",
+              fontSize: isMobile ? 18 : 20, fontWeight: 800, color: "#082d1d",
               margin: "0 0 4px", letterSpacing: "-0.03em", textAlign: "center",
             }}>
               Check-in saved
             </h2>
             <p style={{
               fontSize: 12, color: "#c4cbc2",
-              margin: "0 0 20px", textAlign: "center",
+              margin: "0 0 18px", textAlign: "center",
             }}>
               View your patterns in My Energy
             </p>
 
-            <PrimaryButton onClick={onClose} label="Done" />
+            <PrimaryButton onClick={onClose} label="Done" isMobile={isMobile} />
           </div>
         )}
       </div>
@@ -322,13 +338,12 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
 // ── Shared primary button ─────────────────────────────────────────────
 
 function PrimaryButton({
-  onClick,
-  disabled,
-  label,
+  onClick, disabled, label, isMobile,
 }: {
   onClick: () => void;
   disabled?: boolean;
   label: string;
+  isMobile?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -339,12 +354,14 @@ function PrimaryButton({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: "100%", padding: "12px 0",
+        width: "100%",
+        padding: isMobile ? "14px 0" : "12px 0",
         borderRadius: 8,
         border: "none",
         background: disabled ? "#e9ede9" : hovered ? "#047857" : "#059669",
         color: disabled ? "#c4cbc2" : "#fff",
-        fontSize: 13.5, fontWeight: 700,
+        fontSize: isMobile ? 15 : 13.5,
+        fontWeight: 700,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit",
         transition: "background 0.15s ease",
