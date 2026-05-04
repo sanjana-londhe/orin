@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { X, Sparkles, Zap, TrendingUp, Compass, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { loadEnergyStore, todayKey } from "@/components/EnergyCheckInModal";
@@ -174,8 +175,15 @@ export function AIPanel({ onClose }: Props) {
 
   // ── Render ────────────────────────────────────────────────────────
 
+  const isMobile = useIsMobile();
+
   return (
-    <aside style={{
+    <aside style={isMobile ? {
+      position: "fixed", inset: 0, zIndex: 100,
+      background: "#fff",
+      display: "flex", flexDirection: "column",
+      paddingTop: 52, // clear mobile top bar
+    } : {
       width: 320, flexShrink: 0,
       background: "#fff", borderLeft: "1px solid #e9ede9",
       display: "flex", flexDirection: "column",
