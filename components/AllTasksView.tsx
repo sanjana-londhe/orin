@@ -202,8 +202,8 @@ export function AllTasksView() {
 
       <div style={{ flex: 1 }} />
 
-      {/* ── New Task bar — sticky at bottom ── */}
-      <div style={{ position: "sticky", bottom: stickyBottom, padding: `10px 0 ${isMobile ? 12 : 28}px`, background: T.bg }}>
+      {/* ── New Task bar — sticky at bottom (desktop only; mobile uses FAB) ── */}
+      {!isMobile && <div style={{ position: "sticky", bottom: stickyBottom, padding: `10px 0 28px`, background: T.bg }}>
 
         <div style={{
           background: T.surface, borderRadius: 12,
@@ -313,7 +313,7 @@ export function AllTasksView() {
             </>
           )}
         </div>
-      </div>
+      </div>}
 
     </div>
     </div>
