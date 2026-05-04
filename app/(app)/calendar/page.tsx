@@ -720,7 +720,7 @@ export default function CalendarPage() {
   const [viewDate, setViewDate]     = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [createDate, setCreateDate] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<TaskWithSubtasks | null>(null);
-  const [dayTaskList, setDayTaskList]   = useState<{ date: string; tasks: TaskWithSubtasks[] } | null>(null);
+  const [dayTaskList, setDayTaskList]   = useState<string | null>(null); // just the date — tasks come from live tasksByDate
 
   // Fetch only the ±1 month window around the current view — much smaller payload
   const viewYear  = viewDate.getFullYear();
@@ -828,7 +828,7 @@ export default function CalendarPage() {
           <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} onUpdate={(id, patch) => updateTask({ id, patch })} />
         )}
         {dayTaskList && (
-          <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
+          <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
         )}
         <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
       </div>
@@ -920,7 +920,7 @@ export default function CalendarPage() {
                   })}
                   {overflow > 0 && (
                     <button
-                      onClick={e => { e.stopPropagation(); setDayTaskList({ date: key, tasks: dayTasks }); }}
+                      onClick={e => { e.stopPropagation(); setDayTaskList(key); }}
                       style={{ background: "none", border: "none", cursor: "pointer", fontSize: 10, color: "#059669", fontWeight: 600, padding: "0 4px", textAlign: "left", fontFamily: "inherit" }}>
                       +{overflow} more
                     </button>
@@ -947,7 +947,7 @@ export default function CalendarPage() {
         />
       )}
       {dayTaskList && (
-        <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
+        <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
       )}
       <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
     </div>
