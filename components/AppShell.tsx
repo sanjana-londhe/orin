@@ -140,8 +140,9 @@ export function AppShell({ userName, email, initial, children }: Props) {
 
             {/* Actions */}
             {([
-              { icon: <Zap size={15} color="#059669" />, label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
-              { icon: <User size={15} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+              { icon: <Sparkles size={15} color="#59d10b" />, label: "Orin Insight",       action: () => { setShowMenu(false); setAiOpen(true); } },
+              { icon: <Zap size={15} color="#059669" />,      label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
+              { icon: <User size={15} color="#4a6d47" />,     label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
             ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
               <button key={item.label} onClick={item.action} style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%",
