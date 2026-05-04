@@ -45,7 +45,7 @@ export function AllTasksView() {
   const isMobile    = useIsMobile();
   const { editingTaskId, setEditingTaskId } = useUIStore();
 
-  const [completedOpen, setCompletedOpen] = useState(false);
+  // completedOpen removed — completed tasks are always shown at bottom
   const [formOpen, setFormOpen]     = useState(false);
   const [title, setTitle]           = useState("");
   const [emotion, setEmotion]       = useState<Emotion>("NEUTRAL");
@@ -146,7 +146,15 @@ export function AllTasksView() {
         </h1>
       </div>
 
-      {/* Task list */}
+      {/* Tasks (N) label */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: T.textSecondary }}>Tasks</span>
+        <span style={{ fontSize: 12, color: T.textMuted }}>
+          ({allTasks.filter(t => !t.isCompleted).length})
+        </span>
+      </div>
+
+      {/* Active task list */}
       <div style={{ marginBottom: 10 }}>
         {isLoading ? (
           <SkeletonTaskList count={4} />
@@ -165,52 +173,29 @@ export function AllTasksView() {
         )}
       </div>
 
-      {/* Completed section */}
-      <div style={{ marginBottom: 10 }}>
-        <button
-          onClick={() => setCompletedOpen(o => !o)}
-          style={{
-            display: "flex", alignItems: "center", gap: 10,
-            padding: "13px 18px", background: T.surface,
-            borderRadius: 12, border: `1px solid ${T.border}`,
-            cursor: "pointer", fontFamily: "inherit",
-            fontSize: 13.5, fontWeight: 600, color: T.textPrimary,
-            width: "100%", textAlign: "left", transition: "background 0.1s",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.background = T.stone200)}
-          onMouseLeave={e => (e.currentTarget.style.background = T.surface)}
-        >
-          <svg
-            width="11" height="11" viewBox="0 0 12 12" fill="none"
-            stroke={T.borderStrong} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            style={{ transition: "transform 0.2s", transform: completedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}
-          >
-            <path d="M4 2l4 4-4 4"/>
-          </svg>
-          Completed
-          {completedTasks.length > 0 && (
+      {/* Completed tasks — always at bottom, no toggle */}
+      {completedTasks.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          {/* Divider with count badge */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, padding: "0 2px" }}>
+            <div style={{ flex: 1, height: 1, background: T.border }} />
             <span
               key={completedTasks.length}
               style={{
-                marginLeft: "auto",
-                fontSize: 12, fontWeight: 700,
-                padding: "2px 8px", borderRadius: 999,
+                fontSize: 11, fontWeight: 700,
+                padding: "2px 10px", borderRadius: 999,
                 background: "#f2fdec", color: "#059669",
                 border: "1px solid #c8f7ae",
                 animation: "count-pop 0.3s ease",
               }}
             >
-              ✓ {completedTasks.length}
+              ✓ {completedTasks.length} done
             </span>
-          )}
-        </button>
-
-        {completedOpen && completedTasks.length > 0 && (
-          <div style={{ marginTop: 6 }}>
-            <TaskGrid tasks={completedTasks} isLoading={false} />
+            <div style={{ flex: 1, height: 1, background: T.border }} />
           </div>
-        )}
-      </div>
+          <TaskGrid tasks={completedTasks} isLoading={false} />
+        </div>
+      )}
 
       <div style={{ flex: 1 }} />
 
