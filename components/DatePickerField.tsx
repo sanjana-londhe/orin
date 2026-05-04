@@ -254,9 +254,6 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                     <span style={{ fontSize: 14, color: D.limeInk }}>Pick a date</span>
                     <ChevronRight size={14} color={D.textMuted} />
                   </button>
-                  {value && (
-                    null
-                  )}
                 </>
               )}
               {showCal && (
@@ -314,10 +311,6 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                       <span style={{ fontSize: 13.5, color: D.limeInk, fontWeight: showCal ? 600 : 400 }}>Pick a date</span>
                       <ChevronRight size={13} color={showCal ? D.accent : D.textMuted} />
                     </button>
-                    {value && (
-                      <>
-                      null
-                    )}
                   </div>
                   {showCal && <MiniCalendar selected={value} onSelect={iso => select(iso)} />}
                 </>
