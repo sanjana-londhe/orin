@@ -437,6 +437,7 @@ export default function CalendarPage() {
                   height: 130, overflow: "hidden",
                   borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
                   borderBottom: "1px solid #dde4de",
+                  borderTop: isToday ? "2px solid #059669" : "none",
                   padding: "6px 6px 4px",
                   background: isOtherMonth ? "#fafbf7" : "#fff",
                   cursor: "pointer", transition: "background 0.1s",
