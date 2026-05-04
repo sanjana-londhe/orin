@@ -211,7 +211,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                 width: "100%", border: "none", outline: "none", fontFamily: "inherit",
                 fontSize: 13, color: T.textSecondary, background: "transparent",
                 resize: "none", boxSizing: "border-box", lineHeight: 1.6,
-                padding: "10px 14px 10px 48px",
+                padding: "10px 14px",
               }}
             />
           </div>
