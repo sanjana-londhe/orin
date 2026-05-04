@@ -7,6 +7,9 @@ import { DeferralModal } from "@/components/DeferralModal";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { FeelingPickerField, type Feeling } from "@/components/FeelingPickerField";
+import { DatePickerField } from "@/components/DatePickerField";
+import { TimePickerField } from "@/components/TimePickerField";
 
 // design.md tokens
 const T = {
@@ -137,67 +140,107 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
     setEditing(false);
   }
 
-  // ── Edit form ──────────────────────────────────────────────────────
+  // ── Edit form — same structure as task creation bar ──────────────────
   if (editing) {
     return (
       <div style={{ padding: "6px 8px" }}>
         <div style={{
-          background: T.surface, border: `1.5px solid ${T.accent}`, borderRadius: 10,
-          padding: "14px 16px", boxShadow: "0 0 0 3px rgba(5,150,105,0.08)",
+          background: T.surface,
+          borderRadius: 12,
+          border: `1px solid ${T.accent}`,
+          boxShadow: "0 0 0 3px rgba(5,150,105,0.07)",
         }}>
-          <input
-            ref={editTitleRef}
-            value={editTitle}
-            onChange={e => setEditTitle(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(false); }}
-            style={{
-              width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-              fontSize: 14, fontWeight: 500, color: T.textPrimary,
-              background: "transparent", marginBottom: 12, display: "block",
-            }}
-          />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
-            <div>
-              <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Due date</label>
-              <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)}
-                style={{ width: "100%", fontSize: 13, padding: "6px 10px", borderRadius: 6, border: `1.5px solid ${T.border}`, outline: "none", fontFamily: "inherit", background: T.stone100, boxSizing: "border-box", color: T.textPrimary }} />
+          {/* Title row */}
+          <div style={{ display: "flex", alignItems: "flex-start", padding: "12px 14px 12px 16px" }}>
+            <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: "50%",
+                border: `1.5px solid ${T.accent}`, background: "transparent",
+              }} />
             </div>
-            <div>
-              <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Due time</label>
-              <input type="time" value={editTime} onChange={e => setEditTime(e.target.value)} disabled={!editDate}
-                style={{ width: "100%", fontSize: 13, padding: "6px 10px", borderRadius: 6, border: `1.5px solid ${T.border}`, outline: "none", fontFamily: "inherit", background: editDate ? T.stone100 : T.stone200, boxSizing: "border-box", color: T.textPrimary }} />
+            <input
+              ref={editTitleRef}
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(false); }}
+              style={{
+                flex: 1, border: "none", outline: "none", fontFamily: "inherit",
+                fontSize: 14, fontWeight: 450, color: T.textPrimary,
+                background: "transparent", display: "block",
+              }}
+            />
+          </div>
+
+          {/* Pickers — Feeling → Date → Time */}
+          <div style={{ borderTop: `1px solid ${T.border}`, padding: "12px 14px" }}>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
+              gap: isMobile ? 8 : 10,
+            }}>
+              <FeelingPickerField
+                value={editEmotion as Feeling}
+                onChange={v => setEditEmotion(v as typeof editEmotion)}
+                label="Feeling"
+                dropUp={isMobile}
+              />
+              <DatePickerField
+                value={editDate}
+                onChange={setEditDate}
+                label="Due date"
+                dropUp={isMobile}
+              />
+              <TimePickerField
+                value={editTime}
+                onChange={setEditTime}
+                label="Due time (optional)"
+                selectedDate={editDate}
+                dropUp={isMobile}
+              />
             </div>
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em" }}>Feeling</label>
-            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-              {EMOTIONS.map(s => { const active = editEmotion === s.value; return (
-                <button key={s.value} onClick={() => setEditEmotion(s.value)} style={{
-                  display: "inline-flex", alignItems: "center", gap: 4,
-                  padding: "3px 10px 3px 7px", borderRadius: 999,
-                  fontSize: 11.5, fontWeight: 600,
-                  background: active ? s.fg : s.bg, color: active ? "#fff" : s.fg,
-                  border: "none", cursor: "pointer", fontFamily: "inherit",
-                }}>{s.emoji} {s.label}</button>
-              ); })}
-            </div>
+
+          {/* Note */}
+          <div style={{ borderTop: `1px solid ${T.border}` }}>
+            <textarea
+              value={editNote}
+              onChange={e => setEditNote(e.target.value)}
+              placeholder="Add a note…"
+              rows={2}
+              style={{
+                width: "100%", border: "none", outline: "none", fontFamily: "inherit",
+                fontSize: 13, color: T.textSecondary, background: "transparent",
+                resize: "none", boxSizing: "border-box", lineHeight: 1.6,
+                padding: "10px 14px 10px 48px",
+              }}
+            />
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 10.5, fontWeight: 700, color: T.textMuted, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Note</label>
-            <textarea value={editNote} onChange={e => setEditNote(e.target.value)} placeholder="Add a note…" rows={2}
-              style={{ width: "100%", fontSize: 13, padding: "7px 10px", borderRadius: 6, border: `1.5px solid ${T.border}`, outline: "none", fontFamily: "inherit", background: T.stone100, resize: "vertical", boxSizing: "border-box", color: T.textPrimary }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-            <button onClick={() => setEditing(false)}
-              style={{ padding: "6px 14px", borderRadius: 6, border: `1.5px solid ${T.border}`, background: T.surface, color: T.textSecondary, fontSize: 12.5, cursor: "pointer", fontFamily: "inherit" }}>
-              Cancel
-            </button>
-            <button onClick={saveEdit}
-              style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: T.accent, color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
-              onMouseEnter={e => (e.currentTarget.style.background = T.accentHover)}
-              onMouseLeave={e => (e.currentTarget.style.background = T.accent)}>
-              Save
-            </button>
+
+          {/* Actions */}
+          <div style={{
+            borderTop: `1px solid ${T.border}`,
+            padding: "10px 14px",
+            display: "flex", justifyContent: "flex-end", gap: 8,
+          }}>
+            <button onClick={() => setEditing(false)} style={{
+              padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
+              background: T.surface, color: T.textSecondary, fontSize: 12.5,
+              cursor: "pointer", fontFamily: "inherit",
+            }}>Cancel</button>
+            <button
+              onClick={saveEdit}
+              disabled={!editTitle.trim()}
+              style={{
+                padding: "6px 16px", borderRadius: 6, border: "none",
+                background: editTitle.trim() ? T.accent : T.stone200,
+                color: editTitle.trim() ? "#fff" : T.textMuted,
+                fontSize: 12.5, fontWeight: 600,
+                cursor: editTitle.trim() ? "pointer" : "default",
+                fontFamily: "inherit", transition: "background 0.12s",
+              }}
+              onMouseEnter={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = T.accentHover; }}
+              onMouseLeave={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = T.accent; }}
+            >Save</button>
           </div>
         </div>
       </div>
