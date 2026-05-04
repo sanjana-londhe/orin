@@ -130,7 +130,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
   const [deferOpen, setDeferOpen]     = useState(false);
   const [editing, setEditing]         = useState(false);
-  const [completing, setCompleting]   = useState(false); // animation in-flight
+  const [completing, setCompleting]         = useState(false); // animation in-flight
+  const [showUncompletePrompt, setShowUncompletePrompt] = useState(false);
   const [editTitle, setEditTitle]     = useState(task.title);
   const [editDate, setEditDate]       = useState(getIsoDate(task.dueAt));
   const [editTime, setEditTime]       = useState(getIsoTime(task.dueAt));
@@ -309,7 +310,16 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
           <div
             onClick={() => {
-              if (done) { onUncomplete?.(task.id); return; }
+              if (done) {
+                // Future tasks need a prompt to reschedule
+                const todayIso = new Date().toISOString().slice(0, 10);
+                if (due && due.isoDate > todayIso) {
+                  setShowUncompletePrompt(true);
+                } else {
+                  onUncomplete?.(task.id);
+                }
+                return;
+              }
               setCompleting(true);
               setTimeout(() => { onMarkDone?.(task.id); setCompleting(false); }, 500);
             }}
@@ -361,7 +371,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                   onClick={() => !done && setDeferOpen(true)}
                   style={{
                     fontSize: 12, fontWeight: 500,
-                    color: due.overdue ? T.danger : due.isToday ? T.accent : T.textTertiary,
+                    color: done ? T.textMuted : due.overdue ? T.danger : due.isToday ? T.accent : T.textTertiary,
                     cursor: done ? "default" : "pointer",
                     textDecoration: "none",
                     borderBottom: done ? "none" : `1px dashed ${due.overdue ? T.danger : T.borderStrong}`,
@@ -421,6 +431,50 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
       </div>
 
       {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />}
+
+      {/* Prompt when uncompleting a future task */}
+      {showUncompletePrompt && (
+        <>
+          <div onClick={() => setShowUncompletePrompt(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(8,45,29,0.2)", backdropFilter: "blur(2px)" }} />
+          <div style={{
+            position: "fixed", top: "50%", left: "50%",
+            transform: "translate(-50%, -50%)", zIndex: 201,
+            width: 300, background: "#fff", borderRadius: 12,
+            border: "1px solid #dde4de", boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+            padding: "20px",
+          }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 6px" }}>Future task</p>
+            <p style={{ fontSize: 13, color: "#3d5a4a", margin: "0 0 16px", lineHeight: 1.5 }}>
+              This task is due <strong>{due?.dateLabel}</strong>. Would you like to move it to today?
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button
+                onClick={() => {
+                  const todayIso = new Date().toISOString().slice(0, 10);
+                  onUpdate?.(task.id, { dueAt: new Date(`${todayIso}T00:00:00.000Z`) as unknown as Date });
+                  onUncomplete?.(task.id);
+                  setShowUncompletePrompt(false);
+                }}
+                style={{ padding: "10px", borderRadius: 8, border: "none", background: "#059669", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Move to today
+              </button>
+              <button
+                onClick={() => { onUncomplete?.(task.id); setShowUncompletePrompt(false); }}
+                style={{ padding: "10px", borderRadius: 8, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Keep original date
+              </button>
+              <button
+                onClick={() => setShowUncompletePrompt(false)}
+                style={{ padding: "6px", borderRadius: 8, border: "none", background: "none", color: "#b9d3c4", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
