@@ -403,7 +403,7 @@ export default function CalendarPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
           {days.map((day, i) => {
             if (!day) return (
-              <div key={`empty-${i}`} style={{ minHeight: 110, borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", background: "#fafbf7" }} />
+              <div key={`empty-${i}`} style={{ height: 110, borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", background: "#fafbf7" }} />
             );
 
             const key          = isoDate(day);
@@ -418,7 +418,8 @@ export default function CalendarPage() {
               <div key={key}
                 onClick={() => setCreateDate(key)}
                 style={{
-                  minHeight: 110,
+                  height: 110, // fixed height — never grows with task count
+                  overflow: "hidden",
                   borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
                   borderBottom: "1px solid #dde4de",
                   borderTop: isToday ? "2px solid #059669" : "none",
