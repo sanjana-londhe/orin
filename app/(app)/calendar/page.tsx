@@ -479,11 +479,12 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
   );
 }
 
-// ── Mobile full-screen task info — creation UI style ─────────────────
+// ── Mobile full-screen task info — creation UI style + inline edit ───
 
-function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
+function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate }: {
   task: TaskWithSubtasks; onClose: () => void;
   onMarkDone: (id: string) => void; onMarkUndone: (id: string) => void;
+  onUpdate: (id: string, patch: Record<string, unknown>) => void;
 }) {
   const isDone  = task.isCompleted;
   const overdue = isOverdue(task);
@@ -495,9 +496,84 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
   const dateLabel = !taskIso ? null : taskIso === todayIso ? "Today" : taskIso === tmrIso ? "Tomorrow" : new Date(taskIso + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
   const note = (() => { try { return localStorage.getItem(`orin_note_${task.id}`) ?? ""; } catch { return ""; } })();
 
+  // Edit state
+  const [editing, setEditing]         = useState(false);
+  const [editTitle, setEditTitle]     = useState(task.title);
+  const [editEmotion, setEditEmotion] = useState<Feeling>(task.emotionalState as Feeling);
+  const [editDate, setEditDate]       = useState(taskIso ?? "");
+  const [editTime, setEditTime]       = useState(() => {
+    if (!task.dueAt) return "";
+    const iso = new Date(task.dueAt).toISOString();
+    return iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16);
+  });
+  const [editNote, setEditNote]       = useState(note);
+
+  function saveEdit() {
+    const dueAt = editDate
+      ? (editTime ? new Date(`${editDate}T${editTime}`).toISOString() : `${editDate}T00:00:00.000Z`)
+      : null;
+    onUpdate(task.id, { title: editTitle.trim() || task.title, emotionalState: editEmotion, dueAt: dueAt ?? undefined });
+    if (editNote !== note) {
+      try { editNote.trim() ? localStorage.setItem(`orin_note_${task.id}`, editNote) : localStorage.removeItem(`orin_note_${task.id}`); } catch {}
+    }
+    setEditing(false);
+  }
+
+  // ── Edit mode ──
+  if (editing) {
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 20, height: 20, borderRadius: "50%", border: "1.5px solid #059669", flexShrink: 0 }} />
+            <input
+              autoFocus
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              style={{ border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, fontWeight: 600, color: "#082d1d", background: "transparent", flex: 1 }}
+            />
+          </div>
+          <button onClick={() => setEditing(false)} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 8 }}>
+            <X size={13} />
+          </button>
+        </div>
+
+        {/* Pickers */}
+        <div style={{ borderBottom: "1px solid #e9ede9", padding: "12px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+          <FeelingPickerField value={editEmotion} onChange={v => setEditEmotion(v as Feeling)} label="Feeling" />
+          <DatePickerField value={editDate} onChange={setEditDate} label="Due date" />
+          <TimePickerField value={editTime} onChange={setEditTime} label="Due time (optional)" selectedDate={editDate} />
+        </div>
+
+        {/* Note */}
+        <div style={{ padding: "12px 18px", flex: 1 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 8px" }}>Note</p>
+          <textarea
+            value={editNote}
+            onChange={e => setEditNote(e.target.value)}
+            placeholder="Add a note…"
+            rows={4}
+            style={{ width: "100%", fontSize: 14, color: "#082d1d", background: "#f8f9f5", border: "1.5px solid #dde4de", borderRadius: 8, padding: "10px 12px", outline: "none", fontFamily: "inherit", resize: "none", lineHeight: 1.5, boxSizing: "border-box", transition: "border-color 0.14s" }}
+            onFocus={e => (e.currentTarget.style.borderColor = "#059669")}
+            onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")}
+          />
+        </div>
+
+        {/* Save */}
+        <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9", display: "flex", justifyContent: "flex-end" }}>
+          <button onClick={saveEdit} style={{ padding: "10px 28px", borderRadius: 8, border: "none", background: "#059669", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+            Save
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Info mode ──
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column" }}>
-      {/* Title row — matches creation form header */}
+      {/* Title row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
         <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", opacity: isDone ? 0.9 : 1, margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
         <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0 }}>
@@ -505,7 +581,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
         </button>
       </div>
 
-      {/* Fields section — matches creation pickers style */}
+      {/* Fields section */}
       <div style={{ borderBottom: "1px solid #e9ede9", padding: "12px 18px", display: "flex", flexWrap: "wrap", gap: 8 }}>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: colour + "22", color: colour }}>
           {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
@@ -529,8 +605,14 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone }: {
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* CTA — green both states, right-aligned, compact */}
-      <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9", display: "flex", justifyContent: "flex-end" }}>
+      {/* CTA row: Edit | Mark as done */}
+      <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+        <button
+          onClick={() => setEditing(true)}
+          style={{ padding: "10px 20px", borderRadius: 8, border: "1.5px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+        >
+          Edit
+        </button>
         <button
           onClick={() => { if (isDone) onMarkUndone(task.id); else onMarkDone(task.id); onClose(); }}
           style={{
@@ -743,7 +825,7 @@ export default function CalendarPage() {
 
         {/* Mobile: full-screen task info page */}
         {selectedTask && (
-          <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} />
+          <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} onUpdate={(id, patch) => updateTask({ id, patch })} />
         )}
         {dayTaskList && (
           <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
