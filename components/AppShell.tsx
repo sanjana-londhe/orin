@@ -61,19 +61,37 @@ export function AppShell({ userName, email, initial, children }: Props) {
             <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
           </Link>
 
-          {/* Profile avatar */}
-          <button
-            onClick={() => setShowMenu(o => !o)}
-            style={{
-              width: 34, height: 34, borderRadius: "50%",
-              background: "#059669", border: "none",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 13, fontWeight: 700, color: "#fff",
-              cursor: "pointer", overflow: "hidden", flexShrink: 0,
-            }}
-          >
-            {avatarContent}
-          </button>
+          {/* Right side: Orin Insight + profile avatar */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              onClick={() => setAiOpen(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 12px", borderRadius: 20,
+                background: "#082d1d", color: "#fff",
+                border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: 600,
+                boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
+                letterSpacing: "-0.01em", whiteSpace: "nowrap",
+              }}
+            >
+              <Sparkles size={12} color="#59d10b" />
+              Orin Insight
+            </button>
+
+            <button
+              onClick={() => setShowMenu(o => !o)}
+              style={{
+                width: 34, height: 34, borderRadius: "50%",
+                background: "#059669", border: "none",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 13, fontWeight: 700, color: "#fff",
+                cursor: "pointer", overflow: "hidden", flexShrink: 0,
+              }}
+            >
+              {avatarContent}
+            </button>
+          </div>
         </div>
       )}
 
@@ -142,9 +160,8 @@ export function AppShell({ userName, email, initial, children }: Props) {
 
             {/* Actions */}
             {([
-              { icon: <Sparkles size={15} color="#59d10b" />, label: "Orin Insight",       action: () => { setShowMenu(false); setAiOpen(true); } },
-              { icon: <Zap size={15} color="#059669" />,      label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
-              { icon: <User size={15} color="#4a6d47" />,     label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+              { icon: <Zap size={15} color="#059669" />,  label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
+              { icon: <User size={15} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
             ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
               <button key={item.label} onClick={item.action} style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%",
