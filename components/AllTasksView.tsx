@@ -270,18 +270,25 @@ export function AllTasksView() {
           {/* Note + actions */}
           {formOpen && (
             <>
-              <div style={{ borderTop: `1px solid ${T.border}` }}>
+              <div style={{ borderTop: `1px solid ${T.border}`, padding: "12px 14px" }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: T.textTertiary, margin: "0 0 8px" }}>Note</p>
                 <textarea
                   value={note}
                   onChange={e => setNote(e.target.value)}
-                  placeholder="Add a note…"
+                  placeholder="Add a note or description…"
                   rows={2}
                   style={{
-                    width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-                    fontSize: 13, color: T.textSecondary, background: "transparent",
-                    resize: "none", boxSizing: "border-box", lineHeight: 1.6,
-                    padding: "10px 14px",
+                    width: "100%", outline: "none", fontFamily: "inherit",
+                    fontSize: 12.5, color: T.textPrimary,
+                    background: T.stone100,
+                    border: `1.5px solid ${T.border}`,
+                    borderRadius: 8,
+                    padding: "8px 10px",
+                    resize: "vertical", boxSizing: "border-box", lineHeight: 1.5,
+                    transition: "border-color 0.14s",
                   }}
+                  onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
+                  onBlur={e => (e.currentTarget.style.borderColor = T.border)}
                 />
               </div>
 
