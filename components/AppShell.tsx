@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { AIPanel } from "@/components/AIPanel";
 import { ProfileModal } from "@/components/ProfileModal";
@@ -23,6 +24,7 @@ interface Props {
 export function AppShell({ userName, email, initial, children }: Props) {
   const [aiOpen, setAiOpen]   = useState(false);
   const isMobile              = useIsMobile();
+  const pathname              = usePathname();
 
   // Mobile user state (profile + energy — desktop handled by Sidebar)
   const [showMenu, setShowMenu]           = useState(false);
@@ -82,7 +84,7 @@ export function AppShell({ userName, email, initial, children }: Props) {
         paddingTop: isMobile ? 52 : 0,
         paddingBottom: isMobile ? 68 : 0,
       }}>
-        {!aiOpen && !isMobile && (
+        {!aiOpen && !isMobile && pathname !== "/calendar" && (
           <button
             onClick={() => setAiOpen(true)}
             style={{
