@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { X, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Task } from "@prisma/client";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { TimePickerField } from "@/components/TimePickerField";
 
 // ── helpers ───────────────────────────────────────────────────────────
 
@@ -20,18 +21,20 @@ function nextWeekday(day: number, hour = 9): Date {
   return result;
 }
 
-function tomorrow9am(): Date {
+function tomorrow(): Date {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   d.setHours(9, 0, 0, 0);
   return d;
 }
 
+function isoDate(d: Date): string { return d.toISOString().slice(0, 10); }
+function getToday(): string { return new Date().toISOString().slice(0, 10); }
+
 function formatPreview(d: Date): string {
   return (
     d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) +
-    " at " +
-    d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    " at " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
 }
 
@@ -39,26 +42,23 @@ function shortDate(d: Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function getToday() { return new Date().toISOString().slice(0, 10); }
-
 const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const DAYS   = ["Su","Mo","Tu","We","Th","Fr","Sa"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 const HOUR_OPTIONS = [
-  { label: "+1h",  hours: 1 },
-  { label: "+2h",  hours: 2 },
-  { label: "+4h",  hours: 4 },
-  { label: "+8h",  hours: 8 },
+  { label: "+1h", hours: 1 },
+  { label: "+2h", hours: 2 },
+  { label: "+4h", hours: 4 },
+  { label: "+8h", hours: 8 },
 ];
 
 type Tab = "defer" | "reschedule";
 type RescheduleKey = "tomorrow" | "weekend" | "next-weekday" | "custom";
 type Selection =
   | { kind: "hours"; hours: number }
-  | { kind: "reschedule"; fn: () => Date }
   | { kind: "custom-hours"; hours: number }
-  | { kind: "custom-date"; date: string; time: string };
+  | { kind: "date"; date: string; time: string };
 
 interface Props {
   open: boolean;
@@ -73,6 +73,7 @@ const T = {
   stone100:      "#f8f9f5",
   stone200:      "#f1f3ef",
   border:        "#dde4de",
+  borderHover:   "#c4cbc2",
   accent:        "#059669",
   accentHover:   "#047857",
   accentSubtle:  "#f2fdec",
@@ -84,7 +85,7 @@ const T = {
   textMuted:     "#b9d3c4",
 };
 
-// ── Inline Mini Calendar ──────────────────────────────────────────────
+// ── Mini Calendar ─────────────────────────────────────────────────────
 
 function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso: string) => void }) {
   const today = getToday();
@@ -106,18 +107,20 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
   }
 
   return (
-    <div style={{ paddingTop: 10 }}>
-      {/* Month nav */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+    <div style={{
+      background: T.surface, border: `1.5px solid ${T.border}`,
+      borderRadius: 12, padding: "12px 14px",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
+      width: 248, userSelect: "none", flexShrink: 0,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <button
           onClick={() => setView(v => { const d = new Date(v.year, v.month - 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
           style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: T.textTertiary, display: "flex", alignItems: "center" }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = T.stone200}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronLeft size={14} /></button>
-        <span style={{ fontSize: 12.5, fontWeight: 600, color: T.textPrimary }}>
-          {MONTHS[month]} {year}
-        </span>
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: T.textPrimary }}>{MONTHS[month]} {year}</span>
         <button
           onClick={() => setView(v => { const d = new Date(v.year, v.month + 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
           style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: T.textTertiary, display: "flex", alignItems: "center" }}
@@ -125,15 +128,11 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronRight size={14} /></button>
       </div>
-
-      {/* Day headers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", marginBottom: 4 }}>
         {DAYS.map(d => (
           <div key={d} style={{ textAlign: "center", fontSize: 11, fontWeight: 600, color: T.textMuted, padding: "2px 0" }}>{d}</div>
         ))}
       </div>
-
-      {/* Date cells */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
         {cells.map((day, i) => {
           if (!day) return <div key={i} />;
@@ -167,29 +166,36 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
 export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab = "defer" }: Props) {
   const isMobile = useIsMobile();
 
-  // derive dynamic "next same weekday" from task's due date
-  const taskDueDay  = task.dueAt ? new Date(task.dueAt).getDay() : 3;
-  const nextSameFn  = () => nextWeekday(taskDueDay, 9);
+  const taskDueDay    = task.dueAt ? new Date(task.dueAt).getDay() : 3;
   const nextSameLabel = `Next ${DAY_NAMES[taskDueDay]}`;
 
-  const rescheduleOptions: { key: RescheduleKey; label: string; sub: string; fn: (() => Date) | null }[] = [
-    { key: "tomorrow",     label: "Tomorrow",       sub: shortDate(tomorrow9am()),          fn: () => tomorrow9am() },
-    { key: "weekend",      label: "This weekend",   sub: shortDate(nextWeekday(6, 10)),     fn: () => nextWeekday(6, 10) },
-    { key: "next-weekday", label: nextSameLabel,     sub: shortDate(nextSameFn()),           fn: nextSameFn },
-    { key: "custom",       label: "Custom date",     sub: "",                                fn: null },
-  ];
+  function buildOptions() {
+    return [
+      { key: "tomorrow"     as RescheduleKey, label: "Tomorrow",       sub: shortDate(tomorrow()),              date: isoDate(tomorrow()) },
+      { key: "weekend"      as RescheduleKey, label: "This weekend",   sub: shortDate(nextWeekday(6, 10)),      date: isoDate(nextWeekday(6, 10)) },
+      { key: "next-weekday" as RescheduleKey, label: nextSameLabel,    sub: shortDate(nextWeekday(taskDueDay)), date: isoDate(nextWeekday(taskDueDay)) },
+      { key: "custom"       as RescheduleKey, label: "Custom date",    sub: "",                                  date: "" },
+    ];
+  }
+
+  // ── State ──
 
   const [tab, setTab]               = useState<Tab>(defaultTab);
   const [selected, setSelected]     = useState<Selection | null>(
-    defaultTab === "reschedule" ? { kind: "reschedule", fn: () => tomorrow9am() } : null
+    defaultTab === "reschedule"
+      ? { kind: "date", date: isoDate(tomorrow()), time: "09:00" }
+      : null
   );
   const [customHours, setCustomHours] = useState("");
-  const [rescheduleKey, setRescheduleKey] = useState<RescheduleKey>("tomorrow");
-  const [dropdownOpen, setDropdownOpen]   = useState(false);
-  const [calendarDate, setCalendarDate]   = useState("");
+
+  // Reschedule state
+  const [rescheduleKey, setRescheduleKey]   = useState<RescheduleKey>("tomorrow");
+  const [rescheduleDate, setRescheduleDate] = useState(isoDate(tomorrow()));
+  const [rescheduleTime, setRescheduleTime] = useState("09:00");
+  const [dropdownOpen, setDropdownOpen]     = useState(false);
+  const [calendarDate, setCalendarDate]     = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -205,22 +211,44 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
   const preview = useMemo<Date | null>(() => {
     if (!selected) return null;
     if (selected.kind === "hours")        return addHours(base, selected.hours);
-    if (selected.kind === "reschedule")   return selected.fn();
     if (selected.kind === "custom-hours") return isNaN(selected.hours) ? null : addHours(base, selected.hours);
-    if (selected.kind === "custom-date" && selected.date)
+    if (selected.kind === "date" && selected.date)
       return new Date(`${selected.date}T${selected.time || "09:00"}`);
     return null;
   }, [selected, base]);
 
+  function switchToReschedule() {
+    const opts = buildOptions();
+    const tomorrowOpt = opts[0];
+    setRescheduleKey("tomorrow");
+    setRescheduleDate(tomorrowOpt.date);
+    setRescheduleTime("09:00");
+    setCalendarDate("");
+    setSelected({ kind: "date", date: tomorrowOpt.date, time: "09:00" });
+  }
+
   function pickRescheduleKey(key: RescheduleKey) {
+    const opts = buildOptions();
+    const opt  = opts.find(o => o.key === key)!;
     setRescheduleKey(key);
-    setDropdownOpen(false);
-    const opt = rescheduleOptions.find(o => o.key === key)!;
     if (key !== "custom") {
-      setSelected({ kind: "reschedule", fn: opt.fn! });
-    } else {
-      setSelected(calendarDate ? { kind: "custom-date", date: calendarDate, time: "09:00" } : null);
+      setRescheduleDate(opt.date);
+      setSelected({ kind: "date", date: opt.date, time: rescheduleTime });
+      setDropdownOpen(false);
     }
+    // "custom" keeps dropdown open so user can pick from the calendar
+  }
+
+  function handleCalendarSelect(iso: string) {
+    setCalendarDate(iso);
+    setRescheduleDate(iso);
+    setSelected({ kind: "date", date: iso, time: rescheduleTime });
+    setDropdownOpen(false);
+  }
+
+  function handleTimeChange(time: string) {
+    setRescheduleTime(time);
+    if (rescheduleDate) setSelected({ kind: "date", date: rescheduleDate, time });
   }
 
   function handleConfirm() {
@@ -229,13 +257,21 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
   }
 
   function reset() {
-    setTab(defaultTab); setSelected(defaultTab === "reschedule" ? { kind: "reschedule", fn: () => tomorrow9am() } : null);
-    setCustomHours(""); setRescheduleKey("tomorrow"); setDropdownOpen(false); setCalendarDate("");
+    setTab(defaultTab); setSelected(null);
+    setCustomHours(""); setRescheduleKey("tomorrow");
+    setRescheduleDate(isoDate(tomorrow())); setRescheduleTime("09:00");
+    setDropdownOpen(false); setCalendarDate("");
   }
 
   function handleClose() { onOpenChange(false); reset(); }
 
   if (!open) return null;
+
+  const opts = buildOptions();
+  const currentOpt = opts.find(o => o.key === rescheduleKey)!;
+  const triggerLabel = rescheduleKey === "custom" && calendarDate
+    ? shortDate(new Date(calendarDate + "T12:00:00"))
+    : currentOpt.label;
 
   function optionStyle(active: boolean): React.CSSProperties {
     return {
@@ -248,11 +284,6 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
       transition: "all 0.12s ease",
     };
   }
-
-  const currentRescheduleOpt = rescheduleOptions.find(o => o.key === rescheduleKey)!;
-  const triggerLabel = rescheduleKey === "custom" && calendarDate
-    ? shortDate(new Date(calendarDate + "T12:00:00"))
-    : currentRescheduleOpt.label;
 
   const nativeInputStyle: React.CSSProperties = {
     height: 38, padding: "0 12px", borderRadius: 8,
@@ -320,12 +351,8 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             {(["defer", "reschedule"] as Tab[]).map(t => (
               <button key={t} onClick={() => {
                 setTab(t);
-                if (t === "reschedule") {
-                  setRescheduleKey("tomorrow");
-                  setSelected({ kind: "reschedule", fn: () => tomorrow9am() });
-                } else {
-                  setSelected(null);
-                }
+                if (t === "reschedule") switchToReschedule();
+                else setSelected(null);
               }} style={{
                 flex: 1, padding: "6px 0", borderRadius: 6,
                 border: tab === t ? `1px solid ${T.border}` : "1px solid transparent",
@@ -376,74 +403,92 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             </div>
           )}
 
-          {/* Reschedule tab — dropdown + optional calendar */}
+          {/* Reschedule tab */}
           {tab === "reschedule" && (
-            <div ref={dropdownRef} style={{ position: "relative" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
 
-              {/* Dropdown trigger */}
-              <button
-                onClick={() => setDropdownOpen(o => !o)}
-                style={{
-                  width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "9px 12px", height: 38, borderRadius: 8,
-                  border: `1.5px solid ${dropdownOpen ? T.accent : T.border}`,
-                  background: T.stone100, cursor: "pointer", fontFamily: "inherit",
-                  transition: "border-color 0.14s", boxSizing: "border-box", outline: "none",
-                }}
-                onMouseEnter={e => { if (!dropdownOpen) (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; }}
-                onMouseLeave={e => { if (!dropdownOpen) (e.currentTarget as HTMLElement).style.borderColor = T.border; }}
-              >
-                <span style={{ fontSize: 13, color: T.textPrimary }}>{triggerLabel}</span>
-                <ChevronDown
-                  size={13} color={T.textTertiary}
-                  style={{ flexShrink: 0, transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }}
-                />
-              </button>
+              {/* Date dropdown — left panel + calendar panel beside it (same as DatePickerField) */}
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 600, color: T.textTertiary, margin: "0 0 6px" }}>Due date</p>
+                <div ref={dropdownRef} style={{ position: "relative" }}>
 
-              {/* Dropdown panel */}
-              {dropdownOpen && (
-                <div style={{
-                  position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 10,
-                  background: T.surface, border: `1.5px solid ${T.border}`,
-                  borderRadius: 10, padding: "4px 0",
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
-                }}>
-                  {rescheduleOptions.map(opt => {
-                    const active = rescheduleKey === opt.key;
-                    return (
-                      <button key={opt.key} onClick={() => pickRescheduleKey(opt.key)} style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        width: "100%", padding: "9px 14px",
-                        background: active ? T.accentSubtle : "none",
-                        border: "none", cursor: "pointer", fontFamily: "inherit",
-                      }}
-                        onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = T.stone100; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = active ? T.accentSubtle : "none"; }}
-                      >
-                        <span style={{ fontSize: 13, color: T.textPrimary, fontWeight: active ? 600 : 400 }}>
-                          {opt.label}
-                        </span>
-                        {opt.sub && (
-                          <span style={{ fontSize: 11.5, color: T.textMuted, fontFamily: "monospace" }}>
-                            {opt.sub}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                  {/* Trigger */}
+                  <button
+                    onClick={() => setDropdownOpen(o => !o)}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "9px 12px", height: 38, borderRadius: 8,
+                      border: `1.5px solid ${dropdownOpen ? T.accent : T.border}`,
+                      background: T.stone100, cursor: "pointer", fontFamily: "inherit",
+                      transition: "border-color 0.14s", boxSizing: "border-box", outline: "none",
+                    }}
+                    onMouseEnter={e => { if (!dropdownOpen) (e.currentTarget as HTMLElement).style.borderColor = T.borderHover; }}
+                    onMouseLeave={e => { if (!dropdownOpen) (e.currentTarget as HTMLElement).style.borderColor = T.border; }}
+                  >
+                    <span style={{ fontSize: 13.5, color: T.textPrimary }}>{triggerLabel}</span>
+                    <ChevronDown
+                      size={13} color={T.textTertiary}
+                      style={{ flexShrink: 0, transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }}
+                    />
+                  </button>
+
+                  {/* Dropdown: options list + calendar side-by-side (mirrors DatePickerField) */}
+                  {dropdownOpen && (
+                    <div style={{
+                      position: "absolute", top: "calc(100% + 6px)", left: 0,
+                      display: "flex", gap: 8, zIndex: 20,
+                    }}>
+                      {/* Options list */}
+                      <div style={{
+                        background: T.surface, border: `1.5px solid ${T.border}`,
+                        borderRadius: 10, padding: "4px 0",
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 200,
+                      }}>
+                        {opts.map(opt => {
+                          const active = rescheduleKey === opt.key;
+                          return (
+                            <button key={opt.key} onClick={() => pickRescheduleKey(opt.key)} style={{
+                              display: "flex", alignItems: "center", justifyContent: "space-between",
+                              width: "100%", padding: "9px 14px",
+                              background: active ? T.accentSubtle : "none",
+                              border: "none", cursor: "pointer", fontFamily: "inherit",
+                            }}
+                              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = T.stone100; }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = active ? T.accentSubtle : "none"; }}
+                            >
+                              <span style={{ fontSize: 13.5, color: T.textPrimary, fontWeight: active ? 600 : 400 }}>
+                                {opt.label}
+                              </span>
+                              {opt.sub ? (
+                                <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "monospace" }}>{opt.sub}</span>
+                              ) : (
+                                <ChevronRight size={13} color={active ? T.accent : T.textMuted} />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Calendar panel — appears beside options when Custom is active */}
+                      {rescheduleKey === "custom" && (
+                        <MiniCalendar
+                          selected={calendarDate}
+                          onSelect={handleCalendarSelect}
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {/* Inline calendar when "custom" is selected */}
-              {rescheduleKey === "custom" && (
-                <MiniCalendar
-                  selected={calendarDate}
-                  onSelect={iso => {
-                    setCalendarDate(iso);
-                    setSelected({ kind: "custom-date", date: iso, time: "09:00" });
-                  }}
-                />
-              )}
+              {/* Time picker — same component as task creation */}
+              <TimePickerField
+                value={rescheduleTime}
+                onChange={handleTimeChange}
+                label="Due time (optional)"
+                selectedDate={rescheduleDate}
+                dropUp={isMobile}
+              />
             </div>
           )}
         </div>
@@ -497,8 +542,6 @@ function AddTimeButton({ onClick, disabled }: { onClick: () => void; disabled: b
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit", transition: "background 0.12s",
       }}
-    >
-      Take this time
-    </button>
+    >Take this time</button>
   );
 }
