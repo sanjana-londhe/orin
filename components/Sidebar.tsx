@@ -64,8 +64,8 @@ export function Sidebar({ userName, email = "", initial = "" }: Props) {
             position: "fixed", bottom: 72, right: 20, zIndex: 60,
             width: 52, height: 52, borderRadius: "50%",
             background: "#059669",
-            border: "1.5px solid #050e11",
-            boxShadow: "2px 2px 0 #050e11",
+            border: "none",
+            boxShadow: "0 4px 12px rgba(5,150,105,0.35)",
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: "pointer", color: "#fff",
           }}

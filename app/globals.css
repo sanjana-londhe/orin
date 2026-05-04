@@ -25,14 +25,12 @@
     --radius: 0.5rem;                   /* 8px base — r-md */
 
     /* ── Design tokens ── */
-    --ink: #050e11;                     /* ink-900 — strokes on cards/buttons */
     --lime: #59d10b;                    /* Kanpla lime — progress, chips */
     --lime-subtle: #f2fdec;             /* lime-50 — card footers, washes */
     --lime-muted: #e3ffd1;              /* lime-100 — insight callouts */
     --lime-border: #c8f7ae;             /* lime-200 */
     --lime-dark: #243000;               /* deep forest */
     --lime-ink: #082d1d;                /* darkest forest text */
-    --ink: #dde4de;                     /* was #050e11 — now soft border, no harsh black strokes */
     --stone-100: #f8f9f5;               /* sidebar bg */
     --stone-200: #f1f3ef;               /* muted surface */
     --stone-300: #e9ede9;               /* border light */
@@ -120,7 +118,6 @@
   --color-emotion-excited-border:  hsl(var(--emotion-excited-border));
 
   /* Design tokens */
-  --color-ink:          var(--ink);
   --color-lime:         var(--lime);
   --color-lime-subtle:  var(--lime-subtle);
   --color-lime-muted:   var(--lime-muted);

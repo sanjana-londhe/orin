@@ -35,8 +35,6 @@ function formatPreview(d: Date): string {
   );
 }
 
-// ── option configs ────────────────────────────────────────────────────
-
 const HOUR_OPTIONS = [
   { label: "+1h",  hours: 1 },
   { label: "+2h",  hours: 2 },
@@ -65,28 +63,26 @@ interface Props {
   defaultTab?: Tab;
 }
 
-// ── design tokens ─────────────────────────────────────────────────────
-
 const T = {
-  surface:      "#ffffff",
-  stone100:     "#f8f9f5",
-  stone200:     "#f1f3ef",
-  border:       "#dde4de",
-  ink:          "#050e11",
-  accent:       "#059669",
-  accentHover:  "#047857",
-  accentSubtle: "#f2fdec",
-  lime100:      "#e3ffd1",
-  lime200:      "#c8f7ae",
-  textPrimary:  "#082d1d",
-  textSecondary:"#3d5a4a",
-  textTertiary: "#4a6d47",
-  textMuted:    "#b9d3c4",
+  surface:       "#ffffff",
+  stone100:      "#f8f9f5",
+  stone200:      "#f1f3ef",
+  border:        "#dde4de",
+  accent:        "#059669",
+  accentHover:   "#047857",
+  accentSubtle:  "#f2fdec",
+  accentRing:    "rgba(5,150,105,0.07)",
+  lime100:       "#e3ffd1",
+  lime200:       "#c8f7ae",
+  textPrimary:   "#082d1d",
+  textSecondary: "#3d5a4a",
+  textTertiary:  "#4a6d47",
+  textMuted:     "#b9d3c4",
 };
 
 export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab = "defer" }: Props) {
-  const [tab, setTab]             = useState<Tab>(defaultTab);
-  const [selected, setSelected]   = useState<Selection | null>(null);
+  const [tab, setTab]               = useState<Tab>(defaultTab);
+  const [selected, setSelected]     = useState<Selection | null>(null);
   const [customHours, setCustomHours] = useState("");
   const [customDate, setCustomDate]   = useState("");
   const [customTime, setCustomTime]   = useState("09:00");
@@ -99,9 +95,8 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
     if (selected.kind === "hours")        return addHours(base, selected.hours);
     if (selected.kind === "reschedule")   return selected.fn();
     if (selected.kind === "custom-hours") return isNaN(selected.hours) ? null : addHours(base, selected.hours);
-    if (selected.kind === "custom-date" && selected.date) {
+    if (selected.kind === "custom-date" && selected.date)
       return new Date(`${selected.date}T${selected.time || "09:00"}`);
-    }
     return null;
   }, [selected, base]);
 
@@ -113,34 +108,35 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
   }
 
   function reset() {
-    setTab(defaultTab);
-    setSelected(null);
-    setCustomHours("");
-    setCustomDate("");
-    setCustomTime("09:00");
+    setTab(defaultTab); setSelected(null);
+    setCustomHours(""); setCustomDate(""); setCustomTime("09:00");
   }
 
   function handleClose() { onOpenChange(false); reset(); }
 
   if (!open) return null;
 
-  // ── option button style ───────────────────────────────────────────
-
+  // active option button — accent border + subtle bg (matches picker active style)
   function optionStyle(active: boolean): React.CSSProperties {
     return {
-      flex: 1,
-      padding: "10px 8px",
-      borderRadius: 8,
-      border: active ? `1.5px solid ${T.ink}` : `1.5px solid ${T.border}`,
+      flex: 1, padding: "10px 8px", borderRadius: 8,
+      border: `1.5px solid ${active ? T.accent : T.border}`,
       background: active ? T.accentSubtle : T.stone100,
       color: active ? T.accent : T.textPrimary,
       fontSize: 13, fontWeight: 700,
       cursor: "pointer", fontFamily: "inherit",
-      boxShadow: active ? `2px 2px 0 ${T.ink}` : "none",
-      transform: active ? "translate(-1px, -1px)" : "none",
       transition: "all 0.12s ease",
     };
   }
+
+  // native input style matching DatePickerField trigger
+  const nativeInputStyle: React.CSSProperties = {
+    height: 38, padding: "0 12px", borderRadius: 8,
+    border: `1.5px solid ${T.border}`, background: T.stone100,
+    fontSize: 13, color: T.textPrimary, fontFamily: "inherit",
+    outline: "none", boxSizing: "border-box", transition: "border-color 0.14s",
+    width: "100%",
+  };
 
   return (
     <div style={{
@@ -151,82 +147,89 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
       padding: isMobile ? 0 : "0 20px",
     }}>
       {/* Backdrop */}
-      <div
-        onClick={handleClose}
-        style={{ position: "absolute", inset: 0, background: "rgba(8,45,29,0.35)", backdropFilter: "blur(4px)" }}
-      />
+      <div onClick={handleClose} style={{
+        position: "absolute", inset: 0,
+        background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)",
+      }} />
 
-      {/* Card */}
+      {/* Card — matches TaskCreateModal style */}
       <div style={{
         position: "relative", zIndex: 1,
         width: "100%", maxWidth: isMobile ? "100%" : 460,
         background: T.surface,
-        borderRadius: isMobile ? "16px 16px 0 0" : 16,
-        border: `1.5px solid ${T.ink}`,
-        boxShadow: isMobile ? `0 -4px 24px rgba(0,0,0,0.12)` : `3px 3px 0 ${T.ink}`,
+        borderRadius: isMobile ? "16px 16px 0 0" : 12,
+        border: `1.5px solid ${T.accent}`,
+        boxShadow: isMobile
+          ? "0 -4px 24px rgba(0,0,0,0.08)"
+          : `0 0 0 3px ${T.accentRing}, 0 8px 24px rgba(0,0,0,0.08)`,
         overflow: "hidden",
         paddingBottom: isMobile ? 24 : 0,
       }}>
 
-        {/* Header */}
-        <div style={{ padding: "16px 20px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <p style={{
-              fontFamily: "monospace", fontSize: 10, fontWeight: 700,
-              color: T.accent, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px",
-            }}>
-              {task.dueAt ? `Due ${formatPreview(new Date(task.dueAt))}` : "No due date set"}
-            </p>
-            <h2 style={{
-              fontSize: 20, fontWeight: 800, color: T.textPrimary,
-              margin: 0, letterSpacing: "-0.03em", lineHeight: 1.2,
-            }}>
-              Give yourself more time
-            </h2>
+        {/* Title row — same as TaskCreateModal title row */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 18px",
+          borderBottom: `1px solid ${T.border}`,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: "50%",
+              border: `1.5px solid ${T.accent}`, flexShrink: 0,
+            }} />
+            <div>
+              <p style={{
+                fontFamily: "monospace", fontSize: 10, fontWeight: 700,
+                color: T.accent, textTransform: "uppercase", letterSpacing: "0.08em",
+                margin: "0 0 1px",
+              }}>
+                {task.dueAt ? `Currently ${formatPreview(new Date(task.dueAt))}` : "No due date"}
+              </p>
+              <h2 style={{
+                fontSize: 14, fontWeight: 600, color: T.textPrimary,
+                margin: 0, letterSpacing: "-0.01em",
+              }}>
+                Give yourself more time
+              </h2>
+            </div>
           </div>
-          <button
-            onClick={handleClose}
-            style={{
-              width: 28, height: 28, borderRadius: 8,
-              border: `1.5px solid ${T.border}`, background: T.stone100,
-              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-              color: T.textTertiary, flexShrink: 0,
-            }}
-          >
+          <button onClick={handleClose} style={{
+            width: 28, height: 28, borderRadius: 8,
+            border: `1.5px solid ${T.border}`, background: T.stone100,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            color: T.textTertiary, flexShrink: 0,
+          }}>
             <X size={13} />
           </button>
         </div>
 
-        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
-
-          {/* Tab switcher */}
+        {/* Tab switcher — same stone-100 toggle as other forms */}
+        <div style={{ padding: "12px 18px 0", borderBottom: `1px solid ${T.border}` }}>
           <div style={{
             display: "flex", gap: 4,
-            background: T.stone100, border: `1.5px solid ${T.border}`,
-            borderRadius: 10, padding: 4,
+            background: T.stone100, border: `1px solid ${T.border}`,
+            borderRadius: 8, padding: 3, marginBottom: 12,
           }}>
             {(["defer", "reschedule"] as Tab[]).map(t => (
-              <button
-                key={t}
-                onClick={() => { setTab(t); setSelected(null); }}
-                style={{
-                  flex: 1, padding: "7px 0",
-                  borderRadius: 7,
-                  border: tab === t ? `1.5px solid ${T.border}` : "1.5px solid transparent",
-                  background: tab === t ? T.surface : "transparent",
-                  color: tab === t ? T.textPrimary : T.textTertiary,
-                  fontSize: 12.5, fontWeight: tab === t ? 600 : 450,
-                  cursor: "pointer", fontFamily: "inherit",
-                  transition: "all 0.15s",
-                  boxShadow: tab === t ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
-                }}
-              >
+              <button key={t} onClick={() => { setTab(t); setSelected(null); }} style={{
+                flex: 1, padding: "6px 0", borderRadius: 6,
+                border: tab === t ? `1px solid ${T.border}` : "1px solid transparent",
+                background: tab === t ? T.surface : "transparent",
+                color: tab === t ? T.textPrimary : T.textTertiary,
+                fontSize: 12.5, fontWeight: tab === t ? 600 : 450,
+                cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+                boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
+              }}>
                 {t === "defer" ? "A bit more time" : "Pick a new day"}
               </button>
             ))}
           </div>
+        </div>
 
-          {/* Defer tab */}
+        {/* Tab content */}
+        <div style={{ padding: "12px 18px", borderBottom: `1px solid ${T.border}` }}>
+
+          {/* Defer */}
           {tab === "defer" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
@@ -240,8 +243,6 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   );
                 })}
               </div>
-
-              {/* Custom hours */}
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <input
                   type="number" min="1" max="168" placeholder="Custom hours…"
@@ -249,15 +250,9 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   onChange={e => {
                     setCustomHours(e.target.value);
                     const h = parseFloat(e.target.value);
-                    if (!isNaN(h) && h > 0) setSelected({ kind: "custom-hours", hours: h });
-                    else setSelected(null);
+                    setSelected(!isNaN(h) && h > 0 ? { kind: "custom-hours", hours: h } : null);
                   }}
-                  style={{
-                    flex: 1, height: 38, padding: "0 12px", borderRadius: 8,
-                    border: `1.5px solid ${T.border}`, background: T.stone100,
-                    fontSize: 13, color: T.textPrimary, fontFamily: "inherit", outline: "none",
-                    boxSizing: "border-box", transition: "border-color 0.14s",
-                  }}
+                  style={nativeInputStyle}
                   onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
                   onBlur={e => (e.currentTarget.style.borderColor = T.border)}
                 />
@@ -266,7 +261,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             </div>
           )}
 
-          {/* Reschedule tab */}
+          {/* Reschedule */}
           {tab === "reschedule" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
@@ -280,46 +275,21 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   );
                 })}
               </div>
-
-              {/* Custom date + time */}
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <p style={{
-                  fontFamily: "monospace", fontSize: 10, fontWeight: 700,
+                  fontFamily: "monospace", fontSize: 10, fontWeight: 600,
                   color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0,
-                }}>
-                  Pick a date
-                </p>
+                }}>Pick a date</p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  <input
-                    type="date" value={customDate}
-                    onChange={e => {
-                      setCustomDate(e.target.value);
-                      setSelected({ kind: "custom-date", date: e.target.value, time: customTime });
-                    }}
-                    style={{
-                      height: 38, padding: "0 12px", borderRadius: 8,
-                      border: `1.5px solid ${T.border}`, background: T.stone100,
-                      fontSize: 13, color: T.textPrimary, fontFamily: "inherit", outline: "none",
-                      boxSizing: "border-box", transition: "border-color 0.14s",
-                    }}
+                  <input type="date" value={customDate}
+                    onChange={e => { setCustomDate(e.target.value); setSelected({ kind: "custom-date", date: e.target.value, time: customTime }); }}
+                    style={nativeInputStyle}
                     onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
                     onBlur={e => (e.currentTarget.style.borderColor = T.border)}
                   />
-                  <input
-                    type="time" value={customTime}
-                    disabled={!customDate}
-                    onChange={e => {
-                      setCustomTime(e.target.value);
-                      if (customDate) setSelected({ kind: "custom-date", date: customDate, time: e.target.value });
-                    }}
-                    style={{
-                      height: 38, padding: "0 12px", borderRadius: 8,
-                      border: `1.5px solid ${T.border}`,
-                      background: customDate ? T.stone100 : T.stone200,
-                      fontSize: 13, color: T.textPrimary, fontFamily: "inherit", outline: "none",
-                      boxSizing: "border-box", transition: "border-color 0.14s",
-                      opacity: customDate ? 1 : 0.5,
-                    }}
+                  <input type="time" value={customTime} disabled={!customDate}
+                    onChange={e => { setCustomTime(e.target.value); if (customDate) setSelected({ kind: "custom-date", date: customDate, time: e.target.value }); }}
+                    style={{ ...nativeInputStyle, background: customDate ? T.stone100 : T.stone200, opacity: customDate ? 1 : 0.5 }}
                     onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
                     onBlur={e => (e.currentTarget.style.borderColor = T.border)}
                   />
@@ -327,66 +297,62 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
               </div>
             </div>
           )}
+        </div>
 
-          {/* Preview callout */}
-          {preview && (
+        {/* Preview — lime callout matching insight panel style */}
+        {preview && (
+          <div style={{ padding: "10px 18px", borderBottom: `1px solid ${T.border}` }}>
             <div style={{
               background: T.lime100, border: `1px solid ${T.lime200}`,
-              borderRadius: 12, padding: "12px 16px",
+              borderRadius: 8, padding: "10px 14px",
+              display: "flex", alignItems: "center", gap: 10,
             }}>
-              <p style={{
-                fontFamily: "monospace", fontSize: 10, fontWeight: 700,
-                color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 3px",
-              }}>
-                Giving yourself until
-              </p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary, margin: 0 }}>
-                {formatPreview(preview)}
-              </p>
+              <span style={{ fontSize: 16 }}>⏰</span>
+              <div>
+                <p style={{
+                  fontFamily: "monospace", fontSize: 10, fontWeight: 600,
+                  color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 1px",
+                }}>Giving yourself until</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: T.textPrimary, margin: 0 }}>
+                  {formatPreview(preview)}
+                </p>
+              </div>
             </div>
-          )}
-
-          {/* Actions */}
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, paddingTop: 2 }}>
-            <button onClick={handleClose} style={{
-              padding: "8px 18px", borderRadius: 8,
-              border: `1.5px solid ${T.border}`, background: T.surface,
-              color: T.textSecondary, fontSize: 13, fontWeight: 500,
-              cursor: "pointer", fontFamily: "inherit",
-            }}>
-              Not now
-            </button>
-            <PrimaryButton disabled={!preview} onClick={handleConfirm} label="Take this time" />
           </div>
+        )}
+
+        {/* Actions — same as TaskCreateModal actions row */}
+        <div style={{
+          padding: "10px 18px",
+          display: "flex", justifyContent: "flex-end", gap: 8,
+        }}>
+          <button onClick={handleClose} style={{
+            padding: "6px 14px", borderRadius: 6,
+            border: `1px solid ${T.border}`, background: T.surface,
+            color: T.textSecondary, fontSize: 12.5, cursor: "pointer", fontFamily: "inherit",
+          }}>Not now</button>
+          <AddTimeButton disabled={!preview} onClick={handleConfirm} />
         </div>
       </div>
     </div>
   );
 }
 
-function PrimaryButton({ onClick, disabled, label }: { onClick: () => void; disabled: boolean; label: string }) {
-  const [hovered, setHovered] = useState(false);
+function AddTimeButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
+  const [hov, setHov] = useState(false);
   return (
     <button
-      onClick={onClick}
-      disabled={disabled}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onClick={onClick} disabled={disabled}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
-        padding: "8px 20px", borderRadius: 8,
-        border: disabled ? `1.5px solid #e9ede9` : `1.5px solid #050e11`,
-        background: disabled ? "#e9ede9" : "#059669",
-        color: disabled ? "#c4cbc2" : "#fff",
-        fontSize: 13, fontWeight: 700,
+        padding: "6px 16px", borderRadius: 6, border: "none",
+        background: disabled ? "#c4cbc2" : hov ? "#047857" : "#059669",
+        color: "#fff", fontSize: 12.5, fontWeight: 700,
         cursor: disabled ? "default" : "pointer",
-        fontFamily: "inherit",
-        boxShadow: !disabled && hovered ? "2px 3px 0 #050e11" : "none",
-        transform: !disabled && hovered ? "translateY(-1px)" : "none",
-        transition: "all 0.15s ease",
-        opacity: disabled ? 0.6 : 1,
+        fontFamily: "inherit", transition: "background 0.12s",
       }}
     >
-      {label}
+      Take this time
     </button>
   );
 }

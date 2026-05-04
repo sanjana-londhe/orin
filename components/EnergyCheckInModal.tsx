@@ -90,14 +90,14 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
         backdropFilter: "blur(4px)",
       }} />
 
-      {/* Card — section-level card with ink border */}
+      {/* Card */}
       <div style={{
         position: "relative", zIndex: 1,
         width: "100%", maxWidth: 520,
         background: "#ffffff",
         borderRadius: 16,
-        border: "1.5px solid #050e11",
-        boxShadow: "3px 3px 0 #050e11",
+        border: "1.5px solid #059669",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
         overflow: "hidden",
       }}>
 
@@ -172,11 +172,9 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
                       padding: "14px 4px",
                       borderRadius: 12,
-                      border: active ? "1.5px solid #050e11" : "1.5px solid #dde4de",
+                      border: active ? "1.5px solid #059669" : "1.5px solid #dde4de",
                       background: active ? "#f2fdec" : "#f8f9f5",
                       cursor: "pointer", fontFamily: "inherit",
-                      boxShadow: active ? "2px 2px 0 #050e11" : "none",
-                      transform: active ? "translate(-1px, -1px)" : "none",
                       transition: "all 0.15s ease",
                     }}
                   >
@@ -239,11 +237,9 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
                       padding: "10px 6px",
                       borderRadius: 8,
-                      border: active ? "1.5px solid #050e11" : "1.5px solid #dde4de",
+                      border: active ? "1.5px solid #059669" : "1.5px solid #dde4de",
                       background: active ? "#f2fdec" : "#f8f9f5",
                       cursor: "pointer", fontFamily: "inherit",
-                      boxShadow: active ? "2px 2px 0 #050e11" : "none",
-                      transform: active ? "translate(-1px, -1px)" : "none",
                       transition: "all 0.12s ease",
                     }}
                   >
@@ -345,15 +341,13 @@ function PrimaryButton({
       style={{
         width: "100%", padding: "12px 0",
         borderRadius: 8,
-        border: disabled ? "1.5px solid #e9ede9" : "1.5px solid #050e11",
-        background: disabled ? "#e9ede9" : "#059669",
+        border: "none",
+        background: disabled ? "#e9ede9" : hovered ? "#047857" : "#059669",
         color: disabled ? "#c4cbc2" : "#fff",
         fontSize: 13.5, fontWeight: 700,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit",
-        boxShadow: !disabled && hovered ? "2px 3px 0 #050e11" : "none",
-        transform: !disabled && hovered ? "translateY(-1px)" : "none",
-        transition: "all 0.15s ease",
+        transition: "background 0.15s ease",
       }}
     >
       {label}

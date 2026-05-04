@@ -124,25 +124,19 @@ App currently uses Inter (configured in layout.tsx).
 
 ## 7. Shadows
 
-### Ink offset shadow — featured cards, section cards, primary button hover
+### Modal / overlay card
 
 ```css
-/* Resting — featured/quadrant/review cards */
-border: 1.5px solid #050e11;
-box-shadow: 3px 3px 0 #050e11;
-
-/* Hover — grid cards on hover only */
-border-color: #050e11;
-box-shadow: 3px 3px 0 #050e11;
-transform: translate(-1px, -1px);
-
-/* Primary button hover */
-box-shadow: 2px 3px 0 #050e11;
-transform: translateY(-1px);
+border: 1.5px solid #059669;   /* accent border */
+box-shadow: 0 8px 32px rgba(0,0,0,0.12);
 ```
 
-> Ink strokes apply to: featured cards, section-level cards (quadrant, review), primary buttons on hover.
-> They do NOT apply to: navigation items, sidebar, regular grid task cards at rest.
+### Section card (creation bar, edit form)
+
+```css
+border: 1px solid #059669;
+box-shadow: 0 0 0 3px rgba(5,150,105,0.07);
+```
 
 ### Regular task card
 
@@ -151,7 +145,7 @@ transform: translateY(-1px);
 border: 1px solid rgba(0,0,0,0.04);
 box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 18px rgba(0,0,0,0.07);
 
-/* Hover — lift only, no ink */
+/* Hover — lift only */
 transform: translateY(-3px);
 box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 16px 44px rgba(0,0,0,0.11);
 ```
@@ -261,27 +255,27 @@ Section title: 15px 800, lime-ink, letter-spacing -0.03em
 Section divider: <hr> border-top 1px stone-400; margin 32px 0
 
 Featured card (full-width, urgent):
-  border: 1.5px solid ink-900
-  box-shadow: 3px 3px 0 ink-900
+  border: 1.5px solid #059669
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12)
   Card header: emoji + pills + property table + title
   Footer bg: lime-50
 
 Grid card (2-column):
   border: 1.5px solid stone-400
-  hover → ink border + 3px 3px 0 ink shadow + translate(-1px,-1px)
+  hover → accent border + subtle shadow + translate(-1px,-1px)
 ```
 
 ---
 
 ## 13. Design principles
 
-1. **Ink strokes on cards and CTAs only.** Never on navigation items or sidebar.
-2. **Two greens:** Emerald `#059669` = actions/interactive. Lime `#59d10b` = data/progress/chips.
-3. **White main, stone sidebar.** `#ffffff` main content, `#f8f9f5` sidebar, `#fcfdfc` shell.
-4. **Visible borders.** `#dde4de` everywhere — no rgba hairlines.
-5. **Active nav = solid emerald.** Emerald bg + white text + ink border on active nav item.
-6. **Pills always have borders.** Matching emotion border on all state pills.
-7. **Section chips before titles.** Lime chip (e.g. `🔥 Urgent`) → bold title → subtitle.
-8. **Emotion is always redundant.** Colour + emoji + text label. Never colour alone.
-9. **Relief copy.** "Giving yourself more time" not "Task postponed".
-10. **Monospace for data.** Fragment Mono on timestamps, eyebrows, kbd hints. Never on nav.
+1. **Two greens:** Emerald `#059669` = actions/interactive. Lime `#59d10b` = data/progress/chips.
+2. **White main, stone sidebar.** `#ffffff` main content, `#f8f9f5` sidebar, `#fcfdfc` shell.
+3. **Visible borders.** `#dde4de` everywhere — no rgba hairlines.
+4. **Active nav = solid emerald.** Emerald bg + white text + accent border on active nav item.
+5. **Pills always have borders.** Matching emotion border on all state pills.
+6. **Section chips before titles.** Lime chip (e.g. `🔥 Urgent`) → bold title → subtitle.
+7. **Emotion is always redundant.** Colour + emoji + text label. Never colour alone.
+8. **Relief copy.** "Giving yourself more time" not "Task postponed".
+9. **Monospace for data.** Fragment Mono on timestamps, eyebrows, kbd hints. Never on nav.
+10. **Accent borders on interactive cards.** Modals and creation forms use `#059669` border with soft drop shadow — no black ink strokes.
