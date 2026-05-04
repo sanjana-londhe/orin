@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -8,17 +8,15 @@ import type { TaskWithSubtasks } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 
 const EMOTION_COLOUR: Record<string, string> = {
-  DREADING: "#c23934",
-  ANXIOUS:  "#886a00",
-  NEUTRAL:  "#c4cbc2",
-  WILLING:  "#2b6b5e",
-  EXCITED:  "#59d10b",
+  DREADING: "#c23934", ANXIOUS: "#886a00", NEUTRAL: "#c4cbc2",
+  WILLING: "#2b6b5e", EXCITED: "#59d10b",
 };
 const EMOTION_EMOJI: Record<string, string> = {
   DREADING: "😮‍💨", ANXIOUS: "😟", NEUTRAL: "😐", WILLING: "🙂", EXCITED: "🤩",
 };
 const EMOTION_LABEL: Record<string, string> = {
-  DREADING: "Dreading", ANXIOUS: "Anxious", NEUTRAL: "Neutral", WILLING: "Willing", EXCITED: "Excited",
+  DREADING: "Dreading", ANXIOUS: "Anxious", NEUTRAL: "Neutral",
+  WILLING: "Willing", EXCITED: "Excited",
 };
 
 const DAY_NAMES   = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -28,86 +26,163 @@ const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"
 
 function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
 
-// ── Desktop task popover ─────────────────────────────────────────────
-
-interface PopoverProps {
-  task: TaskWithSubtasks;
-  anchorRect: DOMRect;
-  containerRect: DOMRect;
-  onClose: () => void;
-  onMarkDone: (id: string) => void;
+function fmtDate(iso: string) {
+  return new Date(iso + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+}
+function fmtTime(dueAt: Date | string | null) {
+  if (!dueAt) return null;
+  const iso = new Date(dueAt).toISOString();
+  if (iso.slice(11) === "00:00:00.000Z") return null;
+  return new Date(dueAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+function loadNote(id: string) {
+  try { return localStorage.getItem(`orin_note_${id}`) ?? ""; } catch { return ""; }
 }
 
-function TaskPopover({ task, anchorRect, containerRect, onClose, onMarkDone }: PopoverProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const top  = anchorRect.bottom - containerRect.top + 6;
-  let left   = anchorRect.left - containerRect.left;
-  const PW   = 240;
-  if (left + PW > containerRect.width - 8) left = anchorRect.right - containerRect.left - PW;
-  if (left < 4) left = 4;
+// ── Task Detail Modal (unified desktop + mobile) ─────────────────────
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [onClose]);
+function TaskDetailModal({ task, onClose, onMarkDone }: {
+  task: TaskWithSubtasks; onClose: () => void; onMarkDone: (id: string) => void;
+}) {
+  const isMobile = useIsMobile();
+  const time = fmtTime(task.dueAt);
+  const note = loadNote(task.id);
+  const colour = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
 
-  return (
-    <div ref={ref} style={{
-      position: "absolute", top, left, width: PW, zIndex: 50,
-      background: "#fff", border: "1.5px solid #dde4de",
-      borderRadius: 10, boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-      padding: "12px 14px", fontSize: 12,
-    }}>
-      <div style={{ height: 3, background: EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2", borderRadius: "4px 4px 0 0", margin: "-12px -14px 10px" }} />
-      <p style={{ fontWeight: 700, fontSize: 13, color: "#1A1814", marginBottom: 4, lineHeight: 1.3 }}>{task.title}</p>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-        <span style={{ fontSize: 14 }}>{EMOTION_EMOJI[task.emotionalState]}</span>
-        <span style={{ color: EMOTION_COLOUR[task.emotionalState], fontWeight: 600 }}>{EMOTION_LABEL[task.emotionalState]}</span>
-        {task.dueAt && <span style={{ color: "#B0A89E", marginLeft: "auto" }}>{new Date(task.dueAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
-      </div>
-      {task.deferredCount > 0 && <p style={{ color: "#c23934", fontSize: 11, marginBottom: 8 }}>deferred {task.deferredCount}×</p>}
-      <div style={{ display: "flex", gap: 6 }}>
-        <button onClick={() => { onMarkDone(task.id); onClose(); }} style={{ flex: 1, padding: "5px 0", borderRadius: 6, border: "1px solid #dde4de", background: "#059669", color: "#fff", fontWeight: 700, fontSize: 11, cursor: "pointer" }}>✓ Done</button>
-        <button onClick={onClose} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#4a6d47", fontSize: 11, cursor: "pointer" }}>Close</button>
-      </div>
-    </div>
-  );
-}
+  const cardStyle: React.CSSProperties = isMobile ? {
+    position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
+    background: "#fff", borderRadius: "16px 16px 0 0",
+    border: "1.5px solid #dde4de", borderBottom: "none",
+    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
+    overflow: "hidden",
+  } : {
+    position: "fixed", top: "50%", left: "50%",
+    transform: "translate(-50%, -50%)",
+    zIndex: 70, width: 360,
+    background: "#fff", borderRadius: 14,
+    border: "1.5px solid #dde4de",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+    overflow: "hidden",
+  };
 
-// ── Mobile task detail sheet ─────────────────────────────────────────
-
-function MobileTaskSheet({ task, onClose, onMarkDone }: { task: TaskWithSubtasks; onClose: () => void; onMarkDone: (id: string) => void }) {
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)" }} />
-      <div style={{
-        position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
-        background: "#fff", borderRadius: "16px 16px 0 0",
-        border: "1.5px solid #dde4de", borderBottom: "none",
-        boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
-        padding: "0 0 16px",
-        overflow: "hidden",
-      }}>
-        <div style={{ height: 4, background: EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2", marginBottom: 16 }} />
-        <div style={{ padding: "0 20px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: "#082d1d", lineHeight: 1.3, flex: 1, margin: 0 }}>{task.title}</p>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)" }} />
+      <div style={cardStyle}>
+        {/* Emotion colour bar */}
+        <div style={{ height: 4, background: colour }} />
+        <div style={{ padding: "16px 20px 20px" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+            <p style={{ fontSize: 17, fontWeight: 700, color: "#082d1d", lineHeight: 1.3, flex: 1, margin: 0 }}>{task.title}</p>
             <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 12 }}>
               <X size={13} />
             </button>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-            <span style={{ fontSize: 18 }}>{EMOTION_EMOJI[task.emotionalState]}</span>
-            <span style={{ color: EMOTION_COLOUR[task.emotionalState], fontWeight: 600, fontSize: 13 }}>{EMOTION_LABEL[task.emotionalState]}</span>
-            {task.dueAt && <span style={{ color: "#b9d3c4", fontSize: 12, marginLeft: "auto", fontFamily: "monospace" }}>{new Date(task.dueAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
+
+          {/* Meta */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 16 }}>{EMOTION_EMOJI[task.emotionalState]}</span>
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 999,
+                background: colour + "18", color: colour,
+              }}>{EMOTION_LABEL[task.emotionalState]}</span>
+            </div>
+            {task.dueAt && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 12, color: "#4a6d47", fontFamily: "monospace" }}>
+                  {fmtDate(isoDate(new Date(task.dueAt)))}{time ? ` · ${time}` : ""}
+                </span>
+              </div>
+            )}
+            {task.deferredCount > 0 && (
+              <span style={{ fontSize: 11, color: "#c23934" }}>Deferred {task.deferredCount}×</span>
+            )}
+            {note && (
+              <p style={{ fontSize: 13, color: "#3d5a4a", margin: 0, lineHeight: 1.5, background: "#f8f9f5", borderRadius: 8, padding: "8px 10px" }}>{note}</p>
+            )}
           </div>
-          <button onClick={() => { onMarkDone(task.id); onClose(); }} style={{
-            width: "100%", padding: "12px 0", borderRadius: 8, border: "none",
-            background: "#059669", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
-          }}>✓ Mark as done</button>
+
+          {/* Actions */}
+          {!task.isCompleted && (
+            <button onClick={() => { onMarkDone(task.id); onClose(); }} style={{
+              width: "100%", padding: "12px 0", borderRadius: 8, border: "none",
+              background: "#059669", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+            }}>✓ Mark as done</button>
+          )}
+          {task.isCompleted && (
+            <p style={{ textAlign: "center", fontSize: 13, color: "#059669", fontWeight: 600, margin: 0 }}>✓ Completed</p>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Day Task List Modal ("+N more" click) ────────────────────────────
+
+function DayTaskListModal({ date, tasks, onClose, onTaskClick }: {
+  date: string; tasks: TaskWithSubtasks[];
+  onClose: () => void; onTaskClick: (t: TaskWithSubtasks) => void;
+}) {
+  const isMobile = useIsMobile();
+  const cardStyle: React.CSSProperties = isMobile ? {
+    position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
+    background: "#fff", borderRadius: "16px 16px 0 0",
+    border: "1.5px solid #dde4de", borderBottom: "none",
+    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
+    maxHeight: "60vh", overflowY: "auto",
+  } : {
+    position: "fixed", top: "50%", left: "50%",
+    transform: "translate(-50%, -50%)",
+    zIndex: 70, width: 340,
+    background: "#fff", borderRadius: 14,
+    border: "1.5px solid #dde4de",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+    maxHeight: "70vh", overflowY: "auto",
+  };
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)" }} />
+      <div style={cardStyle}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
+          <div>
+            <p style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>Tasks</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
+          </div>
+          <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+            <X size={13} />
+          </button>
+        </div>
+        <div style={{ padding: "8px 0" }}>
+          {tasks.map(task => {
+            const colour = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+            const time   = fmtTime(task.dueAt);
+            return (
+              <button key={task.id} onClick={() => { onClose(); onTaskClick(task); }} style={{
+                display: "flex", alignItems: "center", gap: 12,
+                width: "100%", padding: "12px 20px",
+                background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
+                textAlign: "left",
+              }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+              >
+                <div style={{ width: 4, height: 36, borderRadius: 2, background: colour, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    textDecoration: task.isCompleted ? "line-through" : "none" }}>{task.title}</p>
+                  <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>
+                    {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}{time ? ` · ${time}` : ""}
+                  </p>
+                </div>
+                {task.isCompleted && <span style={{ fontSize: 12, color: "#059669" }}>✓</span>}
+              </button>
+            );
+          })}
         </div>
       </div>
     </>
@@ -121,36 +196,17 @@ function MonthPicker({ year, month, onSelect, onClose }: { year: number; month: 
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80, background: "rgba(8,45,29,0.15)" }} />
-      <div style={{
-        position: "fixed", top: 52, left: 12, right: 12, zIndex: 90,
-        background: "#fff", borderRadius: 12,
-        border: "1.5px solid #dde4de",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-        padding: "12px 8px",
-      }}>
-        {/* Year navigation */}
+      <div style={{ position: "fixed", top: 52, left: 12, right: 12, zIndex: 90, background: "#fff", borderRadius: 12, border: "1.5px solid #dde4de", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", padding: "12px 8px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, padding: "0 4px" }}>
-          <button onClick={() => setPickerYear(y => y - 1)} style={{ width: 32, height: 32, border: "1px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ChevronLeft size={14} color="#4a6d47" />
-          </button>
+          <button onClick={() => setPickerYear(y => y - 1)} style={{ width: 32, height: 32, border: "1px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={14} color="#4a6d47" /></button>
           <span style={{ fontSize: 15, fontWeight: 700, color: "#082d1d" }}>{pickerYear}</span>
-          <button onClick={() => setPickerYear(y => y + 1)} style={{ width: 32, height: 32, border: "1px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ChevronRight size={14} color="#4a6d47" />
-          </button>
+          <button onClick={() => setPickerYear(y => y + 1)} style={{ width: 32, height: 32, border: "1px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronRight size={14} color="#4a6d47" /></button>
         </div>
-        {/* Month grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
           {MONTH_SHORT.map((m, i) => {
             const isActive = pickerYear === year && i === month;
             return (
-              <button key={m} onClick={() => { onSelect(pickerYear, i); onClose(); }} style={{
-                padding: "10px 0", borderRadius: 8,
-                border: isActive ? "1.5px solid #059669" : "1.5px solid transparent",
-                background: isActive ? "#f2fdec" : "transparent",
-                color: isActive ? "#059669" : "#082d1d",
-                fontSize: 13, fontWeight: isActive ? 700 : 400,
-                cursor: "pointer", fontFamily: "inherit",
-              }}>{m}</button>
+              <button key={m} onClick={() => { onSelect(pickerYear, i); onClose(); }} style={{ padding: "10px 0", borderRadius: 8, border: isActive ? "1.5px solid #059669" : "1.5px solid transparent", background: isActive ? "#f2fdec" : "transparent", color: isActive ? "#059669" : "#082d1d", fontSize: 13, fontWeight: isActive ? 700 : 400, cursor: "pointer", fontFamily: "inherit" }}>{m}</button>
             );
           })}
         </div>
@@ -163,141 +219,82 @@ function MonthPicker({ year, month, onSelect, onClose }: { year: number; month: 
 
 function MobileCalendar({
   viewDate, setViewDate, tasksByDate, today,
-  onAddTask, onTaskTap,
+  onAddTask, onTaskTap, onDayOverflow,
 }: {
-  viewDate: Date;
-  setViewDate: (d: Date) => void;
-  tasksByDate: Map<string, TaskWithSubtasks[]>;
-  today: Date;
+  viewDate: Date; setViewDate: (d: Date) => void;
+  tasksByDate: Map<string, TaskWithSubtasks[]>; today: Date;
   onAddTask: (date: string) => void;
   onTaskTap: (task: TaskWithSubtasks) => void;
+  onDayOverflow: (date: string, tasks: TaskWithSubtasks[]) => void;
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const year  = viewDate.getFullYear();
   const month = viewDate.getMonth();
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysArr = Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1));
+  const daysArr = Array.from({ length: new Date(year, month + 1, 0).getDate() }, (_, i) => new Date(year, month, i + 1));
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-
       {/* Month header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "14px 16px 10px",
-        borderBottom: "1px solid #dde4de",
-        flexShrink: 0,
-        background: "#fff",
-      }}>
-        <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <ChevronLeft size={16} color="#4a6d47" />
-        </button>
-
-        {/* Clickable month/year → opens picker */}
-        <button
-          onClick={() => setPickerOpen(o => !o)}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 17, fontWeight: 800, color: "#082d1d",
-            letterSpacing: "-0.02em", fontFamily: "inherit",
-          }}
-        >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", flexShrink: 0, background: "#fff" }}>
+        <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={16} color="#4a6d47" /></button>
+        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 17, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
           {MONTH_NAMES[month]} {year}
           <ChevronRight size={14} color="#059669" style={{ transform: pickerOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
         </button>
-
-        <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <ChevronRight size={16} color="#4a6d47" />
-        </button>
+        <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronRight size={16} color="#4a6d47" /></button>
       </div>
 
-      {/* Month picker dropdown */}
-      {pickerOpen && (
-        <MonthPicker
-          year={year} month={month}
-          onSelect={(y, m) => setViewDate(new Date(y, m, 1))}
-          onClose={() => setPickerOpen(false)}
-        />
-      )}
+      {pickerOpen && <MonthPicker year={year} month={month} onSelect={(y, m) => setViewDate(new Date(y, m, 1))} onClose={() => setPickerOpen(false)} />}
 
-      {/* Day rows — scrollable */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      {/* Day rows */}
+      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
         {daysArr.map(day => {
           const key      = isoDate(day);
           const dayTasks = tasksByDate.get(key) ?? [];
           const isToday  = key === isoDate(today);
           const dow      = DAY_NAMES[day.getDay()];
-          const MAX      = 3;
+          const MAX      = 2;
           const visible  = dayTasks.slice(0, MAX);
           const overflow = dayTasks.length - MAX;
 
           return (
-            <div key={key} style={{
-              display: "flex", alignItems: "stretch",
-              borderBottom: "1px solid #f1f3ef",
-              minHeight: 56,
-              background: isToday ? "#f2fdec" : "#fff",
-            }}>
+            <div key={key} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : "#fff" }}>
               {/* Left: day + date */}
-              <div style={{
-                width: 56, flexShrink: 0,
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                gap: 2, padding: "10px 0",
-                borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}`,
-              }}>
-                <span style={{
-                  fontSize: 9.5, fontWeight: 600, letterSpacing: "0.04em",
-                  color: isToday ? "#059669" : "#b9d3c4",
-                  textTransform: "uppercase",
-                }}>{dow}</span>
-                <span style={{
-                  width: 28, height: 28, borderRadius: "50%",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, fontWeight: isToday ? 800 : 500,
-                  background: isToday ? "#059669" : "transparent",
-                  color: isToday ? "#fff" : "#082d1d",
-                }}>{day.getDate()}</span>
+              <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, padding: "10px 0", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
+                <span style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: "0.04em", color: isToday ? "#059669" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
+                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: isToday ? 800 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
               </div>
 
-              {/* Right: tasks + add button */}
-              <div
-                style={{ flex: 1, padding: "8px 12px 8px 10px", display: "flex", flexDirection: "column", gap: 4, cursor: "pointer" }}
-                onClick={() => onAddTask(key)}
-              >
+              {/* Right: tasks + add */}
+              <div style={{ flex: 1, padding: "8px 12px 8px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
                 {visible.map(task => (
-                  <div
-                    key={task.id}
-                    onClick={e => { e.stopPropagation(); onTaskTap(task); }}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "4px 8px",
-                      borderRadius: 6,
-                      background: EMOTION_COLOUR[task.emotionalState] + "18",
-                      borderLeft: `3px solid ${EMOTION_COLOUR[task.emotionalState]}`,
-                    }}
-                  >
-                    <span style={{ fontSize: 12, fontWeight: 500, color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-                      {task.dueAt && <span style={{ color: "#b9d3c4", marginRight: 4, fontSize: 11, fontFamily: "monospace" }}>{new Date(task.dueAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
+                  <div key={task.id} onClick={e => { e.stopPropagation(); onTaskTap(task); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 8px", borderRadius: 6, background: EMOTION_COLOUR[task.emotionalState] + "18", borderLeft: `3px solid ${EMOTION_COLOUR[task.emotionalState]}`, cursor: "pointer" }}>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
+                      {fmtTime(task.dueAt) && <span style={{ color: "#b9d3c4", marginRight: 4, fontSize: 11, fontFamily: "monospace" }}>{fmtTime(task.dueAt)}</span>}
                       {task.title}
                     </span>
                     {task.isCompleted && <span style={{ fontSize: 10, color: "#059669" }}>✓</span>}
                   </div>
                 ))}
                 {overflow > 0 && (
-                  <span style={{ fontSize: 11, color: "#b9d3c4", paddingLeft: 4 }}>+{overflow} more</span>
+                  <button onClick={e => { e.stopPropagation(); onDayOverflow(key, dayTasks); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#059669", fontWeight: 600, textAlign: "left", padding: "2px 4px", fontFamily: "inherit" }}>
+                    +{overflow} more
+                  </button>
                 )}
                 {dayTasks.length === 0 && (
-                  <span style={{ fontSize: 12, color: "#dde4de", display: "flex", alignItems: "center", gap: 4 }}>
+                  <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#dde4de", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: 0 }}>
                     <Plus size={12} /> Add task
-                  </span>
+                  </button>
+                )}
+                {dayTasks.length > 0 && (
+                  <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "1px 0" }}>
+                    <Plus size={11} /> Add
+                  </button>
                 )}
               </div>
             </div>
           );
         })}
-        {/* Bottom padding above nav bar */}
         <div style={{ height: 16 }} />
       </div>
     </div>
@@ -312,10 +309,10 @@ export default function CalendarPage() {
   const today        = new Date();
   const isMobile     = useIsMobile();
 
-  const [viewDate, setViewDate]   = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [viewDate, setViewDate]     = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [createDate, setCreateDate] = useState<string | null>(null);
-  const [popover, setPopover]     = useState<{ task: TaskWithSubtasks; rect: DOMRect } | null>(null);
-  const [mobileSheet, setMobileSheet] = useState<TaskWithSubtasks | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskWithSubtasks | null>(null);
+  const [dayTaskList, setDayTaskList]   = useState<{ date: string; tasks: TaskWithSubtasks[] } | null>(null);
 
   const { data: tasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "all"],
@@ -352,68 +349,37 @@ export default function CalendarPage() {
     return { days, month, year };
   }, [viewDate]);
 
-  function handleDayClick(day: Date, e: React.MouseEvent) {
-    if ((e.target as HTMLElement).closest("[data-task-pill]")) return;
-    setPopover(null);
-    setCreateDate(isoDate(day));
-  }
-
-  function handleTaskClick(task: TaskWithSubtasks, e: React.MouseEvent) {
-    e.stopPropagation();
-    const rect          = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const containerRect = containerRef.current!.getBoundingClientRect();
-    const relativeRect  = new DOMRect(rect.left - containerRect.left, rect.top - containerRect.top, rect.width, rect.height);
-    setPopover(popover?.task.id === task.id ? null : { task, rect: relativeRect });
-  }
-
-  const containerRect = containerRef.current?.getBoundingClientRect() ?? new DOMRect(0, 0, 800, 600);
-
   // ── Mobile render ─────────────────────────────────────────────────
   if (isMobile) {
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <MobileCalendar
-          viewDate={viewDate}
-          setViewDate={setViewDate}
-          tasksByDate={tasksByDate}
-          today={today}
+          viewDate={viewDate} setViewDate={setViewDate}
+          tasksByDate={tasksByDate} today={today}
           onAddTask={date => setCreateDate(date)}
-          onTaskTap={task => setMobileSheet(task)}
+          onTaskTap={task => setSelectedTask(task)}
+          onDayOverflow={(date, tasks) => setDayTaskList({ date, tasks })}
         />
 
-        {mobileSheet && (
-          <MobileTaskSheet
-            task={mobileSheet}
-            onClose={() => setMobileSheet(null)}
-            onMarkDone={id => { markDone(id); setMobileSheet(null); }}
-          />
+        {selectedTask && (
+          <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} />
         )}
-
-        <TaskCreateModal
-          open={!!createDate}
-          onOpenChange={open => { if (!open) setCreateDate(null); }}
-          defaultDate={createDate ?? undefined}
-        />
+        {dayTaskList && (
+          <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onTaskClick={t => setSelectedTask(t)} />
+        )}
+        <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
       </div>
     );
   }
 
   // ── Desktop render ────────────────────────────────────────────────
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", padding: "0" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
 
       {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "20px 28px 16px",
-        borderBottom: "1px solid #dde4de",
-        flexShrink: 0,
-      }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px 16px", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
         <div>
-          <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 6 }}>
-            Schedule
-          </p>
-          {/* Month + nav arrows inline */}
+          <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 6 }}>Schedule</p>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
             <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
@@ -440,9 +406,9 @@ export default function CalendarPage() {
               <div key={`empty-${i}`} style={{ minHeight: 110, borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", background: "#fafbf7" }} />
             );
 
-            const key        = isoDate(day);
-            const dayTasks   = tasksByDate.get(key) ?? [];
-            const isToday    = isoDate(day) === isoDate(today);
+            const key          = isoDate(day);
+            const dayTasks     = tasksByDate.get(key) ?? [];
+            const isToday      = key === isoDate(today);
             const isOtherMonth = day.getMonth() !== month;
             const MAX_VISIBLE  = 3;
             const visible      = dayTasks.slice(0, MAX_VISIBLE);
@@ -450,7 +416,7 @@ export default function CalendarPage() {
 
             return (
               <div key={key}
-                onClick={(e) => handleDayClick(day, e)}
+                onClick={() => setCreateDate(key)}
                 style={{
                   minHeight: 110,
                   borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
@@ -463,57 +429,49 @@ export default function CalendarPage() {
                 onMouseEnter={e => { if (!isOtherMonth && !isToday) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isToday ? "#f2fdec" : isOtherMonth ? "#fafbf7" : "#fff"; }}
               >
+                {/* Date number */}
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>
-                  <span style={{
-                    width: 24, height: 24, borderRadius: "50%",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, fontWeight: isToday ? 700 : 400,
-                    background: isToday ? "#059669" : "transparent",
-                    color: isToday ? "#fff" : isOtherMonth ? "#c4cbc2" : "#082d1d",
-                  }}>{day.getDate()}</span>
+                  <span style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isToday ? 700 : 400, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isOtherMonth ? "#c4cbc2" : "#082d1d" }}>
+                    {day.getDate()}
+                  </span>
                 </div>
 
+                {/* Task pills */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {visible.map(task => (
-                    <div key={task.id} data-task-pill="true"
-                      onClick={(e) => handleTaskClick(task, e)}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 4,
-                        padding: "2px 6px", borderRadius: 4,
-                        background: EMOTION_COLOUR[task.emotionalState] + "22",
-                        borderLeft: `3px solid ${EMOTION_COLOUR[task.emotionalState]}`,
-                        cursor: "pointer", overflow: "hidden",
-                      }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-                        {task.dueAt && new Date(task.dueAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + " "}
-                        {task.title}
+                    <div key={task.id}
+                      onClick={e => { e.stopPropagation(); setSelectedTask(task); }}
+                      style={{ display: "flex", alignItems: "center", gap: 4, padding: "2px 6px", borderRadius: 4, background: EMOTION_COLOUR[task.emotionalState] + "22", borderLeft: `3px solid ${EMOTION_COLOUR[task.emotionalState]}`, cursor: "pointer", overflow: "hidden" }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
+                        {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
                       </span>
                     </div>
                   ))}
-                  {overflow > 0 && <p style={{ fontSize: 10, color: "#b9d3c4", padding: "0 4px", margin: 0 }}>+{overflow} more</p>}
-                  {dayTasks.length === 0 && <div style={{ textAlign: "center", marginTop: 4, fontSize: 18, color: "#dde4de", lineHeight: 1 }}>+</div>}
+                  {overflow > 0 && (
+                    <button
+                      onClick={e => { e.stopPropagation(); setDayTaskList({ date: key, tasks: dayTasks }); }}
+                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: 10, color: "#059669", fontWeight: 600, padding: "0 4px", textAlign: "left", fontFamily: "inherit" }}>
+                      +{overflow} more
+                    </button>
+                  )}
+                  {dayTasks.length === 0 && (
+                    <div style={{ textAlign: "center", marginTop: 4, fontSize: 18, color: "#dde4de", lineHeight: 1 }}>+</div>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
-
-        {popover && containerRef.current && (
-          <TaskPopover
-            task={popover.task}
-            anchorRect={popover.rect}
-            containerRect={containerRef.current.getBoundingClientRect()}
-            onClose={() => setPopover(null)}
-            onMarkDone={markDone}
-          />
-        )}
       </div>
 
-      <TaskCreateModal
-        open={!!createDate}
-        onOpenChange={open => { if (!open) setCreateDate(null); }}
-        defaultDate={createDate ?? undefined}
-      />
+      {/* Modals */}
+      {selectedTask && (
+        <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} />
+      )}
+      {dayTaskList && (
+        <DayTaskListModal date={dayTaskList.date} tasks={dayTaskList.tasks} onClose={() => setDayTaskList(null)} onTaskClick={t => setSelectedTask(t)} />
+      )}
+      <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
     </div>
   );
 }
