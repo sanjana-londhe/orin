@@ -51,6 +51,11 @@ export async function GET(request: Request) {
     case "today-active":
       where = { ...where, isCompleted: false };
       break;
+    case "calendar":
+      // All tasks (complete + incomplete) that have a due date — for calendar view
+      where = { ...where, dueAt: { not: null } };
+      orderBy = { dueAt: "asc" };
+      break;
     default:
       // "all" — all incomplete, newest first
       where = { ...where, isCompleted: false };

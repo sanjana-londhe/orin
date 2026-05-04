@@ -55,81 +55,103 @@ function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
   return { background: "#EEFAF1", color: "#1A9444" };                        // Excited
 }
 
-// ── Task Detail Modal (unified desktop + mobile) ─────────────────────
+// ── Task Detail Modal — matches TaskCard todo design ─────────────────
 
 function TaskDetailModal({ task, onClose, onMarkDone }: {
   task: TaskWithSubtasks; onClose: () => void; onMarkDone: (id: string) => void;
 }) {
   const isMobile = useIsMobile();
-  const time = fmtTime(task.dueAt);
-  const note = loadNote(task.id);
-  const colour = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const time     = fmtTime(task.dueAt);
+  const note     = loadNote(task.id);
+  const colour   = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+  const isDone   = task.isCompleted;
+  const overdue  = isOverdue(task);
+
+  // date label matching TaskCard's fmtDue logic
+  const taskIso  = task.dueAt ? new Date(task.dueAt).toISOString().slice(0, 10) : null;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const tmrwIso  = (() => { const d = new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); })();
+  const dateLabel = !taskIso ? null
+    : taskIso === todayIso ? "Today"
+    : taskIso === tmrwIso  ? "Tomorrow"
+    : new Date(taskIso + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   const cardStyle: React.CSSProperties = isMobile ? {
     position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
     background: "#fff", borderRadius: "16px 16px 0 0",
     border: "1.5px solid #dde4de", borderBottom: "none",
-    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
-    overflow: "hidden",
+    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)", overflow: "hidden",
   } : {
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
-    zIndex: 70, width: 360,
-    background: "#fff", borderRadius: 14,
-    border: "1.5px solid #dde4de",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-    overflow: "hidden",
+    zIndex: 70, width: 400,
+    background: "#fff", borderRadius: 12,
+    border: "1px solid #dde4de",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)", overflow: "hidden",
   };
 
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)" }} />
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)", backdropFilter: "blur(2px)" }} />
       <div style={cardStyle}>
-        {/* Emotion colour bar */}
-        <div style={{ height: 4, background: colour }} />
-        <div style={{ padding: "16px 20px 20px" }}>
-          {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-            <p style={{ fontSize: 17, fontWeight: 700, color: "#082d1d", lineHeight: 1.3, flex: 1, margin: 0 }}>{task.title}</p>
-            <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 12 }}>
-              <X size={13} />
-            </button>
-          </div>
-
-          {/* Meta */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 16 }}>{EMOTION_EMOJI[task.emotionalState]}</span>
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 999,
-                background: colour + "18", color: colour,
-              }}>{EMOTION_LABEL[task.emotionalState]}</span>
-            </div>
-            {task.dueAt && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, color: "#4a6d47", fontFamily: "monospace" }}>
-                  {fmtDate(isoDate(new Date(task.dueAt)))}{time ? ` · ${time}` : ""}
-                </span>
-              </div>
-            )}
-            {task.deferredCount > 0 && (
-              <span style={{ fontSize: 11, color: "#c23934" }}>Deferred {task.deferredCount}×</span>
-            )}
-            {note && (
-              <p style={{ fontSize: 13, color: "#3d5a4a", margin: 0, lineHeight: 1.5, background: "#f8f9f5", borderRadius: 8, padding: "8px 10px" }}>{note}</p>
+        {/* Title row — same layout as TaskCard */}
+        <div style={{ display: "flex", alignItems: "flex-start", padding: "14px 16px", borderBottom: "1px solid #e9ede9" }}>
+          <div style={{
+            width: 20, height: 20, borderRadius: "50%",
+            border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
+            background: isDone ? "#059669" : "transparent",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, marginTop: 2, marginRight: 12,
+          }}>
+            {isDone && (
+              <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
+                <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             )}
           </div>
+          <p style={{ fontSize: 14, fontWeight: 450, color: isDone ? "#b9d3c4" : "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
+            {task.title}
+          </p>
+          <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 10 }}>
+            <X size={12} />
+          </button>
+        </div>
 
-          {/* Actions */}
-          {!task.isCompleted && (
-            <button onClick={() => { onMarkDone(task.id); onClose(); }} style={{
-              width: "100%", padding: "12px 0", borderRadius: 8, border: "none",
-              background: "#059669", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
-            }}>✓ Mark as done</button>
+        {/* Date + emotion — same chips as TaskCard row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "10px 16px", borderBottom: note ? "1px solid #e9ede9" : "none" }}>
+          {dateLabel && (
+            <span style={{ fontSize: 12, fontWeight: 500, color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#059669" }}>
+              {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
+            </span>
           )}
-          {task.isCompleted && (
-            <p style={{ textAlign: "center", fontSize: 13, color: "#059669", fontWeight: 600, margin: 0 }}>✓ Completed</p>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 3,
+            fontSize: 11, fontWeight: 600, padding: "1px 7px", borderRadius: 999,
+            background: colour + "22", color: colour,
+          }}>
+            {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+          </span>
+          {task.deferredCount > 0 && (
+            <span style={{ fontSize: 11, color: "#c23934" }}>deferred {task.deferredCount}×</span>
+          )}
+        </div>
+
+        {/* Note */}
+        {note && (
+          <div style={{ padding: "10px 16px", borderBottom: "1px solid #e9ede9" }}>
+            <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, lineHeight: 1.5 }}>{note}</p>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "10px 16px" }}>
+          <button onClick={onClose} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 12.5, cursor: "pointer", fontFamily: "inherit" }}>
+            Close
+          </button>
+          {!isDone && (
+            <button onClick={() => { onMarkDone(task.id); onClose(); }} style={{ padding: "6px 16px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+              ✓ Mark as done
+            </button>
           )}
         </div>
       </div>
@@ -137,7 +159,7 @@ function TaskDetailModal({ task, onClose, onMarkDone }: {
   );
 }
 
-// ── Day Task List Modal ("+N more" click) ────────────────────────────
+// ── Day Task List Modal — TaskCard-style rows ────────────────────────
 
 function DayTaskListModal({ date, tasks, onClose, onTaskClick }: {
   date: string; tasks: TaskWithSubtasks[];
@@ -148,58 +170,86 @@ function DayTaskListModal({ date, tasks, onClose, onTaskClick }: {
     position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
     background: "#fff", borderRadius: "16px 16px 0 0",
     border: "1.5px solid #dde4de", borderBottom: "none",
-    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
-    maxHeight: "60vh", overflowY: "auto",
+    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)", maxHeight: "60vh", overflowY: "auto",
   } : {
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
-    zIndex: 70, width: 340,
-    background: "#fff", borderRadius: 14,
-    border: "1.5px solid #dde4de",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-    maxHeight: "70vh", overflowY: "auto",
+    zIndex: 70, width: 420,
+    background: "#fff", borderRadius: 12,
+    border: "1px solid #dde4de",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)", maxHeight: "70vh", overflowY: "auto",
   };
 
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)" }} />
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)", backdropFilter: "blur(2px)" }} />
       <div style={cardStyle}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
           <div>
-            <p style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>Tasks</p>
-            <p style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
+            <p style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>All tasks</p>
+            <p style={{ fontSize: 13.5, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
           </div>
-          <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
-            <X size={13} />
+          <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+            <X size={12} />
           </button>
         </div>
-        <div style={{ padding: "8px 0" }}>
-          {tasks.map(task => {
-            const colour = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
-            const time   = fmtTime(task.dueAt);
-            return (
-              <button key={task.id} onClick={() => { onClose(); onTaskClick(task); }} style={{
-                display: "flex", alignItems: "center", gap: 12,
-                width: "100%", padding: "12px 20px",
-                background: "none", border: "none", cursor: "pointer", fontFamily: "inherit",
-                textAlign: "left",
+
+        {/* Task rows — match TaskCard layout */}
+        {tasks.map((task, idx) => {
+          const colour  = EMOTION_COLOUR[task.emotionalState] ?? "#c4cbc2";
+          const time    = fmtTime(task.dueAt);
+          const isDone  = task.isCompleted;
+          const overdue = isOverdue(task);
+          return (
+            <button
+              key={task.id}
+              onClick={() => { onClose(); onTaskClick(task); }}
+              style={{
+                display: "flex", alignItems: "flex-start",
+                width: "100%", padding: "12px 16px",
+                background: "none", border: "none", cursor: "pointer",
+                fontFamily: "inherit", textAlign: "left",
+                borderBottom: idx < tasks.length - 1 ? "1px solid #f1f3ef" : "none",
               }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
-              >
-                <div style={{ width: 4, height: 36, borderRadius: 2, background: colour, flexShrink: 0 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    textDecoration: task.isCompleted ? "line-through" : "none" }}>{task.title}</p>
-                  <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>
-                    {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}{time ? ` · ${time}` : ""}
-                  </p>
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+            >
+              {/* Checkbox */}
+              <div style={{
+                width: 18, height: 18, borderRadius: "50%",
+                border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
+                background: isDone ? "#059669" : "transparent",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, marginTop: 2, marginRight: 10,
+              }}>
+                {isDone && (
+                  <svg width="8" height="6" viewBox="0 0 11 8" fill="none">
+                    <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {/* Title */}
+                <p style={{ fontSize: 13.5, fontWeight: 450, color: isDone ? "#b9d3c4" : "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
+                  {task.title}
+                </p>
+                {/* Date + emotion chip */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {time && (
+                    <span style={{ fontSize: 11.5, fontWeight: 500, color: overdue ? "#c23934" : isDone ? "#b9d3c4" : "#4a6d47" }}>
+                      {overdue && "⚠ "}{time}
+                    </span>
+                  )}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: colour + "22", color: colour }}>
+                    {EMOTION_EMOJI[task.emotionalState]} {EMOTION_LABEL[task.emotionalState]}
+                  </span>
                 </div>
-                {task.isCompleted && <span style={{ fontSize: 12, color: "#059669" }}>✓</span>}
-              </button>
-            );
-          })}
-        </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </>
   );
@@ -331,8 +381,8 @@ export default function CalendarPage() {
   const [dayTaskList, setDayTaskList]   = useState<{ date: string; tasks: TaskWithSubtasks[] } | null>(null);
 
   const { data: tasks = [] } = useQuery<TaskWithSubtasks[]>({
-    queryKey: ["tasks", "all"],
-    queryFn: async () => { const res = await fetch("/api/tasks"); if (!res.ok) return []; return res.json(); },
+    queryKey: ["tasks", "calendar"],
+    queryFn: async () => { const res = await fetch("/api/tasks?filter=calendar"); if (!res.ok) return []; return res.json(); },
     retry: 1,
   });
 
