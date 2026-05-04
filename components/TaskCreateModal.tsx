@@ -207,7 +207,7 @@ function ModalForm({
           </div>
 
           <div style={{ marginTop: 20 }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>Note</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Note</p>
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
