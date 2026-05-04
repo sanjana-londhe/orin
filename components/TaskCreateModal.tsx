@@ -18,10 +18,6 @@ function getDefaultDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function getDefaultTime() {
-  const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
 
 export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle }: Props) {
   const [openCount, setOpenCount] = useState(0);
@@ -84,7 +80,6 @@ function ModalForm({
   const [emotion, setEmotion] = useState<Feeling>("NEUTRAL");
   const [note, setNote]       = useState("");
   const [error, setError]     = useState("");
-  const initTime = getDefaultTime();
   const [selectedDate, setSelectedDate] = useState(defaultDate ?? getDefaultDate());
   const [selectedTime, setSelectedTime] = useState("");
 
@@ -136,7 +131,7 @@ function ModalForm({
     setError("");
     mutate({
       title: title.trim(),
-      dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || initTime}`).toISOString() : null,
+      dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || "00:00"}`).toISOString() : null,
       emotion: emotion,
       note,
     });
