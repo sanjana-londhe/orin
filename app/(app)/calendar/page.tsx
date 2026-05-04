@@ -50,9 +50,9 @@ function isOverdue(task: TaskWithSubtasks): boolean {
 }
 
 function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
-  if (task.isCompleted) return { background: "#f1f3ef", color: "#b9d3c4" };
-  if (isOverdue(task))  return { background: "#FFF0EC", color: "#D14626" };
-  return { background: "#f2fdec", color: "#059669" };
+  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" }; // Neutral
+  if (isOverdue(task))  return { background: "#FFF0EC", color: "#D14626" }; // Dreading
+  return { background: "#EEFAF1", color: "#1A9444" };                        // Excited
 }
 
 // ── Task Detail Modal (unified desktop + mobile) ─────────────────────
