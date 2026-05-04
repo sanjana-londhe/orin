@@ -176,22 +176,15 @@ export function AllTasksView() {
       {/* Completed tasks — always at bottom, no toggle */}
       {completedTasks.length > 0 && (
         <div style={{ marginBottom: 10 }}>
-          {/* Divider with count badge */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, padding: "0 2px" }}>
-            <div style={{ flex: 1, height: 1, background: T.border }} />
+          {/* Completed label — same style as Tasks (N) */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: T.textSecondary }}>Completed</span>
             <span
               key={completedTasks.length}
-              style={{
-                fontSize: 11, fontWeight: 700,
-                padding: "2px 10px", borderRadius: 999,
-                background: "#f2fdec", color: "#059669",
-                border: "1px solid #c8f7ae",
-                animation: "count-pop 0.3s ease",
-              }}
+              style={{ fontSize: 12, color: T.textMuted, animation: "count-pop 0.3s ease" }}
             >
-              ✓ {completedTasks.length} done
+              ({completedTasks.length})
             </span>
-            <div style={{ flex: 1, height: 1, background: T.border }} />
           </div>
           <TaskGrid tasks={completedTasks} isLoading={false} />
         </div>
