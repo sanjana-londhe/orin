@@ -103,62 +103,69 @@ export function AppShell({ userName, email, initial, children }: Props) {
         {children}
       </main>
 
-      {/* ── Mobile user menu — bottom sheet ── */}
+      {/* ── Mobile user menu — compact dropdown anchored below avatar ── */}
       {isMobile && showMenu && (
         <>
           <div
             onClick={() => setShowMenu(false)}
-            style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)" }}
+            style={{ position: "fixed", inset: 0, zIndex: 60 }}
           />
           <div style={{
-            position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
+            position: "fixed", top: 60, right: 12, zIndex: 70,
             background: "#fff",
-            borderRadius: "16px 16px 0 0",
-            border: "1.5px solid #dde4de", borderBottom: "none",
-            boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
-            padding: "16px 0 8px",
+            borderRadius: 12,
+            border: "1.5px solid #dde4de",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            minWidth: 210,
+            overflow: "hidden",
           }}>
-            {/* User identity row */}
+            {/* User identity */}
             <div style={{
-              display: "flex", alignItems: "center", gap: 12,
-              padding: "0 20px 14px",
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "12px 14px",
               borderBottom: "1px solid #e9ede9",
             }}>
               <div style={{
-                width: 40, height: 40, borderRadius: "50%", background: "#059669",
+                width: 32, height: 32, borderRadius: "50%", background: "#059669",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 15, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
+                fontSize: 12, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
               }}>
                 {avatarContent}
               </div>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", margin: 0 }}>{currentName}</p>
-                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>Free plan</p>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentName}</p>
+                <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Free plan</p>
               </div>
             </div>
 
             {/* Actions */}
             {([
-              { icon: <Zap size={17} color="#059669" />, label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
-              { icon: <User size={17} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+              { icon: <Zap size={15} color="#059669" />, label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
+              { icon: <User size={15} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
             ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
               <button key={item.label} onClick={item.action} style={{
-                display: "flex", alignItems: "center", gap: 14, width: "100%",
-                padding: "15px 20px", background: "none", border: "none",
-                cursor: "pointer", fontSize: 15, color: "#082d1d", fontFamily: "inherit",
-              }}>
+                display: "flex", alignItems: "center", gap: 10, width: "100%",
+                padding: "12px 14px", background: "none", border: "none",
+                cursor: "pointer", fontSize: 13, color: "#082d1d", fontFamily: "inherit", textAlign: "left",
+              }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+              >
                 {item.icon} {item.label}
               </button>
             ))}
 
-            <div style={{ height: 1, background: "#e9ede9", margin: "4px 0" }} />
+            <div style={{ height: 1, background: "#e9ede9" }} />
             <form action={signOut}>
               <button type="submit" style={{
-                display: "flex", alignItems: "center", gap: 14, width: "100%",
-                padding: "15px 20px", background: "none", border: "none",
-                cursor: "pointer", fontSize: 15, color: "#c23934", fontFamily: "inherit",
-              }}>
-                <span style={{ fontSize: 18 }}>→</span> Log out
+                display: "flex", alignItems: "center", gap: 10, width: "100%",
+                padding: "12px 14px", background: "none", border: "none",
+                cursor: "pointer", fontSize: 13, color: "#c23934", fontFamily: "inherit",
+              }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+              >
+                <span>→</span> Log out
               </button>
             </form>
           </div>

@@ -29,32 +29,39 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
   useEffect(() => { if (open) setOpenCount(c => c + 1); }, [open]);
   if (!open) return null;
 
+  // Mobile: full-screen (no backdrop, fills viewport)
+  if (isMobile) {
+    return (
+      <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "#fff", display: "flex", flexDirection: "column" }}>
+        <ModalForm
+          key={openCount}
+          defaultDate={defaultDate}
+          defaultTitle={defaultTitle}
+          onClose={() => onOpenChange(false)}
+          isMobile
+        />
+      </div>
+    );
+  }
+
+  // Desktop: centered overlay
   return (
     <div
       onClick={() => onOpenChange(false)}
       style={{
         position: "fixed", inset: 0, zIndex: 200,
         background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)",
-        display: "flex",
-        alignItems: isMobile ? "flex-end" : "flex-start",
-        justifyContent: "center",
-        paddingTop: isMobile ? 0 : 80,
+        display: "flex", alignItems: "flex-start", justifyContent: "center",
+        paddingTop: 80,
       }}
     >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxWidth: isMobile ? "100%" : 580,
-          margin: isMobile ? 0 : "0 24px",
-        }}
-      >
+      <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 580, margin: "0 24px" }}>
         <ModalForm
           key={openCount}
           defaultDate={defaultDate}
           defaultTitle={defaultTitle}
           onClose={() => onOpenChange(false)}
-          isMobile={isMobile}
+          isMobile={false}
         />
       </div>
     </div>
@@ -124,18 +131,115 @@ function ModalForm({
     onSettled: () => { queryClient.invalidateQueries({ queryKey: ["tasks"] }); },
   });
 
-  const radius = isMobile ? "16px 16px 0 0" : "12px";
+  function handleCreate() {
+    if (!title.trim()) { setError("Add a title first"); return; }
+    setError("");
+    mutate({
+      title: title.trim(),
+      dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || initTime}`).toISOString() : null,
+      emotion: emotion,
+      note,
+    });
+  }
 
+  // ── Mobile: full-screen layout ───────────────────────────────────
+  if (isMobile) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+
+        {/* Fixed top bar: Cancel | New task | Create */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 16px", height: 54, flexShrink: 0,
+          borderBottom: "1px solid #e9ede9",
+          background: "#fff",
+        }}>
+          <button onClick={onClose} style={{
+            padding: "6px 0", background: "none", border: "none",
+            cursor: "pointer", fontSize: 14, color: "#3d5a4a", fontFamily: "inherit",
+          }}>Cancel</button>
+
+          <span style={{ fontSize: 15, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.01em" }}>New task</span>
+
+          <button
+            onClick={handleCreate}
+            disabled={isPending || !title.trim()}
+            style={{
+              padding: "6px 16px", borderRadius: 8, border: "none",
+              background: title.trim() ? "#059669" : "#e9ede9",
+              color: title.trim() ? "#fff" : "#c4cbc2",
+              fontSize: 14, fontWeight: 700,
+              cursor: title.trim() ? "pointer" : "default",
+              fontFamily: "inherit", transition: "background 0.12s",
+            }}
+          >
+            {isPending ? "…" : "Create"}
+          </button>
+        </div>
+
+        {/* Title input */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 14,
+          padding: "16px 18px",
+          borderBottom: "1px solid #e9ede9",
+          flexShrink: 0,
+        }}>
+          <div style={{ width: 22, height: 22, borderRadius: "50%", border: "1.5px solid #059669", flexShrink: 0 }} />
+          <input
+            autoFocus
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") handleCreate(); }}
+            placeholder="What needs doing?"
+            style={{
+              flex: 1, border: "none", outline: "none", fontFamily: "inherit",
+              fontSize: 16, fontWeight: 450, color: "#082d1d", background: "transparent",
+            }}
+          />
+        </div>
+
+        {/* Scrollable body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "20px 18px 32px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <FeelingPickerField value={emotion} onChange={setEmotion} label="Feeling" />
+            <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
+            <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time (optional)" selectedDate={selectedDate} />
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>Note</p>
+            <textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Add a note or description…"
+              rows={4}
+              style={{
+                width: "100%", fontSize: 14, color: "#082d1d",
+                background: "#f8f9f5", border: "1.5px solid #dde4de",
+                borderRadius: 10, padding: "12px 14px", outline: "none",
+                fontFamily: "inherit", resize: "none", lineHeight: 1.6,
+                boxSizing: "border-box", transition: "border-color 0.14s",
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#059669")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")}
+            />
+          </div>
+
+          {error && <p style={{ fontSize: 12, color: "#c23934", marginTop: 10 }}>{error}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Desktop: card layout ─────────────────────────────────────────
   return (
     <div style={{
       background: "#fff",
-      borderRadius: radius,
+      borderRadius: 12,
       border: "1.5px solid #059669",
-      boxShadow: isMobile ? "0 -4px 24px rgba(0,0,0,0.12)" : "0 4px 16px rgba(5,150,105,0.08)",
+      boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
       overflow: "hidden",
-      paddingBottom: isMobile ? 24 : 0,
     }}>
-      {/* Title row */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
         <div style={{ width: 20, height: 20, borderRadius: "50%", border: "1.5px solid #059669", flexShrink: 0 }} />
         <input
@@ -144,21 +248,12 @@ function ModalForm({
           onChange={e => setTitle(e.target.value)}
           onKeyDown={e => { if (e.key === "Escape") onClose(); }}
           placeholder="What needs doing?"
-          style={{
-            flex: 1, border: "none", outline: "none", fontFamily: "inherit",
-            fontSize: 14, color: "#082d1d", background: "transparent",
-          }}
+          style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }}
         />
       </div>
 
-      {/* Fields */}
       <div style={{ padding: "14px 18px 0" }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
-          gap: isMobile ? 10 : 12,
-          marginBottom: 14,
-        }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
           <FeelingPickerField value={emotion} onChange={setEmotion} label="Feeling" />
           <DatePickerField value={selectedDate} onChange={setSelectedDate} label="Due date" />
           <TimePickerField value={selectedTime} onChange={setSelectedTime} label="Due time (optional)" selectedDate={selectedDate} />
@@ -186,33 +281,12 @@ function ModalForm({
         {error && <p style={{ fontSize: 11.5, color: "#c23934", marginBottom: 8 }}>{error}</p>}
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, paddingBottom: 14 }}>
+          <button onClick={onClose} style={{ padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
           <button
-            onClick={onClose}
-            style={{
-              padding: isMobile ? "10px 20px" : "7px 16px",
-              borderRadius: 8, border: "1.5px solid #dde4de",
-              background: "#fff", color: "#3d5a4a",
-              fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              if (!title.trim()) { setError("Add a title first"); return; }
-              setError("");
-              mutate({
-                title: title.trim(),
-                dueAt: selectedDate ? new Date(`${selectedDate}T${selectedTime || initTime}`).toISOString() : null,
-                emotion: emotion,
-                note,
-              });
-            }}
+            onClick={handleCreate}
             disabled={isPending || !title.trim()}
             style={{
-              flex: isMobile ? 1 : undefined,
-              padding: isMobile ? "10px 20px" : "7px 20px",
-              borderRadius: 8, border: "none",
+              padding: "7px 20px", borderRadius: 8, border: "none",
               background: title.trim() ? "#059669" : "#c4cbc2",
               color: "#fff", fontSize: 13, fontWeight: 700,
               cursor: title.trim() ? "pointer" : "default",
