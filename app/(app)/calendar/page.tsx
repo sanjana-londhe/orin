@@ -99,7 +99,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
         <div style={{ display: "flex", alignItems: "flex-start", padding: "14px 16px", borderBottom: "1px solid #e9ede9" }}>
           {/* Checkbox — click to toggle done/undone directly */}
           <div
-            onClick={() => { isDone ? onMarkUndone(task.id) : onMarkDone(task.id); onClose(); }}
+            onClick={() => { if (isDone) onMarkUndone(task.id); else onMarkDone(task.id); onClose(); }}
             style={{
               width: 20, height: 20, borderRadius: "50%",
               border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
