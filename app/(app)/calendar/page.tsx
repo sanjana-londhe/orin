@@ -410,17 +410,19 @@ export default function CalendarPage() {
         flexShrink: 0,
       }}>
         <div>
-          <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 2 }}>
+          <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 6 }}>
             Schedule
           </p>
-          <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1 }}>
-            {new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-          </h1>
+          {/* Month + nav arrows inline */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+            <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
+              {new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+            </h1>
+            <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
+          </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 32, height: 32, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 16, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-          <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 32, height: 32, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 16, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
-        </div>
+        <div />
       </div>
 
       {/* Day headers */}

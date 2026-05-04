@@ -102,7 +102,7 @@ export function AppShell({ userName, email, initial, children }: Props) {
         paddingTop: isMobile ? 52 : 0,
         paddingBottom: isMobile ? 68 : 0,
       }}>
-        {!aiOpen && !isMobile && pathname !== "/calendar" && (
+        {!aiOpen && !isMobile && (
           <button
             onClick={() => setAiOpen(true)}
             style={{
