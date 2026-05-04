@@ -31,7 +31,7 @@ export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: P
   }
 
   return (
-    <div style={{ background: "white", borderRadius: 12, overflow: "hidden", border: "1px solid #dde4de" }}>
+    <div style={{ background: "white", borderRadius: 12, border: "1px solid #dde4de" }}>
       {tasks.map((task, i) => (
         <div
           key={task.id}

@@ -128,8 +128,10 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
   const tomorrow = getTomorrow();
   const [open, setOpen]       = useState(false);
   const [showCal, setShowCal] = useState(false);
+  const [fixedPos, setFixedPos] = useState({ top: 0, left: 0 });
   const isMobile = useIsMobile();
-  const ref = useRef<HTMLDivElement>(null);
+  const ref       = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -141,14 +143,21 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  function handleOpen() {
+    if (!isMobile && buttonRef.current) {
+      const r = buttonRef.current.getBoundingClientRect();
+      setFixedPos({ top: r.bottom + 6, left: r.left });
+    }
+    setOpen(o => !o);
+    setShowCal(calendarOnly);
+  }
+
   function select(val: string) { onChange(val); setOpen(false); setShowCal(false); }
 
   const displayText =
     value === today    ? "Today" :
     value === tomorrow ? "Tomorrow" :
     value              ? shortFmt(value) : "Pick a date";
-
-  const shouldDropUp = dropUp ?? false;
 
   // Mobile: full-width panel anchored above tab bar
   const mobileDropdownStyle: React.CSSProperties = {
@@ -161,13 +170,12 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
     overflowY: "auto",
   };
 
+  // Desktop: fixed to escape overflow:hidden ancestors, positioned below trigger
   const desktopPositionStyle: React.CSSProperties = {
-    position: "absolute",
-    ...(shouldDropUp
-      ? { bottom: "calc(100% + 6px)", top: "auto" }
-      : { top: "calc(100% + 6px)" }),
-    left: 0,
-    display: "flex", gap: 8, zIndex: 200,
+    position: "fixed",
+    top: fixedPos.top,
+    left: fixedPos.left,
+    display: "flex", gap: 8, zIndex: 300,
   };
 
   return (
@@ -177,8 +185,9 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
       )}
 
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => { setOpen(o => !o); setShowCal(calendarOnly); }}
+        onClick={handleOpen}
         style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,

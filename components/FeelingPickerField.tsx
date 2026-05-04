@@ -35,9 +35,11 @@ interface Props {
 }
 
 export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp }: Props) {
-  const [open, setOpen] = useState(false);
-  const isMobile = useIsMobile();
-  const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen]         = useState(false);
+  const [fixedPos, setFixedPos] = useState({ top: 0, left: 0 });
+  const isMobile  = useIsMobile();
+  const ref       = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -50,9 +52,15 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
   const selected = FEELINGS.find(f => f.value === value);
   const displayText = selected ? `${selected.emoji} ${selected.label}` : "How are you feeling?";
 
-  const shouldDropUp = dropUp ?? false;
+  function handleOpen() {
+    if (!isMobile && buttonRef.current) {
+      const r = buttonRef.current.getBoundingClientRect();
+      setFixedPos({ top: r.bottom + 6, left: r.left });
+    }
+    setOpen(o => !o);
+  }
 
-  // On mobile use fixed positioning anchored above the bottom nav bar
+  // Mobile: full-width panel anchored above tab bar
   const mobileDropdownStyle: React.CSSProperties = {
     position: "fixed",
     bottom: 68,
@@ -63,13 +71,12 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
     overflowY: "auto",
   };
 
+  // Desktop: fixed to escape overflow:hidden ancestors
   const desktopDropdownStyle: React.CSSProperties = {
-    position: "absolute",
-    ...(shouldDropUp
-      ? { bottom: "calc(100% + 6px)", top: "auto" }
-      : { top: "calc(100% + 6px)" }),
-    left: 0,
-    zIndex: 200,
+    position: "fixed",
+    top: fixedPos.top,
+    left: fixedPos.left,
+    zIndex: 300,
     minWidth: 190,
   };
 
@@ -80,8 +87,9 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
       )}
 
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen(o => !o)}
+        onClick={handleOpen}
         style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,

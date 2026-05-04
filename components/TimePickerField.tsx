@@ -45,11 +45,13 @@ interface Props {
 export function TimePickerField({ value, onChange, label = "Due time", selectedDate, dropUp }: Props) {
   const [open, setOpen]             = useState(false);
   const [showCustom, setShowCustom] = useState(false);
+  const [fixedPos, setFixedPos]     = useState({ top: 0, left: 0 });
   const isMobile = useIsMobile();
 
   const isToday = selectedDate === new Date().toISOString().slice(0, 10);
   const nowHHMM = `${String(new Date().getHours()).padStart(2,"0")}:${String(new Date().getMinutes()).padStart(2,"0")}`;
-  const ref = useRef<HTMLDivElement>(null);
+  const ref       = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -63,9 +65,17 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
 
   function select(time: string) { onChange(time); setOpen(false); setShowCustom(false); }
 
+  function handleOpen() {
+    if (!isMobile && buttonRef.current) {
+      const r = buttonRef.current.getBoundingClientRect();
+      setFixedPos({ top: r.bottom + 6, left: r.left });
+    }
+    setOpen(o => !o);
+    setShowCustom(false);
+  }
+
   const display = value ? fmt24to12(value) : "Set time";
   const isQuick = QUICK_TIMES.some(q => q.time === value);
-  const shouldDropUp = dropUp ?? false;
 
   const mobileDropdownStyle: React.CSSProperties = {
     position: "fixed",
@@ -78,12 +88,10 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
   };
 
   const desktopPositionStyle: React.CSSProperties = {
-    position: "absolute",
-    ...(shouldDropUp
-      ? { bottom: "calc(100% + 6px)", top: "auto" }
-      : { top: "calc(100% + 6px)" }),
-    left: 0,
-    display: "flex", gap: 8, zIndex: 200,
+    position: "fixed",
+    top: fixedPos.top,
+    left: fixedPos.left,
+    display: "flex", gap: 8, zIndex: 300,
   };
 
   return (
@@ -95,8 +103,9 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
       )}
 
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => { setOpen(o => !o); setShowCustom(false); }}
+        onClick={handleOpen}
         style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,
