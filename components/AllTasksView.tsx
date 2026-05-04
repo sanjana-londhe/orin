@@ -188,9 +188,21 @@ export function AllTasksView() {
             <path d="M4 2l4 4-4 4"/>
           </svg>
           Completed
-          <span style={{ fontSize: 12.5, color: T.textMuted, fontWeight: 500, marginLeft: "auto" }}>
-            {completedTasks.length}
-          </span>
+          {completedTasks.length > 0 && (
+            <span
+              key={completedTasks.length}
+              style={{
+                marginLeft: "auto",
+                fontSize: 12, fontWeight: 700,
+                padding: "2px 8px", borderRadius: 999,
+                background: "#f2fdec", color: "#059669",
+                border: "1px solid #c8f7ae",
+                animation: "count-pop 0.3s ease",
+              }}
+            >
+              ✓ {completedTasks.length}
+            </span>
+          )}
         </button>
 
         {completedOpen && completedTasks.length > 0 && (

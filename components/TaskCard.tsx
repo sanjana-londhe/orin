@@ -129,6 +129,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
   const [deferOpen, setDeferOpen]     = useState(false);
   const [editing, setEditing]         = useState(false);
+  const [completing, setCompleting]   = useState(false); // animation in-flight
   const [editTitle, setEditTitle]     = useState(task.title);
   const [editDate, setEditDate]       = useState(getIsoDate(task.dueAt));
   const [editTime, setEditTime]       = useState(getIsoTime(task.dueAt));
@@ -296,13 +297,21 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
           display: "flex", alignItems: "flex-start",
           padding: isMobile ? "16px 14px" : "12px 14px 12px 16px",
           background: hovered ? T.stone200 : "transparent",
-          transition: "background 0.1s",
+          opacity: completing ? 0 : 1,
+          transform: completing ? "translateX(8px)" : "none",
+          transition: completing
+            ? "opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s"
+            : "background 0.1s",
         }}
       >
         {/* Circle checkbox */}
         <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
           <div
-            onClick={() => done ? onUncomplete?.(task.id) : onMarkDone?.(task.id)}
+            onClick={() => {
+              if (done) { onUncomplete?.(task.id); return; }
+              setCompleting(true);
+              setTimeout(() => { onMarkDone?.(task.id); setCompleting(false); }, 500);
+            }}
             onMouseEnter={() => setCheckHov(true)}
             onMouseLeave={() => setCheckHov(false)}
             style={{
@@ -324,14 +333,24 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Title with animated strikethrough on completion */}
           <div style={{
             fontSize: 14, fontWeight: 450,
             color: T.textPrimary,
             lineHeight: 1.4,
             textDecoration: done ? "line-through" : "none",
             marginBottom: due || task.emotionalState ? 3 : 0,
+            position: "relative", display: "inline-block", width: "100%",
           }}>
             {task.title}
+            {/* Animated strike line — only during the completing animation */}
+            {completing && !done && (
+              <span style={{
+                position: "absolute", left: 0, top: "50%",
+                height: "1.5px", background: T.textPrimary,
+                animation: "strikethrough-draw 0.25s ease forwards",
+              }} />
+            )}
           </div>
 
           {(due || task.emotionalState || !done) && (
