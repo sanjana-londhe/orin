@@ -177,13 +177,16 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
 
 // ── Day Task List Modal — inline checkbox toggle, no second popup ─────
 
-function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone }: {
+function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEdit, onDelete }: {
   date: string; tasks: TaskWithSubtasks[];
   onClose: () => void;
   onMarkDone: (id: string) => void;
   onMarkUndone: (id: string) => void;
+  onEdit: (task: TaskWithSubtasks) => void;
+  onDelete: (id: string) => void;
 }) {
-  const isMobile = useIsMobile();
+  const isMobile   = useIsMobile();
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const cardStyle: React.CSSProperties = isMobile ? {
     position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
     background: "#fff", borderRadius: "16px 16px 0 0",
@@ -226,10 +229,10 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone }: {
                 display: "flex", alignItems: "flex-start",
                 padding: "12px 16px",
                 borderBottom: idx < tasks.length - 1 ? "1px solid #f1f3ef" : "none",
-                background: "#fff", transition: "background 0.1s",
+                background: hoveredId === task.id ? "#f8f9f5" : "#fff", transition: "background 0.1s",
               }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#fff"}
+              onMouseEnter={() => setHoveredId(task.id)}
+              onMouseLeave={() => setHoveredId(null)}
             >
               {/* Clickable checkbox */}
               <div
@@ -265,6 +268,34 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone }: {
                   </span>
                 </div>
               </div>
+
+              {/* Edit + Delete — visible on desktop hover */}
+              {!isMobile && (
+                <div style={{
+                  display: "flex", gap: 4, flexShrink: 0, marginLeft: 8,
+                  opacity: hoveredId === task.id ? 1 : 0,
+                  transition: "opacity 0.15s",
+                }}>
+                  <button
+                    onClick={e => { e.stopPropagation(); onClose(); onEdit(task); }}
+                    title="Edit"
+                    style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
+                    onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e2.currentTarget as HTMLElement).style.color = "#3d5a4a"; }}
+                    onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; }}
+                  >
+                    <Pencil size={11} />
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); onDelete(task.id); }}
+                    title="Delete"
+                    style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
+                    onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#FFF0EC"; (e2.currentTarget as HTMLElement).style.color = "#D14626"; (e2.currentTarget as HTMLElement).style.borderColor = "#e9c3c1"; }}
+                    onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; (e2.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
@@ -837,7 +868,7 @@ export default function CalendarPage() {
           <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} onUpdate={(id, patch) => updateTask({ id, patch })} />
         )}
         {dayTaskList && (
-          <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
+          <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onEdit={task => { setDayTaskList(null); setSelectedTask(task); }} onDelete={id => deleteTask(id)} />
         )}
         <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
       </div>
@@ -956,7 +987,7 @@ export default function CalendarPage() {
         />
       )}
       {dayTaskList && (
-        <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} />
+        <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onEdit={task => { setDayTaskList(null); setSelectedTask(task); }} onDelete={id => deleteTask(id)} />
       )}
       <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
     </div>
