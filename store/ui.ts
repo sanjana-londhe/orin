@@ -10,6 +10,8 @@ interface UIState {
   dismissedUntil: Record<string, number>;
   // which task card is currently in edit mode (null = none)
   editingTaskId: string | null;
+  // sidebar/FAB sets this; the Today page consumes it to auto-open the inline create form
+  pendingCreateTask: boolean;
 
   setSortMode: (mode: SortMode) => void;
   setOpenTooltipId: (id: string | null) => void;
@@ -18,6 +20,8 @@ interface UIState {
   dismissNudge: (taskId: string) => void;
   isSuppressed: (taskId: string) => boolean;
   setEditingTaskId: (id: string | null) => void;
+  requestCreateTask: () => void;
+  consumeCreateTaskRequest: () => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -28,10 +32,13 @@ export const useUIStore = create<UIState>()(
       nudgedTaskIds: new Set<string>(),
       dismissedUntil: {},
       editingTaskId: null,
+      pendingCreateTask: false,
 
       setSortMode: (mode) => set({ sortMode: mode }),
       setOpenTooltipId: (id) => set({ openTooltipId: id }),
       setEditingTaskId: (id) => set({ editingTaskId: id }),
+      requestCreateTask: () => set({ pendingCreateTask: true }),
+      consumeCreateTaskRequest: () => set({ pendingCreateTask: false }),
 
       addNudge: (taskId) =>
         set((s) => ({ nudgedTaskIds: new Set([...s.nudgedTaskIds, taskId]) })),

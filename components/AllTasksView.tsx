@@ -129,6 +129,8 @@ export function AllTasksView() {
   const queryClient = useQueryClient();
   const isMobile    = useIsMobile();
   const { editingTaskId, setEditingTaskId } = useUIStore();
+  const pendingCreateTask     = useUIStore(s => s.pendingCreateTask);
+  const consumeCreateTaskRequest = useUIStore(s => s.consumeCreateTaskRequest);
 
   // completedOpen removed — completed tasks are always shown at bottom
   const [formOpen, setFormOpen]     = useState(false);
@@ -190,6 +192,15 @@ export function AllTasksView() {
   useEffect(() => {
     if (editingTaskId !== null && formOpen) resetForm();
   }, [editingTaskId]);
+
+  // Sidebar / mobile FAB requested a new task — open the inline form
+  useEffect(() => {
+    if (pendingCreateTask) {
+      openForm();
+      consumeCreateTaskRequest();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingCreateTask]);
 
   function openForm() {
     setEditingTaskId(null); // close any open task edit

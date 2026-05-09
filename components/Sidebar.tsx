@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ListChecks, ScatterChart, CalendarDays, List, Zap,
   ChevronLeft, Plus,
 } from "lucide-react";
-import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { ProfileModal } from "@/components/ProfileModal";
+import { useUIStore } from "@/store/ui";
 import { EnergyCheckInModal, loadEnergyStore, saveEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
 import { getEmotion } from "@/lib/emotions";
 import { signOut, signInWithGoogle } from "@/app/actions/auth";
@@ -28,8 +28,13 @@ interface Props { userName: string; email?: string; initial?: string; isGuest?: 
 
 export function Sidebar({ userName, email = "", initial = "", isGuest = false }: Props) {
   const pathname   = usePathname();
+  const router     = useRouter();
   const isMobile   = useIsMobile();
-  const [modalOpen, setModalOpen]     = useState(false);
+  const requestCreateTask = useUIStore(s => s.requestCreateTask);
+  function openCreate() {
+    requestCreateTask();
+    if (pathname !== "/") router.push("/");
+  }
   const [collapsed, setCollapsed]     = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [showUser, setShowUser]       = useState(false);
@@ -58,7 +63,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
       <>
         {/* FAB — new task */}
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={openCreate}
           style={{
             position: "fixed", bottom: 72, right: 20, zIndex: 60,
             width: 52, height: 52, borderRadius: "50%",
@@ -96,8 +101,6 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
             );
           })}
         </nav>
-
-        <TaskCreateModal open={modalOpen} onOpenChange={setModalOpen} />
       </>
     );
   }
@@ -254,7 +257,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
         {/* Bottom section */}
         <div style={{ padding: isCollapsed ? "10px 6px" : "10px 10px", borderTop: "1px solid #e9ede9", flexShrink: 0 }}>
           {!isCollapsed && (
-            <button onClick={() => setModalOpen(true)} style={{
+            <button onClick={openCreate} style={{
               display: "flex", alignItems: "center", gap: 8, width: "100%",
               padding: "7px 10px", borderRadius: 8, border: "1.5px dashed #c4cbc2",
               background: "none", cursor: "pointer", fontSize: 12.5, color: "#4a6d47",
@@ -367,7 +370,6 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
         </div>
       </aside>
 
-      <TaskCreateModal open={modalOpen} onOpenChange={setModalOpen} />
       {energyModalOpen && (
         <EnergyCheckInModal
           onClose={() => setEnergyModalOpen(false)}
