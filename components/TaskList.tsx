@@ -402,12 +402,10 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
                 {/* Time chip + dropdown */}
                 <div style={{ position: "relative" }}>
-                  {inlineDueTime && (
-                    <button onClick={() => { setShowTimePicker(o => !o); setShowEmotionPicker(false); setShowDatePicker(false); }}
-                      style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#5f5e5a", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
-                      <span style={{ fontSize: 10 }}>🕐</span> {fmtTimeLabel(inlineDueTime)}
-                    </button>
-                  )}
+                  <button onClick={() => { setShowTimePicker(o => !o); setShowEmotionPicker(false); setShowDatePicker(false); }}
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#5f5e5a", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    <span style={{ fontSize: 10 }}>🕐</span> {inlineDueTime ? fmtTimeLabel(inlineDueTime) : "Add time"}
+                  </button>
                   {showTimePicker && (() => {
                     const now = new Date();
                     const todayStr = now.toISOString().slice(0,10);

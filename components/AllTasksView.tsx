@@ -372,12 +372,10 @@ export function AllTasksView() {
 
                   {/* Time chip + dropdown */}
                   <div style={{ position: "relative" }}>
-                    {dueTime && (
-                      <button onClick={() => { setShowTimePicker(o => !o); setShowEmoPicker(false); setShowDatePicker(false); }}
-                        style={chipStyle("#5f5e5a")}>
-                        <span style={{ fontSize: 10 }}>🕐</span> {fmtTimeLbl(dueTime)}
-                      </button>
-                    )}
+                    <button onClick={() => { setShowTimePicker(o => !o); setShowEmoPicker(false); setShowDatePicker(false); }}
+                      style={chipStyle(dueTime ? "#5f5e5a" : undefined)}>
+                      <span style={{ fontSize: 10 }}>🕐</span> {dueTime ? fmtTimeLbl(dueTime) : "Add time"}
+                    </button>
                     {showTimePicker && (() => {
                       const now = new Date();
                       const todayStr = now.toISOString().slice(0, 10);
