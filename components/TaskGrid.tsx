@@ -17,7 +17,6 @@ interface Props {
 function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Props) {
   const m = useTaskMutations();
   const editingTaskId = useUIStore(s => s.editingTaskId);
-  const isEditing = !!editingTaskId && tasks.some(t => t.id === editingTaskId);
 
   if (isLoading) return <SkeletonTaskList count={4} />;
 
@@ -35,23 +34,31 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
   }
 
   return (
-    <div style={{ background: "white", borderRadius: 12, border: `1px solid ${isEditing ? "#059669" : "#dde4de"}`, transition: "border-color 0.18s" }}>
-      {tasks.map((task, i) => (
-        <div
-          key={task.id}
-          style={{ borderBottom: i < tasks.length - 1 ? "1px solid #dde4de" : "none" }}
-        >
-          <SortableTaskCard
-            task={task}
-            dragActive={dragActive}
-            onMarkDone={m.markDone}
-            onUncomplete={m.uncompleteTask}
-            onDefer={m.deferTask}
-            onUpdate={m.updateTask}
-            onDelete={m.deleteTask}
-          />
-        </div>
-      ))}
+    <div style={{ background: "white", borderRadius: 12, border: "1px solid #dde4de" }}>
+      {tasks.map((task, i) => {
+        const editing = task.id === editingTaskId;
+        return (
+          <div
+            key={task.id}
+            style={{
+              borderBottom: i < tasks.length - 1 ? "1px solid #dde4de" : "none",
+              boxShadow: editing ? "inset 0 0 0 1.5px #059669" : "none",
+              borderRadius: editing ? 10 : 0,
+              transition: "box-shadow 0.18s",
+            }}
+          >
+            <SortableTaskCard
+              task={task}
+              dragActive={dragActive}
+              onMarkDone={m.markDone}
+              onUncomplete={m.uncompleteTask}
+              onDefer={m.deferTask}
+              onUpdate={m.updateTask}
+              onDelete={m.deleteTask}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
