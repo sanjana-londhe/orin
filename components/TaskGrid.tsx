@@ -5,6 +5,7 @@ import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
 import { useUIStore } from "@/store/ui";
 import { SkeletonTaskList } from "@/components/Skeleton";
+import { CornerFrame } from "@/components/CornerFrame";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 interface Props {
@@ -34,7 +35,7 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
   }
 
   return (
-    <div style={{ background: "white", borderRadius: 0, border: "1px solid #dde4de" }}>
+    <CornerFrame style={{ background: "white" }}>
       {tasks.map((task, i) => {
         const editing = task.id === editingTaskId;
         return (
@@ -58,7 +59,7 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
           </div>
         );
       })}
-    </div>
+    </CornerFrame>
   );
 }
 

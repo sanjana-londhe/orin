@@ -9,6 +9,7 @@ import {
   ChevronLeft, Plus,
 } from "lucide-react";
 import { ProfileModal } from "@/components/ProfileModal";
+import { CornerFrame } from "@/components/CornerFrame";
 import { useUIStore } from "@/store/ui";
 import { EnergyCheckInModal, loadEnergyStore, saveEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
 import { getEmotion } from "@/lib/emotions";
@@ -199,10 +200,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
 
           {/* Stats */}
           {!isCollapsed && (
-            <div style={{
-              background: "#fff", border: "1px solid #e9ede9",
-              borderRadius: 0, padding: "12px 14px", marginBottom: 14,
-            }}>
+            <CornerFrame style={{ background: "#fff", padding: "12px 14px", marginBottom: 14 }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 10, margin: "0 0 10px" }}>This week</p>
               {[
                 { dot: getEmotion("EXCITED").strip,  label: "Completed", val: 0 },
@@ -226,7 +224,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                   <div style={{ height: "100%", borderRadius: 999, background: "#59d10b", width: "0%" }} />
                 </div>
               </div>
-            </div>
+            </CornerFrame>
           )}
 
           {/* Track energy promo — calm meadow palette */}

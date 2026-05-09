@@ -14,6 +14,8 @@ import {
   type EnergyStore,
 } from "@/components/EnergyCheckInModal";
 
+import { CornerFrame } from "@/components/CornerFrame";
+
 // ── Constants ────────────────────────────────────────────────────────
 
 const MOODS = [
@@ -221,8 +223,6 @@ export function EnergyView() {
   // Shared card style matching the mockup
   const card: React.CSSProperties = {
     background: "#fff",
-    border: "0.5px solid rgba(0,0,0,0.09)",
-    borderRadius: 0,
     padding: isMobile ? "16px" : "20px 24px",
     marginBottom: 12,
   };
@@ -241,7 +241,7 @@ export function EnergyView() {
       </div>
 
       {/* ── Today's check-in ── */}
-      <div style={card}>
+      <CornerFrame style={card}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
           <div>
             <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Today&apos;s feeling</p>
@@ -318,21 +318,21 @@ export function EnergyView() {
             )}
           </div>
         )}
-      </div>
+      </CornerFrame>
 
       {/* ── Mood this week ── */}
-      <div style={card}>
+      <CornerFrame style={card}>
         <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Mood this week</p>
         <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Daily average from check-ins</h3>
         <MoodChart data={weekData} />
-      </div>
+      </CornerFrame>
 
 
       {/* ── Top influences + emotional load ── */}
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 0 }}>
 
         {/* Top influences */}
-        <div style={card}>
+        <CornerFrame style={card}>
           <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>What&apos;s affecting you</p>
           <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Top influences</h3>
           {topInfluences.length === 0 ? (
@@ -357,10 +357,10 @@ export function EnergyView() {
               })}
             </div>
           )}
-        </div>
+        </CornerFrame>
 
         {/* Emotional load from tasks */}
-        <div style={card}>
+        <CornerFrame style={card}>
           <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Task emotional load</p>
           <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Across {allForStats.length} tasks</h3>
           {allForStats.length === 0 ? (
@@ -383,12 +383,12 @@ export function EnergyView() {
               })}
             </div>
           )}
-        </div>
+        </CornerFrame>
       </div>
 
       {/* ── Completion by feeling ── */}
       {completionRates.length > 0 && (
-        <div style={{ ...card, marginTop: 12 }}>
+        <CornerFrame style={{ ...card, marginTop: 12 }}>
           <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Completion by feeling</p>
           <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Which emotions get things done</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -415,7 +415,7 @@ export function EnergyView() {
               );
             })}
           </div>
-        </div>
+        </CornerFrame>
       )}
 
       {/* Modal */}
