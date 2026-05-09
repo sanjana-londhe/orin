@@ -245,7 +245,7 @@ export function EnergyView() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
           <div>
             <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Today&apos;s feeling</p>
-            <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
+            <h3 style={{ fontSize: 16, fontWeight: 500, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </h3>
           </div>
@@ -323,7 +323,7 @@ export function EnergyView() {
       {/* ── Mood this week ── */}
       <div style={card}>
         <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Mood this week</p>
-        <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Daily average from check-ins</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Daily average from check-ins</h3>
         <MoodChart data={weekData} />
       </div>
 
@@ -334,7 +334,7 @@ export function EnergyView() {
         {/* Top influences */}
         <div style={card}>
           <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>What&apos;s affecting you</p>
-          <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Top influences</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Top influences</h3>
           {topInfluences.length === 0 ? (
             <p style={{ fontSize: 12, color: "#888780", textAlign: "center", padding: "16px 0", margin: 0 }}>
               Log check-ins to see patterns
@@ -362,7 +362,7 @@ export function EnergyView() {
         {/* Emotional load from tasks */}
         <div style={card}>
           <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Task emotional load</p>
-          <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Across {allForStats.length} tasks</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Across {allForStats.length} tasks</h3>
           {allForStats.length === 0 ? (
             <p style={{ fontSize: 12, color: "#888780", textAlign: "center", padding: "16px 0", margin: 0 }}>No tasks yet</p>
           ) : (
@@ -390,7 +390,7 @@ export function EnergyView() {
       {completionRates.length > 0 && (
         <div style={{ ...card, marginTop: 12 }}>
           <p style={{ fontSize: 11, color: "#888780", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Completion by feeling</p>
-          <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Which emotions get things done</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Which emotions get things done</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {completionRates.map(({ key, em, done, total, rate }) => {
               const rateColor = rate >= 70 ? "#059669" : rate >= 40 ? "#f59e0b" : "#ef4444";
