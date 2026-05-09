@@ -363,7 +363,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 <div style={{ position: "relative" }}>
                   <button onClick={() => { setShowEmotionPicker(o => !o); setShowDatePicker(false); }}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:em.bg, border:`0.5px solid ${em.fg}33`, color:em.fg, fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
-                    {em.emoji} {em.label}
+                    <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                   </button>
                   {showEmotionPicker && (
                     <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
