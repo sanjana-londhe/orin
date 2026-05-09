@@ -111,7 +111,10 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
       <aside style={{
         width: isCollapsed ? 64 : 240,
         flexShrink: 0,
-        background: "#f8f9f5",
+        backgroundImage: "linear-gradient(rgba(248,249,245,0.84), rgba(248,249,245,0.88)), url('/login-bg.jpg')",
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, center",
+        backgroundRepeat: "no-repeat, no-repeat",
         borderRight: "1.5px solid #dde4de",
         display: "flex",
         flexDirection: "column",
