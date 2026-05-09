@@ -356,7 +356,7 @@ export function AllTasksView() {
                       <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                     </button>
                     {showDatePicker && (
-                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexWrap: "wrap", gap: 8, maxWidth: "calc(100vw - 32px)" }}>
+                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
                         <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 10, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding: "4px 0", overflow: "hidden" }}>
                           {getDatePresets().map(opt => (
                             <button key={opt.value} onClick={() => { setDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
@@ -395,7 +395,7 @@ export function AllTasksView() {
                       const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                       const slots = getTimeSlots(isToday, nowTime, fmtTimeLbl);
                       return (
-                        <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexWrap: "wrap", gap: 8, maxWidth: "calc(100vw - 32px)" }}>
+                        <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
                           <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 10, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding: "4px 0", overflow: "hidden" }}>
                             {slots.map(opt => (
                               <button key={opt.value}
