@@ -241,7 +241,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                       border: "none", cursor: "pointer", fontFamily: "inherit",
                     }}>
                       <span style={{ fontSize: 14, color: D.limeInk, fontWeight: value === opt.val ? 600 : 400 }}>{opt.label}</span>
-                      <span style={{ fontSize: 12, color: D.textMuted, fontFamily: "monospace" }}>{opt.sub}</span>
+                      <span style={{ fontSize: 12, color: D.textMuted, fontFamily: "var(--font-mono), monospace" }}>{opt.sub}</span>
                     </button>
                   ))}
                   <div style={{ height: 1, background: D.stone400, margin: "4px 0" }} />
@@ -295,7 +295,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = value === opt.val ? D.accentSubtle : "none"; }}
                       >
                         <span style={{ fontSize: 13.5, color: D.limeInk, fontWeight: value === opt.val ? 600 : 400 }}>{opt.label}</span>
-                        <span style={{ fontSize: 11, color: D.textMuted, fontFamily: "monospace" }}>{opt.sub}</span>
+                        <span style={{ fontSize: 11, color: D.textMuted, fontFamily: "var(--font-mono), monospace" }}>{opt.sub}</span>
                       </button>
                     ))}
                     <div style={{ height: 1, background: D.stone400, margin: "4px 0" }} />
