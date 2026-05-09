@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { displayName } from "@/lib/utils";
 import { AppShell } from "@/components/AppShell";
@@ -11,7 +12,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const email   = user?.email ?? "";
   const initial = name.charAt(0).toUpperCase();
 
-  if (user) await seedOnboardingTasks(user.id);
+  // Run the onboarding seed AFTER the response — don't block the layout render.
+  if (user) after(() => seedOnboardingTasks(user.id).catch(() => {}));
 
   return (
     <AppShell userName={name} email={email} initial={initial} isGuest={isGuest}>
