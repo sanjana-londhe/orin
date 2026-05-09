@@ -350,10 +350,10 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                       onChange={e => setInlineNote(e.target.value)}
                       placeholder="Notes"
                       rows={2}
-                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, color: "#5f5e5a", background: "transparent", resize: "none", lineHeight: 1.5, display: "block", padding: 0 }}
+                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12.5, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, display: "block", padding: 0 }}
                     />
                   ) : (
-                    <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12, color: "#b9d3c4", cursor: "text", marginBottom: 2 }}>
+                    <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12.5, color: "#b9d3c4", cursor: "text", marginBottom: 2 }}>
                       {inlineNote.trim() || "Notes"}
                     </div>
                   )}
@@ -366,7 +366,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 {/* Feeling chip + dropdown */}
                 <div style={{ position: "relative" }}>
                   <button onClick={() => { setShowEmotionPicker(o => !o); setShowDatePicker(false); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); }}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:em.bg, border:`0.5px solid ${em.fg}33`, color:em.fg, fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:em.bg, border:`0.5px solid ${em.fg}33`, color:em.fg, fontSize: 12.5, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                   </button>
                   {showEmotionPicker && (
@@ -385,7 +385,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 {/* Date chip + dropdown */}
                 <div style={{ position: "relative" }}>
                   <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); setShowEmotionPicker(false); }}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(5,150,105,0.25)", color:"#059669", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(5,150,105,0.25)", color:"#059669", fontSize: 12.5, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                   </button>
                   {showDatePicker && (
@@ -418,7 +418,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 {/* Time chip + dropdown */}
                 <div style={{ position: "relative" }}>
                   <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowDatePicker(false); setShowCustomDate(false); setShowEmotionPicker(false); }}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#5f5e5a", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#3d5a4a", fontSize: 12.5, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>🕐</span> {inlineDueTime ? fmtTimeLabel(inlineDueTime) : "Add time"}
                   </button>
                   {showTimePicker && (() => {
@@ -451,7 +451,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                           </button>
                           {inlineDueTime && (
                             <button onClick={() => { setInlineDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
-                              style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>
+                              style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 12.5, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>
                               Remove time
                             </button>
                           )}

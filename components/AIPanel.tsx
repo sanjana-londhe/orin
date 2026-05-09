@@ -306,7 +306,7 @@ export function AIPanel({ onClose }: Props) {
                   <span style={{ color: "#D14626", fontWeight: 600 }}>Deferred {recommended.deferredCount}×</span>
                 )}
               </p>
-              <p style={{ fontSize: 11.5, color: "#4a6d47", margin: 0 }}>
+              <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>
                 Scored highest on urgency + emotional weight across your {pending.length} pending tasks.
               </p>
             </div>
@@ -352,7 +352,7 @@ export function AIPanel({ onClose }: Props) {
                 ))}
               </div>
 
-              <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: "12px 0 0", fontStyle: "italic" }}>
+              <p style={{ fontSize: 11, color: "#b9d3c4", margin: "12px 0 0", fontStyle: "italic" }}>
                 You only have to do step 1. The rest follows.
               </p>
             </div>

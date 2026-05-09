@@ -243,7 +243,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         }}>
                         <span style={{ fontSize: 14 }}>{c.emoji}</span>
                         <span style={{
-                          fontSize: 11.5, fontWeight: active ? 600 : 500,
+                          fontSize: 11, fontWeight: active ? 600 : 500,
                           color: active ? T.accent : T.textSecondary,
                         }}>{c.label}</span>
                       </button>
@@ -264,7 +264,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                     }}>
                     <span style={{ fontSize: 14 }}>✏️</span>
                     <span style={{
-                      fontSize: 11.5, fontWeight: otherActive ? 600 : 500,
+                      fontSize: 11, fontWeight: otherActive ? 600 : 500,
                       color: otherActive ? T.accent : T.textSecondary,
                     }}>Other</span>
                   </button>

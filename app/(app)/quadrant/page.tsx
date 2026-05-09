@@ -81,7 +81,7 @@ export default function QuadrantPage() {
             <div style={{ width: 160 }}>
               <DatePickerField value={customFrom} onChange={setCustomFrom} />
             </div>
-            <span style={{ fontSize: 12, color: "#4a6d47" }}>to</span>
+            <span style={{ fontSize: 12.5, color: "#4a6d47" }}>to</span>
             <div style={{ width: 160 }}>
               <DatePickerField value={customTo} onChange={setCustomTo} />
             </div>
@@ -90,7 +90,7 @@ export default function QuadrantPage() {
       </div>
 
       {/* Task count */}
-      <p style={{ fontSize: 12, color: "#4a6d47", marginBottom: 16 }}>
+      <p style={{ fontSize: 12.5, color: "#4a6d47", marginBottom: 16 }}>
         {isLoading ? "Loading…" : `${tasks.length} task${tasks.length !== 1 ? "s" : ""} · ${TABS.find(t => t.value === period)?.label} view`}
       </p>
 

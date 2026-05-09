@@ -177,7 +177,7 @@ export function AllTasksPage() {
           <div style={{ width: isMobile ? "100%" : 160 }}>
             <DatePickerField value={from} onChange={setFrom} label="From" calendarOnly />
           </div>
-          {!isMobile && <span style={{ fontSize: 12, color: T.textTertiary, paddingBottom: 10, flexShrink: 0 }}>to</span>}
+          {!isMobile && <span style={{ fontSize: 12.5, color: T.textTertiary, paddingBottom: 10, flexShrink: 0 }}>to</span>}
           <div style={{ width: isMobile ? "100%" : 160 }}>
             <DatePickerField value={to} onChange={setTo} label="To" calendarOnly />
           </div>

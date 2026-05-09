@@ -26,7 +26,7 @@ export default function SignUpPage() {
           <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: "0 0 6px" }}>
             Create your account
           </h1>
-          <p style={{ fontSize: 13, color: "#888780", margin: 0 }}>
+          <p style={{ fontSize: 13, color: "#4a6d47", margin: 0 }}>
             Start tracking tasks and energy with orin
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function SignUpPage() {
           </button>
         </form>
 
-        <p style={{ textAlign: "center", fontSize: 12.5, color: "#888780", marginTop: 28 }}>
+        <p style={{ textAlign: "center", fontSize: 12.5, color: "#4a6d47", marginTop: 28 }}>
           Already have an account?{" "}
           <Link href="/login" style={{ color: "#059669", fontWeight: 500, textDecoration: "none" }}>
             Sign in

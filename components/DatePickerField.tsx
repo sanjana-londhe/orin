@@ -241,7 +241,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                       border: "none", cursor: "pointer", fontFamily: "inherit",
                     }}>
                       <span style={{ fontSize: 14, color: D.limeInk, fontWeight: value === opt.val ? 600 : 400 }}>{opt.label}</span>
-                      <span style={{ fontSize: 12, color: D.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
+                      <span style={{ fontSize: 12.5, color: D.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
                     </button>
                   ))}
                   <div style={{ height: 1, background: D.stone400, margin: "4px 0" }} />

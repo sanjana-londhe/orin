@@ -26,7 +26,7 @@ function LoginPageInner() {
               </svg>
             </div>
             <h1 style={{ fontSize:24, fontWeight:500, letterSpacing:"-0.03em", color:"#082d1d", margin:"0 0 8px" }}>Welcome to orin</h1>
-            <p style={{ fontSize:13, color:"#5f5e5a", margin:0, lineHeight:1.6 }}>
+            <p style={{ fontSize:13, color:"#3d5a4a", margin:0, lineHeight:1.6 }}>
               Your personal space to manage tasks,<br/>track energy, and understand yourself better.
             </p>
           </div>
@@ -71,7 +71,7 @@ function LoginPageInner() {
             </form>
           </div>
 
-          <p style={{ textAlign:"center", fontSize:11.5, color:"#888780", marginTop:20, lineHeight:1.5 }}>
+          <p style={{ textAlign:"center", fontSize: 11, color:"#4a6d47", marginTop:20, lineHeight:1.5 }}>
             Guest sessions are temporary.<br/>Login with Google to save your data.
           </p>
         </div>

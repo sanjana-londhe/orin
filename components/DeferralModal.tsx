@@ -510,7 +510,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                     <span style={{ fontSize: 12.5, color: T.textTertiary, textDecoration: "line-through", letterSpacing: "-0.01em" }}>
                       {formatPreview(new Date(task.dueAt))}
                     </span>
-                    <span style={{ fontSize: 12, color: T.textMuted }}>→</span>
+                    <span style={{ fontSize: 12.5, color: T.textMuted }}>→</span>
                   </>
                 )}
                 <span style={{ fontSize: 13.5, fontWeight: 700, color: T.accent, letterSpacing: "-0.01em" }}>

@@ -75,7 +75,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
                 width: 24, height: 24, borderRadius: "50%",
                 background: "#fff", border: "1.5px solid #dde4de",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", fontSize: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                cursor: "pointer", fontSize: 12.5, boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
               }}
                 title="Change photo">
                 📷

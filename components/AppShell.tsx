@@ -71,7 +71,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                 padding: "6px 12px", borderRadius: 4,
                 background: "#082d1d", color: "#fff",
                 border: "none", cursor: "pointer",
-                fontSize: 12, fontWeight: 600,
+                fontSize: 12.5, fontWeight: 600,
                 boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
                 letterSpacing: "-0.01em", whiteSpace: "nowrap",
               }}
@@ -149,7 +149,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
               <div style={{
                 width: 32, height: 32, borderRadius: "50%", background: "#059669",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 12, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
+                fontSize: 12.5, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
               }}>
                 {avatarContent}
               </div>
@@ -177,7 +177,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                   </svg>
                   Login with Google
                 </button>
-                <p style={{ fontSize: 11, color: "#888780", textAlign: "center", margin: "8px 0 0", lineHeight: 1.4 }}>
+                <p style={{ fontSize: 11, color: "#4a6d47", textAlign: "center", margin: "8px 0 0", lineHeight: 1.4 }}>
                   Your guest data will be saved to your account
                 </p>
               </form>

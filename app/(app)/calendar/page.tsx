@@ -138,7 +138,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
         {/* Date + emotion — same chips as TaskCard row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "10px 16px", borderBottom: note ? "1px solid #e9ede9" : "none" }}>
           {dateLabel && (
-            <span style={{ fontSize: 12, fontWeight: 500, color: overdue ? "#c23934" : "#059669" }}>
+            <span style={{ fontSize: 12.5, fontWeight: 500, color: overdue ? "#c23934" : "#059669" }}>
               {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
             </span>
           )}
@@ -156,7 +156,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
         {/* Note */}
         {note && (
           <div style={{ padding: "10px 16px", borderBottom: "1px solid #e9ede9" }}>
-            <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, lineHeight: 1.5 }}>{note}</p>
+            <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0, lineHeight: 1.5 }}>{note}</p>
           </div>
         )}
 
@@ -258,7 +258,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
                 </p>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {time && (
-                    <span style={{ fontSize: 11.5, fontWeight: 500, color: overdue ? "#c23934" : "#4a6d47" }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: overdue ? "#c23934" : "#4a6d47" }}>
                       {overdue && "⚠ "}{time}
                     </span>
                   )}
@@ -735,7 +735,7 @@ function MobileCalendar({
                     </div>
                   );
                 })}
-                <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: dayTasks.length === 0 ? "#dde4de" : "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "2px 0", alignSelf: "flex-start" }}>
+                <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12.5, color: dayTasks.length === 0 ? "#dde4de" : "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "2px 0", alignSelf: "flex-start" }}>
                   <Plus size={11} /> {dayTasks.length === 0 ? "Add task" : "Add"}
                 </button>
               </div>
@@ -937,7 +937,7 @@ export default function CalendarPage() {
               >
                 {/* Date number */}
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>
-                  <span style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isToday ? 700 : 400, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isOtherMonth ? "#c4cbc2" : "#082d1d" }}>
+                  <span style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12.5, fontWeight: isToday ? 700 : 400, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isOtherMonth ? "#c4cbc2" : "#082d1d" }}>
                     {day.getDate()}
                   </span>
                 </div>

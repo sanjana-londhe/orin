@@ -210,11 +210,11 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 { dot: getEmotion("ANXIOUS").strip,  label: "Pending",   val: pending },
               ].map((row, i, arr) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: i < arr.length - 1 ? 8 : 0 }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#4a6d47" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12.5, color: "#4a6d47" }}>
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: row.dot }} />
                     {row.label}
                   </span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#082d1d" }}>{row.val}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: "#082d1d" }}>{row.val}</span>
                 </div>
               ))}
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #e9ede9" }}>
@@ -246,10 +246,10 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 2px rgba(14,58,37,0.04)"; }}
             >
               <p style={{ fontWeight: 600, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3, letterSpacing: "-0.01em" }}>Track your energy</p>
-              <p style={{ fontSize: 11.5, margin: "0 0 10px", color: "#3d5a4a", lineHeight: 1.5 }}>
+              <p style={{ fontSize: 11, margin: "0 0 10px", color: "#3d5a4a", lineHeight: 1.5 }}>
                 Log how you feel and see patterns over time.
               </p>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
             </button>
           )}
         </div>
@@ -318,7 +318,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 <div style={{
                   width: 30, height: 30, borderRadius: "50%", background: "#059669",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 12, fontWeight: 700, color: "#fff", flexShrink: 0, overflow: "hidden",
+                  fontSize: 12.5, fontWeight: 700, color: "#fff", flexShrink: 0, overflow: "hidden",
                 }}>
                   {avatarSrc
                     ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />

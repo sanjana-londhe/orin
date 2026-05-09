@@ -52,19 +52,19 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
         <div style={{ padding: "18px 20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
 
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Task title</label>
+            <label style={{ fontSize: 12.5, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Task title</label>
             <input ref={titleRef} value={title} onChange={e => setTitle(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") handleSave(); }}
               style={{ width: "100%", fontSize: 15, fontWeight: 600, color: "#0a2010", padding: "10px 12px", borderRadius: 4, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
               onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
               onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
             />
-            {error && <p style={{ fontSize: 12, color: "#ef4444", margin: "4px 0 0" }}>{error}</p>}
+            {error && <p style={{ fontSize: 12.5, color: "#ef4444", margin: "4px 0 0" }}>{error}</p>}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due date</label>
+              <label style={{ fontSize: 12.5, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due date</label>
               <input type="date" value={dateStr} onChange={e => setDateStr(e.target.value)}
                 style={{ width: "100%", fontSize: 13, padding: "9px 10px", borderRadius: 4, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
                 onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
@@ -72,7 +72,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
               />
             </div>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due time</label>
+              <label style={{ fontSize: 12.5, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due time</label>
               <input type="time" value={timeStr} onChange={e => setTimeStr(e.target.value)} disabled={!dateStr}
                 style={{ width: "100%", fontSize: 13, padding: "9px 10px", borderRadius: 4, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: dateStr ? "#fafafa" : "#f3f4f6", boxSizing: "border-box" }}
                 onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}

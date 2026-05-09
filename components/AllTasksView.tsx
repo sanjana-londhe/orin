@@ -283,7 +283,7 @@ export function AllTasksView() {
       {/* Tasks (N) label */}
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: T.textSecondary }}>Tasks</span>
-        <span style={{ fontSize: 12, color: T.textMuted }}>
+        <span style={{ fontSize: 12.5, color: T.textMuted }}>
           ({allTasks.filter(t => !t.isCompleted).length})
         </span>
       </div>
@@ -298,7 +298,7 @@ export function AllTasksView() {
           background: active ? "#f1f3ef" : "#f8f9f5",
           border: `0.5px solid ${active && fg ? fg + "44" : "rgba(0,0,0,0.08)"}`,
           color: active && fg ? fg : "#5f5e5a",
-          fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          fontSize: 12.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
         });
         const EMOTIONS_CYCLE: Emotion[] = ["DREADING","ANXIOUS","NEUTRAL","WILLING","EXCITED"];
         function cycleEmotion() {
@@ -319,7 +319,7 @@ export function AllTasksView() {
           background: "#f8f9f5",
           border: `0.5px solid ${fg ? fg + "33" : "rgba(0,0,0,0.08)"}`,
           color: fg ?? "#5f5e5a",
-          fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          fontSize: 12.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
           position: "relative", overflow: "hidden",
         });
         return (
@@ -349,9 +349,9 @@ export function AllTasksView() {
                       style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, letterSpacing: "-0.01em", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />
                     {noteOpen ? (
                       <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Notes" rows={2}
-                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, color: "#5f5e5a", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
+                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12.5, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
                     ) : (
-                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12, color: "#b9d3c4", cursor: "text" }}>{note.trim() || "Notes"}</div>
+                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12.5, color: "#b9d3c4", cursor: "text" }}>{note.trim() || "Notes"}</div>
                     )}
                   </div>
                 </div>
@@ -445,7 +445,7 @@ export function AllTasksView() {
                             </button>
                             {dueTime && (
                               <button onClick={() => { setDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
-                                style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 12, color: "#c23934", fontFamily: "inherit", textAlign: "left" }}>
+                                style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 12.5, color: "#c23934", fontFamily: "inherit", textAlign: "left" }}>
                                 Remove time
                               </button>
                             )}
