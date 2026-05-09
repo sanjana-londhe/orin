@@ -7,7 +7,9 @@ import { DeferralModal } from "@/components/DeferralModal";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ChevronRight } from "lucide-react";
+import { MiniCalendar } from "@/components/DatePickerField";
+import { WheelTimePicker } from "@/components/TimePickerField";
 
 // design.md tokens
 const T = {
@@ -186,6 +188,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
   const [showEditDatePicker, setShowEditDatePicker] = useState(false);
   const [showEditTimePicker, setShowEditTimePicker] = useState(false);
   const [showEditCustomTime, setShowEditCustomTime] = useState(false);
+  const [showEditCustomDate, setShowEditCustomDate] = useState(false);
   const [note, setNote]               = useState("");
   const [mounted, setMounted]         = useState(false);
   const [hovered, setHovered]         = useState(false);
@@ -245,9 +248,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
   // ── Edit form — Reminders-style ──────────────────────────────────────
   if (editing) {
     const editEm = EMOTIONS.find(e => e.value === editEmotion) ?? EMOTIONS[2];
-    const editDateLabel = editDate
-      ? (editTime ? `${fmtEditDate(editDate)} · ${fmtEditTime(editTime)}` : fmtEditDate(editDate))
-      : "Set date";
+    const editDateLabel = editDate ? fmtEditDate(editDate) : "Set date";
 
     function fmtEditDate(iso: string) {
       const today = new Date().toISOString().slice(0,10);
@@ -294,8 +295,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
             {/* Feeling */}
             <div style={{ position:"relative" }}>
-              <button onClick={() => { setShowEditEmoPicker(o=>!o); setShowEditDatePicker(false); setShowEditTimePicker(false); }}
-                style={{ ...chip(editEm.fg), background: editEm.bg }}>{editEm.emoji} {editEm.label}</button>
+              <button onClick={() => { setShowEditEmoPicker(o=>!o); setShowEditDatePicker(false); setShowEditCustomDate(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
+                style={{ ...chip(editEm.fg), background: editEm.bg }}><span style={{ fontSize: 10 }}>{editEm.emoji}</span> {editEm.label}</button>
               {showEditEmoPicker && (
                 <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
                   {EMOTIONS.map(f => (
@@ -311,60 +312,71 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
             {/* Date */}
             <div style={{ position:"relative" }}>
-              <button onClick={() => { setShowEditDatePicker(o=>!o); setShowEditEmoPicker(false); setShowEditTimePicker(false); }}
+              <button onClick={() => { setShowEditDatePicker(o=>!o); setShowEditCustomDate(false); setShowEditEmoPicker(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                 style={chip("#059669")}><span style={{ fontSize:10 }}>📅</span> {editDateLabel}</button>
               {showEditDatePicker && (
-                <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
-                  {getDatePresets().map(opt=>(
-                    <button key={opt.value} onClick={() => { setEditDate(opt.value); setShowEditDatePicker(false); }}
-                      style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                      <span style={{ fontSize:13, color:editDate===opt.value?"#059669":"#082d1d", fontWeight:editDate===opt.value?500:400 }}>{opt.label}</span>
-                      <span style={{ fontSize:11, color:editDate===opt.value?"#059669":"#888780" }}>{opt.sub}{editDate===opt.value?" ✓":""}</span>
+                <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                    {getDatePresets().map(opt=>(
+                      <button key={opt.value} onClick={() => { setEditDate(opt.value); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
+                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                        <span style={{ fontSize:13, color:editDate===opt.value?"#059669":"#082d1d", fontWeight:editDate===opt.value?500:400 }}>{opt.label}</span>
+                        <span style={{ fontSize:11, color:editDate===opt.value?"#059669":"#888780" }}>{opt.sub}{editDate===opt.value?" ✓":""}</span>
+                      </button>
+                    ))}
+                    <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
+                    <button onClick={() => { setShowEditCustomDate(s => !s); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
+                      style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showEditCustomDate?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                      <span style={{ fontSize:13, color:"#082d1d", fontWeight:showEditCustomDate?500:400 }}>Custom date</span>
+                      <ChevronRight size={13} color={showEditCustomDate ? "#059669" : "#888780"} />
                     </button>
-                  ))}
-                  <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"8px 14px" }}>
-                    <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} onBlur={() => setShowEditDatePicker(false)}
-                      style={{ width:"100%", border:"none", outline:"none", fontSize:12, color:"#082d1d", fontFamily:"inherit", background:"transparent", cursor:"pointer" }} />
                   </div>
+                  {showEditCustomDate && (
+                    <MiniCalendar selected={editDate} onSelect={iso => { setEditDate(iso); setShowEditDatePicker(false); setShowEditCustomDate(false); }} />
+                  )}
                 </div>
               )}
             </div>
 
             {/* Time */}
             <div style={{ position:"relative" }}>
-              <button onClick={() => { setShowEditTimePicker(o=>!o); setShowEditEmoPicker(false); setShowEditDatePicker(false); }}
+              <button onClick={() => { setShowEditTimePicker(o=>!o); setShowEditCustomTime(false); setShowEditEmoPicker(false); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
                 style={chip()}><span style={{ fontSize:10 }}>🕐</span> {editTime ? fmtEditTime(editTime) : "Add time"}</button>
               {showEditTimePicker && (() => {
                 const now=new Date(), todayStr=now.toISOString().slice(0,10), isToday=editDate===todayStr;
                 const nowTime=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                 const slots = getTimeSlots(isToday, nowTime);
                 return (
-                  <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
-                    {slots.map(opt=>(
-                      <button key={opt.value} onClick={() => { setEditTime(opt.value); setShowEditTimePicker(false); }}
-                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                        <span style={{ fontSize:13, color:editTime===opt.value?"#059669":"#082d1d", fontWeight:editTime===opt.value?500:400 }}>{opt.label}</span>
-                        <span style={{ fontSize:11, color:editTime===opt.value?"#059669":"#888780" }}>{fmtEditTime(opt.value)}{editTime===opt.value?" ✓":""}</span>
+                  <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                      {slots.map(opt=>(
+                        <button key={opt.value} onClick={() => { setEditTime(opt.value); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
+                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                          <span style={{ fontSize:13, color:editTime===opt.value?"#059669":"#082d1d", fontWeight:editTime===opt.value?500:400 }}>{opt.label}</span>
+                          <span style={{ fontSize:11, color:editTime===opt.value?"#059669":"#888780" }}>{fmtEditTime(opt.value)}{editTime===opt.value?" ✓":""}</span>
+                        </button>
+                      ))}
+                      <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
+                      <button onClick={() => {
+                        const opening = !showEditCustomTime;
+                        setShowEditCustomTime(opening);
+                        setShowEditDatePicker(false); setShowEditCustomDate(false);
+                        if (opening && !editTime) setEditTime("09:00");
+                      }}
+                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showEditCustomTime?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                        <span style={{ fontSize:13, color:"#082d1d", fontWeight:showEditCustomTime?500:400 }}>Custom time</span>
+                        <ChevronRight size={13} color={showEditCustomTime ? "#059669" : "#888780"} />
                       </button>
-                    ))}
-                    <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }}>
-                      <button onClick={() => setShowEditCustomTime(o => !o)}
-                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showEditCustomTime?"#f8f9f5":"none", border:"none", cursor:"pointer", fontSize:13, color:"#082d1d", fontFamily:"inherit" }}>
-                        <span>Custom</span><span style={{ fontSize:11, color:"#888780" }}>→</span>
-                      </button>
-                      {showEditCustomTime && (
-                        <div style={{ padding:"0 10px 10px" }}>
-                          <input autoFocus placeholder="e.g. 3:30 PM or 15:00"
-                            defaultValue={editTime ? fmtEditTime(editTime) : ""}
-                            onKeyDown={e => { if(e.key==="Enter"){const p=parseTimeInput((e.target as HTMLInputElement).value);if(p){setEditTime(p);setShowEditTimePicker(false);setShowEditCustomTime(false);}} }}
-                            onBlur={e => { const p=parseTimeInput(e.target.value);if(p){setEditTime(p);setShowEditTimePicker(false);setShowEditCustomTime(false);} }}
-                            style={{ width:"100%", fontSize:13, color:"#082d1d", border:"1px solid #059669", borderRadius:7, padding:"7px 10px", outline:"none", fontFamily:"inherit", background:"#fff", boxSizing:"border-box" }} />
-                          <p style={{ margin:"4px 0 0", fontSize:10, color:"#888780" }}>Press Enter to apply</p>
-                        </div>
+                      {editTime && (
+                        <button onClick={()=>{ setEditTime(""); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
+                          style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>
                       )}
                     </div>
-                    {editTime&&<button onClick={()=>{setEditTime("");setShowEditTimePicker(false);}}
-                      style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>}
+                    {showEditCustomTime && (
+                      <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius:12, boxShadow:"0 -4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
+                        <WheelTimePicker value={editTime || "09:00"} onChange={t => setEditTime(t)} />
+                      </div>
+                    )}
                   </div>
                 );
               })()}

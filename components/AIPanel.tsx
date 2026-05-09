@@ -351,7 +351,7 @@ export function AIPanel({ onClose }: Props) {
           ) : recommended ? (
             <div>
               <div style={{ padding: "12px 14px", borderRadius: 10, background: "#f8f9f5", border: "2px solid #059669", marginBottom: 8 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px", fontFamily: "var(--font-mono), monospace" }}>
                   Start with this
                 </p>
                 <p style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 6px", lineHeight: 1.35 }}>
@@ -392,7 +392,7 @@ export function AIPanel({ onClose }: Props) {
           ) : (
             <div>
               <div style={{ padding: "10px 12px", borderRadius: 10, background: "#FFF0EC", border: "1px solid #fecaca", marginBottom: 10 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px", fontFamily: "var(--font-mono), monospace" }}>
                   {(() => { const em = EMOTION_MAP[dreaded.emotionalState as keyof typeof EMOTION_MAP]; return em ? `${em.emoji} ${em.label}` : ""; })()}
                   {dreaded.deferredCount > 0 ? ` · deferred ${dreaded.deferredCount}×` : ""}
                 </p>
@@ -401,7 +401,7 @@ export function AIPanel({ onClose }: Props) {
                 </p>
               </div>
 
-              <p style={{ fontSize: 12, fontWeight: 700, color: "#4a6d47", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#4a6d47", margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-mono), monospace" }}>
                 Break it down — just do step 1:
               </p>
 
