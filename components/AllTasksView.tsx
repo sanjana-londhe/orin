@@ -138,6 +138,7 @@ export function AllTasksView() {
   const [dueTime, setDueTime]       = useState("");
   const [note, setNote]             = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [titleError, setTitleError] = useState(false);
   const [showEmoPicker, setShowEmoPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -294,7 +295,9 @@ export function AllTasksView() {
           setEmotion(EMOTIONS_CYCLE[(idx + 1) % EMOTIONS_CYCLE.length]);
         }
         function submit() {
-          if (!title.trim() || submitting) return;
+          if (!title.trim()) { setTitleError(true); titleRef.current?.focus(); return; }
+          if (submitting) return;
+          setTitleError(false);
           handleCreate();
           setTitle(""); setNote(""); setNoteOpen(false);
           setTimeout(() => titleRef.current?.focus(), 50);
@@ -326,8 +329,10 @@ export function AllTasksView() {
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px 4px 16px" }}>
                   <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 2 }} />
                   <div style={{ flex: 1 }}>
+                    <style>{`.task-name-input.is-error::placeholder { color: #c23934; opacity: 1; }`}</style>
                     <input ref={titleRef} value={title} autoFocus
-                      onChange={e => { setTitle(e.target.value); const d = detectEmotion(e.target.value); if (d) setEmotion(d as Emotion); }}
+                      className={`task-name-input${titleError ? " is-error" : ""}`}
+                      onChange={e => { setTitle(e.target.value); if (titleError && e.target.value.trim()) setTitleError(false); const d = detectEmotion(e.target.value); if (d) setEmotion(d as Emotion); }}
                       onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") resetForm(); }}
                       placeholder="Task name"
                       style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, letterSpacing: "-0.01em", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />

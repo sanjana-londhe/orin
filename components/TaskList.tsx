@@ -208,6 +208,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const [showCustomDate, setShowCustomDate] = useState(false);
   const [showCustomTime, setShowCustomTime] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [titleError, setTitleError] = useState(false);
   const chipBarRef = useRef<HTMLDivElement>(null);
   const formContainerRef = useRef<HTMLDivElement>(null);
   const [formFocused, setFormFocused] = useState(false);
@@ -288,7 +289,9 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
         const dateLabel = fmtDateLabel(inlineDueDate);
 
         function submitForm() {
-          if (!inlineDraft.trim() || creatingInline) return;
+          if (!inlineDraft.trim()) { setTitleError(true); inputRef.current?.focus(); return; }
+          if (creatingInline) return;
+          setTitleError(false);
           createInline({
             title: inlineDraft.trim(),
             dueAt: new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString(),
@@ -322,13 +325,16 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "14px 14px 6px" }}>
                 <div style={{ width: 20, height: 20, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 1 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
+                  <style>{`.inline-task-input.is-error::placeholder { color: #c23934; opacity: 1; }`}</style>
                   <input
                     ref={inputRef}
                     id="inline-task-input"
+                    className={`inline-task-input${titleError ? " is-error" : ""}`}
                     value={inlineDraft}
                     onChange={e => {
                       const val = e.target.value;
                       setInlineDraft(val);
+                      if (titleError && val.trim()) setTitleError(false);
                       const detected = detectFeeling(val);
                       if (detected) setInlineEmotion(detected);
                     }}
