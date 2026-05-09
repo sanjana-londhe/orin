@@ -190,22 +190,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
   const [mounted, setMounted]         = useState(false);
   const [hovered, setHovered]         = useState(false);
   const [checkHov, setCheckHov]       = useState(false);
-  const [showDateEdit, setShowDateEdit] = useState(false);
-  const [pendingDate, setPendingDate]   = useState("");
-  const [pendingTime, setPendingTime]   = useState("");
-
   const editTitleRef = useRef<HTMLInputElement>(null);
   const editChipBarRef = useRef<HTMLDivElement>(null);
-  const dateEditRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function h(e: MouseEvent) {
-      if (dateEditRef.current && !dateEditRef.current.contains(e.target as Node))
-        setShowDateEdit(false);
-    }
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
-  }, []);
 
   useEffect(() => {
     function h(e: MouseEvent) {
@@ -472,90 +458,21 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                   {em.emoji} {em.label}
                 </span>
               )}
-              <div ref={dateEditRef} style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
                 {/* Date */}
                 <span
-                  onClick={e => {
-                    e.stopPropagation();
-                    setPendingDate(due?.isoDate ?? new Date().toISOString().slice(0,10));
-                    setPendingTime(due?.isoTime ?? "");
-                    setShowDateEdit(o => !o);
-                  }}
+                  onClick={e => { e.stopPropagation(); setDeferOpen(true); }}
                   style={{ fontSize:11, fontWeight:500, color: due ? (due.overdue ? T.danger : due.isToday ? T.accent : "#888780") : "#c4cbc2", cursor:"pointer" }}>
                   {due ? <>{due.overdue && "⚠ "}{due.dateLabel}</> : "+ date"}
                 </span>
                 {/* Time — shown separately, only if set */}
                 {due?.timeLabel && (
                   <span
-                    onClick={e => {
-                      e.stopPropagation();
-                      setPendingDate(due.isoDate);
-                      setPendingTime(due.isoTime ?? "");
-                      setShowDateEdit(o => !o);
-                    }}
+                    onClick={e => { e.stopPropagation(); setDeferOpen(true); }}
                     style={{ fontSize:11, fontWeight:500, color: "#888780", cursor:"pointer" }}>
                     {due.timeLabel}
                   </span>
                 )}
-                {showDateEdit && (() => {
-                  const now = new Date();
-                  const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
-                  const isToday = pendingDate === now.toISOString().slice(0,10);
-                  const timeSlots = getTimeSlots(isToday, nowTime);
-                  function applyAndClose(date: string, time: string) {
-                    if (!date) { setShowDateEdit(false); return; }
-                    const dueAt = time
-                      ? new Date(`${date}T${time}`)
-                      : new Date(date + "T00:00:00.000Z");
-                    onUpdate?.(task.id, { dueAt: dueAt as unknown as Date });
-                    setShowDateEdit(false);
-                  }
-                  return (
-                    <div style={{ position:"absolute", top:"calc(100% + 4px)", left:0, zIndex:60, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:210, overflow:"hidden" }}>
-
-                      {/* Date section */}
-                      <div style={{ padding:"4px 0" }}>
-                        {getDatePresets().map(opt => (
-                          <button key={opt.value} onClick={e => { e.stopPropagation(); setPendingDate(opt.value); }}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"7px 14px", background: pendingDate===opt.value ? "#f2fdec" : "none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                            <span style={{ fontSize:13, color:pendingDate===opt.value?"#059669":"#082d1d", fontWeight:pendingDate===opt.value?500:400 }}>{opt.label}</span>
-                            <span style={{ fontSize:11, color:pendingDate===opt.value?"#059669":"#888780" }}>{opt.sub}</span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Time section */}
-                      <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"4px 0" }}>
-                        <button onClick={e => { e.stopPropagation(); setPendingTime(""); }}
-                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"7px 14px", background:pendingTime===""?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                          <span style={{ fontSize:13, color:pendingTime===""?"#059669":"#082d1d", fontWeight:pendingTime===""?500:400 }}>No time</span>
-                          {pendingTime==="" && <span style={{ fontSize:11, color:"#059669" }}>✓</span>}
-                        </button>
-                        {timeSlots.map(opt => (
-                          <button key={opt.value} onClick={e => { e.stopPropagation(); setPendingTime(opt.value); }}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"7px 14px", background:pendingTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                            <span style={{ fontSize:13, color:pendingTime===opt.value?"#059669":"#082d1d", fontWeight:pendingTime===opt.value?500:400 }}>{opt.label}</span>
-                            <span style={{ fontSize:11, color:pendingTime===opt.value?"#059669":"#888780" }}>{fmtTime(opt.value)}</span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Footer */}
-                      <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"8px 10px", display:"flex", gap:6, justifyContent:"flex-end" }}>
-                        {due && (
-                          <button onClick={e => { e.stopPropagation(); onUpdate?.(task.id, { dueAt: null as unknown as Date }); setShowDateEdit(false); }}
-                            style={{ padding:"5px 10px", borderRadius:6, border:"none", background:"none", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit" }}>
-                            Remove
-                          </button>
-                        )}
-                        <button onClick={e => { e.stopPropagation(); applyAndClose(pendingDate, pendingTime); }}
-                          style={{ padding:"5px 14px", borderRadius:6, border:"none", background:"#059669", color:"#fff", fontSize:12.5, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
-                          Done
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
               </div>
             </div>
           )}
@@ -592,7 +509,16 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         )}
       </div>
 
-      {onDefer && <DeferralModal open={deferOpen} onOpenChange={setDeferOpen} task={task} onConfirm={d => onDefer(task.id, d)} />}
+      <DeferralModal
+        open={deferOpen}
+        onOpenChange={setDeferOpen}
+        task={task}
+        defaultTab="reschedule"
+        onConfirm={d => {
+          if (onDefer) onDefer(task.id, d);
+          else onUpdate?.(task.id, { dueAt: d as unknown as Date });
+        }}
+      />
 
       {/* Prompt when uncompleting a future task */}
       {showUncompletePrompt && (
