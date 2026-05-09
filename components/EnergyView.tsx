@@ -5,7 +5,6 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuery } from "@tanstack/react-query";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EMOTION_MAP } from "@/lib/emotions";
-import { Lightbulb } from "lucide-react";
 import {
   EnergyCheckInModal,
   loadEnergyStore,
@@ -131,7 +130,7 @@ function MoodChart({ data }: { data: { label: string; value: number | null }[] }
   );
 }
 
-// ── Today's Load card ────────────────────────────────────────────────
+// ── Emotion color tokens ─────────────────────────────────────────────
 
 const EC: Record<string, { bg: string; text: string; border: string; dot: string }> = {
   DREADING: { bg: "#FFF0EC", text: "#D14626", border: "rgba(209,70,38,0.18)",  dot: "#ef4444" },
@@ -141,184 +140,6 @@ const EC: Record<string, { bg: string; text: string; border: string; dot: string
   EXCITED:  { bg: "#EEFAF1", text: "#1A9444", border: "rgba(26,148,68,0.18)",  dot: "#22c55e" },
 };
 
-const EMOTION_LABELS: Record<string, string> = {
-  DREADING: "dreading", ANXIOUS: "anxious", NEUTRAL: "neutral", WILLING: "willing", EXCITED: "excited",
-};
-
-function hasSpecificTime(dueAt: Date | string | null): boolean {
-  if (!dueAt) return false;
-  return new Date(dueAt).toISOString().slice(11) !== "00:00:00.000Z";
-}
-
-function fmtTaskTime(dueAt: string | Date): string {
-  const d = new Date(dueAt);
-  const h = d.getHours(), m = d.getMinutes();
-  return `${h}:${String(m).padStart(2, "0")}`;
-}
-
-function localDateStr(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function isOnDate(dueAt: Date | string | null, target: string): boolean {
-  if (!dueAt) return false;
-  const d = new Date(dueAt);
-  const iso = d.toISOString();
-  if (iso.slice(11) === "00:00:00.000Z") return iso.slice(0, 10) === target;
-  return localDateStr(d) === target;
-}
-
-function TimelineItem({ task }: { task: TaskWithSubtasks }) {
-  const ec = EC[task.emotionalState] ?? EC.NEUTRAL;
-  const done = task.isCompleted;
-  return (
-    <div style={{ position: "relative", marginBottom: 8 }}>
-      <span style={{ position: "absolute", left: -56, top: 12, fontSize: 11, color: "#b9d3c4", width: 40, textAlign: "right" }}>
-        {fmtTaskTime(task.dueAt!)}
-      </span>
-      <div style={{ position: "absolute", left: -13, top: 14, width: 10, height: 10, borderRadius: "50%", background: done ? "#f1f3ef" : ec.bg, border: done ? "1px solid #e9ede9" : `1px solid ${ec.border}` }} />
-      <div style={{ background: "#fff", border: `0.5px solid ${done ? "#e9ede9" : ec.border}`, borderRadius: 8, padding: "9px 12px", opacity: done ? 0.6 : 1 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <p style={{ margin: 0, fontSize: 13, color: done ? "#4a6d47" : "#082d1d", textDecoration: done ? "line-through" : "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-            {task.title}
-          </p>
-          <div style={{ display: "flex", gap: 5, alignItems: "center", flexShrink: 0 }}>
-            <span style={{ fontSize: 11, padding: "2px 6px", background: ec.bg, color: ec.text, borderRadius: 4, fontWeight: 500 }}>
-              {EMOTION_LABELS[task.emotionalState] ?? task.emotionalState.toLowerCase()}
-            </span>
-            {task.deferredCount > 0 && (
-              <span style={{ fontSize: 11, color: "#b9d3c4" }}>↺{task.deferredCount}×</span>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TodaysLoadCard({ allTasks, completedTasks }: { allTasks: TaskWithSubtasks[]; completedTasks: TaskWithSubtasks[] }) {
-  const now = new Date();
-  const todayStr = localDateStr(now);
-  const tmDate = new Date(now); tmDate.setDate(tmDate.getDate() + 1);
-  const tomorrowStr = localDateStr(tmDate);
-
-  const allToday = [
-    ...allTasks.filter(t => isOnDate(t.dueAt, todayStr)),
-    ...completedTasks.filter(t => isOnDate(t.dueAt, todayStr)),
-  ];
-
-  const timedTasks = allToday
-    .filter(t => hasSpecificTime(t.dueAt))
-    .sort((a, b) => new Date(a.dueAt!).getTime() - new Date(b.dueAt!).getTime());
-
-  const tomorrowTasks = allTasks.filter(t => isOnDate(t.dueAt, tomorrowStr));
-
-  // Insight
-  const dreadDeferred = allToday.filter(t => t.emotionalState === "DREADING" && t.deferredCount > 0);
-  const dreadToday    = allToday.filter(t => t.emotionalState === "DREADING");
-  const allPositive   = allToday.every(t => t.emotionalState === "EXCITED" || t.emotionalState === "WILLING");
-  let insight = "Track how you feel before and after tasks to spot patterns over time";
-  if (dreadDeferred.length > 0) insight = `${dreadDeferred.length} dreading task${dreadDeferred.length > 1 ? "s" : ""} deferred — tackling them early can lift the weight`;
-  else if (dreadToday.length > 0) insight = `${dreadToday.length} dreading task${dreadToday.length > 1 ? "s" : ""} today — consider getting them done first`;
-  else if (allPositive && allToday.length > 0) insight = "Great lineup — all your tasks today feel manageable";
-
-  // Mood bars: morning / noon / afternoon / evening
-  const SLOTS = [{ from: 6, to: 12 }, { from: 12, to: 15 }, { from: 15, to: 19 }, { from: 19, to: 24 }];
-  const bars = SLOTS.map(({ from, to }) => {
-    const slotTasks = timedTasks.filter(t => { const h = new Date(t.dueAt!).getHours(); return h >= from && h < to; });
-    if (!slotTasks.length) return { bg: "#f1f3ef", height: 10, border: "1px solid #e9ede9" };
-    const counts: Record<string, number> = {};
-    slotTasks.forEach(t => { counts[t.emotionalState] = (counts[t.emotionalState] ?? 0) + 1; });
-    const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-    const ec = EC[dominant] ?? EC.NEUTRAL;
-    return { bg: ec.bg, height: Math.min(10 + slotTasks.length * 8, 32), border: `1px solid ${ec.border}` };
-  });
-
-  // Tomorrow distribution
-  const tmCounts: Record<string, number> = {};
-  tomorrowTasks.forEach(t => { tmCounts[t.emotionalState] = (tmCounts[t.emotionalState] ?? 0) + 1; });
-  const tmEntries = Object.entries(tmCounts).sort((a, b) => b[1] - a[1]);
-  const tmDominant = tmEntries[0]?.[0] ?? "NEUTRAL";
-
-  // Split at now
-  const nowMs = now.getTime();
-  const pastTasks   = timedTasks.filter(t => new Date(t.dueAt!).getTime() < nowMs);
-  const futureTasks = timedTasks.filter(t => new Date(t.dueAt!).getTime() >= nowMs);
-
-  return (
-    <div style={{ background: "#fff", border: "1px solid #e9ede9", borderRadius: 16, padding: "20px 24px", marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-        <div>
-          <p style={{ fontSize: 11, color: "#4a6d47", margin: "0 0 3px", letterSpacing: "0.07em", textTransform: "uppercase", fontWeight: 600 }}>Today&apos;s load</p>
-          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 500, color: "#082d1d", letterSpacing: "-0.02em" }}>
-            {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-          </h3>
-        </div>
-        <div style={{ display: "flex", gap: 3, alignItems: "flex-end" }} title="Emotional weight by time of day">
-          {bars.map((b, i) => (
-            <div key={i} style={{ width: 14, height: b.height, background: b.bg, border: b.border, borderRadius: 3 }} />
-          ))}
-        </div>
-      </div>
-
-      {/* Insight */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "9px 12px", background: "#f8f9f5", borderLeft: "2px solid #059669", borderRadius: "0 6px 6px 0", marginBottom: 18 }}>
-        <Lightbulb size={13} color="#059669" style={{ flexShrink: 0, marginTop: 1 }} />
-        <p style={{ margin: 0, fontSize: 13, color: "#3d5a4a", lineHeight: 1.5 }}>{insight}</p>
-      </div>
-
-      {/* Timeline */}
-      {timedTasks.length === 0 ? (
-        <p style={{ fontSize: 12.5, color: "#c4cbc2", textAlign: "center", padding: "20px 0", margin: 0 }}>
-          No tasks with scheduled times today
-        </p>
-      ) : (
-        <div style={{ position: "relative", paddingLeft: 56 }}>
-          <div style={{ position: "absolute", left: 47, top: 8, bottom: 8, width: 1, background: "#e9ede9" }} />
-          {pastTasks.map(task => <TimelineItem key={task.id} task={task} />)}
-          <div style={{ position: "relative", margin: "10px 0" }}>
-            <span style={{ position: "absolute", left: -56, top: "50%", transform: "translateY(-50%)", fontSize: 10, color: "#059669", fontWeight: 700, letterSpacing: "0.5px", width: 40, textAlign: "right" }}>now</span>
-            <div style={{ position: "absolute", left: -10, right: 0, top: "50%", height: 1, background: "#059669", opacity: 0.35 }} />
-            <div style={{ position: "absolute", left: -13, top: "50%", transform: "translateY(-50%)", width: 7, height: 7, borderRadius: "50%", background: "#059669" }} />
-            <div style={{ height: 1 }} />
-          </div>
-          {futureTasks.map(task => <TimelineItem key={task.id} task={task} />)}
-        </div>
-      )}
-
-      {/* Tomorrow forecast */}
-      {tomorrowTasks.length > 0 && (
-        <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #e9ede9" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-            <p style={{ margin: 0, fontSize: 11, color: "#4a6d47", letterSpacing: "0.07em", textTransform: "uppercase", fontWeight: 600 }}>Tomorrow&apos;s forecast</p>
-            <p style={{ margin: 0, fontSize: 12, color: "#4a6d47" }}>
-              {tomorrowTasks.length} task{tomorrowTasks.length > 1 ? "s" : ""} · mostly {EMOTION_LABELS[tmDominant] ?? "neutral"}
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: 2, borderRadius: 4, overflow: "hidden", height: 8 }}>
-            {tmEntries.map(([emotion, count]) => {
-              const ec = EC[emotion] ?? EC.NEUTRAL;
-              return <div key={emotion} style={{ flex: count, background: ec.bg, border: `1px solid ${ec.border}` }} />;
-            })}
-          </div>
-          <div style={{ display: "flex", gap: 14, marginTop: 10, flexWrap: "wrap" }}>
-            {tmEntries.map(([emotion]) => {
-              const ec = EC[emotion] ?? EC.NEUTRAL;
-              return (
-                <span key={emotion} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "#4a6d47" }}>
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: ec.dot, flexShrink: 0, display: "inline-block" }} />
-                  {EMOTION_LABELS[emotion] ?? emotion.toLowerCase()}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ── Main component ────────────────────────────────────────────────────
 
@@ -506,8 +327,6 @@ export function EnergyView() {
         <MoodChart data={weekData} />
       </div>
 
-      {/* ── Today's load timeline ── */}
-      <TodaysLoadCard allTasks={allTasks} completedTasks={completedTasks} />
 
       {/* ── Top influences + emotional load ── */}
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 0 }}>
