@@ -1,17 +1,105 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
-// ── Grid-based custom time picker ─────────────────────────────────────
+// ── iOS-style wheel time picker ───────────────────────────────────────
+
+const WHEEL_ITEM_H = 36;
+const WHEEL_VISIBLE_ROWS = 5; // odd; center row is selection
+const WHEEL_HEIGHT = WHEEL_ITEM_H * WHEEL_VISIBLE_ROWS;
+const WHEEL_PAD = (WHEEL_HEIGHT - WHEEL_ITEM_H) / 2;
+
+function WheelColumn<T extends string | number>({
+  items, value, onChange, format,
+}: {
+  items: T[];
+  value: T;
+  onChange: (v: T) => void;
+  format: (v: T) => string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isProgrammaticScroll = useRef(false);
+
+  // Sync external value → scroll position (programmatic, don't trigger onChange)
+  useEffect(() => {
+    if (!ref.current) return;
+    const idx = items.indexOf(value);
+    if (idx < 0) return;
+    const target = idx * WHEEL_ITEM_H;
+    if (Math.abs(ref.current.scrollTop - target) > 2) {
+      isProgrammaticScroll.current = true;
+      ref.current.scrollTop = target;
+      // Reset flag after the scroll event fires
+      setTimeout(() => { isProgrammaticScroll.current = false; }, 100);
+    }
+  }, [value, items]);
+
+  const handleScroll = useCallback(() => {
+    if (!ref.current || isProgrammaticScroll.current) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (!ref.current) return;
+      const idx = Math.round(ref.current.scrollTop / WHEEL_ITEM_H);
+      const next = items[Math.max(0, Math.min(items.length - 1, idx))];
+      if (next !== undefined && next !== value) onChange(next);
+    }, 100);
+  }, [items, value, onChange]);
+
+  return (
+    <div
+      ref={ref}
+      onScroll={handleScroll}
+      style={{
+        flex: 1, height: WHEEL_HEIGHT,
+        overflowY: "auto",
+        scrollSnapType: "y mandatory",
+        WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
+      className="wheel-col"
+    >
+      <div style={{ paddingTop: WHEEL_PAD, paddingBottom: WHEEL_PAD }}>
+        {items.map((item, i) => {
+          const active = item === value;
+          return (
+            <div
+              key={i}
+              onClick={() => {
+                if (ref.current) {
+                  isProgrammaticScroll.current = true;
+                  ref.current.scrollTop = i * WHEEL_ITEM_H;
+                  setTimeout(() => { isProgrammaticScroll.current = false; }, 100);
+                }
+                onChange(item);
+              }}
+              style={{
+                height: WHEEL_ITEM_H, scrollSnapAlign: "center",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: active ? 19 : 16,
+                fontWeight: active ? 700 : 400,
+                fontVariantNumeric: "tabular-nums",
+                color: active ? "#082d1d" : "#888780",
+                cursor: "pointer",
+                transition: "font-size 0.15s, color 0.15s",
+                userSelect: "none",
+              }}
+            >
+              {format(item)}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
-const MINUTES_5 = Array.from({ length: 12 }, (_, i) => i * 5); // 0, 5, 10, ..., 55
-
-function fmtDisplay(h12: number, m: number, ampm: "AM" | "PM") {
-  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
-}
+const MINUTES = Array.from({ length: 60 }, (_, i) => i);
+const AMPMS = ["AM", "PM"] as const;
 
 export function WheelTimePicker({ value, onChange }: { value: string; onChange: (t: string) => void }) {
   const [h24, m] = value
@@ -19,8 +107,6 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
     : [9, 0];
   const hour12 = ((h24 + 11) % 12) + 1;
   const ampm: "AM" | "PM" = h24 >= 12 ? "PM" : "AM";
-  // Snap displayed minute to nearest 5
-  const minute5 = Math.round(m / 5) * 5 % 60;
 
   function update(nextHour12: number, nextMinute: number, nextAmpm: "AM" | "PM") {
     let h = nextHour12 === 12 ? 0 : nextHour12;
@@ -28,92 +114,37 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
     onChange(`${String(h).padStart(2, "0")}:${String(nextMinute).padStart(2, "0")}`);
   }
 
-  const cellBase: React.CSSProperties = {
-    height: 30, borderRadius: 6, border: "1px solid #dde4de",
-    background: "#fff", color: "#082d1d", fontSize: 12.5, fontWeight: 500,
-    cursor: "pointer", fontFamily: "inherit",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontVariantNumeric: "tabular-nums",
-    transition: "background 0.12s, color 0.12s, border-color 0.12s",
-  };
-  const cellActive: React.CSSProperties = {
-    background: "#059669", color: "#fff", borderColor: "#059669", fontWeight: 700,
-  };
-  const sectionLabel: React.CSSProperties = {
-    fontSize: 10, fontWeight: 600, color: "#4a6d47",
-    textTransform: "uppercase", letterSpacing: "0.06em",
-    fontFamily: "var(--font-mono), monospace",
-    margin: "0 0 6px",
-  };
-
   return (
-    <div style={{ width: 220, userSelect: "none", display: "flex", flexDirection: "column", gap: 12 }}>
-      {/* Big display */}
+    <div style={{ position: "relative", width: 240, height: WHEEL_HEIGHT, userSelect: "none" }}>
+      {/* Center selection band */}
       <div style={{
-        background: "#f2fdec", border: "1px solid #c8f7ae",
-        borderRadius: 8, padding: "8px 12px", textAlign: "center",
-      }}>
-        <span style={{ fontSize: 20, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}>
-          {fmtDisplay(hour12, minute5, ampm)}
-        </span>
-      </div>
+        position: "absolute", top: WHEEL_PAD, left: 0, right: 0, height: WHEEL_ITEM_H,
+        background: "#f2fdec",
+        borderTop: "1px solid #c8f7ae", borderBottom: "1px solid #c8f7ae",
+        pointerEvents: "none", zIndex: 1, borderRadius: 4,
+      }} />
 
-      {/* AM/PM segment */}
-      <div style={{ display: "flex", gap: 4, background: "#f8f9f5", border: "1px solid #dde4de", borderRadius: 8, padding: 3 }}>
-        {(["AM", "PM"] as const).map(p => {
-          const active = ampm === p;
-          return (
-            <button key={p} onClick={() => update(hour12, minute5, p)}
-              style={{
-                flex: 1, padding: "6px 0", borderRadius: 6,
-                border: active ? "1px solid #dde4de" : "1px solid transparent",
-                background: active ? "#fff" : "transparent",
-                color: active ? "#082d1d" : "#4a6d47",
-                fontSize: 12.5, fontWeight: active ? 700 : 500,
-                cursor: "pointer", fontFamily: "inherit",
-                boxShadow: active ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                transition: "all 0.12s",
-              }}>
-              {p}
-            </button>
-          );
-        })}
-      </div>
+      {/* Top/bottom fade gradients */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: WHEEL_PAD,
+        background: "linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0) 100%)",
+        pointerEvents: "none", zIndex: 2,
+      }} />
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0, height: WHEEL_PAD,
+        background: "linear-gradient(0deg, #ffffff 0%, rgba(255,255,255,0) 100%)",
+        pointerEvents: "none", zIndex: 2,
+      }} />
 
-      {/* Hour grid */}
-      <div>
-        <p style={sectionLabel}>Hour</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4 }}>
-          {HOURS_12.map(h => {
-            const active = h === hour12;
-            return (
-              <button key={h} onClick={() => update(h, minute5, ampm)}
-                style={active ? { ...cellBase, ...cellActive } : cellBase}
-                onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
-                onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "#fff"; }}>
-                {h}
-              </button>
-            );
-          })}
+      <style>{`.wheel-col::-webkit-scrollbar { display: none; }`}</style>
+
+      <div style={{ display: "flex", height: "100%", gap: 4 }}>
+        <WheelColumn items={HOURS_12} value={hour12} onChange={v => update(v, m, ampm)} format={v => String(v)} />
+        <div style={{ display: "flex", alignItems: "center", paddingTop: WHEEL_PAD, height: WHEEL_HEIGHT }}>
+          <span style={{ fontSize: 19, fontWeight: 700, color: "#082d1d", lineHeight: `${WHEEL_ITEM_H}px` }}>:</span>
         </div>
-      </div>
-
-      {/* Minute grid */}
-      <div>
-        <p style={sectionLabel}>Minute</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4 }}>
-          {MINUTES_5.map(min => {
-            const active = min === minute5;
-            return (
-              <button key={min} onClick={() => update(hour12, min, ampm)}
-                style={active ? { ...cellBase, ...cellActive } : cellBase}
-                onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
-                onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "#fff"; }}>
-                :{String(min).padStart(2, "0")}
-              </button>
-            );
-          })}
-        </div>
+        <WheelColumn items={MINUTES} value={m} onChange={v => update(hour12, v, ampm)} format={v => String(v).padStart(2, "0")} />
+        <WheelColumn items={[...AMPMS]} value={ampm} onChange={v => update(hour12, m, v)} format={v => v} />
       </div>
     </div>
   );
