@@ -251,7 +251,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                     background: showCal ? D.accentSubtle : "none",
                     border: "none", cursor: "pointer", fontFamily: "inherit",
                   }}>
-                    <span style={{ fontSize: 14, color: D.limeInk }}>Pick a date</span>
+                    <span style={{ fontSize: 14, color: D.limeInk }}>Custom date</span>
                     <ChevronRight size={14} color={D.textMuted} />
                   </button>
                 </>
@@ -308,7 +308,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                       onMouseEnter={e => { if (!showCal) (e.currentTarget as HTMLElement).style.background = D.stone200; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showCal ? D.accentSubtle : "none"; }}
                     >
-                      <span style={{ fontSize: 13.5, color: D.limeInk, fontWeight: showCal ? 600 : 400 }}>Pick a date</span>
+                      <span style={{ fontSize: 13.5, color: D.limeInk, fontWeight: showCal ? 600 : 400 }}>Custom date</span>
                       <ChevronRight size={13} color={showCal ? D.accent : D.textMuted} />
                     </button>
                   </div>

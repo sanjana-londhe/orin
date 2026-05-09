@@ -1,8 +1,146 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDown, ChevronRight, Clock } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
+
+// ── Apple-style wheel time picker ─────────────────────────────────────
+
+const WHEEL_ITEM_H = 36;
+const WHEEL_VISIBLE_ROWS = 5; // odd; center row is selection
+const WHEEL_HEIGHT = WHEEL_ITEM_H * WHEEL_VISIBLE_ROWS;
+const WHEEL_PAD = (WHEEL_HEIGHT - WHEEL_ITEM_H) / 2;
+
+function WheelColumn<T extends string | number>({
+  items, value, onChange, format,
+}: {
+  items: T[];
+  value: T;
+  onChange: (v: T) => void;
+  format: (v: T) => string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync external value → scroll position
+  useEffect(() => {
+    if (!ref.current) return;
+    const idx = items.indexOf(value);
+    if (idx < 0) return;
+    const target = idx * WHEEL_ITEM_H;
+    if (Math.abs(ref.current.scrollTop - target) > 2) {
+      ref.current.scrollTop = target;
+    }
+  }, [value, items]);
+
+  const handleScroll = useCallback(() => {
+    if (!ref.current) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (!ref.current) return;
+      const idx = Math.round(ref.current.scrollTop / WHEEL_ITEM_H);
+      const next = items[Math.max(0, Math.min(items.length - 1, idx))];
+      if (next !== undefined && next !== value) onChange(next);
+    }, 80);
+  }, [items, value, onChange]);
+
+  return (
+    <div
+      ref={ref}
+      onScroll={handleScroll}
+      style={{
+        flex: 1, height: WHEEL_HEIGHT,
+        overflowY: "auto",
+        scrollSnapType: "y mandatory",
+        WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
+      className="wheel-col"
+    >
+      <div style={{ paddingTop: WHEEL_PAD, paddingBottom: WHEEL_PAD }}>
+        {items.map((item, i) => {
+          const active = item === value;
+          return (
+            <div
+              key={i}
+              onClick={() => {
+                if (ref.current) ref.current.scrollTop = i * WHEEL_ITEM_H;
+                onChange(item);
+              }}
+              style={{
+                height: WHEEL_ITEM_H, scrollSnapAlign: "center",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: active ? 19 : 16,
+                fontWeight: active ? 700 : 400,
+                fontVariantNumeric: "tabular-nums",
+                color: active ? "#082d1d" : "#888780",
+                cursor: "pointer",
+                transition: "font-size 0.15s, color 0.15s",
+                userSelect: "none",
+              }}
+            >
+              {format(item)}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
+const MINUTES = Array.from({ length: 60 }, (_, i) => i);
+const AMPMS = ["AM", "PM"] as const;
+
+function WheelTimePicker({ value, onChange }: { value: string; onChange: (t: string) => void }) {
+  const [h24, m] = value
+    ? value.split(":").map(Number) as [number, number]
+    : [9, 0];
+  const hour12 = ((h24 + 11) % 12) + 1; // 0→12, 13→1, etc.
+  const ampm: "AM" | "PM" = h24 >= 12 ? "PM" : "AM";
+
+  function update(nextHour12: number, nextMinute: number, nextAmpm: "AM" | "PM") {
+    let h = nextHour12 === 12 ? 0 : nextHour12;
+    if (nextAmpm === "PM") h += 12;
+    onChange(`${String(h).padStart(2, "0")}:${String(nextMinute).padStart(2, "0")}`);
+  }
+
+  return (
+    <div style={{ position: "relative", width: 220, height: WHEEL_HEIGHT, userSelect: "none" }}>
+      {/* Center selection band */}
+      <div style={{
+        position: "absolute", top: WHEEL_PAD, left: 0, right: 0, height: WHEEL_ITEM_H,
+        background: "#f2fdec",
+        borderTop: "1px solid #c8f7ae", borderBottom: "1px solid #c8f7ae",
+        pointerEvents: "none", zIndex: 1, borderRadius: 4,
+      }} />
+
+      {/* Top/bottom fade gradients */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: WHEEL_PAD,
+        background: "linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0) 100%)",
+        pointerEvents: "none", zIndex: 2,
+      }} />
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0, height: WHEEL_PAD,
+        background: "linear-gradient(0deg, #ffffff 0%, rgba(255,255,255,0) 100%)",
+        pointerEvents: "none", zIndex: 2,
+      }} />
+
+      <style>{`.wheel-col::-webkit-scrollbar { display: none; }`}</style>
+
+      <div style={{ display: "flex", height: "100%", gap: 4 }}>
+        <WheelColumn items={HOURS_12} value={hour12} onChange={v => update(v, m, ampm)} format={v => String(v)} />
+        <div style={{ display: "flex", alignItems: "center", paddingTop: WHEEL_PAD, height: WHEEL_HEIGHT }}>
+          <span style={{ fontSize: 19, fontWeight: 700, color: "#082d1d", lineHeight: `${WHEEL_ITEM_H}px` }}>:</span>
+        </div>
+        <WheelColumn items={MINUTES} value={m} onChange={v => update(hour12, v, ampm)} format={v => String(v).padStart(2, "0")} />
+        <WheelColumn items={[...AMPMS]} value={ampm} onChange={v => update(hour12, m, v)} format={v => v} />
+      </div>
+    </div>
+  );
+}
 
 const D = {
   surface:       "#ffffff",
@@ -161,18 +299,9 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
               <div style={{ height: 1, background: D.border, margin: "4px 0" }} />
               <div style={{ padding: "10px 16px" }}>
                 <p style={{ fontSize: 11, fontWeight: 600, color: D.textTertiary, margin: "0 0 8px" }}>Custom time</p>
-                <input
-                  type="time"
-                  value={value}
-                  min={isToday ? nowHHMM : undefined}
-                  onChange={e => onChange(e.target.value)}
-                  style={{
-                    width: "100%", padding: "10px 12px", borderRadius: 8,
-                    border: `1.5px solid ${D.accent}`, background: D.accentSubtle,
-                    fontSize: 14, fontWeight: 500, color: D.textPrimary,
-                    fontFamily: "inherit", outline: "none", boxSizing: "border-box",
-                  }}
-                />
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <WheelTimePicker value={value || "09:00"} onChange={onChange} />
+                </div>
               </div>
               <div style={{ padding: "0 16px 10px" }}>
                 <button type="button" onClick={() => setOpen(false)} style={{
@@ -232,25 +361,13 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                   background: D.surface, border: `1.5px solid ${D.border}`,
                   borderRadius: 10, padding: "14px 16px",
                   boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
-                  display: "flex", flexDirection: "column", gap: 10,
+                  display: "flex", flexDirection: "column", gap: 12,
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <Clock size={14} color={D.textTertiary} />
                     <p style={{ fontSize: 12, fontWeight: 600, color: D.textTertiary, margin: 0 }}>Pick a time</p>
                   </div>
-                  <input
-                    type="time"
-                    value={value}
-                    min={isToday ? nowHHMM : undefined}
-                    onChange={e => onChange(e.target.value)}
-                    autoFocus
-                    style={{
-                      padding: "9px 12px", borderRadius: 8,
-                      border: `1.5px solid ${D.accent}`, background: D.accentSubtle,
-                      fontSize: 14, fontWeight: 500, color: D.textPrimary,
-                      fontFamily: "inherit", outline: "none", cursor: "pointer", width: 140,
-                    }}
-                  />
+                  <WheelTimePicker value={value || "09:00"} onChange={onChange} />
                   <button type="button" onClick={() => { setOpen(false); setShowCustom(false); }} style={{
                     padding: "7px 16px", borderRadius: 8,
                     background: D.accent, border: "none", color: "#fff",
