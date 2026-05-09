@@ -332,7 +332,7 @@ export function AllTasksView() {
 
                   {/* Feeling chip + dropdown */}
                   <div style={{ position: "relative" }}>
-                    <button onClick={() => { setShowEmoPicker(o => !o); setShowDatePicker(false); }}
+                    <button onClick={() => { setShowEmoPicker(o => !o); setShowDatePicker(false); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); }}
                       style={{ ...chipStyle(em.fg), background: em.bg }}>
                       <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                     </button>
@@ -351,7 +351,7 @@ export function AllTasksView() {
 
                   {/* Date chip + dropdown */}
                   <div style={{ position: "relative" }}>
-                    <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowEmoPicker(false); }}
+                    <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); setShowEmoPicker(false); }}
                       style={chipStyle("#059669")}>
                       <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                     </button>
@@ -366,7 +366,7 @@ export function AllTasksView() {
                             </button>
                           ))}
                           <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
-                          <button onClick={() => setShowCustomDate(s => !s)}
+                          <button onClick={() => { setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
                             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomDate ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
                             <span style={{ fontSize: 13, color: "#082d1d", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
                             <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
@@ -384,7 +384,7 @@ export function AllTasksView() {
 
                   {/* Time chip + dropdown */}
                   <div style={{ position: "relative" }}>
-                    <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowEmoPicker(false); setShowDatePicker(false); }}
+                    <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowDatePicker(false); setShowCustomDate(false); setShowEmoPicker(false); }}
                       style={chipStyle(dueTime ? "#5f5e5a" : undefined)}>
                       <span style={{ fontSize: 10 }}>🕐</span> {dueTime ? fmtTimeLbl(dueTime) : "Add time"}
                     </button>
@@ -406,7 +406,7 @@ export function AllTasksView() {
                               </button>
                             ))}
                             <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
-                            <button onClick={() => setShowCustomTime(s => !s)}
+                            <button onClick={() => { setShowCustomTime(s => !s); setShowDatePicker(false); setShowCustomDate(false); }}
                               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomTime ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
                               <span style={{ fontSize: 13, color: "#082d1d", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
                               <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />

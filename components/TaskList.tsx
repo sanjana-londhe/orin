@@ -361,7 +361,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
                 {/* Feeling chip + dropdown */}
                 <div style={{ position: "relative" }}>
-                  <button onClick={() => { setShowEmotionPicker(o => !o); setShowDatePicker(false); }}
+                  <button onClick={() => { setShowEmotionPicker(o => !o); setShowDatePicker(false); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); }}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:em.bg, border:`0.5px solid ${em.fg}33`, color:em.fg, fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                   </button>
@@ -380,7 +380,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
                 {/* Date chip + dropdown */}
                 <div style={{ position: "relative" }}>
-                  <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowEmotionPicker(false); }}
+                  <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); setShowEmotionPicker(false); }}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(5,150,105,0.25)", color:"#059669", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                   </button>
@@ -395,7 +395,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                           </button>
                         ))}
                         <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
-                        <button onClick={() => setShowCustomDate(s => !s)}
+                        <button onClick={() => { setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
                           style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomDate?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
                           <span style={{ fontSize:13, color:"#082d1d", fontWeight:showCustomDate?500:400 }}>Custom date</span>
                           <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
@@ -413,7 +413,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
                 {/* Time chip + dropdown */}
                 <div style={{ position: "relative" }}>
-                  <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowEmotionPicker(false); setShowDatePicker(false); }}
+                  <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowDatePicker(false); setShowCustomDate(false); setShowEmotionPicker(false); }}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#5f5e5a", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>🕐</span> {inlineDueTime ? fmtTimeLabel(inlineDueTime) : "Add time"}
                   </button>
@@ -435,7 +435,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                             </button>
                           ))}
                           <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
-                          <button onClick={() => setShowCustomTime(s => !s)}
+                          <button onClick={() => { setShowCustomTime(s => !s); setShowDatePicker(false); setShowCustomDate(false); }}
                             style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomTime?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
                             <span style={{ fontSize:13, color:"#082d1d", fontWeight:showCustomTime?500:400 }}>Custom time</span>
                             <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
