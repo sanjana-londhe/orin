@@ -230,14 +230,17 @@ export function AIPanel({ onClose }: Props) {
         {/* ── 1. Daily Briefing ── */}
         <Section icon={<Zap size={14} />} title="Today's briefing">
           <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55 }}>
-            <p style={{ margin: 0, color: overdue.length > 0 ? "#D14626" : "#082d1d", fontWeight: overdue.length > 0 ? 600 : 400 }}>
+            <p style={{ margin: 0, color: overdue.length > 0 ? "#D14626" : "#3d5a4a", fontWeight: overdue.length > 0 ? 600 : 400 }}>
               {overdue.length > 0 ? `${overdue.length} overdue` : "Nothing overdue."}
             </p>
             <p style={{ margin: 0, color: "#082d1d" }}>
-              {pending.length} task{pending.length !== 1 ? "s" : ""} remaining today.
+              <strong style={{ color: "#082d1d" }}>{pending.length}</strong>
+              <span style={{ color: "#3d5a4a" }}> task{pending.length !== 1 ? "s" : ""} remaining today.</span>
             </p>
-            <p style={{ margin: 0, color: "#082d1d" }}>
-              {hasEnergy ? "Energy logged today." : "Energy not logged yet — track how you feel to unlock pattern insights."}
+            <p style={{ margin: 0, color: hasEnergy ? "#059669" : "#3d5a4a" }}>
+              {hasEnergy ? "Energy logged today." : (
+                <>Energy not logged yet — <span style={{ color: "#4a6d47" }}>track how you feel to unlock pattern insights.</span></>
+              )}
             </p>
           </div>
         </Section>
@@ -247,24 +250,29 @@ export function AIPanel({ onClose }: Props) {
           {!weekly ? (
             <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>Loading patterns…</p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55, color: "#082d1d" }}>
-              <p style={{ margin: 0 }}>
-                <strong>{weekly.total_completed}</strong> task{weekly.total_completed === 1 ? "" : "s"} completed this week.
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55 }}>
+              <p style={{ margin: 0, color: "#3d5a4a" }}>
+                <strong style={{ color: "#059669" }}>{weekly.total_completed}</strong> task{weekly.total_completed === 1 ? "" : "s"} completed this week.
               </p>
               {bestEmotion && (
-                <p style={{ margin: 0 }}>
-                  You finish most tasks when feeling <strong>{bestEmotion.em?.emoji} {bestEmotion.em?.label}</strong> ({bestEmotion.count} completed).
+                <p style={{ margin: 0, color: "#3d5a4a" }}>
+                  You finish most tasks when feeling{" "}
+                  <strong style={{ color: bestEmotion.em?.pillText ?? "#082d1d" }}>{bestEmotion.em?.emoji} {bestEmotion.em?.label}</strong>
+                  <span style={{ color: "#4a6d47" }}> ({bestEmotion.count} completed).</span>
                 </p>
               )}
               {worstEmotion && (
-                <p style={{ margin: 0 }}>
-                  Most deferrals when feeling <strong>{worstEmotion.em?.emoji} {worstEmotion.em?.label}</strong> ({worstEmotion.count} deferrals).
+                <p style={{ margin: 0, color: "#3d5a4a" }}>
+                  Most deferrals when feeling{" "}
+                  <strong style={{ color: worstEmotion.em?.pillText ?? "#082d1d" }}>{worstEmotion.em?.emoji} {worstEmotion.em?.label}</strong>
+                  <span style={{ color: "#4a6d47" }}> ({worstEmotion.count} deferrals).</span>
                 </p>
               )}
               {weekly.most_deferred_task && (
-                <p style={{ margin: 0 }}>
-                  Most deferred task: &ldquo;{weekly.most_deferred_task.title}&rdquo; — pushed{" "}
-                  <span style={{ color: "#D14626", fontWeight: 600 }}>{weekly.most_deferred_task.deferredCount}×</span>.
+                <p style={{ margin: 0, color: "#3d5a4a" }}>
+                  Most deferred task:{" "}
+                  <span style={{ color: "#082d1d", fontWeight: 600 }}>&ldquo;{weekly.most_deferred_task.title}&rdquo;</span>
+                  {" "}— pushed <span style={{ color: "#D14626", fontWeight: 600 }}>{weekly.most_deferred_task.deferredCount}×</span>.
                 </p>
               )}
               {weekly.total_completed === 0 && !bestEmotion && !worstEmotion && (
@@ -279,11 +287,12 @@ export function AIPanel({ onClose }: Props) {
         {/* ── 3. Task Coach ── */}
         <Section icon={<Compass size={14} />} title="What to work on next">
           {pending.length === 0 ? (
-            <p style={{ fontSize: 13, color: "#082d1d", margin: 0 }}>🎉 All caught up — no pending tasks for today.</p>
+            <p style={{ fontSize: 13, color: "#059669", margin: 0 }}>🎉 All caught up — no pending tasks for today.</p>
           ) : recommended ? (
-            <div style={{ fontSize: 13, lineHeight: 1.55, color: "#082d1d" }}>
-              <p style={{ margin: "0 0 6px", fontWeight: 600 }}>
-                Start with: &ldquo;{recommended.title}&rdquo;
+            <div style={{ fontSize: 13, lineHeight: 1.55 }}>
+              <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
+                Start with:{" "}
+                <strong style={{ color: "#082d1d" }}>&ldquo;{recommended.title}&rdquo;</strong>
               </p>
               <p style={{ margin: "0 0 6px", display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {recommended.dueAt && new Date(recommended.dueAt) < new Date() && (
@@ -291,10 +300,10 @@ export function AIPanel({ onClose }: Props) {
                 )}
                 {(() => {
                   const em = EMOTION_MAP[recommended.emotionalState as keyof typeof EMOTION_MAP];
-                  return em ? <span style={{ color: "#082d1d" }}>{em.emoji} {em.label}</span> : null;
+                  return em ? <span style={{ color: em.pillText, fontWeight: 600 }}>{em.emoji} {em.label}</span> : null;
                 })()}
                 {recommended.deferredCount > 0 && (
-                  <span style={{ color: "#082d1d" }}>Deferred {recommended.deferredCount}×</span>
+                  <span style={{ color: "#D14626", fontWeight: 600 }}>Deferred {recommended.deferredCount}×</span>
                 )}
               </p>
               <p style={{ fontSize: 11.5, color: "#4a6d47", margin: 0 }}>
@@ -311,15 +320,18 @@ export function AIPanel({ onClose }: Props) {
               No dreaded or anxious tasks right now.
             </p>
           ) : (
-            <div style={{ fontSize: 13, lineHeight: 1.55, color: "#082d1d" }}>
-              <p style={{ margin: "0 0 8px" }}>
-                {(() => { const em = EMOTION_MAP[dreaded.emotionalState as keyof typeof EMOTION_MAP]; return em ? `${em.emoji} ${em.label}` : ""; })()}
+            <div style={{ fontSize: 13, lineHeight: 1.55 }}>
+              <p style={{ margin: "0 0 8px", color: "#3d5a4a" }}>
+                {(() => {
+                  const em = EMOTION_MAP[dreaded.emotionalState as keyof typeof EMOTION_MAP];
+                  return em ? <span style={{ color: em.pillText, fontWeight: 600 }}>{em.emoji} {em.label}</span> : null;
+                })()}
                 {dreaded.deferredCount > 0 ? <> · deferred <span style={{ color: "#D14626", fontWeight: 600 }}>{dreaded.deferredCount}×</span></> : ""}
                 <br />
-                <strong>&ldquo;{dreaded.title}&rdquo;</strong>
+                <strong style={{ color: "#082d1d" }}>&ldquo;{dreaded.title}&rdquo;</strong>
               </p>
 
-              <p style={{ margin: "0 0 8px", fontWeight: 600 }}>Break it down — just do step 1:</p>
+              <p style={{ margin: "0 0 8px", fontWeight: 600, color: "#082d1d" }}>Break it down — just do step 1:</p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {reframeSteps.map((step, i) => (
