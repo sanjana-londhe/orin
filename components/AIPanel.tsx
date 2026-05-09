@@ -92,7 +92,7 @@ function Section({ icon, title, children, defaultOpen = true }: {
           <span style={{ color: "#059669" }}>{icon}</span>
           <span style={{ fontSize: 12.5, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
         </div>
-        {open ? <ChevronUp size={13} color="#c4cbc2" /> : <ChevronDown size={13} color="#c4cbc2" />}
+        {open ? <ChevronUp size={13} color="#b9d3c4" /> : <ChevronDown size={13} color="#b9d3c4" />}
       </button>
       {open && <div style={{ paddingBottom: 12 }}>{children}</div>}
       <div style={{ height: 1, background: "#f1f3ef" }} />
@@ -204,10 +204,15 @@ export function AIPanel({ onClose }: Props) {
             <Sparkles size={14} color="#fff" />
           </div>
           <div>
-            <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
+            <p style={{
+              fontFamily: "var(--font-mono), monospace",
+              fontSize: 10, fontWeight: 600, color: "#4a6d47",
+              textTransform: "uppercase", letterSpacing: "0.08em",
+              margin: "0 0 1px",
+            }}>Workspace · Insights</p>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
               Orin Insight
             </h2>
-            <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Your task patterns, surfaced</p>
           </div>
         </div>
         <button onClick={onClose} style={{
@@ -240,7 +245,7 @@ export function AIPanel({ onClose }: Props) {
         {/* ── 2. Weekly Patterns ── */}
         <Section icon={<TrendingUp size={14} />} title="Weekly patterns">
           {!weekly ? (
-            <p style={{ fontSize: 12.5, color: "#c4cbc2", margin: 0 }}>Loading patterns…</p>
+            <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>Loading patterns…</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55, color: "#082d1d" }}>
               <p style={{ margin: 0 }}>
@@ -263,7 +268,7 @@ export function AIPanel({ onClose }: Props) {
                 </p>
               )}
               {weekly.total_completed === 0 && !bestEmotion && !worstEmotion && (
-                <p style={{ margin: 0, color: "#c4cbc2" }}>
+                <p style={{ margin: 0, color: "#b9d3c4" }}>
                   Complete and defer some tasks this week to see your patterns here.
                 </p>
               )}
@@ -302,7 +307,7 @@ export function AIPanel({ onClose }: Props) {
         {/* ── 4. Reframe Assistant ── */}
         <Section icon={<Lightbulb size={14} />} title="Reframe a dreaded task" defaultOpen={!!dreaded}>
           {!dreaded ? (
-            <p style={{ fontSize: 12.5, color: "#c4cbc2", margin: 0 }}>
+            <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>
               No dreaded or anxious tasks right now.
             </p>
           ) : (
@@ -335,7 +340,7 @@ export function AIPanel({ onClose }: Props) {
                 ))}
               </div>
 
-              <p style={{ fontSize: 11.5, color: "#c4cbc2", margin: "12px 0 0", fontStyle: "italic" }}>
+              <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: "12px 0 0", fontStyle: "italic" }}>
                 You only have to do step 1. The rest follows.
               </p>
             </div>
