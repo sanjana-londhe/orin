@@ -277,7 +277,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
     return (
       <div style={{ padding: "4px 8px" }}>
-        <div style={{ background:"#fff", borderRadius:10, border:`1px solid ${T.accent}` }}>
+        <div style={{ background:"#fff", borderRadius:10 }}>
 
           {/* Title + notes */}
           <div style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"10px 14px 4px 16px" }}>

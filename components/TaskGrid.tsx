@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
+import { useUIStore } from "@/store/ui";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import type { TaskWithSubtasks } from "@/lib/types";
 
@@ -15,6 +16,8 @@ interface Props {
 
 function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Props) {
   const m = useTaskMutations();
+  const editingTaskId = useUIStore(s => s.editingTaskId);
+  const isEditing = !!editingTaskId && tasks.some(t => t.id === editingTaskId);
 
   if (isLoading) return <SkeletonTaskList count={4} />;
 
@@ -32,7 +35,7 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
   }
 
   return (
-    <div style={{ background: "white", borderRadius: 12, border: "1px solid #dde4de" }}>
+    <div style={{ background: "white", borderRadius: 12, border: `1px solid ${isEditing ? "#059669" : "#dde4de"}`, transition: "border-color 0.18s" }}>
       {tasks.map((task, i) => (
         <div
           key={task.id}
