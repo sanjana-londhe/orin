@@ -75,6 +75,8 @@ interface Props {
 export function EnergyCheckInModal({ onClose, onSave }: Props) {
   const [mood, setMood]                   = useState<number | null>(null);
   const [contributions, setContributions] = useState<string[]>([]);
+  const [otherActive, setOtherActive]     = useState(false);
+  const [otherText, setOtherText]         = useState("");
   const [saved, setSaved]                 = useState(false);
   const isMobile                          = useIsMobile();
 
@@ -90,15 +92,20 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
 
   function handleSave() {
     if (mood === null) return;
+    const allContributions = otherActive && otherText.trim()
+      ? [...contributions, otherText.trim()]
+      : contributions;
     const entry: CheckIn = {
       id: `${Date.now()}`,
       time: new Date().toISOString(),
       mood,
-      contributions,
+      contributions: allContributions,
     };
     onSave(entry);
     setSaved(true);
   }
+
+  const totalSelected = contributions.length + (otherActive && otherText.trim() ? 1 : 0);
 
   const selectedMood = MOODS.find(m => m.value === mood);
 
@@ -246,7 +253,44 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       </button>
                     );
                   })}
+                  <button onClick={() => {
+                    if (otherActive) { setOtherActive(false); setOtherText(""); }
+                    else setOtherActive(true);
+                  }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      border: `1px solid ${otherActive ? T.accent : T.border}`,
+                      background: otherActive ? T.accentSubtle : T.surface,
+                      cursor: "pointer", fontFamily: "inherit",
+                      transition: "background 0.12s, border-color 0.12s",
+                    }}>
+                    <span style={{ fontSize: 14 }}>✏️</span>
+                    <span style={{
+                      fontSize: 11.5, fontWeight: otherActive ? 600 : 500,
+                      color: otherActive ? T.accent : T.textSecondary,
+                    }}>Other</span>
+                  </button>
                 </div>
+                {otherActive && (
+                  <input
+                    autoFocus
+                    value={otherText}
+                    onChange={e => setOtherText(e.target.value)}
+                    placeholder="Add your own…"
+                    style={{
+                      marginTop: 8,
+                      width: "100%", padding: "9px 12px",
+                      borderRadius: 8,
+                      border: `1.5px solid ${T.accent}`,
+                      background: T.accentSubtle,
+                      fontSize: 13, color: T.textPrimary,
+                      fontFamily: "inherit", outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                )}
               </section>
             )}
           </div>
@@ -295,7 +339,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                 color: T.textSecondary, fontSize: 13, fontWeight: 500,
                 cursor: "pointer", fontFamily: "inherit",
               }}>Cancel</button>
-              <SaveButton onClick={handleSave} disabled={mood === null} contributions={contributions.length} />
+              <SaveButton onClick={handleSave} disabled={mood === null} contributions={totalSelected} />
             </>
           ) : (
             <button onClick={onClose} style={{
