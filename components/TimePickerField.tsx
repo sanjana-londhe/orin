@@ -116,12 +116,12 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
 
   return (
     <div style={{ position: "relative", width: 240, height: WHEEL_HEIGHT, userSelect: "none" }}>
-      {/* Center selection band */}
+      {/* Center selection band — hairlines only so centered text is visible */}
       <div style={{
         position: "absolute", top: WHEEL_PAD, left: 0, right: 0, height: WHEEL_ITEM_H,
-        background: "#f2fdec",
-        borderTop: "1px solid #c8f7ae", borderBottom: "1px solid #c8f7ae",
-        pointerEvents: "none", zIndex: 1, borderRadius: 4,
+        borderTop: "1px solid rgba(5,150,105,0.18)",
+        borderBottom: "1px solid rgba(5,150,105,0.18)",
+        pointerEvents: "none", zIndex: 0,
       }} />
 
       {/* Top/bottom fade gradients */}
@@ -140,8 +140,8 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
 
       <div style={{ display: "flex", height: "100%", gap: 4 }}>
         <WheelColumn items={HOURS_12} value={hour12} onChange={v => update(v, m, ampm)} format={v => String(v)} />
-        <div style={{ display: "flex", alignItems: "center", paddingTop: WHEEL_PAD, height: WHEEL_HEIGHT }}>
-          <span style={{ fontSize: 19, fontWeight: 700, color: "#082d1d", lineHeight: `${WHEEL_ITEM_H}px` }}>:</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: WHEEL_HEIGHT, width: 8 }}>
+          <span style={{ fontSize: 19, fontWeight: 700, color: "#082d1d" }}>:</span>
         </div>
         <WheelColumn items={MINUTES} value={m} onChange={v => update(hour12, v, ampm)} format={v => String(v).padStart(2, "0")} />
         <WheelColumn items={[...AMPMS]} value={ampm} onChange={v => update(hour12, m, v)} format={v => v} />
