@@ -139,12 +139,12 @@ export function QuadrantMap({ tasks }: Props) {
         {/* Quadrant corner labels */}
         <text x={PAD.left + W - 10} y={PAD.top + 14}
           textAnchor="end" fontSize="9.5" fontWeight="700" letterSpacing="0.06em"
-          fill="#EF4444" fontFamily="monospace" opacity="0.7">
+          fill="#EF4444" opacity="0.7">
           🔥 ON FIRE
         </text>
         <text x={PAD.left + 10} y={PAD.top + H - 10}
           textAnchor="start" fontSize="9.5" fontWeight="700" letterSpacing="0.06em"
-          fill="#14B8A6" fontFamily="monospace" opacity="0.7">
+          fill="#14B8A6" opacity="0.7">
           ✓ SAFE ZONE
         </text>
 

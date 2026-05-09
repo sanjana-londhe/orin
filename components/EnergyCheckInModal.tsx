@@ -108,7 +108,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
 
   // ── Eyebrow style — Fragment Mono per DESIGN.md ──
   const eyebrow: React.CSSProperties = {
-    fontFamily: "var(--font-mono), monospace",
+    fontFamily: "inherit",
     fontSize: 10, fontWeight: 600,
     color: T.textTertiary,
     textTransform: "uppercase",

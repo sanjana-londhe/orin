@@ -207,7 +207,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
           <div>
-            <p style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>All tasks</p>
+            <p style={{ fontFamily: "inherit", fontSize: 10, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>All tasks</p>
             <p style={{ fontSize: 13.5, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
           </div>
           <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
@@ -729,7 +729,7 @@ function MobileCalendar({
                       }}
                     >
                       <span style={{ fontSize: 12.5, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
-                        {fmtTime(task.dueAt) && <span style={{ fontFamily: "monospace", marginRight: 4, opacity: 0.8 }}>{fmtTime(task.dueAt)}</span>}
+                        {fmtTime(task.dueAt) && <span style={{ fontFamily: "inherit", marginRight: 4, opacity: 0.8 }}>{fmtTime(task.dueAt)}</span>}
                         {task.title}
                       </span>
                     </div>
@@ -883,7 +883,7 @@ export default function CalendarPage() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px 16px", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
         <div>
-          <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 6 }}>Schedule</p>
+          <p style={{ fontFamily: "inherit", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 6 }}>Schedule</p>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
             <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
@@ -898,7 +898,7 @@ export default function CalendarPage() {
       {/* Day headers */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
         {DAY_NAMES.map(d => (
-          <div key={d} style={{ padding: "8px 0", textAlign: "center", fontFamily: "monospace", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4" }}>{d}</div>
+          <div key={d} style={{ padding: "8px 0", textAlign: "center", fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4" }}>{d}</div>
         ))}
       </div>
 

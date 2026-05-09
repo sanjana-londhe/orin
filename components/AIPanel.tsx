@@ -205,7 +205,7 @@ export function AIPanel({ onClose }: Props) {
           </div>
           <div>
             <p style={{
-              fontFamily: "var(--font-mono), monospace",
+              fontFamily: "inherit",
               fontSize: 10, fontWeight: 600, color: "#4a6d47",
               textTransform: "uppercase", letterSpacing: "0.08em",
               margin: "0 0 1px",

@@ -114,7 +114,7 @@ export function AllTasksPage() {
 
       {/* Header */}
       <div style={{ marginBottom: isMobile ? 16 : 24 }}>
-        <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: T.textTertiary, margin: "0 0 4px" }}>
+        <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: T.textTertiary, margin: "0 0 4px" }}>
           Workspace · All Tasks
         </p>
         <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 500, letterSpacing: "-0.03em", color: T.textPrimary, margin: 0, lineHeight: 1 }}>

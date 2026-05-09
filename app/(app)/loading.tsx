@@ -20,7 +20,7 @@ export default function Loading() {
         </svg>
         <p style={{
           margin: 0,
-          fontFamily: "var(--font-mono), monospace",
+          fontFamily: "inherit",
           fontSize: 10, fontWeight: 600,
           color: "#4a6d47",
           textTransform: "uppercase",

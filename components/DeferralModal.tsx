@@ -322,7 +322,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         }}>
           <div>
             <p style={{
-              fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600,
+              fontFamily: "inherit", fontSize: 10, fontWeight: 600,
               color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px",
             }}>
               {task.dueAt ? `Currently ${formatPreview(new Date(task.dueAt))}` : "No due date"}
@@ -460,7 +460,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                                 {opt.label}
                               </span>
                               {opt.sub ? (
-                                <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "var(--font-mono), monospace" }}>{opt.sub}</span>
+                                <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
                               ) : (
                                 <ChevronRight size={13} color={active ? T.accent : T.textMuted} />
                               )}
@@ -501,7 +501,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
               borderRadius: 4, padding: "12px 14px",
             }}>
               <p style={{
-                fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600,
+                fontFamily: "inherit", fontSize: 10, fontWeight: 600,
                 color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px",
               }}>Updating due date</p>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>

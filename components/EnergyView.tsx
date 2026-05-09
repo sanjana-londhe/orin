@@ -232,7 +232,7 @@ export function EnergyView() {
 
       {/* ── Header ── */}
       <div style={{ marginBottom: isMobile ? 16 : 20 }}>
-        <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
+        <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
           Workspace · My Energy
         </p>
         <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: 0, lineHeight: 1 }}>

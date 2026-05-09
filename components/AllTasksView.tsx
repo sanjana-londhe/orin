@@ -270,7 +270,7 @@ export function AllTasksView() {
 
       {/* Header */}
       <div style={{ marginBottom: isMobile ? 16 : 24 }}>
-        <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: T.textTertiary, margin: "0 0 4px" }}>
+        <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: T.textTertiary, margin: "0 0 4px" }}>
           {isAllPage
             ? "Workspace · All Tasks"
             : new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}

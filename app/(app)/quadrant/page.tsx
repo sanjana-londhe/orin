@@ -47,7 +47,7 @@ export default function QuadrantPage() {
     <div style={PAGE_STYLE}>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
+        <p style={{ fontFamily: "inherit", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
           Visualization
         </p>
         <h1 style={{ fontSize: 28, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1 }}>
