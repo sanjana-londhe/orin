@@ -493,23 +493,29 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           )}
         </div>
 
-        {/* Preview callout */}
+        {/* Preview callout — from → to */}
         {preview && (
-          <div style={{ padding: "10px 18px", borderBottom: `1px solid ${T.border}` }}>
+          <div style={{ padding: "12px 18px", borderBottom: `1px solid ${T.border}` }}>
             <div style={{
-              background: T.lime100, border: `1px solid ${T.lime200}`,
-              borderRadius: 8, padding: "10px 14px",
-              display: "flex", alignItems: "center", gap: 10,
+              background: T.accentSubtle, border: `1px solid ${T.lime200}`,
+              borderRadius: 10, padding: "12px 14px",
             }}>
-              <span style={{ fontSize: 16 }}>⏰</span>
-              <div>
-                <p style={{
-                  fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600,
-                  color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px",
-                }}>New due time</p>
-                <p style={{ fontSize: 13, fontWeight: 700, color: T.textPrimary, margin: 0, letterSpacing: "-0.01em" }}>
+              <p style={{
+                fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600,
+                color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px",
+              }}>Updating due date</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                {task.dueAt && (
+                  <>
+                    <span style={{ fontSize: 12.5, color: T.textTertiary, textDecoration: "line-through", letterSpacing: "-0.01em" }}>
+                      {formatPreview(new Date(task.dueAt))}
+                    </span>
+                    <span style={{ fontSize: 12, color: T.textMuted }}>→</span>
+                  </>
+                )}
+                <span style={{ fontSize: 13.5, fontWeight: 700, color: T.accent, letterSpacing: "-0.01em" }}>
                   {formatPreview(preview)}
-                </p>
+                </span>
               </div>
             </div>
           </div>
