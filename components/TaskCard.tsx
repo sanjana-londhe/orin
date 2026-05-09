@@ -484,8 +484,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                   style={{ fontSize:11, fontWeight:500, color: due ? (due.overdue ? T.danger : due.isToday ? T.accent : "#888780") : "#c4cbc2", cursor:"pointer" }}>
                   {due ? <>{due.overdue && "⚠ "}{due.dateLabel}</> : "+ date"}
                 </span>
-                {/* Time — shown separately */}
-                {due && (
+                {/* Time — shown separately, only if set */}
+                {due?.timeLabel && (
                   <span
                     onClick={e => {
                       e.stopPropagation();
@@ -494,7 +494,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                       setShowDateEdit(o => !o);
                     }}
                     style={{ fontSize:11, fontWeight:500, color: "#888780", cursor:"pointer" }}>
-                    {due.timeLabel ?? <span style={{ color:"#c4cbc2" }}>+ time</span>}
+                    {due.timeLabel}
                   </span>
                 )}
                 {showDateEdit && (() => {
