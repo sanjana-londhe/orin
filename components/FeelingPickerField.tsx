@@ -122,7 +122,7 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
           <div style={{
             ...(isMobile ? mobileDropdownStyle : desktopDropdownStyle),
             background: D.surface, border: `1.5px solid ${D.border}`,
-            borderRadius: 0, padding: "4px 0",
+            borderRadius: 4, padding: "4px 0",
             boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
           }}>
             {FEELINGS.map(f => (

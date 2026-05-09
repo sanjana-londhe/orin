@@ -222,7 +222,7 @@ export function EnergyView() {
   const card: React.CSSProperties = {
     background: "#fff",
     border: "0.5px solid rgba(0,0,0,0.09)",
-    borderRadius: 0,
+    borderRadius: 4,
     padding: isMobile ? "16px" : "20px 24px",
     marginBottom: 12,
   };

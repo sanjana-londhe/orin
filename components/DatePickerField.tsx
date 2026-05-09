@@ -52,7 +52,7 @@ export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: stri
     <div style={{
       background: D.surface,
       border: `1.5px solid ${D.stone400}`,
-      borderRadius: 0,
+      borderRadius: 4,
       padding: "12px 14px",
       boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
       width: fullWidth ? "100%" : 248,
@@ -224,7 +224,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
             <div style={{
               ...mobileDropdownStyle,
               background: D.surface, border: `1.5px solid ${D.stone400}`,
-              borderRadius: 0, padding: "8px 0",
+              borderRadius: 4, padding: "8px 0",
               boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
             }}>
               {/* Quick picks */}
@@ -278,7 +278,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                 <>
                   <div style={{
                     background: D.surface, border: `1.5px solid ${D.stone400}`,
-                    borderRadius: 0, padding: "4px 0",
+                    borderRadius: 4, padding: "4px 0",
                     boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 200,
                   }}>
                     {[

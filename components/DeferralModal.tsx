@@ -109,7 +109,7 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
   return (
     <div style={{
       background: T.surface, border: `1.5px solid ${T.border}`,
-      borderRadius: 0, padding: "12px 14px",
+      borderRadius: 4, padding: "12px 14px",
       boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
       width: 248, userSelect: "none", flexShrink: 0,
     }}>
@@ -441,7 +441,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                       {/* Options list */}
                       <div style={{
                         background: T.surface, border: `1.5px solid ${T.border}`,
-                        borderRadius: 0, padding: "4px 0",
+                        borderRadius: 4, padding: "4px 0",
                         boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 200,
                       }}>
                         {opts.map(opt => {
@@ -498,7 +498,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           <div style={{ padding: "12px 18px", borderBottom: `1px solid ${T.border}` }}>
             <div style={{
               background: T.surface, border: `1px solid ${T.border}`,
-              borderRadius: 0, padding: "12px 14px",
+              borderRadius: 4, padding: "12px 14px",
             }}>
               <p style={{
                 fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600,

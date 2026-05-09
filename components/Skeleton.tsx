@@ -63,7 +63,7 @@ export function SkeletonTaskRow() {
 export function SkeletonTaskList({ count = 5 }: { count?: number }) {
   injectStyles();
   return (
-    <div style={{ background: "#fff", borderRadius: 0, border: "1px solid #dde4de", overflow: "hidden" }}>
+    <div style={{ background: "#fff", borderRadius: 4, border: "1px solid #dde4de", overflow: "hidden" }}>
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} style={{ borderBottom: i < count - 1 ? "1px solid #dde4de" : "none" }}>
           <SkeletonTaskRow />

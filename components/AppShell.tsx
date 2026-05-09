@@ -68,7 +68,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
               onClick={() => setAiOpen(true)}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 0,
+                padding: "6px 12px", borderRadius: 4,
                 background: "#082d1d", color: "#fff",
                 border: "none", cursor: "pointer",
                 fontSize: 12, fontWeight: 600,
@@ -109,7 +109,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
             style={{
               position: "fixed", top: 14, right: 20, zIndex: 10,
               display: "flex", alignItems: "center", gap: 7,
-              padding: "7px 14px", borderRadius: 0,
+              padding: "7px 14px", borderRadius: 4,
               background: "#082d1d", color: "#fff",
               border: "none", cursor: "pointer",
               fontSize: 12.5, fontWeight: 600,
@@ -134,7 +134,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
           <div style={{
             position: "fixed", top: 60, right: 12, zIndex: 70,
             background: "#fff",
-            borderRadius: 0,
+            borderRadius: 4,
             border: "1.5px solid #dde4de",
             boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
             minWidth: 210,

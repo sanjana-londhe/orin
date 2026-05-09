@@ -336,7 +336,7 @@ export function AllTasksView() {
                 <span style={{ fontSize: 13, fontWeight: 500, color: "#059669" }}>New task</span>
               </div>
             ) : (
-              <div ref={formRef} style={{ border: "1px solid #059669", borderRadius: 0, background: "#fff" }}>
+              <div ref={formRef} style={{ border: "1px solid #059669", borderRadius: 4, background: "#fff" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px 4px 16px" }}>
                   <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 2 }} />
                   <div style={{ flex: 1 }}>
@@ -364,7 +364,7 @@ export function AllTasksView() {
                       <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                     </button>
                     {showEmoPicker && (
-                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 150, padding: "4px 0", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 150, padding: "4px 0", overflow: "hidden" }}>
                         {INLINE_FEELINGS.map(f => (
                           <button key={f.value} onClick={() => { setEmotion(f.value as Emotion); setShowEmoPicker(false); }}
                             style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 14px", background: emotion === f.value ? f.bg : "none", border: "none", cursor: "pointer", fontSize: 13, color: emotion === f.value ? f.fg : "#082d1d", fontFamily: "inherit" }}>
@@ -384,7 +384,7 @@ export function AllTasksView() {
                     </button>
                     {showDatePicker && (
                       <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
-                        <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding: "4px 0", overflow: "hidden" }}>
+                        <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding: "4px 0", overflow: "hidden" }}>
                           {getDatePresets().map(opt => (
                             <button key={opt.value} onClick={() => { setDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
                               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueDate === opt.value ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
@@ -423,7 +423,7 @@ export function AllTasksView() {
                       const slots = getTimeSlots(isToday, nowTime, fmtTimeLbl);
                       return (
                         <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
-                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding: "4px 0", overflow: "hidden" }}>
+                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding: "4px 0", overflow: "hidden" }}>
                             {slots.map(opt => (
                               <button key={opt.value}
                                 onClick={() => { setDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
@@ -451,7 +451,7 @@ export function AllTasksView() {
                             )}
                           </div>
                           {showCustomTime && (
-                            <div style={{ background: "#fff", border: "1.5px solid #dde4de", borderRadius: 0, boxShadow: "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px" }}>
+                            <div style={{ background: "#fff", border: "1.5px solid #dde4de", borderRadius: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px" }}>
                               <WheelTimePicker value={dueTime || "09:00"} onChange={t => setDueTime(t)} />
                             </div>
                           )}
