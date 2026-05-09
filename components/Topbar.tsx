@@ -81,7 +81,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
           <div style={{
             position: "absolute", top: 36, right: 0, zIndex: 100,
             background: "#fff", border: `1.5px solid ${T.border}`,
-            borderRadius: 10, padding: "4px 0",
+            borderRadius: 0, padding: "4px 0",
             boxShadow: "0 4px 16px rgba(0,0,0,0.1)", minWidth: 160,
           }}>
             <button onClick={() => { setView(null); setProfileOpen(true); }} style={{
@@ -113,7 +113,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
           <div style={{
             position: "absolute", top: 36, right: 0, zIndex: 100,
             background: "#fff", border: `1.5px solid ${T.border}`,
-            borderRadius: 12, padding: "20px",
+            borderRadius: 0, padding: "20px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)", width: 240,
           }}>
             <p style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>Log out?</p>

@@ -232,7 +232,7 @@ export function QuadrantMap({ tasks }: Props) {
               <div style={{
                 background: "#fff",
                 border: "1.5px solid #dde4de",
-                borderRadius: 10,
+                borderRadius: 0,
                 padding: "9px 12px",
                 fontFamily: "inherit",
                 lineHeight: 1.45,

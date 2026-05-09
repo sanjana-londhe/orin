@@ -278,7 +278,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
             <div style={{
               ...mobileDropdownStyle,
               background: D.surface, border: `1.5px solid ${D.border}`,
-              borderRadius: 12, padding: "4px 0",
+              borderRadius: 0, padding: "4px 0",
               boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
             }}>
               {QUICK_TIMES.map(opt => {
@@ -322,7 +322,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
             <div style={desktopPositionStyle}>
               <div style={{
                 background: D.surface, border: `1.5px solid ${D.border}`,
-                borderRadius: 10, padding: "4px 0",
+                borderRadius: 0, padding: "4px 0",
                 boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 180,
               }}>
                 {QUICK_TIMES.map(opt => {
@@ -363,7 +363,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
               {showCustom && (
                 <div style={{
                   background: D.surface, border: `1.5px solid ${D.border}`,
-                  borderRadius: 10, padding: "14px 16px",
+                  borderRadius: 0, padding: "14px 16px",
                   boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
                   display: "flex", flexDirection: "column", gap: 12,
                 }}>

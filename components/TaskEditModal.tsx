@@ -40,7 +40,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(10,32,16,0.4)", backdropFilter: "blur(4px)" }} />
 
-      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480, background: "#fff", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.15)", overflow: "hidden" }}>
+      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480, background: "#fff", borderRadius: 0, boxShadow: "0 24px 64px rgba(0,0,0,0.15)", overflow: "hidden" }}>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid #f0f0f0" }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: "#0a2010", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
@@ -55,7 +55,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
             <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Task title</label>
             <input ref={titleRef} value={title} onChange={e => setTitle(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") handleSave(); }}
-              style={{ width: "100%", fontSize: 15, fontWeight: 600, color: "#0a2010", padding: "10px 12px", borderRadius: 10, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
+              style={{ width: "100%", fontSize: 15, fontWeight: 600, color: "#0a2010", padding: "10px 12px", borderRadius: 0, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
               onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
               onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
             />
@@ -66,7 +66,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due date</label>
               <input type="date" value={dateStr} onChange={e => setDateStr(e.target.value)}
-                style={{ width: "100%", fontSize: 13, padding: "9px 10px", borderRadius: 10, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
+                style={{ width: "100%", fontSize: 13, padding: "9px 10px", borderRadius: 0, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
                 onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
                 onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
               />
@@ -74,7 +74,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due time</label>
               <input type="time" value={timeStr} onChange={e => setTimeStr(e.target.value)} disabled={!dateStr}
-                style={{ width: "100%", fontSize: 13, padding: "9px 10px", borderRadius: 10, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: dateStr ? "#fafafa" : "#f3f4f6", boxSizing: "border-box" }}
+                style={{ width: "100%", fontSize: 13, padding: "9px 10px", borderRadius: 0, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: dateStr ? "#fafafa" : "#f3f4f6", boxSizing: "border-box" }}
                 onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
                 onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
               />
@@ -88,7 +88,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
                 const active = emotion === s.value;
                 return (
                   <button key={s.value} onClick={() => setEmotion(s.value)} style={{
-                    display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10,
+                    display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 0,
                     background: active ? s.activeBg : s.bg, color: active ? "#fff" : s.fg,
                     border: "none", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.12s",
                   }}>
@@ -100,10 +100,10 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
           </div>
 
           <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
-            <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 12, border: "1.5px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+            <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 0, border: "1.5px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
               Cancel
             </button>
-            <button onClick={handleSave} style={{ flex: 2, padding: "11px 0", borderRadius: 12, border: "none", background: "#16a34a", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+            <button onClick={handleSave} style={{ flex: 2, padding: "11px 0", borderRadius: 0, border: "none", background: "#16a34a", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
               Save changes
             </button>
           </div>

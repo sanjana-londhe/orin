@@ -229,7 +229,7 @@ export function AIPanel({ onClose }: Props) {
             {/* Overdue */}
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "10px 12px", borderRadius: 10,
+              padding: "10px 12px", borderRadius: 0,
               background: overdue.length > 0 ? "#FFF0EC" : "#f8f9f5",
               border: `1px solid ${overdue.length > 0 ? "#fecaca" : "#e9ede9"}`,
             }}>
@@ -247,7 +247,7 @@ export function AIPanel({ onClose }: Props) {
             {/* Today pending */}
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "10px 12px", borderRadius: 10,
+              padding: "10px 12px", borderRadius: 0,
               background: "#f8f9f5", border: "1px solid #e9ede9",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -260,7 +260,7 @@ export function AIPanel({ onClose }: Props) {
 
             {/* Energy prompt */}
             <div style={{
-              padding: "10px 12px", borderRadius: 10,
+              padding: "10px 12px", borderRadius: 0,
               background: hasEnergy ? "#f2fdec" : "#fffbeb",
               border: `1px solid ${hasEnergy ? "#c8f7ae" : "#fde68a"}`,
             }}>
@@ -287,7 +287,7 @@ export function AIPanel({ onClose }: Props) {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
 
               {/* Completed */}
-              <div style={{ padding: "10px 12px", borderRadius: 10, background: "#f2fdec", border: "1px solid #c8f7ae" }}>
+              <div style={{ padding: "10px 12px", borderRadius: 0, background: "#f2fdec", border: "1px solid #c8f7ae" }}>
                 <p style={{ fontSize: 12, color: "#4a6d47", margin: "0 0 2px" }}>Completed this week</p>
                 <p style={{ fontSize: 20, fontWeight: 700, color: "#059669", margin: 0, letterSpacing: "-0.03em" }}>
                   {weekly.total_completed}
@@ -297,7 +297,7 @@ export function AIPanel({ onClose }: Props) {
 
               {/* Best emotion */}
               {bestEmotion && (
-                <div style={{ padding: "10px 12px", borderRadius: 10, background: bestEmotion.em?.pillBg, border: "1px solid #e9ede9" }}>
+                <div style={{ padding: "10px 12px", borderRadius: 0, background: bestEmotion.em?.pillBg, border: "1px solid #e9ede9" }}>
                   <p style={{ fontSize: 12, color: "#4a6d47", margin: "0 0 3px" }}>You finish most tasks when feeling</p>
                   <p style={{ fontSize: 14, fontWeight: 700, color: bestEmotion.em?.pillText, margin: 0 }}>
                     {bestEmotion.em?.emoji} {bestEmotion.em?.label}
@@ -308,7 +308,7 @@ export function AIPanel({ onClose }: Props) {
 
               {/* Worst emotion (deferrals) */}
               {worstEmotion && (
-                <div style={{ padding: "10px 12px", borderRadius: 10, background: "#FFF0EC", border: "1px solid #fecaca" }}>
+                <div style={{ padding: "10px 12px", borderRadius: 0, background: "#FFF0EC", border: "1px solid #fecaca" }}>
                   <p style={{ fontSize: 12, color: "#4a6d47", margin: "0 0 3px" }}>Most deferrals when feeling</p>
                   <p style={{ fontSize: 14, fontWeight: 700, color: "#D14626", margin: 0 }}>
                     {worstEmotion.em?.emoji} {worstEmotion.em?.label}
@@ -319,7 +319,7 @@ export function AIPanel({ onClose }: Props) {
 
               {/* Most deferred task */}
               {weekly.most_deferred_task && (
-                <div style={{ padding: "10px 12px", borderRadius: 10, background: "#f8f9f5", border: "1px solid #e9ede9" }}>
+                <div style={{ padding: "10px 12px", borderRadius: 0, background: "#f8f9f5", border: "1px solid #e9ede9" }}>
                   <p style={{ fontSize: 12, color: "#4a6d47", margin: "0 0 3px" }}>Most deferred task</p>
                   <p style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", margin: 0, lineHeight: 1.4 }}>
                     &ldquo;{weekly.most_deferred_task.title}&rdquo;
@@ -342,7 +342,7 @@ export function AIPanel({ onClose }: Props) {
         {/* ── 3. Task Coach ── */}
         <Section icon={<Compass size={14} />} title="What to work on next">
           {pending.length === 0 ? (
-            <div style={{ padding: "10px 12px", borderRadius: 10, background: "#f2fdec", border: "1px solid #c8f7ae" }}>
+            <div style={{ padding: "10px 12px", borderRadius: 0, background: "#f2fdec", border: "1px solid #c8f7ae" }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#059669", margin: 0 }}>
                 🎉 All caught up!
               </p>
@@ -350,7 +350,7 @@ export function AIPanel({ onClose }: Props) {
             </div>
           ) : recommended ? (
             <div>
-              <div style={{ padding: "12px 14px", borderRadius: 10, background: "#f8f9f5", border: "2px solid #059669", marginBottom: 8 }}>
+              <div style={{ padding: "12px 14px", borderRadius: 0, background: "#f8f9f5", border: "2px solid #059669", marginBottom: 8 }}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px", fontFamily: "var(--font-mono), monospace" }}>
                   Start with this
                 </p>
@@ -391,7 +391,7 @@ export function AIPanel({ onClose }: Props) {
             </p>
           ) : (
             <div>
-              <div style={{ padding: "10px 12px", borderRadius: 10, background: "#FFF0EC", border: "1px solid #fecaca", marginBottom: 10 }}>
+              <div style={{ padding: "10px 12px", borderRadius: 0, background: "#FFF0EC", border: "1px solid #fecaca", marginBottom: 10 }}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px", fontFamily: "var(--font-mono), monospace" }}>
                   {(() => { const em = EMOTION_MAP[dreaded.emotionalState as keyof typeof EMOTION_MAP]; return em ? `${em.emoji} ${em.label}` : ""; })()}
                   {dreaded.deferredCount > 0 ? ` · deferred ${dreaded.deferredCount}×` : ""}

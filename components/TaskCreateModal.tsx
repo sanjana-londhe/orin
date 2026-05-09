@@ -336,7 +336,7 @@ function ModalForm({
   // ── Desktop: card ────────────────────────────────────────────────
   return (
     <div style={{
-      background: "#fff", borderRadius: 14,
+      background: "#fff", borderRadius: 0,
       border: "1.5px solid #059669",
       boxShadow: "0 4px 24px rgba(5,150,105,0.10)",
       padding: "20px 20px 16px",

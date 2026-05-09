@@ -370,7 +370,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                   </button>
                   {showEmotionPicker && (
-                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
+                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 0, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
                       {INLINE_FEELINGS.map(f => (
                         <button key={f.value} onClick={() => { setInlineEmotion(f.value as Emotion); setShowEmotionPicker(false); }}
                           style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:inlineEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize:13, color:inlineEmotion===f.value?f.fg:"#082d1d", fontFamily:"inherit" }}>
@@ -390,7 +390,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   </button>
                   {showDatePicker && (
                     <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                      <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                      <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 0, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
                         {getDatePresets().map(opt => (
                           <button key={opt.value} onClick={() => { setInlineDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
                             style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
@@ -429,7 +429,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     const slots = getTimeSlots(isToday, nowTime);
                     return (
                       <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                        <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                        <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 0, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
                           {slots.map(opt => (
                             <button key={opt.value}
                               onClick={() => { setInlineDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
@@ -457,7 +457,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                           )}
                         </div>
                         {showCustomTime && (
-                          <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius:12, boxShadow:"0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
+                          <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius: 0, boxShadow:"0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
                             <WheelTimePicker value={inlineDueTime || "09:00"} onChange={t => setInlineDueTime(t)} />
                           </div>
                         )}

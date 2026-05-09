@@ -201,7 +201,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         flex: 1,
                         display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                         padding: "10px 2px",
-                        borderRadius: 10,
+                        borderRadius: 0,
                         border: `1.5px solid ${active ? T.accent : T.border}`,
                         background: active ? T.accentSubtle : T.stone100,
                         cursor: "pointer", fontFamily: "inherit",

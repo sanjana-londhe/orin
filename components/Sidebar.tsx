@@ -337,7 +337,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 <div style={{
                   position: "absolute", bottom: "100%", left: 0, right: 0,
                   background: "#fff", border: "1.5px solid #e9ede9",
-                  borderRadius: 10, padding: "4px 0", marginBottom: 4,
+                  borderRadius: 0, padding: "4px 0", marginBottom: 4,
                   boxShadow: "0 -4px 16px rgba(0,0,0,0.08)", zIndex: 100,
                 }}>
                   <button onClick={() => { setShowUser(false); setProfileOpen(true); }} style={{
