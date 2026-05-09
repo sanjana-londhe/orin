@@ -497,7 +497,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         {preview && (
           <div style={{ padding: "12px 18px", borderBottom: `1px solid ${T.border}` }}>
             <div style={{
-              background: T.accentSubtle, border: `1px solid ${T.lime200}`,
+              background: T.surface, border: `1px solid ${T.border}`,
               borderRadius: 10, padding: "12px 14px",
             }}>
               <p style={{
