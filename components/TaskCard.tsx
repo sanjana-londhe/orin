@@ -513,7 +513,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         open={deferOpen}
         onOpenChange={setDeferOpen}
         task={task}
-        defaultTab="reschedule"
+        defaultTab="defer"
         onConfirm={d => {
           if (onDefer) onDefer(task.id, d);
           else onUpdate?.(task.id, { dueAt: d as unknown as Date });
