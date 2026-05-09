@@ -111,7 +111,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
       <aside style={{
         width: isCollapsed ? 64 : 240,
         flexShrink: 0,
-        backgroundImage: "linear-gradient(rgba(248,249,245,0.84), rgba(248,249,245,0.88)), url('/login-bg.jpg')",
+        backgroundImage: "linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('/login-bg.jpg')",
         backgroundSize: "cover, cover",
         backgroundPosition: "center, center",
         backgroundRepeat: "no-repeat, no-repeat",
