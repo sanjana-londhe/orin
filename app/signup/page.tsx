@@ -1,40 +1,52 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { signUp, signInWithGoogle } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { signInWithGoogle } from "@/app/actions/auth";
 
 export default function SignUpPage() {
-  const [state, action, pending] = useActionState(signUp, null);
   const [googlePending, setGooglePending] = useState(false);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[hsl(var(--background))]">
-      <div className="w-full max-w-sm px-4 space-y-5">
-        <div className="space-y-2 text-center">
-          <div className="flex justify-center mb-2">
-            <svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      background: "#f8f9f5", fontFamily: "inherit",
+    }}>
+      <div style={{ width: "100%", maxWidth: 360, padding: "0 24px" }}>
+
+        {/* Logo + heading */}
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+            <svg width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <rect width="100" height="100" rx="22" fill="#02382a"/>
               <circle cx="50" cy="41" r="18" fill="#059669"/>
               <circle cx="50" cy="59" r="18" fill="#59d10b"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-[hsl(var(--foreground))]">
+          <h1 style={{ fontSize: 24, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: "0 0 6px" }}>
             Create your account
           </h1>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            Start managing tasks with Orin
+          <p style={{ fontSize: 13, color: "#888780", margin: 0 }}>
+            Start tracking tasks and energy with orin
           </p>
         </div>
 
-        {/* Google sign-up — gets name automatically */}
+        {/* Google sign-up */}
         <form action={signInWithGoogle} onSubmit={() => setGooglePending(true)}>
           <button
             type="submit"
             disabled={googlePending}
-            className="w-full flex items-center justify-center gap-3 rounded-[8px] border-[1.5px] border-[var(--stone-400)] bg-white px-4 py-3 text-[13.5px] font-semibold text-[var(--lime-ink)] transition-all hover:border-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              padding: "13px 20px", borderRadius: 10,
+              border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
+              fontSize: 14, fontWeight: 500, color: "#082d1d",
+              cursor: "pointer", fontFamily: "inherit",
+              transition: "border-color 0.14s",
+              opacity: googlePending ? 0.6 : 1,
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.25)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.12)"; }}
           >
             {googlePending ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "spin 0.8s linear infinite" }}>
@@ -49,44 +61,13 @@ export default function SignUpPage() {
                 <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.31z"/>
               </svg>
             )}
-            {googlePending ? "Redirecting…" : "Continue with Google"}
+            {googlePending ? "Redirecting…" : "Sign up with Google"}
           </button>
         </form>
 
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-[var(--stone-300)]" />
-          <span className="text-[11px] text-[var(--stone-500)]">or</span>
-          <div className="flex-1 h-px bg-[var(--stone-300)]" />
-        </div>
-
-        <form action={action} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">Your name</label>
-            <Input id="name" name="name" type="text" autoComplete="name" placeholder="Sanjana" />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">Email</label>
-            <Input id="email" name="email" type="email" autoComplete="email"
-              required placeholder="you@example.com" />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">Password</label>
-            <Input id="password" name="password" type="password"
-              autoComplete="new-password" required placeholder="••••••••" minLength={6} />
-          </div>
-
-          {state?.error && (
-            <p className="text-sm text-[hsl(var(--destructive))]">{state.error}</p>
-          )}
-
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Creating account…" : "Create account"}
-          </Button>
-        </form>
-
-        <p className="text-center text-sm text-[hsl(var(--muted-foreground))]">
+        <p style={{ textAlign: "center", fontSize: 12.5, color: "#888780", marginTop: 28 }}>
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-[hsl(var(--primary))] hover:underline">
+          <Link href="/login" style={{ color: "#059669", fontWeight: 500, textDecoration: "none" }}>
             Sign in
           </Link>
         </p>

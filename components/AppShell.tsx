@@ -12,16 +12,17 @@ import {
 } from "@/components/EnergyCheckInModal";
 import { Sparkles, Zap, User } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { signOut } from "@/app/actions/auth";
+import { signOut, signInWithGoogle } from "@/app/actions/auth";
 
 interface Props {
   userName: string;
   email: string;
   initial: string;
+  isGuest?: boolean;
   children: React.ReactNode;
 }
 
-export function AppShell({ userName, email, initial, children }: Props) {
+export function AppShell({ userName, email, initial, isGuest = false, children }: Props) {
   const [aiOpen, setAiOpen]   = useState(false);
   const isMobile              = useIsMobile();
   const pathname              = usePathname();
@@ -39,7 +40,7 @@ export function AppShell({ userName, email, initial, children }: Props) {
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#fcfdfc" }}>
-      <Sidebar userName={userName} email={email} initial={initial} />
+      <Sidebar userName={userName} email={email} initial={initial} isGuest={isGuest} />
 
       {/* ── Mobile top bar ── */}
       {isMobile && (
@@ -58,7 +59,7 @@ export function AppShell({ userName, email, initial, children }: Props) {
               <circle cx="50" cy="41" r="18" fill="#059669"/>
               <circle cx="50" cy="59" r="18" fill="#59d10b"/>
             </svg>
-            <span style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
+            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
           </Link>
 
           {/* Right side: Orin Insight + profile avatar */}
@@ -159,35 +160,60 @@ export function AppShell({ userName, email, initial, children }: Props) {
             </div>
 
             {/* Actions */}
-            {([
-              { icon: <Zap size={15} color="#059669" />,  label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
-              { icon: <User size={15} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
-            ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
-              <button key={item.label} onClick={item.action} style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%",
-                padding: "12px 14px", background: "none", border: "none",
-                cursor: "pointer", fontSize: 13, color: "#082d1d", fontFamily: "inherit", textAlign: "left",
-              }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
-              >
-                {item.icon} {item.label}
-              </button>
-            ))}
+            {isGuest ? (
+              <form action={signInWithGoogle} style={{ padding: "10px 14px" }}>
+                <button type="submit" style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  width: "100%", padding: "10px 14px", borderRadius: 8,
+                  border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
+                  cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#082d1d",
+                  fontFamily: "inherit",
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 18 18">
+                    <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+                    <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2.01a4.8 4.8 0 0 1-7.18-2.53H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+                    <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
+                    <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.31z"/>
+                  </svg>
+                  Login with Google
+                </button>
+                <p style={{ fontSize: 11, color: "#888780", textAlign: "center", margin: "8px 0 0", lineHeight: 1.4 }}>
+                  Your guest data will be saved to your account
+                </p>
+              </form>
+            ) : (
+              <>
+                {([
+                  { icon: <Zap size={15} color="#059669" />,  label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
+                  { icon: <User size={15} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+                ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
+                  <button key={item.label} onClick={item.action} style={{
+                    display: "flex", alignItems: "center", gap: 10, width: "100%",
+                    padding: "12px 14px", background: "none", border: "none",
+                    cursor: "pointer", fontSize: 13, color: "#082d1d", fontFamily: "inherit", textAlign: "left",
+                  }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+                  >
+                    {item.icon} {item.label}
+                  </button>
+                ))}
 
-            <div style={{ height: 1, background: "#e9ede9" }} />
-            <form action={signOut}>
-              <button type="submit" style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%",
-                padding: "12px 14px", background: "none", border: "none",
-                cursor: "pointer", fontSize: 13, color: "#c23934", fontFamily: "inherit",
-              }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
-              >
-                <span>→</span> Log out
-              </button>
-            </form>
+                <div style={{ height: 1, background: "#e9ede9" }} />
+                <form action={signOut}>
+                  <button type="submit" style={{
+                    display: "flex", alignItems: "center", gap: 10, width: "100%",
+                    padding: "12px 14px", background: "none", border: "none",
+                    cursor: "pointer", fontSize: 13, color: "#c23934", fontFamily: "inherit",
+                  }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+                  >
+                    <span>→</span> Log out
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </>
       )}

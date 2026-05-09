@@ -117,7 +117,7 @@ export function AllTasksPage() {
         <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: T.textTertiary, margin: "0 0 4px" }}>
           Workspace · All Tasks
         </p>
-        <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 800, letterSpacing: "-0.04em", color: T.textPrimary, margin: 0, lineHeight: 1 }}>
+        <h1 style={{ fontSize: isMobile ? 22 : 28, fontWeight: 500, letterSpacing: "-0.03em", color: T.textPrimary, margin: 0, lineHeight: 1 }}>
           All Tasks
         </h1>
       </div>
@@ -137,7 +137,7 @@ export function AllTasksPage() {
           onClick={() => { setPreset(null); setFrom(""); setTo(""); }}
           style={{
             padding: isMobile ? "8px 16px" : "6px 14px",
-            borderRadius: 999, fontSize: 12.5, fontWeight: 500,
+            borderRadius: 6, fontSize: 12.5, fontWeight: 500,
             border: `1.5px solid ${preset === null ? T.accent : T.border}`,
             background: preset === null ? T.accent : T.surface,
             color: preset === null ? "#fff" : T.textSecondary,
@@ -154,7 +154,7 @@ export function AllTasksPage() {
               onClick={() => { setPreset(p.key); if (p.key !== "custom") { setFrom(""); setTo(""); } }}
               style={{
                 padding: isMobile ? "8px 16px" : "6px 14px",
-                borderRadius: 999, fontSize: 12.5, fontWeight: 500,
+                borderRadius: 6, fontSize: 12.5, fontWeight: 500,
                 border: `1.5px solid ${active ? T.accent : T.border}`,
                 background: active ? T.accent : T.surface,
                 color: active ? "#fff" : T.textSecondary,
@@ -187,7 +187,7 @@ export function AllTasksPage() {
       {/* ── Tabs ── */}
       <div style={{
         display: "flex", gap: 2, marginBottom: 16,
-        background: T.stone200, borderRadius: 10, padding: 4,
+        background: T.stone200, borderRadius: 8, padding: 4,
       }}>
         {TABS.map(t => {
           const count      = countFor(t.key);
@@ -200,11 +200,11 @@ export function AllTasksPage() {
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: isMobile ? "9px 6px" : "7px 10px",
-                borderRadius: 8, border: "none", cursor: "pointer",
+                borderRadius: 6, border: "none", cursor: "pointer",
                 fontSize: isMobile ? 12 : 12.5, fontWeight: active ? 600 : 400,
                 background: active ? T.surface : "transparent",
                 color: active ? T.textPrimary : T.textTertiary,
-                boxShadow: active ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                boxShadow: "none",
                 transition: "all 0.12s", fontFamily: "inherit",
               }}
             >
@@ -213,7 +213,7 @@ export function AllTasksPage() {
                 ? <SkeletonBox width={28} height={18} radius={999} />
                 : (
                   <span style={{
-                    fontSize: 11, fontWeight: 700, padding: "1px 6px", borderRadius: 999,
+                    fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
                     background: active ? T.stone200 : T.stone300,
                     color: active ? T.accent : T.textTertiary,
                     minWidth: 20, textAlign: "center",

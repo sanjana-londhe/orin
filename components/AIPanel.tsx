@@ -204,7 +204,7 @@ export function AIPanel({ onClose }: Props) {
             <Sparkles size={14} color="#fff" />
           </div>
           <div>
-            <h2 style={{ fontSize: 14, fontWeight: 800, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
               Orin Insight
             </h2>
             <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Your task patterns, surfaced</p>
@@ -289,7 +289,7 @@ export function AIPanel({ onClose }: Props) {
               {/* Completed */}
               <div style={{ padding: "10px 12px", borderRadius: 10, background: "#f2fdec", border: "1px solid #c8f7ae" }}>
                 <p style={{ fontSize: 12, color: "#4a6d47", margin: "0 0 2px" }}>Completed this week</p>
-                <p style={{ fontSize: 20, fontWeight: 800, color: "#059669", margin: 0, letterSpacing: "-0.03em" }}>
+                <p style={{ fontSize: 20, fontWeight: 700, color: "#059669", margin: 0, letterSpacing: "-0.03em" }}>
                   {weekly.total_completed}
                   <span style={{ fontSize: 12, fontWeight: 400, color: "#4a6d47", marginLeft: 6 }}>tasks</span>
                 </p>

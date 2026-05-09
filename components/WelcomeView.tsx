@@ -35,7 +35,7 @@ export function WelcomeView({ name }: Props) {
         </p>
 
         {/* Greeting */}
-        <h1 className="text-[36px] sm:text-[48px] font-extrabold leading-tight tracking-[-0.04em] text-[var(--lime-ink)] mb-3">
+        <h1 className="text-[36px] sm:text-[48px] font-bold leading-tight tracking-[-0.04em] text-[var(--lime-ink)] mb-3">
           {greeting(name)}
         </h1>
 

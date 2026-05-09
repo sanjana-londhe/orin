@@ -7,9 +7,6 @@ import { DeferralModal } from "@/components/DeferralModal";
 import { NudgeBanner } from "@/components/NudgeBanner";
 import { useUIStore } from "@/store/ui";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { FeelingPickerField, type Feeling } from "@/components/FeelingPickerField";
-import { DatePickerField } from "@/components/DatePickerField";
-import { TimePickerField } from "@/components/TimePickerField";
 import { Pencil, Trash2 } from "lucide-react";
 
 // design.md tokens
@@ -83,6 +80,53 @@ function getIsoTime(dueAt: Date | string | null) {
   return iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16);
 }
 
+function fmtTime(t: string) {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+}
+
+function getDatePresets() {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return [
+    { label: "Today",     sub: fmt(t),                                     value: t.toISOString().slice(0,10) },
+    { label: "Tomorrow",  sub: fmt(new Date(t.getTime()+86400000)),         value: new Date(t.getTime()+86400000).toISOString().slice(0,10) },
+    { label: "In 2 days", sub: fmt(new Date(t.getTime()+172800000)),        value: new Date(t.getTime()+172800000).toISOString().slice(0,10) },
+    { label: "Next week", sub: fmt(new Date(t.getTime()+604800000)),        value: new Date(t.getTime()+604800000).toISOString().slice(0,10) },
+  ];
+}
+function getTimeSlots(isToday: boolean, nowTime: string) {
+  if (!isToday) return [
+    { label: "Morning", value: "09:00" }, { label: "Noon", value: "12:00" },
+    { label: "Afternoon", value: "14:00" }, { label: "Evening", value: "18:00" }, { label: "Night", value: "21:00" },
+  ];
+  const now = new Date();
+  const slots: { label: string; value: string }[] = [];
+  [30, 60, 120, 180].forEach(mins => {
+    const t = new Date(now.getTime() + mins * 60000);
+    const h = t.getHours(), rawM = t.getMinutes();
+    const rM = Math.ceil(rawM / 15) * 15, fH = rM >= 60 ? h + 1 : h, fM = rM >= 60 ? 0 : rM;
+    if (fH < 24) slots.push({ label: mins < 60 ? `In ${mins} min` : `In ${mins/60} hr${mins > 60 ? "s" : ""}`, value: `${String(fH).padStart(2,"0")}:${String(fM).padStart(2,"0")}` });
+  });
+  [{ label: "Afternoon", value: "14:00" }, { label: "Evening", value: "18:00" }, { label: "Night", value: "21:00" }]
+    .filter(s => s.value > nowTime)
+    .forEach(s => { if (!slots.find(x => x.value === s.value)) slots.push(s); });
+  return slots;
+}
+
+function parseTimeInput(raw: string): string | null {
+  const s = raw.trim().toUpperCase();
+  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/);
+  if (!m) return null;
+  let h = parseInt(m[1]); const min = parseInt(m[2] ?? "0");
+  if (isNaN(h) || isNaN(min) || min > 59) return null;
+  if (m[3] === "PM" && h < 12) h += 12;
+  if (m[3] === "AM" && h === 12) h = 0;
+  if (h > 23) return null;
+  return `${String(h).padStart(2,"0")}:${String(min).padStart(2,"0")}`;
+}
+
 // ── emotion config ─────────────────────────────────────────────────────
 
 const EMOTIONS = [
@@ -130,19 +174,48 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
   const [deferOpen, setDeferOpen]     = useState(false);
   const [editing, setEditing]         = useState(false);
-  const [completing, setCompleting]         = useState(false); // animation in-flight
+  const [completing, setCompleting]         = useState(false);
   const [showUncompletePrompt, setShowUncompletePrompt] = useState(false);
   const [editTitle, setEditTitle]     = useState(task.title);
   const [editDate, setEditDate]       = useState(getIsoDate(task.dueAt));
   const [editTime, setEditTime]       = useState(getIsoTime(task.dueAt));
   const [editEmotion, setEditEmotion] = useState(task.emotionalState as typeof EMOTIONS[number]["value"]);
   const [editNote, setEditNote]       = useState("");
+  const [editNoteOpen, setEditNoteOpen] = useState(false);
+  const [showEditEmoPicker, setShowEditEmoPicker]   = useState(false);
+  const [showEditDatePicker, setShowEditDatePicker] = useState(false);
+  const [showEditTimePicker, setShowEditTimePicker] = useState(false);
+  const [showEditCustomTime, setShowEditCustomTime] = useState(false);
   const [note, setNote]               = useState("");
   const [mounted, setMounted]         = useState(false);
   const [hovered, setHovered]         = useState(false);
   const [checkHov, setCheckHov]       = useState(false);
+  const [showDateEdit, setShowDateEdit] = useState(false);
+  const [pendingDate, setPendingDate]   = useState("");
+  const [pendingTime, setPendingTime]   = useState("");
 
   const editTitleRef = useRef<HTMLInputElement>(null);
+  const editChipBarRef = useRef<HTMLDivElement>(null);
+  const dateEditRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function h(e: MouseEvent) {
+      if (dateEditRef.current && !dateEditRef.current.contains(e.target as Node))
+        setShowDateEdit(false);
+    }
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  useEffect(() => {
+    function h(e: MouseEvent) {
+      if (editChipBarRef.current && !editChipBarRef.current.contains(e.target as Node)) {
+        setShowEditEmoPicker(false); setShowEditDatePicker(false); setShowEditTimePicker(false);
+      }
+    }
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
 
   useEffect(() => { setMounted(true); setNote(loadNote(task.id)); }, [task.id]);
   useEffect(() => {
@@ -151,7 +224,10 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
       setEditDate(getIsoDate(task.dueAt));
       setEditTime(getIsoTime(task.dueAt));
       setEditEmotion(task.emotionalState as typeof EMOTIONS[number]["value"]);
-      setEditNote(loadNote(task.id));
+      const savedNote = loadNote(task.id);
+      setEditNote(savedNote);
+      setEditNoteOpen(!!savedNote.trim());
+      setShowEditEmoPicker(false); setShowEditDatePicker(false); setShowEditTimePicker(false);
       setTimeout(() => editTitleRef.current?.focus(), 10);
     }
   }, [editing]);
@@ -175,129 +251,143 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
     closeEdit();
   }
 
-  // ── Edit form — same structure as task creation bar ──────────────────
+  // ── Edit form — Reminders-style ──────────────────────────────────────
   if (editing) {
+    const editEm = EMOTIONS.find(e => e.value === editEmotion) ?? EMOTIONS[2];
+    const editDateLabel = editDate
+      ? (editTime ? `${fmtEditDate(editDate)} · ${fmtEditTime(editTime)}` : fmtEditDate(editDate))
+      : "Set date";
+
+    function fmtEditDate(iso: string) {
+      const today = new Date().toISOString().slice(0,10);
+      const tmrw  = new Date(Date.now()+86400000).toISOString().slice(0,10);
+      if (iso === today) return "Today";
+      if (iso === tmrw)  return "Tomorrow";
+      return new Date(iso+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    }
+    function fmtEditTime(t: string) {
+      const [h,m] = t.split(":").map(Number);
+      return `${h%12||12}:${String(m).padStart(2,"0")} ${h>=12?"PM":"AM"}`;
+    }
+    const chip = (fg?: string): React.CSSProperties => ({
+      display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6,
+      background:"#f8f9f5", border:`0.5px solid ${fg ? fg+"33" : "rgba(0,0,0,0.08)"}`,
+      color: fg ?? "#5f5e5a", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit",
+    });
+
     return (
-      <div style={{ padding: "6px 8px" }}>
-        <div style={{
-          background: T.surface,
-          borderRadius: 12,
-          border: `1px solid ${T.accent}`,
-          boxShadow: "0 0 0 3px rgba(5,150,105,0.07)",
-        }}>
-          {/* Title row */}
-          <div style={{ display: "flex", alignItems: "flex-start", padding: "12px 14px 12px 16px" }}>
-            <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
-              <div style={{
-                width: 20, height: 20, borderRadius: "50%",
-                border: `1.5px solid ${T.accent}`, background: "transparent",
-              }} />
-            </div>
-            <input
-              ref={editTitleRef}
-              value={editTitle}
-              onChange={e => setEditTitle(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") closeEdit(); }}
-              style={{
-                flex: 1, border: "none", outline: "none", fontFamily: "inherit",
-                fontSize: 14, fontWeight: 450, color: T.textPrimary,
-                background: "transparent", display: "block",
-              }}
-            />
-          </div>
+      <div style={{ padding: "4px 8px" }}>
+        <div style={{ background:"#fff", borderRadius:10, border:`1px solid ${T.accent}` }}>
 
-          {/* Pickers — Feeling → Date → Time */}
-          <div style={{ borderTop: `1px solid ${T.border}`, padding: "12px 14px" }}>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
-              gap: isMobile ? 8 : 10,
-            }}>
-              <FeelingPickerField
-                value={editEmotion as Feeling}
-                onChange={v => setEditEmotion(v as typeof editEmotion)}
-                label="Feeling"
-                dropUp={isMobile}
-              />
-              <DatePickerField
-                value={editDate}
-                onChange={setEditDate}
-                label="Due date"
-                dropUp={isMobile}
-              />
-              <TimePickerField
-                value={editTime}
-                onChange={setEditTime}
-                label="Due time (optional)"
-                selectedDate={editDate}
-                dropUp={isMobile}
-              />
+          {/* Title + notes */}
+          <div style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"10px 14px 4px 16px" }}>
+            <div style={{ width:18, height:18, borderRadius:"50%", border:`1.5px solid ${T.accent}`, flexShrink:0, marginTop:2 }} />
+            <div style={{ flex:1 }}>
+              <input ref={editTitleRef} value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") closeEdit(); }}
+                style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize:14, fontWeight:400, letterSpacing:"-0.01em", color:T.textPrimary, background:"transparent", marginBottom:2, display:"block" }} />
+              {editNoteOpen ? (
+                <textarea value={editNote} onChange={e => setEditNote(e.target.value)} placeholder="Notes" rows={2}
+                  style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize:12, color:"#5f5e5a", background:"transparent", resize:"none", lineHeight:1.5, padding:0, display:"block" }} />
+              ) : (
+                <div onClick={() => setEditNoteOpen(true)} style={{ fontSize:12, color:"#b9d3c4", cursor:"text", marginBottom:2 }}>
+                  {editNote.trim() || "Notes"}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Note */}
-          <div style={{ borderTop: `1px solid ${T.border}`, padding: "12px 14px" }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: T.textTertiary, margin: "0 0 8px" }}>Note</p>
-            <textarea
-              value={editNote}
-              onChange={e => setEditNote(e.target.value)}
-              placeholder="Add a note or description…"
-              rows={2}
-              style={{
-                width: "100%", outline: "none", fontFamily: "inherit",
-                fontSize: 13, color: T.textPrimary,
-                background: T.stone100,
-                border: `1.5px solid ${T.border}`,
-                borderRadius: 8,
-                padding: "8px 10px",
-                resize: "vertical", boxSizing: "border-box", lineHeight: 1.5,
-                transition: "border-color 0.14s",
-              }}
-              onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
-              onBlur={e => (e.currentTarget.style.borderColor = T.border)}
-            />
-          </div>
+          {/* Chip bar */}
+          <div ref={editChipBarRef} style={{ display:"flex", gap:5, padding:"6px 14px 10px", borderTop:"0.5px solid rgba(0,0,0,0.05)", marginTop:6, flexWrap:"wrap", position:"relative", alignItems:"center" }}>
 
-          {/* Actions */}
-          <div style={{
-            borderTop: `1px solid ${T.border}`,
-            padding: "10px 14px",
-            display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8,
-          }}>
-            <div style={{ display: "flex", gap: 8 }}>
-            {/* Mobile: Delete (cancel-style, red) + Save only */}
-            {isMobile && onDelete ? (
-              <button
-                onClick={() => { onDelete(task.id); closeEdit(); }}
-                style={{
-                  padding: "6px 14px", borderRadius: 6,
-                  border: `1px solid #e9c3c1`,
-                  background: T.surface, color: "#D14626",
-                  fontSize: 12.5, cursor: "pointer", fontFamily: "inherit",
-                }}
-              >Delete</button>
-            ) : !isMobile && (
-              <button onClick={closeEdit} style={{
-                padding: "6px 14px", borderRadius: 6, border: `1px solid ${T.border}`,
-                background: T.surface, color: T.textSecondary, fontSize: 12.5,
-                cursor: "pointer", fontFamily: "inherit",
-              }}>Cancel</button>
+            {/* Feeling */}
+            <div style={{ position:"relative" }}>
+              <button onClick={() => { setShowEditEmoPicker(o=>!o); setShowEditDatePicker(false); setShowEditTimePicker(false); }}
+                style={{ ...chip(editEm.fg), background: editEm.bg }}>{editEm.emoji} {editEm.label}</button>
+              {showEditEmoPicker && (
+                <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
+                  {EMOTIONS.map(f => (
+                    <button key={f.value} onClick={() => { setEditEmotion(f.value); setShowEditEmoPicker(false); }}
+                      style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:editEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize:13, color:editEmotion===f.value?f.fg:"#082d1d", fontFamily:"inherit" }}>
+                      {f.emoji} {f.label}
+                      {editEmotion===f.value && <span style={{ marginLeft:"auto", fontSize:11 }}>✓</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Date */}
+            <div style={{ position:"relative" }}>
+              <button onClick={() => { setShowEditDatePicker(o=>!o); setShowEditEmoPicker(false); setShowEditTimePicker(false); }}
+                style={chip("#059669")}><span style={{ fontSize:10 }}>📅</span> {editDateLabel}</button>
+              {showEditDatePicker && (
+                <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                  {getDatePresets().map(opt=>(
+                    <button key={opt.value} onClick={() => { setEditDate(opt.value); setShowEditDatePicker(false); }}
+                      style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                      <span style={{ fontSize:13, color:editDate===opt.value?"#059669":"#082d1d", fontWeight:editDate===opt.value?500:400 }}>{opt.label}</span>
+                      <span style={{ fontSize:11, color:editDate===opt.value?"#059669":"#888780" }}>{opt.sub}{editDate===opt.value?" ✓":""}</span>
+                    </button>
+                  ))}
+                  <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"8px 14px" }}>
+                    <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} onBlur={() => setShowEditDatePicker(false)}
+                      style={{ width:"100%", border:"none", outline:"none", fontSize:12, color:"#082d1d", fontFamily:"inherit", background:"transparent", cursor:"pointer" }} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Time */}
+            <div style={{ position:"relative" }}>
+              <button onClick={() => { setShowEditTimePicker(o=>!o); setShowEditEmoPicker(false); setShowEditDatePicker(false); }}
+                style={chip()}><span style={{ fontSize:10 }}>🕐</span> {editTime ? fmtEditTime(editTime) : "Add time"}</button>
+              {showEditTimePicker && (() => {
+                const now=new Date(), todayStr=now.toISOString().slice(0,10), isToday=editDate===todayStr;
+                const nowTime=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+                const slots = getTimeSlots(isToday, nowTime);
+                return (
+                  <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                    {slots.map(opt=>(
+                      <button key={opt.value} onClick={() => { setEditTime(opt.value); setShowEditTimePicker(false); }}
+                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                        <span style={{ fontSize:13, color:editTime===opt.value?"#059669":"#082d1d", fontWeight:editTime===opt.value?500:400 }}>{opt.label}</span>
+                        <span style={{ fontSize:11, color:editTime===opt.value?"#059669":"#888780" }}>{fmtEditTime(opt.value)}{editTime===opt.value?" ✓":""}</span>
+                      </button>
+                    ))}
+                    <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }}>
+                      <button onClick={() => setShowEditCustomTime(o => !o)}
+                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showEditCustomTime?"#f8f9f5":"none", border:"none", cursor:"pointer", fontSize:13, color:"#082d1d", fontFamily:"inherit" }}>
+                        <span>Custom</span><span style={{ fontSize:11, color:"#888780" }}>→</span>
+                      </button>
+                      {showEditCustomTime && (
+                        <div style={{ padding:"0 10px 10px" }}>
+                          <input autoFocus placeholder="e.g. 3:30 PM or 15:00"
+                            defaultValue={editTime ? fmtEditTime(editTime) : ""}
+                            onKeyDown={e => { if(e.key==="Enter"){const p=parseTimeInput((e.target as HTMLInputElement).value);if(p){setEditTime(p);setShowEditTimePicker(false);setShowEditCustomTime(false);}} }}
+                            onBlur={e => { const p=parseTimeInput(e.target.value);if(p){setEditTime(p);setShowEditTimePicker(false);setShowEditCustomTime(false);} }}
+                            style={{ width:"100%", fontSize:13, color:"#082d1d", border:"1px solid #059669", borderRadius:7, padding:"7px 10px", outline:"none", fontFamily:"inherit", background:"#fff", boxSizing:"border-box" }} />
+                          <p style={{ margin:"4px 0 0", fontSize:10, color:"#888780" }}>Press Enter to apply</p>
+                        </div>
+                      )}
+                    </div>
+                    {editTime&&<button onClick={()=>{setEditTime("");setShowEditTimePicker(false);}}
+                      style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {isMobile && onDelete && (
+              <button onClick={()=>{onDelete(task.id);closeEdit();}} style={chip("#c23934")}>Delete</button>
             )}
-            <button
-              onClick={saveEdit}
-              disabled={!editTitle.trim()}
-              style={{
-                padding: "6px 16px", borderRadius: 6, border: "none",
-                background: editTitle.trim() ? T.accent : T.stone200,
-                color: editTitle.trim() ? "#fff" : T.textMuted,
-                fontSize: 12.5, fontWeight: 600,
-                cursor: editTitle.trim() ? "pointer" : "default",
-                fontFamily: "inherit", transition: "background 0.12s",
-              }}
-              onMouseEnter={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = T.accentHover; }}
-              onMouseLeave={e => { if (editTitle.trim()) (e.currentTarget as HTMLElement).style.background = T.accent; }}
-            >Save</button>
-            </div>
+
+            <div style={{ flex:1 }} />
+            <button onClick={saveEdit}
+              style={{ padding:"5px 14px", borderRadius:6, border:"none", background:T.accent, color:"#fff", fontSize:12.5, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+              Save
+            </button>
           </div>
         </div>
       </div>
@@ -327,15 +417,11 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
           <div
             onClick={e => {
-              e.stopPropagation(); // prevent row click from also opening edit on mobile
+              e.stopPropagation();
               if (done) {
-                // Future tasks need a prompt to reschedule
                 const todayIso = new Date().toISOString().slice(0, 10);
-                if (due && due.isoDate > todayIso) {
-                  setShowUncompletePrompt(true);
-                } else {
-                  onUncomplete?.(task.id);
-                }
+                if (due && due.isoDate > todayIso) { setShowUncompletePrompt(true); }
+                else { onUncomplete?.(task.id); }
                 return;
               }
               setCompleting(true);
@@ -344,8 +430,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
             onMouseEnter={() => setCheckHov(true)}
             onMouseLeave={() => setCheckHov(false)}
             style={{
-              width: isMobile ? 26 : 20, height: isMobile ? 26 : 20, borderRadius: "50%",
-              border: `1.5px solid ${done ? T.accent : checkHov ? T.accent : T.border}`,
+              width: isMobile ? 22 : 18, height: isMobile ? 22 : 18, borderRadius: "50%",
+              border: done ? `1.5px solid ${T.accent}` : checkHov ? `1.5px solid ${T.accent}` : "1.5px dashed #c4cbc2",
               background: done ? T.accent : "transparent",
               cursor: "pointer", flexShrink: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -353,7 +439,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
             }}
           >
             {done && (
-              <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
+              <svg width="9" height="6" viewBox="0 0 11 8" fill="none">
                 <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             )}
@@ -362,59 +448,115 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Title with animated strikethrough on completion */}
+          {/* Title */}
           <div style={{
-            fontSize: 14, fontWeight: 450,
-            color: T.textPrimary,
-            lineHeight: 1.4,
+            fontSize: 14, fontWeight: 400,
+            color: done ? T.textMuted : T.textPrimary,
+            lineHeight: 1.45,
+            letterSpacing: "-0.01em",
             textDecoration: done ? "line-through" : "none",
-            marginBottom: due || task.emotionalState ? 3 : 0,
+            marginBottom: 4,
             position: "relative", display: "inline-block", width: "100%",
           }}>
             {task.title}
-            {/* Animated strike line — only during the completing animation */}
             {completing && !done && (
-              <span style={{
-                position: "absolute", left: 0, top: "50%",
-                height: "1.5px", background: T.textPrimary,
-                animation: "strikethrough-draw 0.25s ease forwards",
-              }} />
+              <span style={{ position: "absolute", left: 0, top: "50%", height: "1.5px", background: T.textPrimary, animation: "strikethrough-draw 0.25s ease forwards" }} />
             )}
           </div>
 
-          {(due || task.emotionalState || !done) && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: note && mounted ? 3 : 0 }}>
-              {due ? (
-                <span
-                  onClick={() => !done && setDeferOpen(true)}
-                  style={{
-                    fontSize: 12, fontWeight: 500,
-                    color: done ? T.textMuted : due.overdue ? T.danger : due.isToday ? T.accent : T.textTertiary,
-                    cursor: done ? "default" : "pointer",
-                    textDecoration: "none",
-                    borderBottom: done ? "none" : `1px dashed ${due.overdue ? T.danger : T.borderStrong}`,
-                  }}
-                >
-                  {due.overdue && "⚠ "}{due.dateLabel}{due.timeLabel && ` · ${due.timeLabel}`}
-                </span>
-              ) : !done && (
-                <span
-                  onClick={() => setDeferOpen(true)}
-                  style={{
-                    fontSize: 12, fontWeight: 500, color: T.textMuted,
-                    cursor: "pointer", borderBottom: `1px dashed ${T.borderStrong}`,
-                  }}
-                >+ Set date</span>
-              )}
+          {/* Meta chips — feeling → date */}
+          {!done && (
+            <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap", marginBottom: note && mounted ? 3 : 0 }}>
               {task.emotionalState && (
-                <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 3,
-                  fontSize: 12, fontWeight: 600, padding: "1px 7px", borderRadius: 999,
-                  background: em.bg, color: em.fg,
-                }}>
+                <span style={{ display:"inline-flex", alignItems:"center", gap:3, fontSize:11, fontWeight:500, padding:"2px 7px", borderRadius:5, background:em.bg, color:em.fg }}>
                   {em.emoji} {em.label}
                 </span>
               )}
+              <div ref={dateEditRef} style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                {/* Date */}
+                <span
+                  onClick={e => {
+                    e.stopPropagation();
+                    setPendingDate(due?.isoDate ?? new Date().toISOString().slice(0,10));
+                    setPendingTime(due?.isoTime ?? "");
+                    setShowDateEdit(o => !o);
+                  }}
+                  style={{ fontSize:11, fontWeight:500, color: due ? (due.overdue ? T.danger : due.isToday ? T.accent : "#888780") : "#c4cbc2", cursor:"pointer" }}>
+                  {due ? <>{due.overdue && "⚠ "}{due.dateLabel}</> : "+ date"}
+                </span>
+                {/* Time — shown separately */}
+                {due && (
+                  <span
+                    onClick={e => {
+                      e.stopPropagation();
+                      setPendingDate(due.isoDate);
+                      setPendingTime(due.isoTime ?? "");
+                      setShowDateEdit(o => !o);
+                    }}
+                    style={{ fontSize:11, fontWeight:500, color: "#888780", cursor:"pointer" }}>
+                    {due.timeLabel ?? <span style={{ color:"#c4cbc2" }}>+ time</span>}
+                  </span>
+                )}
+                {showDateEdit && (() => {
+                  const now = new Date();
+                  const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+                  const isToday = pendingDate === now.toISOString().slice(0,10);
+                  const timeSlots = getTimeSlots(isToday, nowTime);
+                  function applyAndClose(date: string, time: string) {
+                    if (!date) { setShowDateEdit(false); return; }
+                    const dueAt = time
+                      ? new Date(`${date}T${time}`)
+                      : new Date(date + "T00:00:00.000Z");
+                    onUpdate?.(task.id, { dueAt: dueAt as unknown as Date });
+                    setShowDateEdit(false);
+                  }
+                  return (
+                    <div style={{ position:"absolute", top:"calc(100% + 4px)", left:0, zIndex:60, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:210, overflow:"hidden" }}>
+
+                      {/* Date section */}
+                      <div style={{ padding:"4px 0" }}>
+                        {getDatePresets().map(opt => (
+                          <button key={opt.value} onClick={e => { e.stopPropagation(); setPendingDate(opt.value); }}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"7px 14px", background: pendingDate===opt.value ? "#f2fdec" : "none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                            <span style={{ fontSize:13, color:pendingDate===opt.value?"#059669":"#082d1d", fontWeight:pendingDate===opt.value?500:400 }}>{opt.label}</span>
+                            <span style={{ fontSize:11, color:pendingDate===opt.value?"#059669":"#888780" }}>{opt.sub}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Time section */}
+                      <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"4px 0" }}>
+                        <button onClick={e => { e.stopPropagation(); setPendingTime(""); }}
+                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"7px 14px", background:pendingTime===""?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                          <span style={{ fontSize:13, color:pendingTime===""?"#059669":"#082d1d", fontWeight:pendingTime===""?500:400 }}>No time</span>
+                          {pendingTime==="" && <span style={{ fontSize:11, color:"#059669" }}>✓</span>}
+                        </button>
+                        {timeSlots.map(opt => (
+                          <button key={opt.value} onClick={e => { e.stopPropagation(); setPendingTime(opt.value); }}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"7px 14px", background:pendingTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                            <span style={{ fontSize:13, color:pendingTime===opt.value?"#059669":"#082d1d", fontWeight:pendingTime===opt.value?500:400 }}>{opt.label}</span>
+                            <span style={{ fontSize:11, color:pendingTime===opt.value?"#059669":"#888780" }}>{fmtTime(opt.value)}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Footer */}
+                      <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"8px 10px", display:"flex", gap:6, justifyContent:"flex-end" }}>
+                        {due && (
+                          <button onClick={e => { e.stopPropagation(); onUpdate?.(task.id, { dueAt: null as unknown as Date }); setShowDateEdit(false); }}
+                            style={{ padding:"5px 10px", borderRadius:6, border:"none", background:"none", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit" }}>
+                            Remove
+                          </button>
+                        )}
+                        <button onClick={e => { e.stopPropagation(); applyAndClose(pendingDate, pendingTime); }}
+                          style={{ padding:"5px 14px", borderRadius:6, border:"none", background:"#059669", color:"#fff", fontSize:12.5, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
           )}
 

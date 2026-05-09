@@ -358,7 +358,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                 border: tab === t ? `1px solid ${T.border}` : "1px solid transparent",
                 background: tab === t ? T.surface : "transparent",
                 color: tab === t ? T.textPrimary : T.textTertiary,
-                fontSize: 12.5, fontWeight: tab === t ? 600 : 450,
+                fontSize: 12.5, fontWeight: tab === t ? 600 : 400,
                 cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
                 boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
               }}>

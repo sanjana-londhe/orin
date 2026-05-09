@@ -8,7 +8,7 @@ import type { TaskWithSubtasks } from "@/lib/types";
 const EMOTIONS = [
   { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626", activeBg: "#D14626" },
   { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10", activeBg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#3a3a3a", fg: "#fff",    activeBg: "#3a3a3a" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#F3F2F0", fg: "#7A756E", activeBg: "#7A756E" },
   { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D", activeBg: "#0E8A7D" },
   { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444", activeBg: "#1A9444" },
 ] as const;
@@ -43,7 +43,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
       <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480, background: "#fff", borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.15)", overflow: "hidden" }}>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid #f0f0f0" }}>
-          <h2 style={{ fontSize: 16, fontWeight: 800, color: "#0a2010", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "#0a2010", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
           <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: "50%", border: "1px solid #e5e7eb", background: "#f9fafb", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280" }}>
             <X size={14} />
           </button>

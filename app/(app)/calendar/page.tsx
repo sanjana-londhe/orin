@@ -127,7 +127,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
               </svg>
             )}
           </div>
-          <p style={{ fontSize: 14, fontWeight: 450, color: "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
+          <p style={{ fontSize: 14, fontWeight: 400, color: "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
             {task.title}
           </p>
           <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 10 }}>
@@ -143,8 +143,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
             </span>
           )}
           <span style={{
-            display: "inline-flex", alignItems: "center", gap: 3,
-            fontSize: 11, fontWeight: 600, padding: "1px 7px", borderRadius: 999,
+            fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3,
             background: e.pillBg, color: e.pillText,
           }}>
             {em(task.emotionalState).emoji} {em(task.emotionalState).label}
@@ -254,7 +253,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13.5, fontWeight: 450, color: "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
+                <p style={{ fontSize: 13.5, fontWeight: 400, color: "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
                   {task.title}
                 </p>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -263,7 +262,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
                       {overdue && "⚠ "}{time}
                     </span>
                   )}
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999, background: e.pillBg, color: e.pillText }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: e.pillBg, color: e.pillText }}>
                     {em(task.emotionalState).emoji} {em(task.emotionalState).label}
                   </span>
                 </div>
@@ -492,15 +491,15 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ height: 3, background: colour, borderRadius: 2 }} />
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: e.pillBg, color: e.pillText }}>
+                <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: e.pillBg, color: e.pillText }}>
                   {em(task.emotionalState).emoji} {em(task.emotionalState).label}
                 </span>
                 {dateLabel && (
-                  <span style={{ fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
                     {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
                   </span>
                 )}
-                {task.deferredCount > 0 && <span style={{ fontSize: 12, padding: "3px 10px", borderRadius: 999, background: "#FFF0EC", color: "#D14626" }}>Deferred {task.deferredCount}×</span>}
+                {task.deferredCount > 0 && <span style={{ fontSize: 11, padding: "2px 6px", borderRadius: 3, background: "#FFF0EC", color: "#D14626" }}>Deferred {task.deferredCount}×</span>}
               </div>
               {note && (
                 <div style={{ background: "#f8f9f5", borderRadius: 8, padding: "10px 12px" }}>
@@ -623,15 +622,15 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
 
       {/* Fields section */}
       <div style={{ borderBottom: "1px solid #e9ede9", padding: "12px 18px", display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: e.pillBg, color: e.pillText }}>
+        <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: e.pillBg, color: e.pillText }}>
           {em(task.emotionalState).emoji} {em(task.emotionalState).label}
         </span>
         {dateLabel && (
-          <span style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 999, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
+          <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
             {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
           </span>
         )}
-        {task.deferredCount > 0 && <span style={{ fontSize: 12, padding: "4px 10px", borderRadius: 999, background: "#FFF0EC", color: "#D14626" }}>Deferred {task.deferredCount}×</span>}
+        {task.deferredCount > 0 && <span style={{ fontSize: 11, padding: "2px 6px", borderRadius: 3, background: "#FFF0EC", color: "#D14626" }}>Deferred {task.deferredCount}×</span>}
       </div>
 
       {/* Note */}
@@ -690,7 +689,7 @@ function MobileCalendar({
       {/* Month header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", flexShrink: 0, background: "#fff" }}>
         <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={16} color="#4a6d47" /></button>
-        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 17, fontWeight: 800, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
+        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 17, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
           {MONTH_NAMES[month]} {year}
           <ChevronRight size={14} color="#059669" style={{ transform: pickerOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
         </button>
@@ -712,7 +711,7 @@ function MobileCalendar({
               {/* Left: day + date — top-aligned when there are multiple tasks */}
               <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
                 <span style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: "0.04em", color: isToday ? "#059669" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
-                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: isToday ? 800 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
+                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: isToday ? 700 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
               </div>
 
               {/* Right: colored pill per task, no checkboxes */}
@@ -887,7 +886,7 @@ export default function CalendarPage() {
           <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 6 }}>Schedule</p>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-            <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
               {new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </h1>
             <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>

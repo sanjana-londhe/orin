@@ -31,27 +31,33 @@ export async function GET(request: Request) {
   const from   = searchParams.get("from");
   const to     = searchParams.get("to");
 
-  // Determine the window end for filtering
   const now = new Date();
+  const periodHours = period === "custom" && from && to
+    ? (new Date(to + "T23:59:59").getTime() - new Date(from + "T00:00:00").getTime()) / (1000 * 60 * 60)
+    : PERIOD_HOURS[period] ?? 168;
+
+  // Bidirectional window: past N hours → future N hours (so completed tasks are included)
+  let windowStart: Date | null = null;
   let windowEnd: Date | null = null;
 
   if (period === "custom" && from && to) {
-    windowEnd = new Date(to + "T23:59:59");
+    windowStart = new Date(from + "T00:00:00");
+    windowEnd   = new Date(to   + "T23:59:59");
   } else if (PERIOD_HOURS[period]) {
-    windowEnd = new Date(now.getTime() + PERIOD_HOURS[period] * 60 * 60 * 1000);
+    const ms = PERIOD_HOURS[period] * 60 * 60 * 1000;
+    windowStart = new Date(now.getTime() - ms);
+    windowEnd   = new Date(now.getTime() + ms);
   }
-
-  const periodHours = period === "custom" && from && to
-    ? (new Date(to + "T23:59:59").getTime() - now.getTime()) / (1000 * 60 * 60)
-    : PERIOD_HOURS[period] ?? 168;
 
   const tasks = await prisma.task.findMany({
     where: {
-      userId: user.id, parentTaskId: null, isCompleted: false,
-      // Include tasks with dueAt within window, or tasks with no dueAt
-      ...(windowEnd ? { OR: [{ dueAt: null }, { dueAt: { lte: windowEnd } }] } : {}),
+      userId: user.id, parentTaskId: null,
+      OR: windowStart && windowEnd ? [
+        { dueAt: null },
+        { dueAt: { gte: windowStart, lte: windowEnd } },
+      ] : undefined,
     },
-    select: { id: true, title: true, emotionalState: true, dueAt: true, deferredCount: true },
+    select: { id: true, title: true, emotionalState: true, dueAt: true, deferredCount: true, isCompleted: true },
   });
 
   const result = tasks.map(t => ({
@@ -62,6 +68,7 @@ export async function GET(request: Request) {
     emotionalWeight: EMOTIONAL_WEIGHT[t.emotionalState] ?? 3,
     dueAt:           t.dueAt,
     deferredCount:   t.deferredCount,
+    isCompleted:     t.isCompleted,
   }));
 
   return NextResponse.json(result);

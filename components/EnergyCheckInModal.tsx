@@ -162,7 +162,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
             </p>
 
             <h2 style={{
-              fontSize: isMobile ? 20 : 24, fontWeight: 800, color: "#082d1d",
+              fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "#082d1d",
               margin: "0 0 4px", letterSpacing: "-0.03em", lineHeight: 1.2,
             }}>
               How are you feeling right now?
@@ -226,7 +226,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
             </p>
 
             <h2 style={{
-              fontSize: isMobile ? 20 : 24, fontWeight: 800, color: "#082d1d",
+              fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "#082d1d",
               margin: "0 0 4px", letterSpacing: "-0.03em", lineHeight: 1.2,
             }}>
               What had an influence?
@@ -315,7 +315,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
               Logged
             </p>
             <h2 style={{
-              fontSize: isMobile ? 18 : 20, fontWeight: 800, color: "#082d1d",
+              fontSize: isMobile ? 18 : 20, fontWeight: 700, color: "#082d1d",
               margin: "0 0 4px", letterSpacing: "-0.03em", textAlign: "center",
             }}>
               Check-in saved

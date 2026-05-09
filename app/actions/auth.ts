@@ -45,6 +45,13 @@ export async function signOut() {
   redirect("/login");
 }
 
+export async function signInAsGuest(_formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInAnonymously();
+  if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  redirect("/");
+}
+
 export async function signInWithGoogle(): Promise<void> {
   const supabase = await createClient();
   const { data } = await supabase.auth.signInWithOAuth({

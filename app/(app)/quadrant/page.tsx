@@ -50,7 +50,7 @@ export default function QuadrantPage() {
         <p style={{ fontFamily: "monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", marginBottom: 4 }}>
           Visualization
         </p>
-        <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1 }}>
           Feeling Map
         </h1>
         <p style={{ fontSize: 12.5, color: "#4a6d47", marginTop: 4 }}>
@@ -64,7 +64,7 @@ export default function QuadrantPage() {
           const active = period === tab.value;
           return (
             <button key={tab.value} onClick={() => setPeriod(tab.value)} style={{
-              padding: "6px 14px", borderRadius: 999, fontSize: 12.5, fontWeight: 500,
+              padding: "6px 14px", borderRadius: 6, fontSize: 12.5, fontWeight: 500,
               border: `1.5px solid ${active ? "#059669" : "#dde4de"}`,
               background: active ? "#059669" : "#fff",
               color: active ? "#fff" : "#3d5a4a",

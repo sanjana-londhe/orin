@@ -16,10 +16,89 @@ import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { DatePickerField } from "@/components/DatePickerField";
 import { TimePickerField } from "@/components/TimePickerField";
-import { FeelingPickerField } from "@/components/FeelingPickerField";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import { Plus } from "lucide-react";
 import type { TaskWithSubtasks } from "@/lib/types";
+
+type Emotion = "DREADING" | "ANXIOUS" | "NEUTRAL" | "WILLING" | "EXCITED";
+
+const INLINE_FEELINGS = [
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#F3F2F0", fg: "#7A756E" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444" },
+] as const;
+
+function fmtDateLabel(iso: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  const tmrw  = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  if (iso === today) return "Today";
+  if (iso === tmrw)  return "Tomorrow";
+  return new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+function fmtTimeLabel(t: string) {
+  if (!t) return "";
+  const [h, m] = t.split(":").map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+}
+
+const FEELING_KEYWORDS: Record<string, Emotion> = {
+  dreading: "DREADING", dread: "DREADING",
+  anxious: "ANXIOUS", anxiety: "ANXIOUS", nervous: "ANXIOUS", worried: "ANXIOUS", stress: "ANXIOUS",
+  neutral: "NEUTRAL", okay: "NEUTRAL", fine: "NEUTRAL", meh: "NEUTRAL",
+  willing: "WILLING", ready: "WILLING", open: "WILLING", sure: "WILLING",
+  excited: "EXCITED", happy: "EXCITED", eager: "EXCITED", pumped: "EXCITED", love: "EXCITED",
+};
+
+function getDatePresets() {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return [
+    { label: "Today",     sub: fmt(t),                                     value: t.toISOString().slice(0,10) },
+    { label: "Tomorrow",  sub: fmt(new Date(t.getTime()+86400000)),         value: new Date(t.getTime()+86400000).toISOString().slice(0,10) },
+    { label: "In 2 days", sub: fmt(new Date(t.getTime()+172800000)),        value: new Date(t.getTime()+172800000).toISOString().slice(0,10) },
+    { label: "Next week", sub: fmt(new Date(t.getTime()+604800000)),        value: new Date(t.getTime()+604800000).toISOString().slice(0,10) },
+  ];
+}
+function getTimeSlots(isToday: boolean, nowTime: string) {
+  if (!isToday) return [
+    { label: "Morning", value: "09:00" }, { label: "Noon", value: "12:00" },
+    { label: "Afternoon", value: "14:00" }, { label: "Evening", value: "18:00" }, { label: "Night", value: "21:00" },
+  ];
+  const now = new Date();
+  const slots: { label: string; value: string }[] = [];
+  [30, 60, 120, 180].forEach(mins => {
+    const t = new Date(now.getTime() + mins * 60000);
+    const h = t.getHours(), rawM = t.getMinutes();
+    const rM = Math.ceil(rawM / 15) * 15, fH = rM >= 60 ? h + 1 : h, fM = rM >= 60 ? 0 : rM;
+    if (fH < 24) slots.push({ label: mins < 60 ? `In ${mins} min` : `In ${mins/60} hr${mins > 60 ? "s" : ""}`, value: `${String(fH).padStart(2,"0")}:${String(fM).padStart(2,"0")}` });
+  });
+  [{ label: "Afternoon", value: "14:00" }, { label: "Evening", value: "18:00" }, { label: "Night", value: "21:00" }]
+    .filter(s => s.value > nowTime)
+    .forEach(s => { if (!slots.find(x => x.value === s.value)) slots.push(s); });
+  return slots;
+}
+
+function parseTimeInput(raw: string): string | null {
+  const s = raw.trim().toUpperCase();
+  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/);
+  if (!m) return null;
+  let h = parseInt(m[1]); const min = parseInt(m[2] ?? "0");
+  if (isNaN(h) || isNaN(min) || min > 59) return null;
+  if (m[3] === "PM" && h < 12) h += 12;
+  if (m[3] === "AM" && h === 12) h = 0;
+  if (h > 23) return null;
+  return `${String(h).padStart(2,"0")}:${String(min).padStart(2,"0")}`;
+}
+
+function detectFeeling(text: string): Emotion | null {
+  const lower = text.toLowerCase();
+  for (const [kw, emotion] of Object.entries(FEELING_KEYWORDS)) {
+    if (lower.includes(kw)) return emotion;
+  }
+  return null;
+}
 
 export function TaskList({ userName = "there", timeGreeting = "morning" }: { userName?: string; timeGreeting?: string }) {
   const queryClient = useQueryClient();
@@ -116,16 +195,36 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const overdue = tasks.filter(t => t.dueAt && new Date(t.dueAt) < new Date()).length;
   const totalDeferred = tasks.reduce((s, t) => s + (t.deferredCount ?? 0), 0);
 
-  // Inline task creation state
+  // Inline task creation state — always expanded
+  const inputRef = useRef<HTMLInputElement>(null);
   const [inlineDraft, setInlineDraft] = useState("");
-  const [showInlineForm, setShowInlineForm] = useState(false);
   const [inlineDueDate, setInlineDueDate] = useState(new Date().toISOString().slice(0, 10));
-  const [inlineDueTime, setInlineDueTime] = useState(() => {
-    const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
-    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-  });
-  const [inlineEmotion, setInlineEmotion] = useState<"DREADING"|"ANXIOUS"|"NEUTRAL"|"WILLING"|"EXCITED"|"">();
+  const [inlineDueTime, setInlineDueTime] = useState("");
+  const [inlineEmotion, setInlineEmotion] = useState<Emotion>("NEUTRAL");
   const [inlineNote, setInlineNote] = useState("");
+  const [showEmotionPicker, setShowEmotionPicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showCustomTime, setShowCustomTime] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const chipBarRef = useRef<HTMLDivElement>(null);
+  const formContainerRef = useRef<HTMLDivElement>(null);
+  const [formFocused, setFormFocused] = useState(false);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      const target = e.target as Node;
+      if (chipBarRef.current && !chipBarRef.current.contains(target)) {
+        setShowEmotionPicker(false); setShowDatePicker(false); setShowTimePicker(false);
+      }
+      if (formContainerRef.current && !formContainerRef.current.contains(target)) {
+        setFormFocused(false);
+        setInlineDraft(""); setInlineNote(""); setNoteOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const { mutate: createInline, isPending: creatingInline } = useMutation({
     mutationFn: async (vars: { title: string; dueAt: string | null; emotion: typeof inlineEmotion; note?: string }) => {
@@ -168,11 +267,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       queryClient.setQueryData(["tasks", selectedDate], (old: TaskWithSubtasks[] = []) => [...old, optimistic]);
 
       // Reset form immediately — user sees instant feedback
-      setInlineDraft(""); setShowInlineForm(false);
-      setInlineDueDate(new Date().toISOString().slice(0, 10));
-      const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
-      setInlineDueTime(`${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`);
-      setInlineEmotion(undefined); setInlineNote("");
+      setInlineDraft(""); setInlineNote("");
 
       return { snap };
     },
@@ -186,115 +281,190 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
   return (
     <>
-      {/* ── Page header (5.html style) ── */}
-      <div style={{ marginBottom: 24 }}>
-        {/* Header: Today top-left, New task top-right */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
-          <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.04em", color: "#082d1d", lineHeight: 1, marginBottom: 10 }}>
-              Today
-            </h1>
+      {/* ── Sticky task creation — always expanded ── */}
+      {(() => {
+        const em = INLINE_FEELINGS.find(f => f.value === inlineEmotion) ?? INLINE_FEELINGS[2];
+        const dateLabel = inlineDueTime
+          ? `${fmtDateLabel(inlineDueDate)} · ${fmtTimeLabel(inlineDueTime)}`
+          : fmtDateLabel(inlineDueDate);
+
+        function submitForm() {
+          if (!inlineDraft.trim() || creatingInline) return;
+          createInline({
+            title: inlineDraft.trim(),
+            dueAt: new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString(),
+            emotion: inlineEmotion,
+            note: inlineNote,
+          });
+          // Clear title + note, keep emotion/date so user can keep adding
+          setInlineDraft("");
+          setInlineNote("");
+          setNoteOpen(false);
+          setShowEmotionPicker(false);
+          setShowDatePicker(false);
+          setTimeout(() => inputRef.current?.focus(), 50);
+        }
+
+        const chip = (active: boolean, fg?: string) => ({
+          display: "inline-flex" as const, alignItems: "center" as const, gap: 5,
+          padding: "5px 10px", borderRadius: 7,
+          background: active ? "#f1f3ef" : "#f8f9f5",
+          border: `0.5px solid ${active && fg ? fg + "44" : "rgba(0,0,0,0.08)"}`,
+          color: active && fg ? fg : "#5f5e5a",
+          fontSize: 12.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          transition: "all 0.1s",
+        });
+
+        return (
+          <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#f8f9f5", paddingBottom: 16 }}>
+            <div ref={formContainerRef} onFocus={() => setFormFocused(true)} style={{ border: `1px solid ${formFocused ? "#059669" : "rgba(0,0,0,0.09)"}`, borderRadius: 10, transition: "border-color 0.15s", background: "#fff" }}>
+
+              {/* Top: circle + title + Add */}
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "14px 14px 6px" }}>
+                <div style={{ width: 20, height: 20, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 1 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <input
+                    ref={inputRef}
+                    id="inline-task-input"
+                    value={inlineDraft}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setInlineDraft(val);
+                      const detected = detectFeeling(val);
+                      if (detected) setInlineEmotion(detected);
+                    }}
+                    onKeyDown={e => { if (e.key === "Enter") submitForm(); }}
+                    placeholder="Task name"
+                    style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, letterSpacing: "-0.01em", color: "#082d1d", background: "transparent", marginBottom: 4 }}
+                  />
+                  {/* Note inline */}
+                  {noteOpen ? (
+                    <textarea
+                      autoFocus
+                      value={inlineNote}
+                      onChange={e => setInlineNote(e.target.value)}
+                      placeholder="Notes"
+                      rows={2}
+                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, color: "#5f5e5a", background: "transparent", resize: "none", lineHeight: 1.5, display: "block", padding: 0 }}
+                    />
+                  ) : (
+                    <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12, color: "#b9d3c4", cursor: "text", marginBottom: 2 }}>
+                      {inlineNote.trim() || "Notes"}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom chip bar */}
+              <div ref={chipBarRef} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderTop: "0.5px solid rgba(0,0,0,0.06)", flexWrap: "wrap", position: "relative" }}>
+
+                {/* Feeling chip + dropdown */}
+                <div style={{ position: "relative" }}>
+                  <button onClick={() => { setShowEmotionPicker(o => !o); setShowDatePicker(false); }}
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:em.bg, border:`0.5px solid ${em.fg}33`, color:em.fg, fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    {em.emoji} {em.label}
+                  </button>
+                  {showEmotionPicker && (
+                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
+                      {INLINE_FEELINGS.map(f => (
+                        <button key={f.value} onClick={() => { setInlineEmotion(f.value as Emotion); setShowEmotionPicker(false); }}
+                          style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:inlineEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize:13, color:inlineEmotion===f.value?f.fg:"#082d1d", fontFamily:"inherit" }}>
+                          {f.emoji} {f.label}
+                          {inlineEmotion===f.value && <span style={{ marginLeft:"auto", fontSize:11 }}>✓</span>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Date chip + dropdown */}
+                <div style={{ position: "relative" }}>
+                  <button onClick={() => { setShowDatePicker(o => !o); setShowEmotionPicker(false); }}
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(5,150,105,0.25)", color:"#059669", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
+                  </button>
+                  {showDatePicker && (
+                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                      {getDatePresets().map(opt => (
+                        <button key={opt.value} onClick={() => { setInlineDueDate(opt.value); setShowDatePicker(false); }}
+                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                          <span style={{ fontSize:13, color:inlineDueDate===opt.value?"#059669":"#082d1d", fontWeight:inlineDueDate===opt.value?500:400 }}>{opt.label}</span>
+                          <span style={{ fontSize:11, color:inlineDueDate===opt.value?"#059669":"#888780" }}>{opt.sub}{inlineDueDate===opt.value?" ✓":""}</span>
+                        </button>
+                      ))}
+                      <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"8px 14px" }}>
+                        <input type="date" value={inlineDueDate} onChange={e => setInlineDueDate(e.target.value)} onBlur={() => setShowDatePicker(false)}
+                          style={{ width:"100%", border:"none", outline:"none", fontSize:12, color:"#082d1d", fontFamily:"inherit", background:"transparent", cursor:"pointer" }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Time chip + dropdown */}
+                <div style={{ position: "relative" }}>
+                  {inlineDueTime && (
+                    <button onClick={() => { setShowTimePicker(o => !o); setShowEmotionPicker(false); setShowDatePicker(false); }}
+                      style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#5f5e5a", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                      <span style={{ fontSize: 10 }}>🕐</span> {fmtTimeLabel(inlineDueTime)}
+                    </button>
+                  )}
+                  {showTimePicker && (() => {
+                    const now = new Date();
+                    const todayStr = now.toISOString().slice(0,10);
+                    const isToday = inlineDueDate === todayStr;
+                    const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+                    const slots = getTimeSlots(isToday, nowTime);
+                    return (
+                      <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                        {slots.map(opt => (
+                          <button key={opt.value}
+                            onClick={() => { setInlineDueTime(opt.value); setShowTimePicker(false); }}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                            <span style={{ fontSize:13, color:inlineDueTime===opt.value?"#059669":"#082d1d", fontWeight:inlineDueTime===opt.value?500:400 }}>{opt.label}</span>
+                            <span style={{ fontSize:11, color:inlineDueTime===opt.value?"#059669":"#888780" }}>{fmtTimeLabel(opt.value)}{inlineDueTime===opt.value?" ✓":""}</span>
+                          </button>
+                        ))}
+                        <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }}>
+                          <button onClick={() => setShowCustomTime(o => !o)}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomTime?"#f8f9f5":"none", border:"none", cursor:"pointer", fontSize:13, color:"#082d1d", fontFamily:"inherit" }}>
+                            <span>Custom</span><span style={{ fontSize:11, color:"#888780" }}>→</span>
+                          </button>
+                          {showCustomTime && (
+                            <div style={{ padding:"0 10px 10px" }}>
+                              <input autoFocus placeholder="e.g. 3:30 PM or 15:00"
+                                defaultValue={inlineDueTime ? fmtTimeLabel(inlineDueTime) : ""}
+                                onKeyDown={e => { if(e.key==="Enter"){const p=parseTimeInput((e.target as HTMLInputElement).value);if(p){setInlineDueTime(p);setShowTimePicker(false);setShowCustomTime(false);}} }}
+                                onBlur={e => { const p=parseTimeInput(e.target.value);if(p){setInlineDueTime(p);setShowTimePicker(false);setShowCustomTime(false);} }}
+                                style={{ width:"100%", fontSize:13, color:"#082d1d", border:"1px solid #059669", borderRadius:7, padding:"7px 10px", outline:"none", fontFamily:"inherit", background:"#fff", boxSizing:"border-box" }} />
+                              <p style={{ margin:"4px 0 0", fontSize:10, color:"#888780" }}>Press Enter to apply</p>
+                            </div>
+                          )}
+                        </div>
+                        {inlineDueTime && (
+                          <button onClick={() => { setInlineDueTime(""); setShowTimePicker(false); }}
+                            style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>
+                            Remove time
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
+                <div style={{ flex: 1 }} />
+                <button onClick={submitForm} disabled={creatingInline}
+                  style={{ padding:"5px 14px", borderRadius:6, border:"none", background:"#059669", color:"#fff", fontSize:12.5, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+                  {creatingInline ? "…" : "Add"}
+                </button>
+                </div>
+              </div>
+            </div>
           </div>
+        );
+      })()}
 
-          {/* New task button — top right */}
-          <button onClick={() => { setShowInlineForm(true); setTimeout(() => document.getElementById("inline-task-input")?.focus(), 50); }} style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "8px 16px", height: 38, borderRadius: 8,
-            background: "#059669", border: "none",
-            color: "#fff", fontSize: 13.5, fontWeight: 600,
-            cursor: "pointer", fontFamily: "inherit",
-            transition: "background 0.15s", flexShrink: 0,
-          }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#047857"}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "#059669"}>
-            + New task
-          </button>
-        </div>
-
-      </div>
-
-      {/* ── Inline creation ── */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 12,
-          padding: "14px 18px", background: "#fff",
-          border: `1.5px solid ${showInlineForm ? "#059669" : "#dde4de"}`,
-          borderRadius: showInlineForm ? "12px 12px 0 0" : 12,
-          transition: "border-color 0.15s",
-        }}>
-          <span style={{ fontSize: 14, color: "#b9d3c4", flexShrink: 0 }}>✦</span>
-          <input
-            id="inline-task-input"
-            value={inlineDraft}
-            onChange={e => setInlineDraft(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && inlineDraft.trim()) setShowInlineForm(true); }}
-            placeholder="What needs doing?"
-            style={{ flex: 1, border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#082d1d", background: "transparent" }}
-          />
-          {inlineDraft.trim() && !showInlineForm && (
-            <button onClick={() => setShowInlineForm(true)} style={{
-              padding: "5px 14px", borderRadius: 7, background: "#059669", border: "none",
-              color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-            }}>Add →</button>
-          )}
-        </div>
-
-        {showInlineForm && (
-          <div style={{
-            background: "#fff", border: "1.5px solid #059669", borderTop: "none",
-            borderRadius: "0 0 12px 12px", padding: "16px 18px",
-            boxShadow: "0 4px 16px rgba(5,150,105,0.08)",
-          }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 14 }}>
-              <DatePickerField value={inlineDueDate} onChange={setInlineDueDate} label="Due date" />
-              <TimePickerField value={inlineDueTime} onChange={setInlineDueTime} label="Due time" selectedDate={inlineDueDate} />
-              <FeelingPickerField value={inlineEmotion ?? ""} onChange={v => setInlineEmotion(v as typeof inlineEmotion)} label="Feeling" />
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", marginBottom: 8 }}>Note</p>
-              <textarea
-                value={inlineNote}
-                onChange={e => setInlineNote(e.target.value)}
-                placeholder="Add a note or description…"
-                rows={2}
-                style={{
-                  width:"100%", fontSize:12.5, color:"#082d1d", background:"#f8f9f5",
-                  border:"1.5px solid #dde4de", borderRadius:8, padding:"8px 10px",
-                  outline:"none", fontFamily:"inherit", resize:"vertical",
-                  lineHeight:1.5, boxSizing:"border-box", transition:"border-color 0.14s",
-                }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#059669")}
-                onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")}
-              />
-            </div>
-
-            <div style={{ display:"flex",justifyContent:"flex-end",gap:8 }}>
-              <button onClick={() => { setShowInlineForm(false); setInlineDraft(""); setInlineDueDate(new Date().toISOString().slice(0,10)); const _d = new Date(Date.now() + 3*60*60*1000); setInlineDueTime(`${String(_d.getHours()).padStart(2,"0")}:${String(_d.getMinutes()).padStart(2,"0")}`); setInlineEmotion(undefined); setInlineNote(""); }}
-                style={{ padding:"6px 14px",borderRadius:7,border:"1px solid #dde4de",background:"#fff",color:"#4a6d47",fontSize:12.5,cursor:"pointer",fontFamily:"inherit" }}>
-                Cancel
-              </button>
-              <button onClick={() => {
-                if (inlineDueDate && inlineDueTime) {
-                  const chosen = new Date(`${inlineDueDate}T${inlineDueTime}`);
-                  if (chosen <= new Date()) { alert("Please pick a time in the future."); return; }
-                }
-                createInline({
-                  title: inlineDraft.trim(),
-                  dueAt: inlineDueDate ? new Date(`${inlineDueDate}T${inlineDueTime || "00:00"}`).toISOString() : null,
-                  emotion: inlineEmotion || "NEUTRAL",
-                  note: inlineNote,
-                });
-              }} disabled={!inlineDraft.trim() || creatingInline} style={{
-                padding:"6px 18px",borderRadius:7,border:"none",
-                background: inlineDraft.trim() ? "#059669" : "#c4cbc2",
-                color:"#fff",fontSize:12.5,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
-              }}>
-                {creatingInline ? "Creating…" : "Create task"}
-              </button>
-            </div>
-          </div>
-        )}
+      {/* ── Page header ── */}
+      <div style={{ marginBottom: 16, marginTop: 8 }}>
+        <p style={{ fontFamily: "monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>Workspace · Today</p>
+        <h1 style={{ fontSize: 26, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>Today</h1>
       </div>
 
       {/* ── Cards ── */}

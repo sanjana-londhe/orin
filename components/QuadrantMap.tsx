@@ -14,6 +14,7 @@ export interface QuadrantTask {
   emotionalWeight: number;
   dueAt: string | null;
   deferredCount: number;
+  isCompleted: boolean;
 }
 
 interface TooltipState {
@@ -32,8 +33,8 @@ const VH = 360;
 const PAD = { top: 28, right: 20, bottom: 40, left: 18 };
 const W = VW - PAD.left - PAD.right;
 const H = VH - PAD.top - PAD.bottom;
-const TOOLTIP_W = 168;
-const TOOLTIP_H = 64;
+const TOOLTIP_W = 224;
+const TOOLTIP_H = 86;
 const DOT_OFFSET = 14;
 
 const xScale = scaleLinear().domain([0, 1]).range([0, W]);
@@ -97,6 +98,12 @@ export function QuadrantMap({ tasks }: Props) {
             <span className="text-[11.5px] font-medium" style={{ color: "#3d5a4a" }}>{em.label}</span>
           </div>
         ))}
+        <div className="flex items-center gap-1.5">
+          <svg width="10" height="10" viewBox="0 0 10 10" style={{ flexShrink: 0 }}>
+            <circle cx="5" cy="5" r="4" fill="#fff" stroke="#3d5a4a" strokeWidth="1.5" strokeDasharray="2 1.5" opacity="0.6" />
+          </svg>
+          <span className="text-[11.5px] font-medium" style={{ color: "#3d5a4a" }}>Completed</span>
+        </div>
       </div>
 
       <svg
@@ -189,22 +196,23 @@ export function QuadrantMap({ tasks }: Props) {
         {dotPositions.map((t) => {
           const { cx, cy, colour } = t;
           const active = tooltip?.taskId === t.id;
+          const done = t.isCompleted;
 
           return (
             <circle
               key={t.id}
               cx={cx} cy={cy}
               r={active ? 7 : 5}
-              fill={colour}
-              stroke="#ffffff"
-              strokeWidth="2"
+              fill={done ? "#ffffff" : colour}
+              stroke={colour}
+              strokeWidth={done ? 2 : 2}
+              strokeDasharray={done ? "3 2" : undefined}
+              opacity={done ? 0.55 : 1}
               style={{ cursor: "pointer", transition: "r 0.13s" }}
               aria-label={t.title}
               tabIndex={0}
-              // Desktop: hover
               onMouseEnter={() => showTooltip(t.id, cx, cy)}
               onMouseLeave={hideTooltip}
-              // Mobile: tap toggles
               onClick={(e) => {
                 e.stopPropagation();
                 tooltip?.taskId === t.id ? hideTooltip() : showTooltip(t.id, cx, cy);
@@ -216,63 +224,67 @@ export function QuadrantMap({ tasks }: Props) {
         })}
 
         {/* Tooltip */}
-        {activeTask && (
-          <foreignObject x={ttX} y={ttY} width={TOOLTIP_W} height={TOOLTIP_H}
-            style={{ pointerEvents: "none" }}>
-            <div style={{
-              background: "#fff",
-              border: "1.5px solid #dde4de",
-              borderRadius: 8,
-              padding: "7px 10px",
-              fontSize: 11,
-              lineHeight: 1.45,
-              color: "#082d1d",
-              fontFamily: "inherit",
-            }}>
-              {/* Title */}
+        {activeTask && (() => {
+          const em = getEmotion(activeTask.emotionalState);
+          return (
+            <foreignObject x={ttX} y={ttY} width={TOOLTIP_W} height={TOOLTIP_H}
+              style={{ pointerEvents: "none" }}>
               <div style={{
-                fontWeight: 700,
-                marginBottom: 3,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                background: "#fff",
+                border: "1.5px solid #dde4de",
+                borderRadius: 10,
+                padding: "9px 12px",
+                fontFamily: "inherit",
+                lineHeight: 1.45,
+                boxShadow: "0 2px 10px rgba(0,0,0,0.09)",
               }}>
-                {activeTask.title}
-              </div>
-              {/* Coloured state label */}
-              <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
-                <span style={{
-                  display: "inline-block",
-                  width: 6, height: 6,
-                  borderRadius: "50%",
-                  background: getEmotion(activeTask.emotionalState).chartColor,
-                  flexShrink: 0,
-                }} />
-                <span style={{ color: getEmotion(activeTask.emotionalState).pillText, fontWeight: 600 }}>
-                  {getEmotion(activeTask.emotionalState).label}
-                </span>
-              </div>
-              {/* Relative deadline */}
-              <div style={{ color: "#4a6d47", display: "flex", alignItems: "center", gap: 6 }}>
-                <span>{relativeDeadline(activeTask.dueAt)}</span>
-                {/* Deferred count — only if > 0 */}
-                {activeTask.deferredCount > 0 && (
-                  <span style={{
-                    background: "#fcf0f3",
-                    color: "#c23934",
-                    border: "1px solid #e9c3c1",
-                    borderRadius: 4,
-                    padding: "0 5px",
-                    fontSize: 11,
-                    fontWeight: 600,
+                {/* Checkbox + title */}
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
+                  <div style={{
+                    width: 15, height: 15, borderRadius: "50%", flexShrink: 0, marginTop: 1,
+                    border: `1.5px solid ${activeTask.isCompleted ? "#059669" : "#dde4de"}`,
+                    background: activeTask.isCompleted ? "#059669" : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    deferred {activeTask.deferredCount}×
+                    {activeTask.isCompleted && (
+                      <svg width="7" height="5" viewBox="0 0 11 8" fill="none">
+                        <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                  <div style={{
+                    fontSize: 13, fontWeight: 500, color: "#082d1d",
+                    textDecoration: activeTask.isCompleted ? "line-through" : "none",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    flex: 1,
+                  }}>
+                    {activeTask.title}
+                  </div>
+                </div>
+                {/* Emotion pill + due/status */}
+                <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 3,
+                    fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999,
+                    background: em.pillBg, color: em.pillText,
+                  }}>
+                    {em.emoji} {em.label}
                   </span>
-                )}
+                  {activeTask.isCompleted ? (
+                    <span style={{ fontSize: 11, color: "#059669", fontWeight: 600 }}>· Done</span>
+                  ) : activeTask.deferredCount > 0 ? (
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999,
+                      background: "#fcf0f3", color: "#c23934", border: "1px solid #e9c3c1",
+                    }}>deferred {activeTask.deferredCount}×</span>
+                  ) : activeTask.dueAt ? (
+                    <span style={{ fontSize: 11, color: "#4a6d47" }}>· {relativeDeadline(activeTask.dueAt)}</span>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          </foreignObject>
-        )}
+            </foreignObject>
+          );
+        })()}
       </svg>
 
     </div>
