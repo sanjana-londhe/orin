@@ -20,7 +20,6 @@ function WheelColumn<T extends string | number>({
   format: (v: T) => string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isProgrammaticScroll = useRef(false);
 
   // Sync external value → scroll position (programmatic, don't trigger onChange)
@@ -32,20 +31,17 @@ function WheelColumn<T extends string | number>({
     if (Math.abs(ref.current.scrollTop - target) > 2) {
       isProgrammaticScroll.current = true;
       ref.current.scrollTop = target;
-      // Reset flag after the scroll event fires
       setTimeout(() => { isProgrammaticScroll.current = false; }, 100);
     }
   }, [value, items]);
 
+  // Fire onChange on every scroll event so the latest value is committed
+  // even if the popover closes mid-scroll (no debounce).
   const handleScroll = useCallback(() => {
     if (!ref.current || isProgrammaticScroll.current) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      if (!ref.current) return;
-      const idx = Math.round(ref.current.scrollTop / WHEEL_ITEM_H);
-      const next = items[Math.max(0, Math.min(items.length - 1, idx))];
-      if (next !== undefined && next !== value) onChange(next);
-    }, 100);
+    const idx = Math.round(ref.current.scrollTop / WHEEL_ITEM_H);
+    const next = items[Math.max(0, Math.min(items.length - 1, idx))];
+    if (next !== undefined && next !== value) onChange(next);
   }, [items, value, onChange]);
 
   return (

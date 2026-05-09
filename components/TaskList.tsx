@@ -435,7 +435,12 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                             </button>
                           ))}
                           <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
-                          <button onClick={() => { setShowCustomTime(s => !s); setShowDatePicker(false); setShowCustomDate(false); }}
+                          <button onClick={() => {
+                            const opening = !showCustomTime;
+                            setShowCustomTime(opening);
+                            setShowDatePicker(false); setShowCustomDate(false);
+                            if (opening && !inlineDueTime) setInlineDueTime("09:00");
+                          }}
                             style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomTime?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
                             <span style={{ fontSize:13, color:"#082d1d", fontWeight:showCustomTime?500:400 }}>Custom time</span>
                             <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
