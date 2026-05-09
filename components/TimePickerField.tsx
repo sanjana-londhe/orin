@@ -93,7 +93,7 @@ const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1);
 const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 const AMPMS = ["AM", "PM"] as const;
 
-function WheelTimePicker({ value, onChange }: { value: string; onChange: (t: string) => void }) {
+export function WheelTimePicker({ value, onChange }: { value: string; onChange: (t: string) => void }) {
   const [h24, m] = value
     ? value.split(":").map(Number) as [number, number]
     : [9, 0];

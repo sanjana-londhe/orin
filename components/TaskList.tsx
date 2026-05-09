@@ -14,10 +14,10 @@ import {
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
-import { DatePickerField } from "@/components/DatePickerField";
-import { TimePickerField } from "@/components/TimePickerField";
+import { DatePickerField, MiniCalendar } from "@/components/DatePickerField";
+import { TimePickerField, WheelTimePicker } from "@/components/TimePickerField";
 import { SkeletonTaskList } from "@/components/Skeleton";
-import { Plus } from "lucide-react";
+import { Plus, ChevronRight } from "lucide-react";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 type Emotion = "DREADING" | "ANXIOUS" | "NEUTRAL" | "WILLING" | "EXCITED";
@@ -205,6 +205,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const [showEmotionPicker, setShowEmotionPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showCustomDate, setShowCustomDate] = useState(false);
   const [showCustomTime, setShowCustomTime] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const chipBarRef = useRef<HTMLDivElement>(null);
@@ -379,30 +380,40 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
                 {/* Date chip + dropdown */}
                 <div style={{ position: "relative" }}>
-                  <button onClick={() => { setShowDatePicker(o => !o); setShowEmotionPicker(false); }}
+                  <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowEmotionPicker(false); }}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(5,150,105,0.25)", color:"#059669", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                   </button>
                   {showDatePicker && (
-                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
-                      {getDatePresets().map(opt => (
-                        <button key={opt.value} onClick={() => { setInlineDueDate(opt.value); setShowDatePicker(false); }}
-                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                          <span style={{ fontSize:13, color:inlineDueDate===opt.value?"#059669":"#082d1d", fontWeight:inlineDueDate===opt.value?500:400 }}>{opt.label}</span>
-                          <span style={{ fontSize:11, color:inlineDueDate===opt.value?"#059669":"#888780" }}>{opt.sub}{inlineDueDate===opt.value?" ✓":""}</span>
+                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                      <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                        {getDatePresets().map(opt => (
+                          <button key={opt.value} onClick={() => { setInlineDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                            <span style={{ fontSize:13, color:inlineDueDate===opt.value?"#059669":"#082d1d", fontWeight:inlineDueDate===opt.value?500:400 }}>{opt.label}</span>
+                            <span style={{ fontSize:11, color:inlineDueDate===opt.value?"#059669":"#888780" }}>{opt.sub}{inlineDueDate===opt.value?" ✓":""}</span>
+                          </button>
+                        ))}
+                        <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
+                        <button onClick={() => setShowCustomDate(s => !s)}
+                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomDate?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                          <span style={{ fontSize:13, color:"#082d1d", fontWeight:showCustomDate?500:400 }}>Custom date</span>
+                          <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
                         </button>
-                      ))}
-                      <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)", padding:"8px 14px" }}>
-                        <input type="date" value={inlineDueDate} onChange={e => setInlineDueDate(e.target.value)} onBlur={() => setShowDatePicker(false)}
-                          style={{ width:"100%", border:"none", outline:"none", fontSize:12, color:"#082d1d", fontFamily:"inherit", background:"transparent", cursor:"pointer" }} />
                       </div>
+                      {showCustomDate && (
+                        <MiniCalendar
+                          selected={inlineDueDate}
+                          onSelect={iso => { setInlineDueDate(iso); setShowDatePicker(false); setShowCustomDate(false); }}
+                        />
+                      )}
                     </div>
                   )}
                 </div>
 
                 {/* Time chip + dropdown */}
                 <div style={{ position: "relative" }}>
-                  <button onClick={() => { setShowTimePicker(o => !o); setShowEmotionPicker(false); setShowDatePicker(false); }}
+                  <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowEmotionPicker(false); setShowDatePicker(false); }}
                     style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#5f5e5a", fontSize:12, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>🕐</span> {inlineDueTime ? fmtTimeLabel(inlineDueTime) : "Add time"}
                   </button>
@@ -413,36 +424,33 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                     const slots = getTimeSlots(isToday, nowTime);
                     return (
-                      <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
-                        {slots.map(opt => (
-                          <button key={opt.value}
-                            onClick={() => { setInlineDueTime(opt.value); setShowTimePicker(false); }}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                            <span style={{ fontSize:13, color:inlineDueTime===opt.value?"#059669":"#082d1d", fontWeight:inlineDueTime===opt.value?500:400 }}>{opt.label}</span>
-                            <span style={{ fontSize:11, color:inlineDueTime===opt.value?"#059669":"#888780" }}>{fmtTimeLabel(opt.value)}{inlineDueTime===opt.value?" ✓":""}</span>
+                      <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                        <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                          {slots.map(opt => (
+                            <button key={opt.value}
+                              onClick={() => { setInlineDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
+                              style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                              <span style={{ fontSize:13, color:inlineDueTime===opt.value?"#059669":"#082d1d", fontWeight:inlineDueTime===opt.value?500:400 }}>{opt.label}</span>
+                              <span style={{ fontSize:11, color:inlineDueTime===opt.value?"#059669":"#888780" }}>{fmtTimeLabel(opt.value)}{inlineDueTime===opt.value?" ✓":""}</span>
+                            </button>
+                          ))}
+                          <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
+                          <button onClick={() => setShowCustomTime(s => !s)}
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomTime?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                            <span style={{ fontSize:13, color:"#082d1d", fontWeight:showCustomTime?500:400 }}>Custom time</span>
+                            <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
                           </button>
-                        ))}
-                        <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }}>
-                          <button onClick={() => setShowCustomTime(o => !o)}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomTime?"#f8f9f5":"none", border:"none", cursor:"pointer", fontSize:13, color:"#082d1d", fontFamily:"inherit" }}>
-                            <span>Custom</span><span style={{ fontSize:11, color:"#888780" }}>→</span>
-                          </button>
-                          {showCustomTime && (
-                            <div style={{ padding:"0 10px 10px" }}>
-                              <input autoFocus placeholder="e.g. 3:30 PM or 15:00"
-                                defaultValue={inlineDueTime ? fmtTimeLabel(inlineDueTime) : ""}
-                                onKeyDown={e => { if(e.key==="Enter"){const p=parseTimeInput((e.target as HTMLInputElement).value);if(p){setInlineDueTime(p);setShowTimePicker(false);setShowCustomTime(false);}} }}
-                                onBlur={e => { const p=parseTimeInput(e.target.value);if(p){setInlineDueTime(p);setShowTimePicker(false);setShowCustomTime(false);} }}
-                                style={{ width:"100%", fontSize:13, color:"#082d1d", border:"1px solid #059669", borderRadius:7, padding:"7px 10px", outline:"none", fontFamily:"inherit", background:"#fff", boxSizing:"border-box" }} />
-                              <p style={{ margin:"4px 0 0", fontSize:10, color:"#888780" }}>Press Enter to apply</p>
-                            </div>
+                          {inlineDueTime && (
+                            <button onClick={() => { setInlineDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
+                              style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>
+                              Remove time
+                            </button>
                           )}
                         </div>
-                        {inlineDueTime && (
-                          <button onClick={() => { setInlineDueTime(""); setShowTimePicker(false); }}
-                            style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize:12, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>
-                            Remove time
-                          </button>
+                        {showCustomTime && (
+                          <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", padding:"12px 14px" }}>
+                            <WheelTimePicker value={inlineDueTime || "09:00"} onChange={t => setInlineDueTime(t)} />
+                          </div>
                         )}
                       </div>
                     );

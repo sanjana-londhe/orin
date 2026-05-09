@@ -28,7 +28,7 @@ function shortFmt(iso: string) {
   return new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function MiniCalendar({ selected, onSelect, fullWidth }: { selected: string; onSelect: (iso: string) => void; fullWidth?: boolean }) {
+export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: string; onSelect: (iso: string) => void; fullWidth?: boolean }) {
   const today = getToday();
   const [view, setView] = useState(() => {
     const d = selected ? new Date(selected + "T12:00:00") : new Date();
