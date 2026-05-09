@@ -451,7 +451,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                           )}
                         </div>
                         {showCustomTime && (
-                          <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", padding:"12px 14px" }}>
+                          <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius:12, boxShadow:"0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
                             <WheelTimePicker value={inlineDueTime || "09:00"} onChange={t => setInlineDueTime(t)} />
                           </div>
                         )}
