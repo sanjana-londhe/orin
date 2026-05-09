@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
 import { SkeletonTaskList } from "@/components/Skeleton";
@@ -12,7 +13,7 @@ interface Props {
   dragActive?: boolean;
 }
 
-export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: Props) {
+function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Props) {
   const m = useTaskMutations();
 
   if (isLoading) return <SkeletonTaskList count={4} />;
@@ -51,3 +52,5 @@ export function TaskGrid({ tasks, isLoading, emptyState, dragActive = false }: P
     </div>
   );
 }
+
+export const TaskGrid = memo(TaskGridInner);

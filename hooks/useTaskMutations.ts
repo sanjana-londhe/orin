@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task } from "@prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
@@ -155,11 +156,29 @@ export function useTaskMutations() {
     onSettled: settle,
   });
 
-  return {
-    markDone:       markDone.mutate,
-    uncompleteTask: uncompleteTask.mutate,
-    updateTask:     (id: string, patch: Partial<Task>) => updateTask.mutate({ id, patch }),
-    deferTask:      (id: string, newDueAt: Date) => deferTask.mutate({ id, newDueAt }),
-    deleteTask:     deleteTask.mutate,
-  };
+  // Stable wrappers — `*.mutate` is already a stable ref from React Query, but
+  // we wrap the arg-shaping ones in useCallback so consumers passing them as
+  // props don't bust `memo()` on TaskCard / SortableTaskCard on every parent
+  // re-render.
+  const updateTaskCb = useCallback(
+    (id: string, patch: Partial<Task>) => updateTask.mutate({ id, patch }),
+    [updateTask.mutate],
+  );
+  const deferTaskCb = useCallback(
+    (id: string, newDueAt: Date) => deferTask.mutate({ id, newDueAt }),
+    [deferTask.mutate],
+  );
+
+  // Memoize the returned object so callers using it as a whole don't get a
+  // new reference on every render either.
+  return useMemo(
+    () => ({
+      markDone:       markDone.mutate,
+      uncompleteTask: uncompleteTask.mutate,
+      updateTask:     updateTaskCb,
+      deferTask:      deferTaskCb,
+      deleteTask:     deleteTask.mutate,
+    }),
+    [markDone.mutate, uncompleteTask.mutate, updateTaskCb, deferTaskCb, deleteTask.mutate],
+  );
 }

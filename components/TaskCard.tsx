@@ -193,7 +193,12 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
   const editTitleRef = useRef<HTMLInputElement>(null);
   const editChipBarRef = useRef<HTMLDivElement>(null);
 
+  // Only attach the global mousedown listener while a picker is actually open.
+  // With many rows on screen this avoids dozens of always-on listeners running
+  // ref.contains() on every click — a measurable INP win.
+  const anyEditPickerOpen = showEditEmoPicker || showEditDatePicker || showEditTimePicker;
   useEffect(() => {
+    if (!anyEditPickerOpen) return;
     function h(e: MouseEvent) {
       if (editChipBarRef.current && !editChipBarRef.current.contains(e.target as Node)) {
         setShowEditEmoPicker(false); setShowEditDatePicker(false); setShowEditTimePicker(false);
@@ -201,7 +206,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
     }
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
-  }, []);
+  }, [anyEditPickerOpen]);
 
   useEffect(() => { setMounted(true); setNote(loadNote(task.id)); }, [task.id]);
   useEffect(() => {

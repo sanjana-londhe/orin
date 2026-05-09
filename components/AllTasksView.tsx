@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TaskGrid } from "@/components/TaskGrid";
@@ -148,7 +148,11 @@ export function AllTasksView() {
   const chipBarRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
+  // Only listen for outside clicks when the create form (or one of its
+  // pickers) is actually open. Avoids a permanent doc-level handler firing
+  // on every click site-wide.
   useEffect(() => {
+    if (!formOpen) return;
     function handler(e: MouseEvent) {
       const target = e.target as Node;
       // Close pickers on outside click
@@ -164,7 +168,7 @@ export function AllTasksView() {
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [formOpen]);
 
   const activeFilter    = isAllPage ? "all"             : "today-active";
   const completedFilter = isAllPage ? "completed"       : "today-completed";
@@ -236,6 +240,13 @@ export function AllTasksView() {
 
   const pad = isMobile ? "16px 14px 0" : "24px 28px 0";
   const stickyBottom = isMobile ? 68 : 0;
+
+  // Stable list reference — without this, every chip toggle / keystroke produces
+  // a new array, busting TaskGrid's memo and re-rendering every TaskCard.
+  const gridTasks = useMemo(
+    () => [...allTasks.filter(t => !t.isCompleted), ...completedTasks],
+    [allTasks, completedTasks],
+  );
 
   return (
     <div style={{ background: T.bg, minHeight: "100%" }}>
@@ -451,7 +462,7 @@ export function AllTasksView() {
           <SkeletonTaskList count={4} />
         ) : (
           <TaskGrid
-            tasks={[...allTasks.filter(t => !t.isCompleted), ...completedTasks]}
+            tasks={gridTasks}
             isLoading={false}
             emptyState={
               <div style={{ padding: "40px 0", textAlign: "center" }}>
