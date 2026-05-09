@@ -419,9 +419,6 @@ export function EnergyView() {
         </h1>
       </div>
 
-      {/* ── Today's load timeline ── */}
-      <TodaysLoadCard allTasks={allTasks} completedTasks={completedTasks} />
-
       {/* ── Today's check-in ── */}
       <div style={card}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
@@ -508,6 +505,9 @@ export function EnergyView() {
         <h3 style={{ fontSize: 18, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Daily average from check-ins</h3>
         <MoodChart data={weekData} />
       </div>
+
+      {/* ── Today's load timeline ── */}
+      <TodaysLoadCard allTasks={allTasks} completedTasks={completedTasks} />
 
       {/* ── Top influences + emotional load ── */}
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 0 }}>
