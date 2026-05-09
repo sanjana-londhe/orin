@@ -77,7 +77,6 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
   const [contributions, setContributions] = useState<string[]>([]);
   const [otherActive, setOtherActive]     = useState(false);
   const [otherText, setOtherText]         = useState("");
-  const [saved, setSaved]                 = useState(false);
   const isMobile                          = useIsMobile();
 
   const todayLabel = new Date().toLocaleDateString("en-US", {
@@ -102,12 +101,10 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
       contributions: allContributions,
     };
     onSave(entry);
-    setSaved(true);
+    onClose();
   }
 
   const totalSelected = contributions.length + (otherActive && otherText.trim() ? 1 : 0);
-
-  const selectedMood = MOODS.find(m => m.value === mood);
 
   // ── Eyebrow style — Fragment Mono per DESIGN.md ──
   const eyebrow: React.CSSProperties = {
@@ -172,7 +169,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
               fontSize: 15, fontWeight: 700, color: T.textPrimary,
               margin: 0, letterSpacing: "-0.02em",
             }}>
-              {saved ? "Check-in saved" : "Quick check-in"}
+              Quick check-in
             </h2>
           </div>
           <button onClick={onClose} style={{
@@ -186,12 +183,11 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
         </div>
 
         {/* Body — single scroll flow */}
-        {!saved ? (
-          <div style={{
-            padding: "16px 18px 18px",
-            overflowY: "auto",
-            display: "flex", flexDirection: "column", gap: 18,
-          }}>
+        <div style={{
+          padding: "16px 18px 18px",
+          overflowY: "auto",
+          display: "flex", flexDirection: "column", gap: 18,
+        }}>
 
             {/* Mood */}
             <section>
@@ -293,36 +289,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                 )}
               </section>
             )}
-          </div>
-        ) : (
-          /* Saved confirmation — calm summary */
-          <div style={{ padding: "18px 18px 22px" }}>
-            <div style={{
-              background: T.accentSubtle,
-              border: `1px solid ${T.lime200}`,
-              borderRadius: 10,
-              padding: "14px 16px",
-              display: "flex", alignItems: "center", gap: 14,
-              marginBottom: 14,
-            }}>
-              <span style={{ fontSize: 32, lineHeight: 1 }}>{selectedMood?.emoji}</span>
-              <div style={{ flex: 1 }}>
-                <p style={{
-                  fontSize: 14, fontWeight: 700, color: T.textPrimary,
-                  margin: "0 0 2px", letterSpacing: "-0.01em",
-                }}>{selectedMood?.label}</p>
-                {contributions.length > 0 && (
-                  <p style={{ fontSize: 12, color: T.textSecondary, margin: 0, lineHeight: 1.5 }}>
-                    {contributions.join(" · ")}
-                  </p>
-                )}
-              </div>
-            </div>
-            <p style={{ fontSize: 12, color: T.textTertiary, margin: 0, textAlign: "center" }}>
-              View patterns over time in <strong style={{ color: T.textPrimary }}>My Energy</strong>.
-            </p>
-          </div>
-        )}
+        </div>
 
         {/* Footer */}
         <div style={{
@@ -331,24 +298,13 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
           borderTop: `1px solid ${T.border}`,
           background: T.stone100,
         }}>
-          {!saved ? (
-            <>
-              <button onClick={onClose} style={{
-                padding: "8px 16px", borderRadius: 8,
-                border: `1.5px solid ${T.border}`, background: T.surface,
-                color: T.textSecondary, fontSize: 13, fontWeight: 500,
-                cursor: "pointer", fontFamily: "inherit",
-              }}>Cancel</button>
-              <SaveButton onClick={handleSave} disabled={mood === null} contributions={totalSelected} />
-            </>
-          ) : (
-            <button onClick={onClose} style={{
-              padding: "8px 20px", borderRadius: 8,
-              border: "none", background: T.accent, color: "#fff",
-              fontSize: 13, fontWeight: 700,
-              cursor: "pointer", fontFamily: "inherit",
-            }}>Done</button>
-          )}
+          <button onClick={onClose} style={{
+            padding: "8px 16px", borderRadius: 8,
+            border: `1.5px solid ${T.border}`, background: T.surface,
+            color: T.textSecondary, fontSize: 13, fontWeight: 500,
+            cursor: "pointer", fontFamily: "inherit",
+          }}>Cancel</button>
+          <SaveButton onClick={handleSave} disabled={mood === null} contributions={totalSelected} />
         </div>
       </div>
     </div>
