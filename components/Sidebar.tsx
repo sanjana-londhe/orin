@@ -201,7 +201,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
           {!isCollapsed && (
             <div style={{
               background: "#fff", border: "1px solid #e9ede9",
-              borderRadius: 12, padding: "12px 14px", marginBottom: 14,
+              borderRadius: 0, padding: "12px 14px", marginBottom: 14,
             }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 10, margin: "0 0 10px" }}>This week</p>
               {[
@@ -235,7 +235,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
               onClick={() => setEnergyModalOpen(true)}
               style={{
                 width: "100%", textAlign: "left",
-                padding: 14, borderRadius: 12,
+                padding: 14, borderRadius: 0,
                 border: "0.5px solid rgba(14,58,37,0.10)",
                 background: "linear-gradient(160deg, #e7eed7 0%, #cad9b6 60%, #b9cfa7 100%)",
                 color: "#0e3a25", cursor: "pointer", fontFamily: "inherit",

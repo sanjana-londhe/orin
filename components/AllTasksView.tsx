@@ -336,7 +336,7 @@ export function AllTasksView() {
                 <span style={{ fontSize: 13, fontWeight: 500, color: "#059669" }}>New task</span>
               </div>
             ) : (
-              <div ref={formRef} style={{ border: "1px solid #059669", borderRadius: 10, background: "#fff" }}>
+              <div ref={formRef} style={{ border: "1px solid #059669", borderRadius: 0, background: "#fff" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px 4px 16px" }}>
                   <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 2 }} />
                   <div style={{ flex: 1 }}>

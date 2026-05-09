@@ -319,7 +319,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
         return (
           <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#f8f9f5", paddingBottom: 16 }}>
-            <div ref={formContainerRef} onFocus={() => setFormFocused(true)} style={{ border: `1px solid ${formFocused ? "#059669" : "rgba(0,0,0,0.09)"}`, borderRadius: 10, transition: "border-color 0.15s", background: "#fff" }}>
+            <div ref={formContainerRef} onFocus={() => setFormFocused(true)} style={{ border: `1px solid ${formFocused ? "#059669" : "rgba(0,0,0,0.09)"}`, borderRadius: 0, transition: "border-color 0.15s", background: "#fff" }}>
 
               {/* Top: circle + title + Add */}
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "14px 14px 6px" }}>

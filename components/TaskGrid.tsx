@@ -34,7 +34,7 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
   }
 
   return (
-    <div style={{ background: "white", borderRadius: 12, border: "1px solid #dde4de" }}>
+    <div style={{ background: "white", borderRadius: 0, border: "1px solid #dde4de" }}>
       {tasks.map((task, i) => {
         const editing = task.id === editingTaskId;
         return (
@@ -43,7 +43,6 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
             style={{
               borderBottom: i < tasks.length - 1 ? "1px solid #dde4de" : "none",
               boxShadow: editing ? "inset 0 0 0 1.5px #059669" : "none",
-              borderRadius: editing ? 10 : 0,
               transition: "box-shadow 0.18s",
             }}
           >
