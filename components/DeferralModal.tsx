@@ -321,12 +321,15 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           padding: "14px 18px", borderBottom: `1px solid ${T.border}`,
         }}>
           <div>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: T.textPrimary, margin: "0 0 2px", letterSpacing: "-0.01em" }}>
-              Reschedule task
-            </h2>
-            <p style={{ fontSize: 11.5, fontWeight: 400, color: T.textTertiary, margin: 0 }}>
+            <p style={{
+              fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600,
+              color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px",
+            }}>
               {task.dueAt ? `Currently ${formatPreview(new Date(task.dueAt))}` : "No due date"}
             </p>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: T.textPrimary, margin: 0, letterSpacing: "-0.02em" }}>
+              Reschedule task
+            </h2>
           </div>
           <button onClick={handleClose} style={{
             width: 28, height: 28, borderRadius: 8,
@@ -457,7 +460,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                                 {opt.label}
                               </span>
                               {opt.sub ? (
-                                <span style={{ fontSize: 11.5, color: T.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
+                                <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "var(--font-mono), monospace" }}>{opt.sub}</span>
                               ) : (
                                 <ChevronRight size={13} color={active ? T.accent : T.textMuted} />
                               )}
@@ -500,10 +503,11 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             }}>
               <span style={{ fontSize: 16 }}>⏰</span>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 600, color: T.textTertiary, margin: "0 0 2px" }}>
-                  New due time
-                </p>
-                <p style={{ fontSize: 13, fontWeight: 600, color: T.textPrimary, margin: 0, letterSpacing: "-0.01em" }}>
+                <p style={{
+                  fontFamily: "var(--font-mono), monospace", fontSize: 10, fontWeight: 600,
+                  color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px",
+                }}>New due time</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: T.textPrimary, margin: 0, letterSpacing: "-0.01em" }}>
                   {formatPreview(preview)}
                 </p>
               </div>

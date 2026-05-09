@@ -1,10 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Fragment_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { NudgePoller } from "@/components/NudgePoller";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const fragmentMono = Fragment_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Orin",
@@ -23,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${jakarta.variable} ${fragmentMono.variable}`} style={{ fontFamily: "var(--font-sans), system-ui, sans-serif" }}>
         <QueryProvider>
           <NudgePoller />
           {children}
