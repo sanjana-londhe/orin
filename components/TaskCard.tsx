@@ -189,6 +189,14 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
   const [showEditTimePicker, setShowEditTimePicker] = useState(false);
   const [showEditCustomTime, setShowEditCustomTime] = useState(false);
   const [showEditCustomDate, setShowEditCustomDate] = useState(false);
+  const [editDropUp, setEditDropUp]                 = useState(false);
+
+  // Decide whether the edit chip dropdowns open below (default) or flip above
+  // if there isn't ~300px of viewport space below the clicked chip.
+  function pickDropDirection(e: React.MouseEvent<HTMLButtonElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    setEditDropUp(window.innerHeight - r.bottom < 300);
+  }
   const [note, setNote]               = useState("");
   const [mounted, setMounted]         = useState(false);
   const [hovered, setHovered]         = useState(false);
@@ -295,10 +303,10 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
             {/* Feeling */}
             <div style={{ position:"relative" }}>
-              <button onClick={() => { setShowEditEmoPicker(o=>!o); setShowEditDatePicker(false); setShowEditCustomDate(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
+              <button onClick={(e) => { pickDropDirection(e); setShowEditEmoPicker(o=>!o); setShowEditDatePicker(false); setShowEditCustomDate(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                 style={{ ...chip(editEm.fg), background: editEm.bg }}><span style={{ fontSize: 10 }}>{editEm.emoji}</span> {editEm.label}</button>
               {showEditEmoPicker && (
-                <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
+                <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
                   {EMOTIONS.map(f => (
                     <button key={f.value} onClick={() => { setEditEmotion(f.value); setShowEditEmoPicker(false); }}
                       style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:editEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize:13, color:editEmotion===f.value?f.fg:"#082d1d", fontFamily:"inherit" }}>
@@ -312,11 +320,11 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
             {/* Date */}
             <div style={{ position:"relative" }}>
-              <button onClick={() => { setShowEditDatePicker(o=>!o); setShowEditCustomDate(false); setShowEditEmoPicker(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
+              <button onClick={(e) => { pickDropDirection(e); setShowEditDatePicker(o=>!o); setShowEditCustomDate(false); setShowEditEmoPicker(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                 style={chip("#059669")}><span style={{ fontSize:10 }}>📅</span> {editDateLabel}</button>
               {showEditDatePicker && (
-                <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
                     {getDatePresets().map(opt=>(
                       <button key={opt.value} onClick={() => { setEditDate(opt.value); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
                         style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
@@ -340,15 +348,15 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
             {/* Time */}
             <div style={{ position:"relative" }}>
-              <button onClick={() => { setShowEditTimePicker(o=>!o); setShowEditCustomTime(false); setShowEditEmoPicker(false); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
+              <button onClick={(e) => { pickDropDirection(e); setShowEditTimePicker(o=>!o); setShowEditCustomTime(false); setShowEditEmoPicker(false); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
                 style={chip()}><span style={{ fontSize:10 }}>🕐</span> {editTime ? fmtEditTime(editTime) : "Add time"}</button>
               {showEditTimePicker && (() => {
                 const now=new Date(), todayStr=now.toISOString().slice(0,10), isToday=editDate===todayStr;
                 const nowTime=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                 const slots = getTimeSlots(isToday, nowTime);
                 return (
-                  <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow:"0 -4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                  <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius:10, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
                       {slots.map(opt=>(
                         <button key={opt.value} onClick={() => { setEditTime(opt.value); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                           style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
@@ -373,7 +381,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                       )}
                     </div>
                     {showEditCustomTime && (
-                      <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius:12, boxShadow:"0 -4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
+                      <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius:12, boxShadow: editDropUp ? "0 -4px 16px rgba(0,0,0,0.09)" : "0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
                         <WheelTimePicker value={editTime || "09:00"} onChange={t => setEditTime(t)} />
                       </div>
                     )}
