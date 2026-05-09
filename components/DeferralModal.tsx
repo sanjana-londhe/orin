@@ -321,15 +321,12 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           padding: "14px 18px", borderBottom: `1px solid ${T.border}`,
         }}>
           <div>
-            <p style={{
-              fontFamily: "monospace", fontSize: 10, fontWeight: 600,
-              color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 1px",
-            }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: T.textPrimary, margin: "0 0 2px", letterSpacing: "-0.01em" }}>
+              Reschedule task
+            </h2>
+            <p style={{ fontSize: 11.5, fontWeight: 400, color: T.textTertiary, margin: 0 }}>
               {task.dueAt ? `Currently ${formatPreview(new Date(task.dueAt))}` : "No due date"}
             </p>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary, margin: 0, letterSpacing: "-0.01em" }}>
-              Give yourself more time
-            </h2>
           </div>
           <button onClick={handleClose} style={{
             width: 28, height: 28, borderRadius: 8,
@@ -362,7 +359,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                 cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
                 boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
               }}>
-                {t === "defer" ? "A bit more time" : "Pick a new day"}
+                {t === "defer" ? "Snooze a bit" : "Pick a date"}
               </button>
             ))}
           </div>
@@ -460,7 +457,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                                 {opt.label}
                               </span>
                               {opt.sub ? (
-                                <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "monospace" }}>{opt.sub}</span>
+                                <span style={{ fontSize: 11.5, color: T.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
                               ) : (
                                 <ChevronRight size={13} color={active ? T.accent : T.textMuted} />
                               )}
@@ -503,11 +500,10 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             }}>
               <span style={{ fontSize: 16 }}>⏰</span>
               <div>
-                <p style={{
-                  fontFamily: "monospace", fontSize: 10, fontWeight: 600,
-                  color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 1px",
-                }}>Giving yourself until</p>
-                <p style={{ fontSize: 13, fontWeight: 700, color: T.textPrimary, margin: 0 }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: T.textTertiary, margin: "0 0 2px" }}>
+                  New due time
+                </p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: T.textPrimary, margin: 0, letterSpacing: "-0.01em" }}>
                   {formatPreview(preview)}
                 </p>
               </div>
@@ -518,10 +514,10 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         {/* Actions */}
         <div style={{ padding: "10px 18px", display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button onClick={handleClose} style={{
-            padding: "6px 14px", borderRadius: 6,
-            border: `1px solid ${T.border}`, background: T.surface,
-            color: T.textSecondary, fontSize: 12.5, cursor: "pointer", fontFamily: "inherit",
-          }}>Not now</button>
+            padding: "7px 16px", borderRadius: 8,
+            border: `1.5px solid ${T.border}`, background: T.surface,
+            color: T.textSecondary, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          }}>Cancel</button>
           <AddTimeButton disabled={!preview} onClick={handleConfirm} />
         </div>
       </div>
@@ -536,12 +532,12 @@ function AddTimeButton({ onClick, disabled }: { onClick: () => void; disabled: b
       onClick={onClick} disabled={disabled}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
-        padding: "6px 16px", borderRadius: 6, border: "none",
+        padding: "7px 20px", borderRadius: 8, border: "none",
         background: disabled ? "#c4cbc2" : hov ? "#047857" : "#059669",
-        color: "#fff", fontSize: 12.5, fontWeight: 700,
+        color: "#fff", fontSize: 13, fontWeight: 700,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit", transition: "background 0.12s",
       }}
-    >Take this time</button>
+    >Save</button>
   );
 }
