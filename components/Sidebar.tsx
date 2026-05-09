@@ -226,22 +226,27 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
             </div>
           )}
 
-          {/* Track energy promo */}
+          {/* Track energy promo — calm meadow palette */}
           {!isCollapsed && (
             <button
               onClick={() => setEnergyModalOpen(true)}
               style={{
                 width: "100%", textAlign: "left",
-                padding: 14, borderRadius: 12, border: "none",
-                background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
-                color: "#fff", cursor: "pointer", fontFamily: "inherit",
+                padding: 14, borderRadius: 12,
+                border: "0.5px solid rgba(14,58,37,0.10)",
+                background: "linear-gradient(160deg, #e7eed7 0%, #cad9b6 60%, #b9cfa7 100%)",
+                color: "#0e3a25", cursor: "pointer", fontFamily: "inherit",
+                boxShadow: "0 1px 2px rgba(14,58,37,0.04)",
+                transition: "box-shadow 0.16s, transform 0.16s",
               }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(14,58,37,0.10)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 2px rgba(14,58,37,0.04)"; }}
             >
-              <p style={{ fontWeight: 700, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3 }}>Track your energy</p>
-              <p style={{ fontSize: 11.5, margin: "0 0 10px", opacity: 0.85, lineHeight: 1.5 }}>
+              <p style={{ fontWeight: 600, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3, letterSpacing: "-0.01em" }}>Track your energy</p>
+              <p style={{ fontSize: 11.5, margin: "0 0 10px", color: "#3d5a4a", lineHeight: 1.5 }}>
                 Log how you feel and see patterns over time.
               </p>
-              <span style={{ fontSize: 12, fontWeight: 700 }}>Check in now →</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
             </button>
           )}
         </div>
