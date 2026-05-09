@@ -279,7 +279,7 @@ export function AllTasksView() {
       {/* ── Inline task creation — top of list ── */}
       {(() => {
         const em = INLINE_FEELINGS.find(f => f.value === (emotion || "NEUTRAL")) ?? INLINE_FEELINGS[2];
-        const dateLabel = dueTime ? `${fmtDateLbl(dueDate)} · ${fmtTimeLbl(dueTime)}` : fmtDateLbl(dueDate);
+        const dateLabel = fmtDateLbl(dueDate);
         const chip = (active: boolean, fg?: string): React.CSSProperties => ({
           display: "inline-flex", alignItems: "center", gap: 5,
           padding: "4px 9px", borderRadius: 6,

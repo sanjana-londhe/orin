@@ -285,9 +285,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       {/* ── Sticky task creation — always expanded ── */}
       {(() => {
         const em = INLINE_FEELINGS.find(f => f.value === inlineEmotion) ?? INLINE_FEELINGS[2];
-        const dateLabel = inlineDueTime
-          ? `${fmtDateLabel(inlineDueDate)} · ${fmtTimeLabel(inlineDueTime)}`
-          : fmtDateLabel(inlineDueDate);
+        const dateLabel = fmtDateLabel(inlineDueDate);
 
         function submitForm() {
           if (!inlineDraft.trim() || creatingInline) return;
