@@ -34,7 +34,7 @@ export function SimpleTaskView({ title, emoji, filter, emptyText }: Props) {
   return (
     <div style={PAGE_STYLE}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 900, letterSpacing: "-0.04em", color: "#1A1612", display: "flex", alignItems: "center", gap: 10 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", display: "flex", alignItems: "center", gap: 10 }}>
           <span>{emoji}</span> {title}
         </h1>
         {!isLoading && (
