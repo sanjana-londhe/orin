@@ -285,7 +285,7 @@ export function EnergyView() {
                 borderLeft: `2px solid ${moodColor(latest.mood)}`,
                 background: "#f8f9f5", borderRadius: "0 8px 8px 0", marginBottom: 10,
               }}>
-                <span style={{ fontSize: 27 }}>{moodEmoji(latest.mood)}</span>
+                <span style={{ fontSize: 28 }}>{moodEmoji(latest.mood)}</span>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: 12, fontWeight: 500, color: "#082d1d", margin: "0 0 4px" }}>{moodLabel(latest.mood)}</p>
                   {latest.contributions.length > 0 && (

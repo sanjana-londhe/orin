@@ -64,7 +64,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
                   width: 72, height: 72, borderRadius: "50%",
                   background: "#059669", border: "2px solid #dde4de",
                   color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 27, fontWeight: 700,
+                  fontSize: 28, fontWeight: 700,
                 }}>
                   {displayName.charAt(0).toUpperCase() || initial}
                 </div>

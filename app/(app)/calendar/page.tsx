@@ -886,7 +886,7 @@ export default function CalendarPage() {
           <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>Workspace · Calendar</p>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 14, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-            <h1 style={{ fontSize: 27, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
               {new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </h1>
             <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 14, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>

@@ -316,7 +316,7 @@ export function AIPanel({ onClose }: Props) {
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
             </p>
             <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
-              <span style={{ fontSize: 27, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pending.length}</span>
+              <span style={{ fontSize: 28, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pending.length}</span>
               <span style={{ fontSize: 13, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
                 task{pending.length !== 1 ? "s" : ""} remaining
               </span>
@@ -331,7 +331,7 @@ export function AIPanel({ onClose }: Props) {
           <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f1f3ef", marginBottom: 6 }}>
             <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Streak</p>
             <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
-              <span style={{ fontSize: 27, fontWeight: 600, color: "#059669", fontVariantNumeric: "tabular-nums" }}>{streak}</span>
+              <span style={{ fontSize: 28, fontWeight: 600, color: "#059669", fontVariantNumeric: "tabular-nums" }}>{streak}</span>
               <span style={{ fontSize: 13, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
                 day{streak === 1 ? "" : "s"} in a row
               </span>
