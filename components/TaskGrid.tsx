@@ -1,10 +1,12 @@
 "use client";
 
 import { memo } from "react";
+import { Sparkles } from "lucide-react";
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
 import { useUIStore } from "@/store/ui";
 import { SkeletonTaskList } from "@/components/Skeleton";
+import { EmptyState } from "@/components/EmptyState";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 interface Props {
@@ -24,10 +26,7 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
     return (
       <>
         {emptyState ?? (
-          <div style={{ textAlign: "center", padding: "64px 0", color: "#c7c7cc" }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🌿</div>
-            <p style={{ fontSize: 14, color: "#8e8e93" }}>Nothing here yet</p>
-          </div>
+          <EmptyState icon={Sparkles} title="Nothing here yet" description="Add a task to get started." />
         )}
       </>
     );

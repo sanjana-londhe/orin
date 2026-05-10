@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { Heart, Lightbulb, BarChart3 } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuery } from "@tanstack/react-query";
+import { EmptyState } from "@/components/EmptyState";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EMOTION_MAP } from "@/lib/emotions";
 import {
@@ -259,15 +261,20 @@ export function EnergyView() {
         </div>
 
         {todayEntries.length === 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 0", gap: 10 }}>
-            <span style={{ fontSize: 32 }}>🌱</span>
-            <p style={{ fontSize: 13, fontWeight: 500, color: "#082d1d", margin: 0 }}>No check-in yet today</p>
-            <p style={{ fontSize: 12.5, color: "#3d5a4a", margin: 0 }}>How are you feeling right now?</p>
-            <button onClick={() => setModalOpen(true)} style={{
-              marginTop: 4, padding: "8px 20px", borderRadius: 8, border: "none",
-              background: "#059669", color: "#fff", fontSize: 13, fontWeight: 600,
-              cursor: "pointer", fontFamily: "inherit",
-            }}>Log my feelings</button>
+          <div>
+            <EmptyState
+              icon={Heart}
+              title="No check-in yet today"
+              description="How are you feeling right now?"
+              compact
+            />
+            <div style={{ display: "flex", justifyContent: "center", marginTop: -6 }}>
+              <button onClick={() => setModalOpen(true)} style={{
+                padding: "8px 20px", borderRadius: 8, border: "none",
+                background: "#059669", color: "#fff", fontSize: 13, fontWeight: 600,
+                cursor: "pointer", fontFamily: "inherit",
+              }}>Log my feelings</button>
+            </div>
           </div>
         ) : (
           <div>
@@ -336,9 +343,7 @@ export function EnergyView() {
           <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>What&apos;s affecting you</p>
           <h3 style={{ fontSize: 16, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Top influences</h3>
           {topInfluences.length === 0 ? (
-            <p style={{ fontSize: 12.5, color: "#4a6d47", textAlign: "center", padding: "16px 0", margin: 0 }}>
-              Log check-ins to see patterns
-            </p>
+            <EmptyState icon={Lightbulb} title="No patterns yet" description="Log check-ins to see what's influencing you." compact />
           ) : (
             <div style={{ display: "flex", flexDirection: "column" }}>
               {topInfluences.map(([label, count]) => {
@@ -364,7 +369,7 @@ export function EnergyView() {
           <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Task emotional load</p>
           <h3 style={{ fontSize: 16, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Across {allForStats.length} tasks</h3>
           {allForStats.length === 0 ? (
-            <p style={{ fontSize: 12.5, color: "#4a6d47", textAlign: "center", padding: "16px 0", margin: 0 }}>No tasks yet</p>
+            <EmptyState icon={BarChart3} title="No tasks yet" description="Add a task to see your emotional load." compact />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {emotionDist.filter(r => r.count > 0).map(({ key, em, count, pct }) => {

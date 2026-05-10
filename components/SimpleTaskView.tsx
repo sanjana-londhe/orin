@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { CalendarClock, Flag, CheckCircle2, Sparkles, type LucideIcon } from "lucide-react";
 import { TaskGrid } from "@/components/TaskGrid";
+import { EmptyState } from "@/components/EmptyState";
 import { PAGE_STYLE } from "@/lib/utils";
 import type { TaskWithSubtasks } from "@/lib/types";
 
@@ -11,6 +13,12 @@ interface Props {
   filter: string;
   emptyText?: string;
 }
+
+const EMPTY_ICON: Record<string, LucideIcon> = {
+  scheduled: CalendarClock,
+  flagged:   Flag,
+  completed: CheckCircle2,
+};
 
 export function SimpleTaskView({ title, emoji, filter, emptyText }: Props) {
   const { data: tasks = [], isLoading } = useQuery<TaskWithSubtasks[]>({
@@ -40,10 +48,10 @@ export function SimpleTaskView({ title, emoji, filter, emptyText }: Props) {
         tasks={tasks}
         isLoading={isLoading}
         emptyState={
-          <div style={{ textAlign: "center", padding: "64px 0", color: "#B0A89E" }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🌿</div>
-            <p style={{ fontSize: 14 }}>{emptyText ?? "Nothing here yet"}</p>
-          </div>
+          <EmptyState
+            icon={EMPTY_ICON[filter] ?? Sparkles}
+            title={emptyText ?? "Nothing here yet"}
+          />
         }
       />
     </div>

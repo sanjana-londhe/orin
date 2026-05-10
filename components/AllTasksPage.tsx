@@ -2,9 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Sparkles, CheckCircle2, Flag } from "lucide-react";
 import { TaskGrid } from "@/components/TaskGrid";
 import { SkeletonTaskList, SkeletonBox } from "@/components/Skeleton";
 import { DatePickerField } from "@/components/DatePickerField";
+import { EmptyState } from "@/components/EmptyState";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import type { TaskWithSubtasks } from "@/lib/types";
 
@@ -233,16 +235,18 @@ export function AllTasksPage() {
           tasks={displayTasks}
           isLoading={false}
           emptyState={
-            <div style={{ textAlign: "center", padding: "64px 0" }}>
-              <div style={{ fontSize: 36, marginBottom: 12 }}>🌿</div>
-              <p style={{ fontSize: 14, fontWeight: 600, color: T.textPrimary, marginBottom: 4 }}>
-                No {activeTab.label.toLowerCase()} tasks{preset ? " in this period" : ""}
-              </p>
+            <div>
+              <EmptyState
+                icon={activeTab.key === "completed" ? CheckCircle2 : activeTab.key === "deferred" ? Flag : Sparkles}
+                title={`No ${activeTab.label.toLowerCase()} tasks${preset ? " in this period" : ""}`}
+              />
               {preset && (
-                <button onClick={() => { setPreset(null); setFrom(""); setTo(""); }} style={{
-                  marginTop: 8, fontSize: 12.5, color: T.accent, background: "none",
-                  border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit",
-                }}>Clear date filter</button>
+                <div style={{ textAlign: "center", marginTop: -36, paddingBottom: 24 }}>
+                  <button onClick={() => { setPreset(null); setFrom(""); setTo(""); }} style={{
+                    fontSize: 12.5, color: T.accent, background: "none",
+                    border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit",
+                  }}>Clear date filter</button>
+                </div>
               )}
             </div>
           }

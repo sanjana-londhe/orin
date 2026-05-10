@@ -7,8 +7,9 @@ import { TaskGrid } from "@/components/TaskGrid";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import { DatePickerField, MiniCalendar } from "@/components/DatePickerField";
 import { TimePickerField, WheelTimePicker } from "@/components/TimePickerField";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { FeelingPickerField } from "@/components/FeelingPickerField";
+import { EmptyState } from "@/components/EmptyState";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useUIStore } from "@/store/ui";
 import type { TaskWithSubtasks } from "@/lib/types";
@@ -481,10 +482,12 @@ export function AllTasksView() {
             tasks={gridTasks}
             isLoading={false}
             emptyState={
-              <div style={{ padding: "40px 0", textAlign: "center" }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>🌿</div>
-                <p style={{ fontSize: 13, color: T.textMuted }}>No tasks yet — add one above</p>
-              </div>
+              <EmptyState
+                icon={Sparkles}
+                title="No tasks yet"
+                description="Add a task in the form above to get started."
+                compact
+              />
             }
           />
         )}
