@@ -25,21 +25,21 @@ function LoginPageInner() {
                 <circle cx="50" cy="59" r="18" fill="#59d10b"/>
               </svg>
             </div>
-            <h1 style={{ fontSize:24, fontWeight:500, letterSpacing:"-0.03em", color:"#082d1d", margin:"0 0 8px" }}>Welcome to orin</h1>
-            <p style={{ fontSize:13, color:"#3d5a4a", margin:0, lineHeight:1.6 }}>
+            <h1 style={{ fontSize: 23, fontWeight:500, letterSpacing:"-0.03em", color:"#082d1d", margin:"0 0 8px" }}>Welcome to orin</h1>
+            <p style={{ fontSize: 12, color:"#3d5a4a", margin:0, lineHeight:1.6 }}>
               Your personal space to manage tasks,<br/>track energy, and understand yourself better.
             </p>
           </div>
 
           {error && (
             <div style={{ padding:"10px 14px", borderRadius:8, background:"#FFF0EC", border:"0.5px solid rgba(209,70,38,0.2)", marginBottom:16 }}>
-              <p style={{ margin:0, fontSize:12.5, color:"#D14626" }}>{decodeURIComponent(error)}</p>
+              <p style={{ margin:0, fontSize: 11.5, color:"#D14626" }}>{decodeURIComponent(error)}</p>
             </div>
           )}
 
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             <form action={signInWithGoogle} onSubmit={() => setGooglePending(true)}>
-              <button type="submit" disabled={googlePending||guestPending} style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"center", gap:10, padding:"12px 20px", borderRadius:10, border:"0.5px solid rgba(0,0,0,0.12)", background:"#fff", fontSize:14, fontWeight:500, color:"#082d1d", cursor:"pointer", fontFamily:"inherit", transition:"border-color 0.14s", opacity:googlePending||guestPending?0.6:1 }}
+              <button type="submit" disabled={googlePending||guestPending} style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"center", gap:10, padding:"12px 20px", borderRadius:10, border:"0.5px solid rgba(0,0,0,0.12)", background:"#fff", fontSize: 13, fontWeight:500, color:"#082d1d", cursor:"pointer", fontFamily:"inherit", transition:"border-color 0.14s", opacity:googlePending||guestPending?0.6:1 }}
                 onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.borderColor="rgba(0,0,0,0.25)"}}
                 onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.borderColor="rgba(0,0,0,0.12)"}}>
                 {googlePending ? (
@@ -60,7 +60,7 @@ function LoginPageInner() {
             </form>
 
             <form action={signInAsGuest} onSubmit={() => setGuestPending(true)}>
-              <button type="submit" disabled={googlePending||guestPending} style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"center", gap:10, padding:"12px 20px", borderRadius:10, border:"0.5px solid rgba(0,0,0,0.12)", background:"#fff", fontSize:14, fontWeight:500, color:"#082d1d", cursor:"pointer", fontFamily:"inherit", transition:"border-color 0.14s", opacity:googlePending||guestPending?0.6:1 }}
+              <button type="submit" disabled={googlePending||guestPending} style={{ width:"100%", display:"flex", alignItems:"center", justifyContent:"center", gap:10, padding:"12px 20px", borderRadius:10, border:"0.5px solid rgba(0,0,0,0.12)", background:"#fff", fontSize: 13, fontWeight:500, color:"#082d1d", cursor:"pointer", fontFamily:"inherit", transition:"border-color 0.14s", opacity:googlePending||guestPending?0.6:1 }}
                 onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.borderColor="rgba(0,0,0,0.25)"}}
                 onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.borderColor="rgba(0,0,0,0.12)"}}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a6d47" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

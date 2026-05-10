@@ -166,7 +166,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
           <div>
             <p style={{ ...eyebrow, marginBottom: 2 }}>Mood · {todayLabel}</p>
             <h2 style={{
-              fontSize: 15, fontWeight: 700, color: T.textPrimary,
+              fontSize: 14, fontWeight: 700, color: T.textPrimary,
               margin: 0, letterSpacing: "-0.02em",
             }}>
               Quick check-in
@@ -207,7 +207,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         cursor: "pointer", fontFamily: "inherit",
                         transition: "background 0.12s, border-color 0.12s",
                       }}>
-                      <span style={{ fontSize: 22 }}>{m.emoji}</span>
+                      <span style={{ fontSize: 21 }}>{m.emoji}</span>
                       <span style={{
                         fontSize: 10, fontWeight: 600,
                         color: active ? T.accent : T.textTertiary,
@@ -241,7 +241,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                           cursor: "pointer", fontFamily: "inherit",
                           transition: "background 0.12s, border-color 0.12s",
                         }}>
-                        <span style={{ fontSize: 14 }}>{c.emoji}</span>
+                        <span style={{ fontSize: 13 }}>{c.emoji}</span>
                         <span style={{
                           fontSize: 11, fontWeight: active ? 600 : 500,
                           color: active ? T.accent : T.textSecondary,
@@ -262,7 +262,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       cursor: "pointer", fontFamily: "inherit",
                       transition: "background 0.12s, border-color 0.12s",
                     }}>
-                    <span style={{ fontSize: 14 }}>✏️</span>
+                    <span style={{ fontSize: 13 }}>✏️</span>
                     <span style={{
                       fontSize: 11, fontWeight: otherActive ? 600 : 500,
                       color: otherActive ? T.accent : T.textSecondary,
@@ -281,7 +281,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       borderRadius: 8,
                       border: `1.5px solid ${T.accent}`,
                       background: T.accentSubtle,
-                      fontSize: 13, color: T.textPrimary,
+                      fontSize: 12, color: T.textPrimary,
                       fontFamily: "inherit", outline: "none",
                       boxSizing: "border-box",
                     }}
@@ -301,7 +301,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
           <button onClick={onClose} style={{
             padding: "8px 16px", borderRadius: 8,
             border: `1.5px solid ${T.border}`, background: T.surface,
-            color: T.textSecondary, fontSize: 13, fontWeight: 500,
+            color: T.textSecondary, fontSize: 12, fontWeight: 500,
             cursor: "pointer", fontFamily: "inherit",
           }}>Cancel</button>
           <SaveButton onClick={handleSave} disabled={mood === null} contributions={totalSelected} />
@@ -326,7 +326,7 @@ function SaveButton({
       style={{
         padding: "8px 20px", borderRadius: 8, border: "none",
         background: disabled ? T.borderStrong : hov ? T.accentHover : T.accent,
-        color: "#fff", fontSize: 13, fontWeight: 700,
+        color: "#fff", fontSize: 12, fontWeight: 700,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit", transition: "background 0.12s",
       }}

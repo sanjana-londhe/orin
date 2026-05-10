@@ -128,7 +128,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 <circle cx="50" cy="41" r="18" fill="#059669"/>
                 <circle cx="50" cy="59" r="18" fill="#59d10b"/>
               </svg>
-              <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
+              <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
             </Link>
           )}
           <button
@@ -164,7 +164,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                     background: active ? "#e8f5f0" : "transparent",
                     color: active ? "#059669" : "#3d5a4a",
                     fontWeight: active ? 600 : 400,
-                    fontSize: 13,
+                    fontSize: 12,
                     justifyContent: isCollapsed ? "center" : "flex-start",
                     transition: "background 0.1s",
                   }}
@@ -205,11 +205,11 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(14,58,37,0.10)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 2px rgba(14,58,37,0.04)"; }}
             >
-              <p style={{ fontWeight: 600, fontSize: 13, margin: "0 0 5px", lineHeight: 1.3, letterSpacing: "-0.01em" }}>Track your energy</p>
+              <p style={{ fontWeight: 600, fontSize: 12, margin: "0 0 5px", lineHeight: 1.3, letterSpacing: "-0.01em" }}>Track your energy</p>
               <p style={{ fontSize: 11, margin: "0 0 10px", color: "#3d5a4a", lineHeight: 1.5 }}>
                 Log how you feel and see patterns over time.
               </p>
-              <span style={{ fontSize: 12.5, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
             </button>
           )}
         </div>
@@ -220,7 +220,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
             <button onClick={openCreate} style={{
               display: "flex", alignItems: "center", gap: 8, width: "100%",
               padding: "7px 10px", borderRadius: 8, border: "1.5px dashed #c4cbc2",
-              background: "none", cursor: "pointer", fontSize: 12.5, color: "#4a6d47",
+              background: "none", cursor: "pointer", fontSize: 11.5, color: "#4a6d47",
               fontFamily: "inherit", marginBottom: 6,
             }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.color = "#059669"; (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
@@ -240,7 +240,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                     width: "100%", padding: "9px 10px", borderRadius: 8,
                     border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
-                    cursor: "pointer", fontSize: 12.5, fontWeight: 500, color: "#082d1d",
+                    cursor: "pointer", fontSize: 11.5, fontWeight: 500, color: "#082d1d",
                     fontFamily: "inherit",
                   }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.25)"}
@@ -278,7 +278,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 <div style={{
                   width: 30, height: 30, borderRadius: "50%", background: "#059669",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 12.5, fontWeight: 700, color: "#fff", flexShrink: 0, overflow: "hidden",
+                  fontSize: 11.5, fontWeight: 700, color: "#fff", flexShrink: 0, overflow: "hidden",
                 }}>
                   {avatarSrc
                     ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -287,7 +287,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 </div>
                 {!isCollapsed && (
                   <div style={{ textAlign: "left", minWidth: 0, flex: 1 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentName}</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentName}</p>
                     <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Free plan</p>
                   </div>
                 )}
@@ -303,7 +303,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                   <button onClick={() => { setShowUser(false); setProfileOpen(true); }} style={{
                     display: "flex", alignItems: "center", gap: 8, width: "100%",
                     padding: "9px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 13, color: "#082d1d", fontFamily: "inherit",
+                    cursor: "pointer", fontSize: 12, color: "#082d1d", fontFamily: "inherit",
                   }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f1f3ef"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
@@ -315,7 +315,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                     <button type="submit" style={{
                       display: "flex", alignItems: "center", gap: 8, width: "100%",
                       padding: "9px 14px", background: "none", border: "none",
-                      cursor: "pointer", fontSize: 13, color: "#D14626", fontFamily: "inherit",
+                      cursor: "pointer", fontSize: 12, color: "#D14626", fontFamily: "inherit",
                     }}
                       onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
                       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}

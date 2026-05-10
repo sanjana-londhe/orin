@@ -54,7 +54,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
       backdropFilter: "blur(12px)",
     }}>
       {/* Breadcrumb */}
-      <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12.5, color: T.textTertiary, flex: 1 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11.5, color: T.textTertiary, flex: 1 }}>
         <span>Workspace</span>
         <span style={{ color: T.stone500 }}>/</span>
         <span style={{ color: T.textPrimary, fontWeight: 600 }}>{currentPage}</span>
@@ -87,7 +87,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
               display: "flex", alignItems: "center", gap: 9,
               width: "100%", padding: "9px 14px",
               background: "none", border: "none", cursor: "pointer",
-              fontSize: 13, color: T.textPrimary, fontFamily: "inherit",
+              fontSize: 12, color: T.textPrimary, fontFamily: "inherit",
             }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = T.surfaceMuted}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}>
@@ -98,7 +98,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
               display: "flex", alignItems: "center", gap: 9,
               width: "100%", padding: "9px 14px",
               background: "none", border: "none", cursor: "pointer",
-              fontSize: 13, color: "#D14626", fontFamily: "inherit",
+              fontSize: 12, color: "#D14626", fontFamily: "inherit",
             }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}>
@@ -115,15 +115,15 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
             borderRadius: 4, padding: "20px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)", width: 240,
           }}>
-            <p style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>Log out?</p>
-            <p style={{ fontSize: 12.5, color: T.textTertiary, marginBottom: 16, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>Log out?</p>
+            <p style={{ fontSize: 11.5, color: T.textTertiary, marginBottom: 16, lineHeight: 1.5 }}>
               You&apos;ll need to sign in again to access your tasks.
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => setView(null)} style={{
                 flex: 1, padding: "7px 0", borderRadius: 8,
                 border: `1px solid ${T.border}`, background: "#fff",
-                fontSize: 12.5, color: T.textSecondary, cursor: "pointer", fontFamily: "inherit",
+                fontSize: 11.5, color: T.textSecondary, cursor: "pointer", fontFamily: "inherit",
               }}>
                 Cancel
               </button>
@@ -131,7 +131,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
                 <button type="submit" style={{
                   width: "100%", padding: "7px 0", borderRadius: 8,
                   border: "none", background: "#c23934",
-                  fontSize: 12.5, fontWeight: 600, color: "#fff", cursor: "pointer", fontFamily: "inherit",
+                  fontSize: 11.5, fontWeight: 600, color: "#fff", cursor: "pointer", fontFamily: "inherit",
                 }}>
                   Log out
                 </button>

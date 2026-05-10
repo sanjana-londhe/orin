@@ -120,7 +120,7 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = T.stone200}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronLeft size={14} /></button>
-        <span style={{ fontSize: 12.5, fontWeight: 600, color: T.textPrimary }}>{MONTHS[month]} {year}</span>
+        <span style={{ fontSize: 11.5, fontWeight: 600, color: T.textPrimary }}>{MONTHS[month]} {year}</span>
         <button
           onClick={() => setView(v => { const d = new Date(v.year, v.month + 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
           style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: T.textTertiary, display: "flex", alignItems: "center" }}
@@ -146,7 +146,7 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
               border: isToday && !isSelected ? `1.5px solid ${T.accent}` : "none",
               background: isSelected ? T.accent : "transparent",
               color: isSelected ? "#fff" : isPast ? T.textMuted : T.textPrimary,
-              fontSize: 12.5, fontWeight: isSelected || isToday ? 700 : 400,
+              fontSize: 11.5, fontWeight: isSelected || isToday ? 700 : 400,
               cursor: isPast ? "default" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               transition: "background 0.1s", minHeight: 28,
@@ -279,7 +279,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
       border: `1.5px solid ${active ? T.accent : T.border}`,
       background: active ? T.accentSubtle : T.stone100,
       color: active ? T.accent : T.textSecondary,
-      fontSize: 13, fontWeight: active ? 600 : 400,
+      fontSize: 12, fontWeight: active ? 600 : 400,
       cursor: "pointer", fontFamily: "inherit",
       transition: "all 0.12s ease",
     };
@@ -288,7 +288,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
   const nativeInputStyle: React.CSSProperties = {
     height: 38, padding: "0 12px", borderRadius: 8,
     border: `1.5px solid ${T.border}`, background: T.stone100,
-    fontSize: 13, color: T.textPrimary, fontFamily: "inherit",
+    fontSize: 12, color: T.textPrimary, fontFamily: "inherit",
     outline: "none", boxSizing: "border-box", transition: "border-color 0.14s", width: "100%",
   };
 
@@ -327,7 +327,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             }}>
               {task.dueAt ? `Currently ${formatPreview(new Date(task.dueAt))}` : "No due date"}
             </p>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: T.textPrimary, margin: 0, letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: T.textPrimary, margin: 0, letterSpacing: "-0.02em" }}>
               Reschedule task
             </h2>
           </div>
@@ -358,7 +358,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                 border: tab === t ? `1px solid ${T.border}` : "1px solid transparent",
                 background: tab === t ? T.surface : "transparent",
                 color: tab === t ? T.textPrimary : T.textTertiary,
-                fontSize: 12.5, fontWeight: tab === t ? 600 : 400,
+                fontSize: 11.5, fontWeight: tab === t ? 600 : 400,
                 cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
                 boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
               }}>
@@ -398,7 +398,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
                   onBlur={e => (e.currentTarget.style.borderColor = T.border)}
                 />
-                <span style={{ fontSize: 12.5, color: T.textTertiary, whiteSpace: "nowrap" }}>hours</span>
+                <span style={{ fontSize: 11.5, color: T.textTertiary, whiteSpace: "nowrap" }}>hours</span>
               </div>
             </div>
           )}
@@ -425,7 +425,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                     onMouseEnter={e => { if (!dropdownOpen) (e.currentTarget as HTMLElement).style.borderColor = T.borderHover; }}
                     onMouseLeave={e => { if (!dropdownOpen) (e.currentTarget as HTMLElement).style.borderColor = T.border; }}
                   >
-                    <span style={{ fontSize: 13.5, color: T.textPrimary }}>{triggerLabel}</span>
+                    <span style={{ fontSize: 12.5, color: T.textPrimary }}>{triggerLabel}</span>
                     <ChevronDown
                       size={13} color={T.textTertiary}
                       style={{ flexShrink: 0, transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }}
@@ -456,7 +456,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                               onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = T.stone100; }}
                               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = active ? T.accentSubtle : "none"; }}
                             >
-                              <span style={{ fontSize: 13.5, color: T.textPrimary, fontWeight: active ? 600 : 400 }}>
+                              <span style={{ fontSize: 12.5, color: T.textPrimary, fontWeight: active ? 600 : 400 }}>
                                 {opt.label}
                               </span>
                               {opt.sub ? (
@@ -507,13 +507,13 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 {task.dueAt && (
                   <>
-                    <span style={{ fontSize: 12.5, color: T.textTertiary, textDecoration: "line-through", letterSpacing: "-0.01em" }}>
+                    <span style={{ fontSize: 11.5, color: T.textTertiary, textDecoration: "line-through", letterSpacing: "-0.01em" }}>
                       {formatPreview(new Date(task.dueAt))}
                     </span>
-                    <span style={{ fontSize: 12.5, color: T.textMuted }}>→</span>
+                    <span style={{ fontSize: 11.5, color: T.textMuted }}>→</span>
                   </>
                 )}
-                <span style={{ fontSize: 13.5, fontWeight: 700, color: T.accent, letterSpacing: "-0.01em" }}>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: T.accent, letterSpacing: "-0.01em" }}>
                   {formatPreview(preview)}
                 </span>
               </div>
@@ -526,7 +526,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           <button onClick={handleClose} style={{
             padding: "7px 16px", borderRadius: 8,
             border: `1.5px solid ${T.border}`, background: T.surface,
-            color: T.textSecondary, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+            color: T.textSecondary, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
           }}>Cancel</button>
           <AddTimeButton disabled={!preview} onClick={handleConfirm} />
         </div>
@@ -544,7 +544,7 @@ function AddTimeButton({ onClick, disabled }: { onClick: () => void; disabled: b
       style={{
         padding: "7px 20px", borderRadius: 8, border: "none",
         background: disabled ? "#c4cbc2" : hov ? "#047857" : "#059669",
-        color: "#fff", fontSize: 13, fontWeight: 700,
+        color: "#fff", fontSize: 12, fontWeight: 700,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit", transition: "background 0.12s",
       }}

@@ -38,7 +38,7 @@ export function SimpleTaskView({ title, emoji, filter, emptyText }: Props) {
           <span>{emoji}</span> {title}
         </h1>
         {!isLoading && (
-          <p style={{ fontSize: 13, color: "#B0A89E", marginTop: 4 }}>
+          <p style={{ fontSize: 12, color: "#B0A89E", marginTop: 4 }}>
             {tasks.length} task{tasks.length !== 1 ? "s" : ""}
           </p>
         )}

@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { X, Sparkles, Zap, TrendingUp, Compass, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Sparkles, Zap, TrendingUp, Compass, AlertCircle, Flame, Heart, CalendarClock, Moon, Lightbulb, type LucideIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { loadEnergyStore, todayKey } from "@/components/EnergyCheckInModal";
+import { loadEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
 import { EMOTION_MAP } from "@/lib/emotions";
 import type { TaskWithSubtasks } from "@/lib/types";
 
@@ -36,7 +36,7 @@ interface WeeklyReport {
   most_deferred_task: { title: string; deferredCount: number; emotionalState: string } | null;
 }
 
-// ── Hierarchy: Group → Section → Body ────────────────────────────────
+// ── Hierarchy: Group → Card → Body ───────────────────────────────────
 
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -51,27 +51,21 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Section({ icon, title, children, defaultOpen = true }: {
-  icon: React.ReactNode; title: string; children: React.ReactNode; defaultOpen?: boolean;
+function Card({ icon: Icon, title, children }: {
+  icon: LucideIcon; title: string; children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
   return (
     <div>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          width: "100%", padding: "12px 0 10px", background: "none", border: "none",
-          cursor: "pointer", fontFamily: "inherit",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: "#4a6d47", display: "inline-flex" }}>{icon}</span>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
-        </div>
-        {open ? <ChevronUp size={14} color="#b9d3c4" /> : <ChevronDown size={14} color="#b9d3c4" />}
-      </button>
-      {open && <div style={{ paddingBottom: 14, paddingLeft: 22 }}>{children}</div>}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "12px 0 8px",
+      }}>
+        <span style={{ color: "#4a6d47", display: "inline-flex" }}>
+          <Icon size={14} />
+        </span>
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
+      </div>
+      <div style={{ paddingBottom: 14, paddingLeft: 22 }}>{children}</div>
       <div style={{ height: 1, background: "#f1f3ef" }} />
     </div>
   );
@@ -88,6 +82,12 @@ export function AIPanel({ onClose }: Props) {
   const { data: todayTasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", new Date().toISOString().slice(0, 10)],
     queryFn: () => fetch("/api/tasks?filter=today").then(r => r.json()),
+    retry: 1,
+  });
+
+  const { data: allTasks = [] } = useQuery<TaskWithSubtasks[]>({
+    queryKey: ["tasks", "all"],
+    queryFn: () => fetch("/api/tasks?filter=all").then(r => r.json()),
     retry: 1,
   });
 
@@ -109,11 +109,99 @@ export function AIPanel({ onClose }: Props) {
   const pending     = todayTasks.filter(t => !t.isCompleted);
   const hasEnergy   = mounted && (loadEnergyStore()[todayKey()] ?? []).length > 0;
 
-  // Task coach — highest scored pending task
-  const recommended = useMemo(() =>
-    [...pending].sort((a, b) => taskScore(b) - taskScore(a))[0],
-    [pending]
+  // Today's latest mood (from energy check-ins)
+  const todayMood = useMemo(() => {
+    if (!mounted) return null;
+    const entries = loadEnergyStore()[todayKey()] ?? [];
+    if (!entries.length) return null;
+    return entries.reduce((s: number, e: CheckIn) => s + e.mood, 0) / entries.length;
+  }, [mounted]);
+
+  // Task coach — mood-aware: if low mood, prefer Willing/Excited tasks
+  const recommended = useMemo(() => {
+    if (!pending.length) return null;
+    const lowMood = todayMood !== null && todayMood <= 2.5;
+    if (lowMood) {
+      const easy = pending.filter(t => t.emotionalState === "WILLING" || t.emotionalState === "EXCITED");
+      if (easy.length) return [...easy].sort((a, b) => taskScore(b) - taskScore(a))[0];
+    }
+    return [...pending].sort((a, b) => taskScore(b) - taskScore(a))[0];
+  }, [pending, todayMood]);
+
+  // Avoidance — tasks deferred 3+ times
+  const avoidance = useMemo(() =>
+    [...allTasks]
+      .filter(t => !t.isCompleted && (t.deferredCount ?? 0) >= 3)
+      .sort((a, b) => (b.deferredCount ?? 0) - (a.deferredCount ?? 0))
+      .slice(0, 3),
+    [allTasks]
   );
+
+  // Streak — consecutive days back from today (or yesterday) with completions
+  const streak = useMemo(() => {
+    const dayKey = (d: Date) => {
+      const x = new Date(d); x.setHours(0, 0, 0, 0);
+      return x.toISOString().slice(0, 10);
+    };
+    const days = new Set(completedTasks.map(t => dayKey(new Date(t.updatedAt))));
+    const today = new Date();
+    let cursor = days.has(dayKey(today)) ? today : new Date(today.getTime() - 86400000);
+    let count = 0;
+    while (days.has(dayKey(cursor)) && count < 365) {
+      count++;
+      cursor = new Date(cursor.getTime() - 86400000);
+    }
+    return count;
+  }, [completedTasks]);
+
+  // Mood ↔ completion correlation across past 14 days
+  const moodVsCompletion = useMemo(() => {
+    if (!mounted) return null;
+    const store = loadEnergyStore();
+    const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+    const completionsByDay: Record<string, number> = {};
+    completedTasks.forEach(t => {
+      const k = dayKey(new Date(t.updatedAt));
+      completionsByDay[k] = (completionsByDay[k] ?? 0) + 1;
+    });
+    const samples: { mood: number; completions: number }[] = [];
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const k = dayKey(d);
+      const entries = store[k] ?? [];
+      if (!entries.length) continue;
+      const mood = entries.reduce((s: number, e: CheckIn) => s + e.mood, 0) / entries.length;
+      samples.push({ mood, completions: completionsByDay[k] ?? 0 });
+    }
+    const high = samples.filter(s => s.mood >= 4);
+    const low  = samples.filter(s => s.mood <= 2.5);
+    if (high.length < 2 || low.length < 2) return null;
+    const highAvg = high.reduce((s, x) => s + x.completions, 0) / high.length;
+    const lowAvg  = low.reduce((s, x) => s + x.completions, 0) / low.length;
+    if (lowAvg <= 0) return { highAvg: highAvg.toFixed(1), lowAvg: "0", ratio: null };
+    return { highAvg: highAvg.toFixed(1), lowAvg: lowAvg.toFixed(1), ratio: (highAvg / lowAvg).toFixed(1) };
+  }, [completedTasks, mounted]);
+
+  // Tomorrow's emotional load
+  const tomorrowLoad = useMemo(() => {
+    if (!allTasks.length) return null;
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(0, 0, 0, 0);
+    const end = new Date(tomorrow); end.setHours(23, 59, 59, 999);
+    const tasks = allTasks.filter(t => {
+      if (!t.dueAt || t.isCompleted) return false;
+      const due = new Date(t.dueAt);
+      return due >= tomorrow && due <= end;
+    });
+    if (!tasks.length) return null;
+    const byEmotion: Record<string, number> = {};
+    tasks.forEach(t => { byEmotion[t.emotionalState] = (byEmotion[t.emotionalState] ?? 0) + 1; });
+    return { total: tasks.length, byEmotion };
+  }, [allTasks]);
+
+  // Time flags
+  const now = new Date();
+  const isEvening = now.getHours() >= 18;
+  const isSunday  = now.getDay() === 0;
 
   // Weekly patterns
   const bestEmotion = useMemo(() => {
@@ -130,6 +218,9 @@ export function AIPanel({ onClose }: Props) {
       .sort((a, b) => b[1] - a[1])[0];
     return worst ? { key: worst[0], count: worst[1], em: EMOTION_MAP[worst[0] as keyof typeof EMOTION_MAP] } : null;
   }, [weekly]);
+
+  // Empty-week onboarding flag
+  const noDataYet = !weekly || (weekly.total_completed === 0 && weekly.total_deferrals === 0 && !hasEnergy);
 
   // ── Render ────────────────────────────────────────────────────────
 
@@ -168,7 +259,7 @@ export function AIPanel({ onClose }: Props) {
               textTransform: "uppercase", letterSpacing: "0.08em",
               margin: "0 0 1px",
             }}>Workspace · Insights</p>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
               Orin Insight
             </h2>
           </div>
@@ -185,16 +276,47 @@ export function AIPanel({ onClose }: Props) {
       {/* Scrollable body */}
       <div style={{ flex: 1, overflowY: "auto", padding: "4px 18px 24px" }}>
 
+        {/* ── Empty-week onboarding takes over when there's no data yet ── */}
+        {noDataYet && mounted ? (
+          <div style={{ marginTop: 12, padding: "14px 14px", background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Get started</p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: "0 0 8px", letterSpacing: "-0.01em" }}>Unlock insights in 3 steps</p>
+            <ol style={{ margin: 0, paddingLeft: 18, fontSize: 11.5, color: "#3d5a4a", lineHeight: 1.6 }}>
+              <li>Add a few tasks with how you feel about each</li>
+              <li>Log an energy check-in to capture your mood</li>
+              <li>Complete or defer them — patterns will appear here</li>
+            </ol>
+          </div>
+        ) : null}
+
         <Group label="Today">
-        {/* ── 1. Daily Briefing ── */}
-        <Section icon={<Zap size={14} />} title="Today's briefing">
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55 }}>
+
+        {/* Avoidance alert — slipping tasks */}
+        {avoidance.length > 0 && (
+          <Card icon={AlertCircle} title="Slipping tasks">
+            <p style={{ fontSize: 11.5, color: "#3d5a4a", margin: "0 0 8px", lineHeight: 1.5 }}>
+              Deferred 3+ times — consider doing just step 1.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {avoidance.map(t => (
+                <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 12 }}>
+                  <span style={{ color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>&ldquo;{t.title}&rdquo;</span>
+                  <span style={{ color: "#D14626", fontWeight: 600, flexShrink: 0 }}>{t.deferredCount}×</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Today's briefing */}
+        <Card icon={Zap} title="Today's briefing">
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, lineHeight: 1.55 }}>
             <p style={{ margin: 0, color: overdue.length > 0 ? "#D14626" : "#3d5a4a", fontWeight: overdue.length > 0 ? 600 : 400 }}>
               {overdue.length > 0 ? `${overdue.length} overdue` : "Nothing overdue."}
             </p>
-            <p style={{ margin: 0, color: "#082d1d" }}>
+            <p style={{ margin: 0, color: "#3d5a4a" }}>
               <strong style={{ color: "#082d1d" }}>{pending.length}</strong>
-              <span style={{ color: "#3d5a4a" }}> task{pending.length !== 1 ? "s" : ""} remaining today.</span>
+              <span> task{pending.length !== 1 ? "s" : ""} remaining today.</span>
             </p>
             <p style={{ margin: 0, color: hasEnergy ? "#059669" : "#3d5a4a" }}>
               {hasEnergy ? "Energy logged today." : (
@@ -202,14 +324,19 @@ export function AIPanel({ onClose }: Props) {
               )}
             </p>
           </div>
-        </Section>
+        </Card>
 
-        {/* ── 3. Task Coach (moved up — also a 'Today' insight) ── */}
-        <Section icon={<Compass size={14} />} title="What to work on next">
+        {/* What to work on next — mood-aware */}
+        <Card icon={Compass} title={isEvening ? "Wrapping up the day" : "What to work on next"}>
           {pending.length === 0 ? (
-            <p style={{ fontSize: 13, color: "#059669", margin: 0 }}>🎉 All caught up — no pending tasks for today.</p>
+            <p style={{ fontSize: 12, color: "#059669", margin: 0 }}>🎉 All caught up — nothing pending today.</p>
           ) : recommended ? (
-            <div style={{ fontSize: 13, lineHeight: 1.55 }}>
+            <div style={{ fontSize: 12, lineHeight: 1.55 }}>
+              {todayMood !== null && todayMood <= 2.5 && (recommended.emotionalState === "WILLING" || recommended.emotionalState === "EXCITED") && (
+                <p style={{ margin: "0 0 6px", fontSize: 11, color: "#4a6d47" }}>
+                  Low mood today — picking something gentler.
+                </p>
+              )}
               <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
                 Start with:{" "}
                 <strong style={{ color: "#082d1d" }}>&ldquo;{recommended.title}&rdquo;</strong>
@@ -226,19 +353,30 @@ export function AIPanel({ onClose }: Props) {
                   <span style={{ color: "#D14626", fontWeight: 600 }}>Deferred {recommended.deferredCount}×</span>
                 )}
               </p>
-              <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>
-                Scored highest on urgency + emotional weight across your {pending.length} pending tasks.
-              </p>
             </div>
           ) : null}
-        </Section>
+        </Card>
+
+        {/* End-of-day reflection — only after 6pm */}
+        {isEvening && (
+          <Card icon={Moon} title="End-of-day reflection">
+            <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.55 }}>
+              {pending.length === 0
+                ? "You finished everything today. Take a breath and call it done."
+                : <>{pending.length} task{pending.length === 1 ? "" : "s"} unfinished — that&apos;s okay. Reschedule what won&apos;t happen tonight.</>
+              }
+            </p>
+          </Card>
+        )}
+
         </Group>
 
         <Group label="This week">
-        {/* ── 2. This-week stats ── */}
-        <Section icon={<TrendingUp size={14} />} title="At a glance">
+
+        {/* At a glance */}
+        <Card icon={TrendingUp} title="At a glance">
           {!weekly ? (
-            <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>Loading…</p>
+            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Loading…</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {[
@@ -247,25 +385,37 @@ export function AIPanel({ onClose }: Props) {
                 { label: "Pending",   val: pending.length,         dot: "#94a3b8" },
               ].map(row => (
                 <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#3d5a4a" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "#3d5a4a" }}>
                     <span style={{ width: 5, height: 5, borderRadius: "50%", background: row.dot, opacity: 0.7 }} />
                     {row.label}
                   </span>
-                  <span style={{ fontSize: 12.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
+                  <span style={{ fontSize: 11.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
                 </div>
               ))}
             </div>
           )}
-        </Section>
+        </Card>
 
-        {/* ── 3. Patterns ── */}
-        <Section icon={<Sparkles size={14} />} title="Patterns">
+        {/* Streak */}
+        <Card icon={Flame} title="Streak">
+          {streak === 0 ? (
+            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Complete a task today to start a streak.</p>
+          ) : (
+            <p style={{ margin: 0, fontSize: 12, color: "#3d5a4a", lineHeight: 1.55 }}>
+              <strong style={{ color: "#059669", fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{streak}</strong>
+              <span style={{ marginLeft: 6 }}>day{streak === 1 ? "" : "s"} in a row with at least one task done.</span>
+            </p>
+          )}
+        </Card>
+
+        {/* Patterns */}
+        <Card icon={Sparkles} title="Patterns">
           {!weekly || (weekly.total_completed === 0 && !bestEmotion && !worstEmotion) ? (
-            <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>
+            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>
               Complete and defer some tasks this week to see patterns here.
             </p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13, lineHeight: 1.5 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 12, lineHeight: 1.5 }}>
               {bestEmotion && (
                 <div>
                   <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most completions when feeling</p>
@@ -284,7 +434,7 @@ export function AIPanel({ onClose }: Props) {
                   </p>
                 </div>
               )}
-              {weekly.most_deferred_task && (
+              {weekly?.most_deferred_task && (
                 <div>
                   <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most deferred task</p>
                   <p style={{ margin: 0, color: "#082d1d" }}>
@@ -295,7 +445,75 @@ export function AIPanel({ onClose }: Props) {
               )}
             </div>
           )}
-        </Section>
+        </Card>
+
+        {/* Mood ↔ productivity correlation */}
+        <Card icon={Heart} title="Mood vs. productivity">
+          {!moodVsCompletion ? (
+            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>
+              Log moods + complete tasks for two weeks to see how they relate.
+            </p>
+          ) : (
+            <div style={{ fontSize: 12, lineHeight: 1.55 }}>
+              <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
+                <span style={{ color: "#082d1d", fontWeight: 600 }}>{moodVsCompletion.highAvg}</span> tasks/day on high-mood days
+                {" vs "}
+                <span style={{ color: "#082d1d", fontWeight: 600 }}>{moodVsCompletion.lowAvg}</span> on low-mood days.
+              </p>
+              {moodVsCompletion.ratio && (
+                <p style={{ margin: 0, fontSize: 11.5, color: "#4a6d47" }}>
+                  You finish <strong>{moodVsCompletion.ratio}×</strong> more when feeling good — protect your high-mood time.
+                </p>
+              )}
+            </div>
+          )}
+        </Card>
+
+        {/* Tomorrow's emotional load */}
+        <Card icon={CalendarClock} title="Tomorrow's load">
+          {!tomorrowLoad ? (
+            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Nothing scheduled for tomorrow.</p>
+          ) : (
+            <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+              <p style={{ margin: "0 0 8px", color: "#3d5a4a" }}>
+                <strong style={{ color: "#082d1d" }}>{tomorrowLoad.total}</strong> task{tomorrowLoad.total === 1 ? "" : "s"} due tomorrow.
+              </p>
+              <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", border: "1px solid #f1f3ef" }}>
+                {(["DREADING", "ANXIOUS", "NEUTRAL", "WILLING", "EXCITED"] as const).map(key => {
+                  const n = tomorrowLoad.byEmotion[key] ?? 0;
+                  if (!n) return null;
+                  const em = EMOTION_MAP[key];
+                  return <div key={key} title={`${em.label}: ${n}`} style={{ flex: n, background: em.strip, opacity: 0.85 }} />;
+                })}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                {(["DREADING", "ANXIOUS", "NEUTRAL", "WILLING", "EXCITED"] as const).map(key => {
+                  const n = tomorrowLoad.byEmotion[key] ?? 0;
+                  if (!n) return null;
+                  const em = EMOTION_MAP[key];
+                  return (
+                    <span key={key} style={{ fontSize: 11.5, color: em.pillText, fontWeight: 500 }}>
+                      {em.emoji} {n}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* Sunday review — only on Sundays */}
+        {isSunday && weekly && (
+          <Card icon={Lightbulb} title="Sunday review">
+            <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.55 }}>
+              This week: <strong style={{ color: "#082d1d" }}>{weekly.total_completed}</strong> done,{" "}
+              <strong style={{ color: "#082d1d" }}>{weekly.total_deferrals}</strong> deferred.{" "}
+              {bestEmotion ? <>You moved best when feeling <span style={{ color: bestEmotion.em?.pillText, fontWeight: 600 }}>{bestEmotion.em?.label}</span>.</> : null}
+              {" "}Take a breath and pick one thing to bring into next week.
+            </p>
+          </Card>
+        )}
+
         </Group>
       </div>
     </aside>

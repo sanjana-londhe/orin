@@ -101,7 +101,7 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
         onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.borderHover; }}
         onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.border; }}
       >
-        <span style={{ fontSize: 13, color: value ? D.textPrimary : D.textMuted }}>
+        <span style={{ fontSize: 12, color: value ? D.textPrimary : D.textMuted }}>
           {displayText}
         </span>
         <ChevronDown
@@ -140,9 +140,9 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
                 <span style={{
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
                   width: 28, height: 28, borderRadius: 6,
-                  background: f.bg, fontSize: 15, flexShrink: 0,
+                  background: f.bg, fontSize: 14, flexShrink: 0,
                 }}>{f.emoji}</span>
-                <span style={{ fontSize: 13, color: D.textPrimary, fontWeight: value === f.value ? 600 : 400 }}>
+                <span style={{ fontSize: 12, color: D.textPrimary, fontWeight: value === f.value ? 600 : 400 }}>
                   {f.label}
                 </span>
               </button>

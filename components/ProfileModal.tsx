@@ -51,7 +51,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
 
         {/* Header */}
         <div style={{ padding: "20px 20px 0", textAlign: "center" }}>
-          <p style={{ fontSize: 15, fontWeight: 700, color: "#082d1d", margin: "0 0 20px" }}>Profile</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 20px" }}>Profile</p>
 
           {/* Avatar */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginBottom: 20 }}>
@@ -64,7 +64,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
                   width: 72, height: 72, borderRadius: "50%",
                   background: "#059669", border: "2px solid #dde4de",
                   color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 28, fontWeight: 700,
+                  fontSize: 27, fontWeight: 700,
                 }}>
                   {displayName.charAt(0).toUpperCase() || initial}
                 </div>
@@ -75,7 +75,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
                 width: 24, height: 24, borderRadius: "50%",
                 background: "#fff", border: "1.5px solid #dde4de",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", fontSize: 12.5, boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                cursor: "pointer", fontSize: 11.5, boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
               }}
                 title="Change photo">
                 📷
@@ -99,7 +99,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
               style={{
                 width: "100%", padding: "9px 12px", borderRadius: 8,
                 border: "1px solid #dde4de", background: "#fafbf7",
-                fontSize: 13, color: "#082d1d", fontFamily: "inherit",
+                fontSize: 12, color: "#082d1d", fontFamily: "inherit",
                 outline: "none", boxSizing: "border-box",
                 transition: "border-color 0.14s",
               }}
@@ -116,7 +116,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
             <div style={{
               padding: "9px 12px", borderRadius: 8,
               border: "1px solid #dde4de", background: "#f1f3ef",
-              fontSize: 13, color: "#4a6d47", userSelect: "none",
+              fontSize: 12, color: "#4a6d47", userSelect: "none",
             }}>
               {email || "—"}
             </div>
@@ -130,7 +130,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
               width: "100%", padding: "9px 0", borderRadius: 8,
               border: "none", marginTop: 4,
               background: saved ? "#22C55E" : displayName.trim() ? "#059669" : "#c4cbc2",
-              color: "#fff", fontSize: 13, fontWeight: 600,
+              color: "#fff", fontSize: 12, fontWeight: 600,
               cursor: displayName.trim() ? "pointer" : "default",
               fontFamily: "inherit", transition: "background 0.15s",
             }}

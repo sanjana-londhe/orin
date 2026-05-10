@@ -283,8 +283,8 @@ export function AllTasksView() {
 
       {/* Tasks (N) label */}
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: T.textSecondary }}>Tasks</span>
-        <span style={{ fontSize: 12.5, color: T.textMuted }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: T.textSecondary }}>Tasks</span>
+        <span style={{ fontSize: 11.5, color: T.textMuted }}>
           ({allTasks.filter(t => !t.isCompleted).length})
         </span>
       </div>
@@ -299,7 +299,7 @@ export function AllTasksView() {
           background: active ? "#f1f3ef" : "#f8f9f5",
           border: `0.5px solid ${active && fg ? fg + "44" : "rgba(0,0,0,0.08)"}`,
           color: active && fg ? fg : "#5f5e5a",
-          fontSize: 12.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          fontSize: 11.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
         });
         const EMOTIONS_CYCLE: Emotion[] = ["DREADING","ANXIOUS","NEUTRAL","WILLING","EXCITED"];
         function cycleEmotion() {
@@ -320,7 +320,7 @@ export function AllTasksView() {
           background: "#f8f9f5",
           border: `0.5px solid ${fg ? fg + "33" : "rgba(0,0,0,0.08)"}`,
           color: fg ?? "#5f5e5a",
-          fontSize: 12.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          fontSize: 11.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
           position: "relative", overflow: "hidden",
         });
         return (
@@ -334,7 +334,7 @@ export function AllTasksView() {
                     <path d="M5 1v8M1 5h8" stroke="#059669" strokeWidth="1.75" strokeLinecap="round"/>
                   </svg>
                 </span>
-                <span style={{ fontSize: 13, fontWeight: 500, color: "#059669" }}>New task</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: "#059669" }}>New task</span>
               </div>
             ) : (
               <div ref={formRef} style={{ border: "1px solid #059669", borderRadius: 4, background: "#fff" }}>
@@ -347,12 +347,12 @@ export function AllTasksView() {
                       onChange={e => { setTitle(e.target.value); if (titleError && e.target.value.trim()) setTitleError(false); const d = detectEmotion(e.target.value); if (d) setEmotion(d as Emotion); }}
                       onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") resetForm(); }}
                       placeholder="Task name"
-                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 14, letterSpacing: "-0.01em", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />
+                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 13, letterSpacing: "-0.01em", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />
                     {noteOpen ? (
                       <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Notes" rows={2}
-                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12.5, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
+                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 11.5, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
                     ) : (
-                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12.5, color: "#b9d3c4", cursor: "text" }}>{note.trim() || "Notes"}</div>
+                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 11.5, color: "#b9d3c4", cursor: "text" }}>{note.trim() || "Notes"}</div>
                     )}
                   </div>
                 </div>
@@ -368,7 +368,7 @@ export function AllTasksView() {
                       <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 150, padding: "4px 0", overflow: "hidden" }}>
                         {INLINE_FEELINGS.map(f => (
                           <button key={f.value} onClick={() => { setEmotion(f.value as Emotion); setShowEmoPicker(false); }}
-                            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 14px", background: emotion === f.value ? f.bg : "none", border: "none", cursor: "pointer", fontSize: 13, color: emotion === f.value ? f.fg : "#082d1d", fontFamily: "inherit" }}>
+                            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 14px", background: emotion === f.value ? f.bg : "none", border: "none", cursor: "pointer", fontSize: 12, color: emotion === f.value ? f.fg : "#082d1d", fontFamily: "inherit" }}>
                             {f.emoji} {f.label}
                             {emotion === f.value && <span style={{ marginLeft: "auto", fontSize: 11 }}>✓</span>}
                           </button>
@@ -389,14 +389,14 @@ export function AllTasksView() {
                           {getDatePresets().map(opt => (
                             <button key={opt.value} onClick={() => { setDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
                               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueDate === opt.value ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
-                              <span style={{ fontSize: 13, color: dueDate === opt.value ? "#059669" : "#082d1d", fontWeight: dueDate === opt.value ? 500 : 400 }}>{opt.label}</span>
+                              <span style={{ fontSize: 12, color: dueDate === opt.value ? "#059669" : "#082d1d", fontWeight: dueDate === opt.value ? 500 : 400 }}>{opt.label}</span>
                               <span style={{ fontSize: 11, color: dueDate === opt.value ? "#059669" : "#888780" }}>{opt.sub}{dueDate === opt.value ? " ✓" : ""}</span>
                             </button>
                           ))}
                           <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
                           <button onClick={() => { setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
                             style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomDate ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                            <span style={{ fontSize: 13, color: "#082d1d", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
+                            <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
                             <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
                           </button>
                         </div>
@@ -429,7 +429,7 @@ export function AllTasksView() {
                               <button key={opt.value}
                                 onClick={() => { setDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
                                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueTime === opt.value ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
-                                <span style={{ fontSize: 13, color: dueTime === opt.value ? "#059669" : "#082d1d", fontWeight: dueTime === opt.value ? 500 : 400 }}>{opt.label}</span>
+                                <span style={{ fontSize: 12, color: dueTime === opt.value ? "#059669" : "#082d1d", fontWeight: dueTime === opt.value ? 500 : 400 }}>{opt.label}</span>
                                 <span style={{ fontSize: 11, color: dueTime === opt.value ? "#059669" : "#888780" }}>{fmtTimeLbl(opt.value)}{dueTime === opt.value ? " ✓" : ""}</span>
                               </button>
                             ))}
@@ -441,12 +441,12 @@ export function AllTasksView() {
                               if (opening && !dueTime) setDueTime("09:00");
                             }}
                               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomTime ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                              <span style={{ fontSize: 13, color: "#082d1d", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
+                              <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
                               <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
                             </button>
                             {dueTime && (
                               <button onClick={() => { setDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
-                                style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 12.5, color: "#D14626", fontFamily: "inherit", textAlign: "left" }}>
+                                style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 11.5, color: "#D14626", fontFamily: "inherit", textAlign: "left" }}>
                                 Remove time
                               </button>
                             )}
@@ -463,7 +463,7 @@ export function AllTasksView() {
 
                   <div style={{ flex: 1 }} />
                   <button onClick={submit} disabled={submitting}
-                    style={{ padding: "5px 14px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                    style={{ padding: "5px 14px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
                     {submitting ? "…" : "Add"}
                   </button>
                 </div>

@@ -59,7 +59,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
               <circle cx="50" cy="41" r="18" fill="#059669"/>
               <circle cx="50" cy="59" r="18" fill="#59d10b"/>
             </svg>
-            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
+            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
           </Link>
 
           {/* Right side: Orin Insight + profile avatar */}
@@ -71,7 +71,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                 padding: "6px 12px", borderRadius: 4,
                 background: "#082d1d", color: "#fff",
                 border: "none", cursor: "pointer",
-                fontSize: 12.5, fontWeight: 600,
+                fontSize: 11.5, fontWeight: 600,
                 boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
                 letterSpacing: "-0.01em", whiteSpace: "nowrap",
               }}
@@ -86,7 +86,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                 width: 34, height: 34, borderRadius: "50%",
                 background: "#059669", border: "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 13, fontWeight: 700, color: "#fff",
+                fontSize: 12, fontWeight: 700, color: "#fff",
                 cursor: "pointer", overflow: "hidden", flexShrink: 0,
               }}
             >
@@ -112,7 +112,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
               padding: "7px 14px", borderRadius: 4,
               background: "#082d1d", color: "#fff",
               border: "none", cursor: "pointer",
-              fontSize: 12.5, fontWeight: 600,
+              fontSize: 11.5, fontWeight: 600,
               boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
               letterSpacing: "-0.01em",
             }}
@@ -149,12 +149,12 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
               <div style={{
                 width: 32, height: 32, borderRadius: "50%", background: "#059669",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 12.5, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
+                fontSize: 11.5, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
               }}>
                 {avatarContent}
               </div>
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentName}</p>
+                <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentName}</p>
                 <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Free plan</p>
               </div>
             </div>
@@ -166,7 +166,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                   width: "100%", padding: "10px 14px", borderRadius: 8,
                   border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
-                  cursor: "pointer", fontSize: 13, fontWeight: 500, color: "#082d1d",
+                  cursor: "pointer", fontSize: 12, fontWeight: 500, color: "#082d1d",
                   fontFamily: "inherit",
                 }}>
                   <svg width="16" height="16" viewBox="0 0 18 18">
@@ -190,7 +190,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                   <button key={item.label} onClick={item.action} style={{
                     display: "flex", alignItems: "center", gap: 10, width: "100%",
                     padding: "12px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 13, color: "#082d1d", fontFamily: "inherit", textAlign: "left",
+                    cursor: "pointer", fontSize: 12, color: "#082d1d", fontFamily: "inherit", textAlign: "left",
                   }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
@@ -204,7 +204,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                   <button type="submit" style={{
                     display: "flex", alignItems: "center", gap: 10, width: "100%",
                     padding: "12px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 13, color: "#D14626", fontFamily: "inherit",
+                    cursor: "pointer", fontSize: 12, color: "#D14626", fontFamily: "inherit",
                   }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}

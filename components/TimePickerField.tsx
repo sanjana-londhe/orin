@@ -137,7 +137,7 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
       <div style={{ display: "flex", height: "100%", gap: 4 }}>
         <WheelColumn items={HOURS_12} value={hour12} onChange={v => update(v, m, ampm)} format={v => String(v)} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: WHEEL_HEIGHT, width: 8 }}>
-          <span style={{ fontSize: 19, fontWeight: 700, color: "#082d1d" }}>:</span>
+          <span style={{ fontSize: 18, fontWeight: 700, color: "#082d1d" }}>:</span>
         </div>
         <WheelColumn items={MINUTES} value={m} onChange={v => update(hour12, v, ampm)} format={v => String(v).padStart(2, "0")} />
         <WheelColumn items={[...AMPMS]} value={ampm} onChange={v => update(hour12, m, v)} format={v => v} />
@@ -259,7 +259,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
         onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.borderHover; }}
         onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.border; }}
       >
-        <span style={{ fontSize: 13, color: value ? D.textPrimary : D.textMuted }}>{display}</span>
+        <span style={{ fontSize: 12, color: value ? D.textPrimary : D.textMuted }}>{display}</span>
         <ChevronDown size={13} color={D.textTertiary}
           style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }} />
       </button>
@@ -295,8 +295,8 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                       opacity: isPast ? 0.4 : 1,
                     }}
                   >
-                    <span style={{ fontSize: 14, color: D.textPrimary }}>{opt.label}</span>
-                    <span style={{ fontSize: 12.5, color: D.textMuted }}>{isPast ? "past" : opt.sub}</span>
+                    <span style={{ fontSize: 13, color: D.textPrimary }}>{opt.label}</span>
+                    <span style={{ fontSize: 11.5, color: D.textMuted }}>{isPast ? "past" : opt.sub}</span>
                   </button>
                 );
               })}
@@ -311,7 +311,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                 <button type="button" onClick={() => setOpen(false)} style={{
                   width: "100%", padding: "10px", borderRadius: 8,
                   background: D.accent, border: "none", color: "#fff",
-                  fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                  fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
                 }}>
                   Confirm
                 </button>
@@ -340,7 +340,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                       }}
                       onMouseEnter={e => { if (value !== opt.time && !isPast) (e.currentTarget as HTMLElement).style.background = D.surfaceMuted; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = value === opt.time ? D.accentSubtle : "none"; }}>
-                      <span style={{ fontSize: 13, color: D.textPrimary }}>{opt.label}</span>
+                      <span style={{ fontSize: 12, color: D.textPrimary }}>{opt.label}</span>
                       <span style={{ fontSize: 11, color: D.textMuted }}>{isPast ? "past" : opt.sub}</span>
                     </button>
                   );
@@ -355,7 +355,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                 }}
                   onMouseEnter={e => { if (!showCustom) (e.currentTarget as HTMLElement).style.background = D.surfaceMuted; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showCustom || (!isQuick && value) ? D.accentSubtle : "none"; }}>
-                  <span style={{ fontSize: 13, color: D.textPrimary }}>Custom time</span>
+                  <span style={{ fontSize: 12, color: D.textPrimary }}>Custom time</span>
                   <ChevronRight size={13} color={showCustom ? D.accent : D.textMuted} />
                 </button>
               </div>
@@ -369,13 +369,13 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <Clock size={14} color={D.textTertiary} />
-                    <p style={{ fontSize: 12.5, fontWeight: 600, color: D.textTertiary, margin: 0 }}>Pick a time</p>
+                    <p style={{ fontSize: 11.5, fontWeight: 600, color: D.textTertiary, margin: 0 }}>Pick a time</p>
                   </div>
                   <WheelTimePicker value={value || "09:00"} onChange={onChange} />
                   <button type="button" onClick={() => { setOpen(false); setShowCustom(false); }} style={{
                     padding: "7px 16px", borderRadius: 8,
                     background: D.accent, border: "none", color: "#fff",
-                    fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                    fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
                   }}>Confirm</button>
                 </div>
               )}

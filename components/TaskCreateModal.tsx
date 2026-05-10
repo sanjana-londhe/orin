@@ -207,7 +207,7 @@ function ModalForm({
           placeholder="What needs doing?"
           style={{
             flex: 1, border: "none", outline: "none", fontFamily: "inherit",
-            fontSize: 13, fontWeight: 400, color: "#082d1d", background: "transparent",
+            fontSize: 12, fontWeight: 400, color: "#082d1d", background: "transparent",
           }}
         />
       </div>
@@ -226,7 +226,7 @@ function ModalForm({
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "5px 11px", borderRadius: 999, cursor: "pointer",
-                  fontFamily: "inherit", fontSize: 12.5,
+                  fontFamily: "inherit", fontSize: 11.5,
                   fontWeight: active ? 600 : 400,
                   border: `1.5px solid ${active ? f.fg : "#e9ede9"}`,
                   background: active ? f.bg : "#fff",
@@ -252,7 +252,7 @@ function ModalForm({
             width: "100%", padding: "9px 12px", borderRadius: 8,
             border: `1.5px solid ${dateOpen ? "#059669" : "#dde4de"}`,
             background: "#f8f9f5", cursor: "pointer", fontFamily: "inherit",
-            fontSize: 13, color: selectedDate ? "#082d1d" : "#b9d3c4",
+            fontSize: 12, color: selectedDate ? "#082d1d" : "#b9d3c4",
             textAlign: "left", transition: "border-color 0.14s",
           }}
         >
@@ -282,7 +282,7 @@ function ModalForm({
           placeholder="Add a note or description…"
           rows={isMobile ? 4 : 2}
           style={{
-            width: "100%", fontSize: 13, color: "#082d1d",
+            width: "100%", fontSize: 12, color: "#082d1d",
             background: "#f8f9f5", border: "1.5px solid #dde4de",
             borderRadius: 8, padding: "9px 12px", outline: "none",
             fontFamily: "inherit", resize: "vertical", lineHeight: 1.6,
@@ -293,7 +293,7 @@ function ModalForm({
         />
       </div>
 
-      {error && <p style={{ fontSize: 12.5, color: "#D14626", margin: 0 }}>{error}</p>}
+      {error && <p style={{ fontSize: 11.5, color: "#D14626", margin: 0 }}>{error}</p>}
     </div>
   );
 
@@ -309,9 +309,9 @@ function ModalForm({
         }}>
           <button onClick={onClose} style={{
             padding: "6px 0", background: "none", border: "none",
-            cursor: "pointer", fontSize: 14, color: "#3d5a4a", fontFamily: "inherit",
+            cursor: "pointer", fontSize: 13, color: "#3d5a4a", fontFamily: "inherit",
           }}>Cancel</button>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.01em" }}>New task</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.01em" }}>New task</span>
           <button
             onClick={handleCreate}
             disabled={isPending || !title.trim()}
@@ -319,7 +319,7 @@ function ModalForm({
               padding: "6px 16px", borderRadius: 8, border: "none",
               background: title.trim() ? "#059669" : "#e9ede9",
               color: title.trim() ? "#fff" : "#c4cbc2",
-              fontSize: 14, fontWeight: 700,
+              fontSize: 13, fontWeight: 700,
               cursor: title.trim() ? "pointer" : "default",
               fontFamily: "inherit", transition: "background 0.12s",
             }}
@@ -345,7 +345,7 @@ function ModalForm({
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
         <button onClick={onClose} style={{
           padding: "7px 16px", borderRadius: 8, border: "1.5px solid #dde4de",
-          background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 500,
+          background: "#fff", color: "#3d5a4a", fontSize: 12, fontWeight: 500,
           cursor: "pointer", fontFamily: "inherit",
         }}>Cancel</button>
         <button
@@ -354,7 +354,7 @@ function ModalForm({
           style={{
             padding: "7px 20px", borderRadius: 8, border: "none",
             background: title.trim() ? "#059669" : "#c4cbc2",
-            color: "#fff", fontSize: 13, fontWeight: 700,
+            color: "#fff", fontSize: 12, fontWeight: 700,
             cursor: title.trim() ? "pointer" : "default",
             fontFamily: "inherit", transition: "background 0.13s",
           }}
