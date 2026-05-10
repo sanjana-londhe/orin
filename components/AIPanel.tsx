@@ -36,20 +36,32 @@ interface WeeklyReport {
   most_deferred_task: { title: string; deferredCount: number; emotionalState: string } | null;
 }
 
-// ── Block: one insight (icon + title + content), separated by hairline ─
+// ── Block: each insight as its own bordered card ─────────────────────
 
 function Block({ icon: Icon, title, children }: {
   icon: LucideIcon; title: string; children: React.ReactNode;
 }) {
   return (
-    <div style={{ paddingTop: 14, paddingBottom: 14, borderBottom: "1px solid #f1f3ef" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
-        <span style={{ color: "#4a6d47", display: "inline-flex" }}>
+    <div style={{
+      background: "#fff",
+      border: "1px solid #e9ede9",
+      borderRadius: 4,
+      padding: "12px 14px",
+      marginTop: 8,
+      boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
+        <span style={{
+          width: 22, height: 22, borderRadius: "50%",
+          background: "#f2fdec",
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          color: "#059669", flexShrink: 0,
+        }}>
           <Icon size={12} />
         </span>
         <span style={{ fontSize: 11.5, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
       </div>
-      <div style={{ paddingLeft: 19 }}>{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
