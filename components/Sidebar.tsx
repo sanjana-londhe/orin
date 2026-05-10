@@ -11,7 +11,6 @@ import {
 import { ProfileModal } from "@/components/ProfileModal";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { EnergyCheckInModal, loadEnergyStore, saveEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
-import { getEmotion } from "@/lib/emotions";
 import { signOut, signInWithGoogle } from "@/app/actions/auth";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -48,9 +47,6 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
     },
     retry: 1,
   });
-
-  const deferred = tasks.filter(t => t.deferredCount > 0).length;
-  const pending  = tasks.length;
 
   // ── Mobile: bottom tab bar (nav only — profile/energy handled by AppShell top bar) ──
   if (isMobile) {
@@ -192,43 +188,6 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
               );
             })}
           </nav>
-
-          {/* Stats */}
-          {!isCollapsed && (
-            <div style={{
-              background: "transparent",
-              padding: "0 4px", marginBottom: 14,
-            }}>
-              <p style={{
-                fontSize: 10, fontWeight: 600,
-                color: "#4a6d47",
-                textTransform: "uppercase", letterSpacing: "0.08em",
-                margin: "0 0 8px",
-              }}>This week</p>
-              {[
-                { dot: getEmotion("EXCITED").strip,  label: "Completed", val: 0 },
-                { dot: getEmotion("DREADING").strip, label: "Deferred",  val: deferred },
-                { dot: getEmotion("ANXIOUS").strip,  label: "Pending",   val: pending },
-              ].map((row, i, arr) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: i < arr.length - 1 ? 6 : 0 }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#3d5a4a" }}>
-                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: row.dot, opacity: 0.7 }} />
-                    {row.label}
-                  </span>
-                  <span style={{ fontSize: 12.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
-                </div>
-              ))}
-              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #e9ede9" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
-                  <span style={{ color: "#4a6d47" }}>Completion</span>
-                  <span style={{ fontWeight: 500, color: "#3d5a4a", fontVariantNumeric: "tabular-nums" }}>0%</span>
-                </div>
-                <div style={{ height: 2, background: "#e9ede9", borderRadius: 999 }}>
-                  <div style={{ height: "100%", borderRadius: 999, background: "#059669", width: "0%", opacity: 0.6 }} />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Track energy promo — calm meadow palette */}
           {!isCollapsed && (

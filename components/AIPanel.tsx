@@ -251,9 +251,22 @@ export function AIPanel({ onClose }: Props) {
             <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>Loading patterns…</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55 }}>
-              <p style={{ margin: 0, color: "#3d5a4a" }}>
-                <strong style={{ color: "#059669" }}>{weekly.total_completed}</strong> task{weekly.total_completed === 1 ? "" : "s"} completed this week.
-              </p>
+              {/* Stat rows */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 4, borderBottom: "1px solid #f1f3ef", marginBottom: 4 }}>
+                {[
+                  { label: "Completed", val: weekly.total_completed, dot: "#22c55e" },
+                  { label: "Deferred",  val: weekly.total_deferrals, dot: "#f59e0b" },
+                  { label: "Pending",   val: pending.length,         dot: "#94a3b8" },
+                ].map(row => (
+                  <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#3d5a4a" }}>
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: row.dot, opacity: 0.7 }} />
+                      {row.label}
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
+                  </div>
+                ))}
+              </div>
               {bestEmotion && (
                 <p style={{ margin: 0, color: "#3d5a4a" }}>
                   You finish most tasks when feeling{" "}
