@@ -377,7 +377,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                       </button>
                       {editTime && (
                         <button onClick={()=>{ setEditTime(""); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
-                          style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 12.5, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>
+                          style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 12.5, color: "#D14626", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>
                       )}
                     </div>
                     {showEditCustomTime && (

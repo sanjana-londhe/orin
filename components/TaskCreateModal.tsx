@@ -293,7 +293,7 @@ function ModalForm({
         />
       </div>
 
-      {error && <p style={{ fontSize: 12.5, color: "#c23934", margin: 0 }}>{error}</p>}
+      {error && <p style={{ fontSize: 12.5, color: "#D14626", margin: 0 }}>{error}</p>}
     </div>
   );
 

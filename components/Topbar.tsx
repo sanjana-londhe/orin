@@ -98,7 +98,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
               display: "flex", alignItems: "center", gap: 9,
               width: "100%", padding: "9px 14px",
               background: "none", border: "none", cursor: "pointer",
-              fontSize: 13, color: "#c23934", fontFamily: "inherit",
+              fontSize: 13, color: "#D14626", fontFamily: "inherit",
             }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}>

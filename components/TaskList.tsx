@@ -451,7 +451,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                           </button>
                           {inlineDueTime && (
                             <button onClick={() => { setInlineDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
-                              style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 12.5, color:"#c23934", fontFamily:"inherit", textAlign:"left" }}>
+                              style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 12.5, color: "#D14626", fontFamily:"inherit", textAlign:"left" }}>
                               Remove time
                             </button>
                           )}

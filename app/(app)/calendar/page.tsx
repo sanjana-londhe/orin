@@ -149,7 +149,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
             {em(task.emotionalState).emoji} {em(task.emotionalState).label}
           </span>
           {task.deferredCount > 0 && (
-            <span style={{ fontSize: 11, color: "#c23934" }}>deferred {task.deferredCount}×</span>
+            <span style={{ fontSize: 11, color: "#D14626" }}>deferred {task.deferredCount}×</span>
           )}
         </div>
 
@@ -207,7 +207,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
           <div>
-            <p style={{ fontFamily: "inherit", fontSize: 10, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>All tasks</p>
+            <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>All tasks</p>
             <p style={{ fontSize: 13.5, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
           </div>
           <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
@@ -689,7 +689,7 @@ function MobileCalendar({
       {/* Month header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", flexShrink: 0, background: "#fff" }}>
         <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={16} color="#4a6d47" /></button>
-        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 17, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
+        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 20, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
           {MONTH_NAMES[month]} {year}
           <ChevronRight size={14} color="#059669" style={{ transform: pickerOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
         </button>
@@ -710,7 +710,7 @@ function MobileCalendar({
             <div key={key} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : "#fff" }}>
               {/* Left: day + date — top-aligned when there are multiple tasks */}
               <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
-                <span style={{ fontSize: 9.5, fontWeight: 600, letterSpacing: "0.04em", color: isToday ? "#059669" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: isToday ? "#059669" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
                 <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: isToday ? 700 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
               </div>
 
@@ -883,10 +883,10 @@ export default function CalendarPage() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px 16px", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
         <div>
-          <p style={{ fontFamily: "inherit", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4", marginBottom: 6 }}>Schedule</p>
+          <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>Workspace · Calendar</p>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-            <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
+            <h1 style={{ fontSize: 30, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
               {new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </h1>
             <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 15, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
