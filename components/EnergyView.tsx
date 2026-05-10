@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Heart, Lightbulb, BarChart3 } from "lucide-react";
+import { Heart, Lightbulb } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/EmptyState";
@@ -106,15 +106,6 @@ function MoodChart({ data }: { data: { label: string; value: number | null }[] }
   );
 }
 
-// ── Emotion color tokens ─────────────────────────────────────────────
-
-const EC: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  DREADING: { bg: "#FFF0EC", text: "#D14626", border: "rgba(209,70,38,0.18)",  dot: "#ef4444" },
-  ANXIOUS:  { bg: "#FFF8E8", text: "#B07A10", border: "rgba(245,158,11,0.2)",  dot: "#f59e0b" },
-  NEUTRAL:  { bg: "#F3F2F0", text: "#7A756E", border: "rgba(0,0,0,0.08)",      dot: "#94a3b8" },
-  WILLING:  { bg: "#EEF9F7", text: "#0E8A7D", border: "rgba(14,138,125,0.2)",  dot: "#14b8a6" },
-  EXCITED:  { bg: "#EEFAF1", text: "#1A9444", border: "rgba(26,148,68,0.18)",  dot: "#22c55e" },
-};
 
 
 // ── Main component ────────────────────────────────────────────────────
@@ -157,36 +148,93 @@ export function EnergyView() {
     };
   }), [store]);
 
-  // Top influences from last 7 days
-  const topInfluences = useMemo(() => {
-    const counts: Record<string, number> = {};
-    Object.entries(store).forEach(([key, entries]) => {
-      const d = new Date(key);
-      const daysDiff = (Date.now() - d.getTime()) / 86400000;
-      if (daysDiff > 7) return;
-      entries.forEach(e => e.contributions.forEach(c => { counts[c] = (counts[c] ?? 0) + 1; }));
+  // ── Headline insight: how did the week feel? ──────────────────────
+  const weekHeadline = useMemo(() => {
+    const filled = weekData.filter(d => d.value !== null) as { label: string; value: number }[];
+    if (filled.length === 0) return null;
+    const avg = filled.reduce((s, d) => s + d.value, 0) / filled.length;
+    const best = filled.reduce((a, b) => (b.value > a.value ? b : a));
+    const worst = filled.reduce((a, b) => (b.value < a.value ? b : a));
+    const lean = avg >= 4 ? "Pleasant" : avg >= 3 ? "Neutral" : avg >= 2 ? "Low" : "Tough";
+    const half = Math.ceil(filled.length / 2);
+    const firstHalf = filled.slice(0, half).reduce((s, d) => s + d.value, 0) / half;
+    const lastHalf  = filled.slice(-half).reduce((s, d) => s + d.value, 0) / half;
+    const trend = lastHalf > firstHalf + 0.4 ? "rising"
+                : lastHalf < firstHalf - 0.4 ? "falling"
+                : "steady";
+    return {
+      avg: avg.toFixed(1),
+      lean, trend, best, worst,
+      flat: best.value === worst.value,
+      checkIns: filled.length,
+    };
+  }, [weekData]);
+
+  // ── What lifts you / pulls you down ──────────────────────────────
+  // For every contribution tag, average the mood of check-ins that included it.
+  const liftsPulls = useMemo(() => {
+    const tagMoods: Record<string, number[]> = {};
+    Object.values(store).forEach(entries => {
+      entries.forEach(e => {
+        e.contributions.forEach(c => {
+          if (!tagMoods[c]) tagMoods[c] = [];
+          tagMoods[c].push(e.mood);
+        });
+      });
     });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const avgs = Object.entries(tagMoods)
+      .filter(([, arr]) => arr.length >= 2)
+      .map(([tag, arr]) => ({ tag, avg: arr.reduce((s, m) => s + m, 0) / arr.length, count: arr.length }))
+      .sort((a, b) => b.avg - a.avg);
+    if (avgs.length === 0) return null;
+    const lifts = avgs.filter(x => x.avg >= 3.5).slice(0, 3);
+    const pulls = [...avgs].filter(x => x.avg < 3).slice(0, 3);
+    return { lifts, pulls, hasAny: lifts.length + pulls.length > 0 };
   }, [store]);
 
-  // Task data for the bottom sections
+  // Task data for mood × tasks
   const { data: allTasks = [] }       = useQuery<TaskWithSubtasks[]>({ queryKey: ["tasks", "all"],       queryFn: () => fetch("/api/tasks?filter=all").then(r => r.json()),       retry: 1 });
   const { data: completedTasks = [] } = useQuery<TaskWithSubtasks[]>({ queryKey: ["tasks", "completed"], queryFn: () => fetch("/api/tasks?filter=completed").then(r => r.json()), retry: 1 });
   const allForStats = useMemo(() => [...allTasks, ...completedTasks], [allTasks, completedTasks]);
 
-  const emotionDist = useMemo(() => {
-    const total = allForStats.length || 1;
-    return Object.entries(EMOTION_MAP).map(([key, em]) => {
-      const count = allForStats.filter(t => t.emotionalState === key).length;
-      return { key, em, count, pct: Math.round((count / total) * 100) };
+  // ── Mood × tasks: high-mood vs low-mood completion ratio ─────────
+  const moodVsTasks = useMemo(() => {
+    const completionsByDay: Record<string, number> = {};
+    completedTasks.forEach(t => {
+      const k = new Date(t.updatedAt).toISOString().slice(0, 10);
+      completionsByDay[k] = (completionsByDay[k] ?? 0) + 1;
     });
-  }, [allForStats]);
+    const samples: { mood: number; completions: number }[] = [];
+    Object.entries(store).forEach(([k, entries]) => {
+      if (!entries.length) return;
+      const mood = entries.reduce((s: number, e: CheckIn) => s + e.mood, 0) / entries.length;
+      samples.push({ mood, completions: completionsByDay[k] ?? 0 });
+    });
+    const high = samples.filter(s => s.mood >= 4);
+    const low  = samples.filter(s => s.mood <= 2.5);
+    if (!high.length || !low.length) return null;
+    const highAvg = high.reduce((s, x) => s + x.completions, 0) / high.length;
+    const lowAvg  = low.reduce((s, x) => s + x.completions, 0) / low.length;
+    return {
+      highAvg: highAvg.toFixed(1),
+      lowAvg:  lowAvg.toFixed(1),
+      ratio:   lowAvg > 0 ? (highAvg / lowAvg).toFixed(1) : null,
+    };
+  }, [completedTasks, store]);
 
-  const completionRates = useMemo(() => Object.entries(EMOTION_MAP).map(([key, em]) => {
-    const total = allForStats.filter(t => t.emotionalState === key).length;
-    const done  = completedTasks.filter(t => t.emotionalState === key).length;
-    return { key, em, total, done, rate: total ? Math.round((done / total) * 100) : 0 };
-  }).filter(r => r.total > 0).sort((a, b) => b.rate - a.rate), [allForStats, completedTasks]);
+  // Best / worst emotion for tasks (using completion rate)
+  const taskByEmotion = useMemo(() => {
+    const buckets: Record<string, { done: number; total: number }> = {};
+    Object.keys(EMOTION_MAP).forEach(k => { buckets[k] = { done: 0, total: 0 }; });
+    allForStats.forEach(t => { if (buckets[t.emotionalState]) buckets[t.emotionalState].total++; });
+    completedTasks.forEach(t => { if (buckets[t.emotionalState]) buckets[t.emotionalState].done++; });
+    const ranked = Object.entries(buckets)
+      .filter(([, v]) => v.total > 0)
+      .map(([k, v]) => ({ key: k, em: EMOTION_MAP[k as keyof typeof EMOTION_MAP], done: v.done, total: v.total, rate: v.done / v.total }))
+      .sort((a, b) => b.rate - a.rate);
+    if (ranked.length < 2) return null;
+    return { best: ranked[0], worst: ranked[ranked.length - 1] };
+  }, [allForStats, completedTasks]);
 
   const isMobile = useIsMobile();
 
@@ -216,18 +264,139 @@ export function EnergyView() {
         </h1>
       </div>
 
-      {/* ── Today's check-in ── */}
+      {/* ── 1. This week — headline + bars ── */}
       <div style={card}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>This week</p>
+        {weekHeadline ? (
+          <p style={{ fontSize: 14, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.01em", lineHeight: 1.5 }}>
+            You leaned <strong>{weekHeadline.lean}</strong>
+            {weekHeadline.trend === "rising" && <> · trended <strong style={{ color: "#059669" }}>upward</strong></>}
+            {weekHeadline.trend === "falling" && <> · trended <strong style={{ color: "#D14626" }}>downward</strong></>}
+            {weekHeadline.trend === "steady" && !weekHeadline.flat && <> · stayed <strong>steady</strong></>}
+            .{" "}
+            {!weekHeadline.flat && (
+              <>Best day <strong>{weekHeadline.best.label}</strong>, dipped <strong>{weekHeadline.worst.label}</strong>.</>
+            )}
+          </p>
+        ) : (
+          <p style={{ fontSize: 14, color: "#3d5a4a", margin: "0 0 16px", lineHeight: 1.5 }}>
+            Log a few check-ins to see your week unfold.
+          </p>
+        )}
+        <MoodChart data={weekData} />
+        {weekHeadline && (
+          <p style={{ fontSize: 11, color: "#4a6d47", margin: "12px 0 0", textAlign: "center" }}>
+            {weekHeadline.checkIns} day{weekHeadline.checkIns === 1 ? "" : "s"} logged · avg <strong style={{ color: "#082d1d" }}>{weekHeadline.avg}</strong> / 5
+          </p>
+        )}
+      </div>
+
+      {/* ── 2. What lifts / pulls ── */}
+      <div style={card}>
+        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>What's moving you</p>
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.02em" }}>Lifts your mood vs. pulls it down</h3>
+        {!liftsPulls?.hasAny ? (
+          <EmptyState icon={Lightbulb} title="Not enough signal yet" description="Tag your check-ins with what's affecting you to see what lifts you." compact />
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
+            <div style={{ background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4, padding: "10px 12px" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Lifts you</p>
+              {liftsPulls.lifts.length === 0 ? (
+                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {liftsPulls.lifts.map(l => (
+                    <div key={l.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
+                      <span>{l.tag}</span>
+                      <span style={{ color: "#059669", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{l.avg.toFixed(1)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ background: "#FFF0EC", border: "1px solid #fecaca", borderRadius: 4, padding: "10px 12px" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Pulls you down</p>
+              {liftsPulls.pulls.length === 0 ? (
+                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {liftsPulls.pulls.map(p => (
+                    <div key={p.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
+                      <span>{p.tag}</span>
+                      <span style={{ color: "#D14626", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{p.avg.toFixed(1)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── 3. Mood × tasks ── */}
+      {(moodVsTasks || taskByEmotion) && (
+        <div style={card}>
+          <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>Mood × tasks</p>
+          <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.02em" }}>How feelings turn into action</h3>
+
+          {moodVsTasks && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: taskByEmotion ? 14 : 0 }}>
+              <div style={{ background: "#f2fdec", borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>High-mood days</p>
+                <p style={{ margin: 0, color: "#082d1d" }}>
+                  <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.highAvg}</strong>
+                  <span style={{ fontSize: 11, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
+                </p>
+              </div>
+              <div style={{ background: "#f8f9f5", borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Low-mood days</p>
+                <p style={{ margin: 0, color: "#082d1d" }}>
+                  <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.lowAvg}</strong>
+                  <span style={{ fontSize: 11, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {moodVsTasks?.ratio && (
+            <p style={{ fontSize: 12, color: "#3d5a4a", margin: "0 0 14px", lineHeight: 1.5 }}>
+              You finish <strong style={{ color: "#082d1d" }}>{moodVsTasks.ratio}×</strong> more on high-mood days — protect that time.
+            </p>
+          )}
+
+          {taskByEmotion && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div style={{ background: taskByEmotion.best.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Most likely to finish</p>
+                <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.best.em?.pillText, fontWeight: 600 }}>
+                  {taskByEmotion.best.em?.emoji} {taskByEmotion.best.em?.label}
+                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.best.rate * 100)}%</span>
+                </p>
+              </div>
+              <div style={{ background: taskByEmotion.worst.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Least likely to finish</p>
+                <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.worst.em?.pillText, fontWeight: 600 }}>
+                  {taskByEmotion.worst.em?.emoji} {taskByEmotion.worst.em?.label}
+                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.worst.rate * 100)}%</span>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 4. Today — action anchor ── */}
+      <div style={card}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
           <div>
-            <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Today&apos;s feeling</p>
+            <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 2px" }}>Today</p>
             <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </h3>
           </div>
           {todayEntries.length > 0 && (
             <button onClick={() => setModalOpen(true)} style={{
-              padding: "5px 12px", borderRadius: 6, border: "0.5px solid rgba(0,0,0,0.12)",
+              padding: "5px 12px", borderRadius: 4, border: "0.5px solid rgba(0,0,0,0.12)",
               background: "#fff", color: "#059669", fontSize: 11, fontWeight: 500,
               cursor: "pointer", fontFamily: "inherit",
             }}>+ Log again</button>
@@ -236,15 +405,10 @@ export function EnergyView() {
 
         {todayEntries.length === 0 ? (
           <div>
-            <EmptyState
-              icon={Heart}
-              title="No check-in yet today"
-              description="How are you feeling right now?"
-              compact
-            />
+            <EmptyState icon={Heart} title="No check-in yet today" description="How are you feeling right now?" compact />
             <div style={{ display: "flex", justifyContent: "center", marginTop: -6 }}>
               <button onClick={() => setModalOpen(true)} style={{
-                padding: "8px 20px", borderRadius: 8, border: "none",
+                padding: "8px 20px", borderRadius: 4, border: "none",
                 background: "#059669", color: "#fff", fontSize: 12, fontWeight: 600,
                 cursor: "pointer", fontFamily: "inherit",
               }}>Log my feelings</button>
@@ -257,7 +421,7 @@ export function EnergyView() {
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "10px 12px 10px 14px",
                 borderLeft: `2px solid ${moodColor(latest.mood)}`,
-                background: "#f8f9f5", borderRadius: "0 8px 8px 0", marginBottom: 10,
+                background: "#f8f9f5", borderRadius: "0 4px 4px 0", marginBottom: 10,
               }}>
                 <span style={{ fontSize: 22 }}>{moodEmoji(latest.mood)}</span>
                 <div style={{ flex: 1 }}>
@@ -281,7 +445,7 @@ export function EnergyView() {
                 {todayEntries.slice(0, -1).map((e, i) => (
                   <div key={i} style={{
                     display: "flex", alignItems: "center", gap: 5,
-                    padding: "4px 10px", borderRadius: 6,
+                    padding: "4px 10px", borderRadius: 4,
                     background: "#f8f9f5", border: "0.5px solid rgba(0,0,0,0.08)",
                     fontSize: 11, color: "#3d5a4a",
                   }}>
@@ -294,108 +458,12 @@ export function EnergyView() {
             )}
             {todayAvg !== null && todayEntries.length > 1 && (
               <p style={{ fontSize: 11, color: "#059669", fontWeight: 500, margin: "10px 0 0" }}>
-                📊 Today&apos;s average: {moodLabel(todayAvg)}
+                Today&apos;s average: {moodLabel(todayAvg)}
               </p>
             )}
           </div>
         )}
       </div>
-
-      {/* ── Mood this week ── */}
-      <div style={card}>
-        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Mood this week</p>
-        <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Daily average from check-ins</h3>
-        <MoodChart data={weekData} />
-      </div>
-
-
-      {/* ── Top influences + emotional load ── */}
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 0 }}>
-
-        {/* Top influences */}
-        <div style={card}>
-          <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>What&apos;s affecting you</p>
-          <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Top influences</h3>
-          {topInfluences.length === 0 ? (
-            <EmptyState icon={Lightbulb} title="No patterns yet" description="Log check-ins to see what's influencing you." compact />
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {topInfluences.map(([label, count]) => {
-                const max = topInfluences[0][1];
-                return (
-                  <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: "0.5px solid rgba(0,0,0,0.06)" }}>
-                    <span style={{ fontSize: 12, color: "#082d1d" }}>{label}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 56, height: 3, background: "rgba(0,0,0,0.07)", borderRadius: 999 }}>
-                        <div style={{ height: "100%", background: "#059669", borderRadius: 999, width: `${(count / max) * 100}%` }} />
-                      </div>
-                      <span style={{ fontSize: 11, color: "#4a6d47", minWidth: 18, textAlign: "right" }}>{count}×</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Emotional load from tasks */}
-        <div style={card}>
-          <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Task emotional load</p>
-          <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Across {allForStats.length} tasks</h3>
-          {allForStats.length === 0 ? (
-            <EmptyState icon={BarChart3} title="No tasks yet" description="Add a task to see your emotional load." compact />
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {emotionDist.filter(r => r.count > 0).map(({ key, em, count, pct }) => {
-                const ec = EC[key] ?? EC.NEUTRAL;
-                return (
-                  <div key={key} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "7px 10px 7px 12px",
-                    borderLeft: `2px solid ${ec.text}`,
-                    background: ec.bg, borderRadius: "0 6px 6px 0",
-                  }}>
-                    <span style={{ fontSize: 12, color: "#082d1d" }}>{em.emoji} {em.label}</span>
-                    <span style={{ fontSize: 11, color: ec.text, fontWeight: 500 }}>{count} · {pct}%</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Completion by feeling ── */}
-      {completionRates.length > 0 && (
-        <div style={{ ...card, marginTop: 12 }}>
-          <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.5px", textTransform: "uppercase", fontWeight: 500, margin: "0 0 2px" }}>Completion by feeling</p>
-          <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.02em" }}>Which emotions get things done</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {completionRates.map(({ key, em, done, total, rate }) => {
-              const rateColor = rate >= 70 ? "#059669" : rate >= 40 ? "#f59e0b" : "#ef4444";
-              const rateBg    = rate >= 70 ? "#EEFAF1" : rate >= 40 ? "#FFF8E8" : "#FFF0EC";
-              return (
-                <div key={key} style={{
-                  padding: "9px 12px 9px 14px",
-                  borderLeft: `2px solid ${rateColor}`,
-                  background: rateBg, borderRadius: "0 6px 6px 0",
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 12, color: "#082d1d" }}>{em.emoji} {em.label}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 11, color: "#4a6d47" }}>{done} of {total}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: rateColor }}>{rate}%</span>
-                    </div>
-                  </div>
-                  <div style={{ height: 3, background: "rgba(0,0,0,0.08)", borderRadius: 999 }}>
-                    <div style={{ height: "100%", background: rateColor, borderRadius: 999, width: `${rate}%`, transition: "width 0.4s ease" }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Modal */}
       {modalOpen && (
