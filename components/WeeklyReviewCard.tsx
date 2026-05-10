@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 interface WeeklyReport {
   week_start: string;
@@ -167,13 +166,7 @@ export function WeeklyReviewCard() {
         )}
 
         {/* CTA */}
-        <div className="mt-4 flex items-center justify-between">
-          <Link
-            href="/quadrant"
-            className="text-[12.5px] font-bold text-[var(--lime-dark)] border-b-[1.5px] border-[var(--lime-border)] hover:border-[var(--lime-dark)] pb-px transition-colors"
-          >
-            See quadrant map →
-          </Link>
+        <div className="mt-4 flex items-center justify-end">
           <button
             onClick={dismiss}
             className="text-[12px] text-[var(--stone-500)] hover:text-[var(--lime-ink)] transition-colors"

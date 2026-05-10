@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ListChecks, ScatterChart, CalendarDays, List, Zap,
+  ListChecks, CalendarDays, List, Zap,
   ChevronLeft, Plus,
 } from "lucide-react";
 import { ProfileModal } from "@/components/ProfileModal";
@@ -19,7 +19,6 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 const VIEWS = [
   { href: "/",         Icon: ListChecks,   label: "Today",    fullLabel: "To-do list" },
   { href: "/energy",   Icon: Zap,          label: "Energy",   fullLabel: "My Energy" },
-  { href: "/quadrant", Icon: ScatterChart, label: "Map",      fullLabel: "Quadrant" },
   { href: "/calendar", Icon: CalendarDays, label: "Calendar", fullLabel: "Calendar" },
   { href: "/all",      Icon: List,         label: "All",      fullLabel: "All Tasks" },
 ];

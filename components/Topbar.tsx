@@ -7,7 +7,6 @@ import { ProfileModal } from "@/components/ProfileModal";
 
 const PAGE_NAMES: Record<string, string> = {
   "/":         "To-do list",
-  "/quadrant": "Quadrant",
   "/calendar": "Calendar",
   "/scheduled":"Scheduled",
   "/all":      "All",
