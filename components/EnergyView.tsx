@@ -264,128 +264,7 @@ export function EnergyView() {
         </h1>
       </div>
 
-      {/* ── 1. This week — headline + bars ── */}
-      <div style={card}>
-        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>This week</p>
-        {weekHeadline ? (
-          <p style={{ fontSize: 14, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.01em", lineHeight: 1.5 }}>
-            You leaned <strong>{weekHeadline.lean}</strong>
-            {weekHeadline.trend === "rising" && <> · trended <strong style={{ color: "#059669" }}>upward</strong></>}
-            {weekHeadline.trend === "falling" && <> · trended <strong style={{ color: "#D14626" }}>downward</strong></>}
-            {weekHeadline.trend === "steady" && !weekHeadline.flat && <> · stayed <strong>steady</strong></>}
-            .{" "}
-            {!weekHeadline.flat && (
-              <>Best day <strong>{weekHeadline.best.label}</strong>, dipped <strong>{weekHeadline.worst.label}</strong>.</>
-            )}
-          </p>
-        ) : (
-          <p style={{ fontSize: 14, color: "#3d5a4a", margin: "0 0 16px", lineHeight: 1.5 }}>
-            Log a few check-ins to see your week unfold.
-          </p>
-        )}
-        <MoodChart data={weekData} />
-        {weekHeadline && (
-          <p style={{ fontSize: 11, color: "#4a6d47", margin: "12px 0 0", textAlign: "center" }}>
-            {weekHeadline.checkIns} day{weekHeadline.checkIns === 1 ? "" : "s"} logged · avg <strong style={{ color: "#082d1d" }}>{weekHeadline.avg}</strong> / 5
-          </p>
-        )}
-      </div>
-
-      {/* ── 2. What lifts / pulls ── */}
-      <div style={card}>
-        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>What&apos;s moving you</p>
-        <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.02em" }}>Lifts your mood vs. pulls it down</h3>
-        {!liftsPulls?.hasAny ? (
-          <EmptyState icon={Lightbulb} title="Not enough signal yet" description="Tag your check-ins with what&apos;s affecting you to see what lifts you." compact />
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
-            <div style={{ background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4, padding: "10px 12px" }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Lifts you</p>
-              {liftsPulls.lifts.length === 0 ? (
-                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  {liftsPulls.lifts.map(l => (
-                    <div key={l.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
-                      <span>{l.tag}</span>
-                      <span style={{ color: "#059669", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{l.avg.toFixed(1)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div style={{ background: "#FFF0EC", border: "1px solid #fecaca", borderRadius: 4, padding: "10px 12px" }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Pulls you down</p>
-              {liftsPulls.pulls.length === 0 ? (
-                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  {liftsPulls.pulls.map(p => (
-                    <div key={p.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
-                      <span>{p.tag}</span>
-                      <span style={{ color: "#D14626", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{p.avg.toFixed(1)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── 3. Mood × tasks ── */}
-      {(moodVsTasks || taskByEmotion) && (
-        <div style={card}>
-          <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>Mood × tasks</p>
-          <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.02em" }}>How feelings turn into action</h3>
-
-          {moodVsTasks && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: taskByEmotion ? 14 : 0 }}>
-              <div style={{ background: "#f2fdec", borderRadius: 4, padding: "10px 12px" }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>High-mood days</p>
-                <p style={{ margin: 0, color: "#082d1d" }}>
-                  <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.highAvg}</strong>
-                  <span style={{ fontSize: 11, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
-                </p>
-              </div>
-              <div style={{ background: "#f8f9f5", borderRadius: 4, padding: "10px 12px" }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Low-mood days</p>
-                <p style={{ margin: 0, color: "#082d1d" }}>
-                  <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.lowAvg}</strong>
-                  <span style={{ fontSize: 11, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
-                </p>
-              </div>
-            </div>
-          )}
-
-          {moodVsTasks?.ratio && (
-            <p style={{ fontSize: 12, color: "#3d5a4a", margin: "0 0 14px", lineHeight: 1.5 }}>
-              You finish <strong style={{ color: "#082d1d" }}>{moodVsTasks.ratio}×</strong> more on high-mood days — protect that time.
-            </p>
-          )}
-
-          {taskByEmotion && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div style={{ background: taskByEmotion.best.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Most likely to finish</p>
-                <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.best.em?.pillText, fontWeight: 600 }}>
-                  {taskByEmotion.best.em?.emoji} {taskByEmotion.best.em?.label}
-                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.best.rate * 100)}%</span>
-                </p>
-              </div>
-              <div style={{ background: taskByEmotion.worst.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Least likely to finish</p>
-                <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.worst.em?.pillText, fontWeight: 600 }}>
-                  {taskByEmotion.worst.em?.emoji} {taskByEmotion.worst.em?.label}
-                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.worst.rate * 100)}%</span>
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── 4. Today — action anchor ── */}
+      {/* ── 1. Today — action anchor ── */}
       <div style={card}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
           <div>
@@ -464,6 +343,128 @@ export function EnergyView() {
           </div>
         )}
       </div>
+
+      {/* ── 2. Mood × tasks ── */}
+      {(moodVsTasks || taskByEmotion) && (
+        <div style={card}>
+          <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>Mood × tasks</p>
+          <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.02em" }}>How feelings turn into action</h3>
+
+          {moodVsTasks && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: taskByEmotion ? 14 : 0 }}>
+              <div style={{ background: "#f2fdec", borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>High-mood days</p>
+                <p style={{ margin: 0, color: "#082d1d" }}>
+                  <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.highAvg}</strong>
+                  <span style={{ fontSize: 11, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
+                </p>
+              </div>
+              <div style={{ background: "#f8f9f5", borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Low-mood days</p>
+                <p style={{ margin: 0, color: "#082d1d" }}>
+                  <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.lowAvg}</strong>
+                  <span style={{ fontSize: 11, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {moodVsTasks?.ratio && (
+            <p style={{ fontSize: 12, color: "#3d5a4a", margin: "0 0 14px", lineHeight: 1.5 }}>
+              You finish <strong style={{ color: "#082d1d" }}>{moodVsTasks.ratio}×</strong> more on high-mood days — protect that time.
+            </p>
+          )}
+
+          {taskByEmotion && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div style={{ background: taskByEmotion.best.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Most likely to finish</p>
+                <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.best.em?.pillText, fontWeight: 600 }}>
+                  {taskByEmotion.best.em?.emoji} {taskByEmotion.best.em?.label}
+                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.best.rate * 100)}%</span>
+                </p>
+              </div>
+              <div style={{ background: taskByEmotion.worst.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Least likely to finish</p>
+                <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.worst.em?.pillText, fontWeight: 600 }}>
+                  {taskByEmotion.worst.em?.emoji} {taskByEmotion.worst.em?.label}
+                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.worst.rate * 100)}%</span>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 3. This week — headline + bars ── */}
+      <div style={card}>
+        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>This week</p>
+        {weekHeadline ? (
+          <p style={{ fontSize: 14, color: "#082d1d", margin: "0 0 16px", letterSpacing: "-0.01em", lineHeight: 1.5 }}>
+            You leaned <strong>{weekHeadline.lean}</strong>
+            {weekHeadline.trend === "rising" && <> · trended <strong style={{ color: "#059669" }}>upward</strong></>}
+            {weekHeadline.trend === "falling" && <> · trended <strong style={{ color: "#D14626" }}>downward</strong></>}
+            {weekHeadline.trend === "steady" && !weekHeadline.flat && <> · stayed <strong>steady</strong></>}
+            .{" "}
+            {!weekHeadline.flat && (
+              <>Best day <strong>{weekHeadline.best.label}</strong>, dipped <strong>{weekHeadline.worst.label}</strong>.</>
+            )}
+          </p>
+        ) : (
+          <p style={{ fontSize: 14, color: "#3d5a4a", margin: "0 0 16px", lineHeight: 1.5 }}>
+            Log a few check-ins to see your week unfold.
+          </p>
+        )}
+        <MoodChart data={weekData} />
+        {weekHeadline && (
+          <p style={{ fontSize: 11, color: "#4a6d47", margin: "12px 0 0", textAlign: "center" }}>
+            {weekHeadline.checkIns} day{weekHeadline.checkIns === 1 ? "" : "s"} logged · avg <strong style={{ color: "#082d1d" }}>{weekHeadline.avg}</strong> / 5
+          </p>
+        )}
+      </div>
+
+      {/* ── 4. What lifts / pulls ── */}
+      <div style={card}>
+        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>What&apos;s moving you</p>
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.02em" }}>Lifts your mood vs. pulls it down</h3>
+        {!liftsPulls?.hasAny ? (
+          <EmptyState icon={Lightbulb} title="Not enough signal yet" description="Tag your check-ins with what&apos;s affecting you to see what lifts you." compact />
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
+            <div style={{ background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4, padding: "10px 12px" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Lifts you</p>
+              {liftsPulls.lifts.length === 0 ? (
+                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {liftsPulls.lifts.map(l => (
+                    <div key={l.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
+                      <span>{l.tag}</span>
+                      <span style={{ color: "#059669", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{l.avg.toFixed(1)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ background: "#FFF0EC", border: "1px solid #fecaca", borderRadius: 4, padding: "10px 12px" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Pulls you down</p>
+              {liftsPulls.pulls.length === 0 ? (
+                <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {liftsPulls.pulls.map(p => (
+                    <div key={p.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
+                      <span>{p.tag}</span>
+                      <span style={{ color: "#D14626", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{p.avg.toFixed(1)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
 
       {/* Modal */}
       {modalOpen && (
