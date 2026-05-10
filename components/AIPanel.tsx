@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { X, Sparkles, Zap, TrendingUp, Compass, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Sparkles, Zap, TrendingUp, Compass, ChevronDown, ChevronUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { loadEnergyStore, todayKey } from "@/components/EnergyCheckInModal";
 import { EMOTION_MAP } from "@/lib/emotions";
@@ -25,42 +25,6 @@ function taskScore(t: TaskWithSubtasks): number {
   const u = urgencyScore(t.dueAt);
   const e = EMOTION_WEIGHT[t.emotionalState] ?? 3;
   return u * e + e * 0.1; // emotion as tiebreaker
-}
-
-// ── Reframe templates ────────────────────────────────────────────────
-
-function getReframeSteps(title: string): string[] {
-  const t = title.toLowerCase();
-  if (/write|report|doc|draft|email|brief|summary/.test(t)) return [
-    `Open a blank doc and type just the title: "${title}"`,
-    "Spend 5 min bullet-pointing the 3 main things to cover",
-    "Write one rough paragraph — it doesn't need to be good yet",
-  ];
-  if (/call|meeting|talk|present|pitch|discuss/.test(t)) return [
-    "Write down the one thing you need to get out of this conversation",
-    "Prepare 3 bullet points or questions to guide it",
-    "Block 10 min before for a quick mental warm-up",
-  ];
-  if (/review|check|audit|read|look|analyse/.test(t)) return [
-    "Open the thing — just open it, don't do anything yet",
-    "Skim for 5 minutes to get the lay of the land",
-    "Write 3 notes on what needs attention before going deeper",
-  ];
-  if (/plan|strategy|roadmap|design|architect/.test(t)) return [
-    "Write the problem you're trying to solve in one sentence",
-    "List 3 constraints or requirements from memory",
-    "Sketch the simplest possible version that would work",
-  ];
-  if (/fix|bug|error|issue|debug|broken/.test(t)) return [
-    "Reproduce the problem — can you make it happen consistently?",
-    "Write down what you know and what you don't know",
-    "Try one small hypothesis — even if it fails, you've learned something",
-  ];
-  return [
-    "Set a 10-minute timer — just start, don't aim to finish",
-    "Identify the single smallest action you can take right now",
-    "Do only that one thing, then decide if you want to continue",
-  ];
 }
 
 // ── Weekly report type ───────────────────────────────────────────────
@@ -127,12 +91,6 @@ export function AIPanel({ onClose }: Props) {
     retry: 1,
   });
 
-  const { data: allTasks = [] } = useQuery<TaskWithSubtasks[]>({
-    queryKey: ["tasks", "all"],
-    queryFn: () => fetch("/api/tasks?filter=all").then(r => r.json()),
-    retry: 1,
-  });
-
   const { data: completedTasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "completed"],
     queryFn: () => fetch("/api/tasks?filter=completed").then(r => r.json()),
@@ -157,14 +115,6 @@ export function AIPanel({ onClose }: Props) {
     [pending]
   );
 
-  // Reframe — most deferred dreaded/anxious task
-  const dreaded = useMemo(() =>
-    [...allTasks]
-      .filter(t => t.emotionalState === "DREADING" || t.emotionalState === "ANXIOUS")
-      .sort((a, b) => (b.deferredCount ?? 0) - (a.deferredCount ?? 0))[0],
-    [allTasks]
-  );
-
   // Weekly patterns
   const bestEmotion = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -180,11 +130,6 @@ export function AIPanel({ onClose }: Props) {
       .sort((a, b) => b[1] - a[1])[0];
     return worst ? { key: worst[0], count: worst[1], em: EMOTION_MAP[worst[0] as keyof typeof EMOTION_MAP] } : null;
   }, [weekly]);
-
-  const reframeSteps = useMemo(() =>
-    dreaded ? getReframeSteps(dreaded.title) : [],
-    [dreaded]
-  );
 
   // ── Render ────────────────────────────────────────────────────────
 
@@ -290,100 +235,64 @@ export function AIPanel({ onClose }: Props) {
         </Group>
 
         <Group label="This week">
-        {/* ── 2. Weekly Patterns ── */}
-        <Section icon={<TrendingUp size={14} />} title="Weekly patterns">
+        {/* ── 2. This-week stats ── */}
+        <Section icon={<TrendingUp size={14} />} title="At a glance">
           {!weekly ? (
-            <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>Loading patterns…</p>
+            <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>Loading…</p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55 }}>
-              {/* Stat rows */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 4, borderBottom: "1px solid #f1f3ef", marginBottom: 4 }}>
-                {[
-                  { label: "Completed", val: weekly.total_completed, dot: "#22c55e" },
-                  { label: "Deferred",  val: weekly.total_deferrals, dot: "#f59e0b" },
-                  { label: "Pending",   val: pending.length,         dot: "#94a3b8" },
-                ].map(row => (
-                  <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#3d5a4a" }}>
-                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: row.dot, opacity: 0.7 }} />
-                      {row.label}
-                    </span>
-                    <span style={{ fontSize: 12.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
-                  </div>
-                ))}
-              </div>
-              {bestEmotion && (
-                <p style={{ margin: 0, color: "#3d5a4a" }}>
-                  You finish most tasks when feeling{" "}
-                  <strong style={{ color: bestEmotion.em?.pillText ?? "#082d1d" }}>{bestEmotion.em?.emoji} {bestEmotion.em?.label}</strong>
-                  <span style={{ color: "#4a6d47" }}> ({bestEmotion.count} completed).</span>
-                </p>
-              )}
-              {worstEmotion && (
-                <p style={{ margin: 0, color: "#3d5a4a" }}>
-                  Most deferrals when feeling{" "}
-                  <strong style={{ color: worstEmotion.em?.pillText ?? "#082d1d" }}>{worstEmotion.em?.emoji} {worstEmotion.em?.label}</strong>
-                  <span style={{ color: "#4a6d47" }}> ({worstEmotion.count} deferrals).</span>
-                </p>
-              )}
-              {weekly.most_deferred_task && (
-                <p style={{ margin: 0, color: "#3d5a4a" }}>
-                  Most deferred task:{" "}
-                  <span style={{ color: "#082d1d", fontWeight: 600 }}>&ldquo;{weekly.most_deferred_task.title}&rdquo;</span>
-                  {" "}— pushed <span style={{ color: "#D14626", fontWeight: 600 }}>{weekly.most_deferred_task.deferredCount}×</span>.
-                </p>
-              )}
-              {weekly.total_completed === 0 && !bestEmotion && !worstEmotion && (
-                <p style={{ margin: 0, color: "#b9d3c4" }}>
-                  Complete and defer some tasks this week to see your patterns here.
-                </p>
-              )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {[
+                { label: "Completed", val: weekly.total_completed, dot: "#22c55e" },
+                { label: "Deferred",  val: weekly.total_deferrals, dot: "#f59e0b" },
+                { label: "Pending",   val: pending.length,         dot: "#94a3b8" },
+              ].map(row => (
+                <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#3d5a4a" }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: row.dot, opacity: 0.7 }} />
+                    {row.label}
+                  </span>
+                  <span style={{ fontSize: 12.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
+                </div>
+              ))}
             </div>
           )}
         </Section>
 
-        {/* ── 4. Reframe Assistant ── */}
-        <Section icon={<Lightbulb size={14} />} title="Reframe a dreaded task" defaultOpen={!!dreaded}>
-          {!dreaded ? (
+        {/* ── 3. Patterns ── */}
+        <Section icon={<Sparkles size={14} />} title="Patterns">
+          {!weekly || (weekly.total_completed === 0 && !bestEmotion && !worstEmotion) ? (
             <p style={{ fontSize: 12.5, color: "#b9d3c4", margin: 0 }}>
-              No dreaded or anxious tasks right now.
+              Complete and defer some tasks this week to see patterns here.
             </p>
           ) : (
-            <div style={{ fontSize: 13, lineHeight: 1.55 }}>
-              <p style={{ margin: "0 0 8px", color: "#3d5a4a" }}>
-                {(() => {
-                  const em = EMOTION_MAP[dreaded.emotionalState as keyof typeof EMOTION_MAP];
-                  return em ? <span style={{ color: em.pillText, fontWeight: 600 }}>{em.emoji} {em.label}</span> : null;
-                })()}
-                {dreaded.deferredCount > 0 ? <> · deferred <span style={{ color: "#D14626", fontWeight: 600 }}>{dreaded.deferredCount}×</span></> : ""}
-                <br />
-                <strong style={{ color: "#082d1d" }}>&ldquo;{dreaded.title}&rdquo;</strong>
-              </p>
-
-              <p style={{ margin: "0 0 8px", fontWeight: 600, color: "#082d1d" }}>Break it down — just do step 1:</p>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {reframeSteps.map((step, i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <span style={{
-                      width: 20, height: 20, borderRadius: 999, flexShrink: 0,
-                      background: i === 0 ? "#059669" : "#f1f3ef",
-                      color: i === 0 ? "#fff" : "#4a6d47",
-                      fontSize: 11, fontWeight: 700,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>{i + 1}</span>
-                    <p style={{
-                      fontSize: 13, color: i === 0 ? "#082d1d" : "#4a6d47",
-                      fontWeight: i === 0 ? 600 : 400,
-                      margin: 0, lineHeight: 1.5,
-                    }}>{step}</p>
-                  </div>
-                ))}
-              </div>
-
-              <p style={{ fontSize: 11, color: "#b9d3c4", margin: "12px 0 0", fontStyle: "italic" }}>
-                You only have to do step 1. The rest follows.
-              </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13, lineHeight: 1.5 }}>
+              {bestEmotion && (
+                <div>
+                  <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most completions when feeling</p>
+                  <p style={{ margin: 0, color: bestEmotion.em?.pillText ?? "#082d1d", fontWeight: 600 }}>
+                    {bestEmotion.em?.emoji} {bestEmotion.em?.label}
+                    <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {bestEmotion.count}</span>
+                  </p>
+                </div>
+              )}
+              {worstEmotion && (
+                <div>
+                  <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most deferrals when feeling</p>
+                  <p style={{ margin: 0, color: worstEmotion.em?.pillText ?? "#082d1d", fontWeight: 600 }}>
+                    {worstEmotion.em?.emoji} {worstEmotion.em?.label}
+                    <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {worstEmotion.count}</span>
+                  </p>
+                </div>
+              )}
+              {weekly.most_deferred_task && (
+                <div>
+                  <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most deferred task</p>
+                  <p style={{ margin: 0, color: "#082d1d" }}>
+                    &ldquo;{weekly.most_deferred_task.title}&rdquo;
+                    <span style={{ color: "#D14626", fontWeight: 600, marginLeft: 6 }}>· {weekly.most_deferred_task.deferredCount}×</span>
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </Section>
