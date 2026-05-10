@@ -365,21 +365,22 @@ export function AIPanel({ onClose }: Props) {
           </Block>
         )}
 
-        {/* Today's briefing */}
+        {/* Today's briefing — 3 stat tiles */}
         <Block icon={Zap} title="Today's briefing">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, lineHeight: 1.55 }}>
-            <p style={{ margin: 0, color: overdue.length > 0 ? "#D14626" : "#3d5a4a", fontWeight: overdue.length > 0 ? 600 : 400 }}>
-              {overdue.length > 0 ? `${overdue.length} overdue` : "Nothing overdue."}
-            </p>
-            <p style={{ margin: 0, color: "#3d5a4a" }}>
-              <strong style={{ color: "#082d1d" }}>{pending.length}</strong>
-              <span> task{pending.length !== 1 ? "s" : ""} remaining today.</span>
-            </p>
-            <p style={{ margin: 0, color: hasEnergy ? "#059669" : "#3d5a4a" }}>
-              {hasEnergy ? "Energy logged today." : (
-                <>Energy not logged yet — <span style={{ color: "#4a6d47" }}>track how you feel to unlock pattern insights.</span></>
-              )}
-            </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+            {[
+              { label: "Overdue", val: String(overdue.length), color: overdue.length > 0 ? "#D14626" : "#082d1d", bg: overdue.length > 0 ? "#FFF0EC" : "#f8f9f5" },
+              { label: "Pending", val: String(pending.length), color: "#082d1d", bg: "#f8f9f5" },
+              { label: "Energy",  val: hasEnergy ? "✓" : "—", color: hasEnergy ? "#059669" : "#b9d3c4", bg: hasEnergy ? "#f2fdec" : "#f8f9f5" },
+            ].map(t => (
+              <div key={t.label} style={{
+                background: t.bg, borderRadius: 4, padding: "8px 6px",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+              }}>
+                <span style={{ fontSize: 17, fontWeight: 600, color: t.color, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>{t.val}</span>
+                <span style={{ fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
+              </div>
+            ))}
           </div>
         </Block>
 
@@ -432,21 +433,21 @@ export function AIPanel({ onClose }: Props) {
         ) : (
           <>
 
-        {/* At a glance — only if any totals are non-zero */}
+        {/* At a glance — 3 stat tiles */}
         {weekly && (weekly.total_completed > 0 || weekly.total_deferrals > 0 || pending.length > 0) && (
           <Block icon={TrendingUp} title="At a glance">
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
               {[
-                { label: "Completed", val: weekly.total_completed, dot: "#22c55e" },
-                { label: "Deferred",  val: weekly.total_deferrals, dot: "#f59e0b" },
-                { label: "Pending",   val: pending.length,         dot: "#94a3b8" },
-              ].map(row => (
-                <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "#3d5a4a" }}>
-                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: row.dot, opacity: 0.7 }} />
-                    {row.label}
-                  </span>
-                  <span style={{ fontSize: 11.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
+                { label: "Completed", val: weekly.total_completed, color: "#1A9444", bg: "#EEFAF1" },
+                { label: "Deferred",  val: weekly.total_deferrals, color: "#B07A10", bg: "#FFF8E8" },
+                { label: "Pending",   val: pending.length,         color: "#082d1d", bg: "#f8f9f5" },
+              ].map(t => (
+                <div key={t.label} style={{
+                  background: t.bg, borderRadius: 4, padding: "8px 6px",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                }}>
+                  <span style={{ fontSize: 17, fontWeight: 600, color: t.color, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>{t.val}</span>
+                  <span style={{ fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
                 </div>
               ))}
             </div>
@@ -463,32 +464,32 @@ export function AIPanel({ onClose }: Props) {
           </Block>
         )}
 
-        {/* Patterns — only if at least one pattern exists */}
+        {/* Patterns — each sub-pattern is its own tinted sub-card */}
         {(bestEmotion || worstEmotion || weekly?.most_deferred_task) && (
           <Block icon={Sparkles} title="Patterns">
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 12, lineHeight: 1.5 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {bestEmotion && (
-                <div>
-                  <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most completions when feeling</p>
-                  <p style={{ margin: 0, color: bestEmotion.em?.pillText ?? "#082d1d", fontWeight: 600 }}>
+                <div style={{ background: bestEmotion.em?.pillBg ?? "#f8f9f5", borderRadius: 4, padding: "8px 10px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most completions when feeling</p>
+                  <p style={{ margin: 0, color: bestEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12.5 }}>
                     {bestEmotion.em?.emoji} {bestEmotion.em?.label}
                     <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {bestEmotion.count}</span>
                   </p>
                 </div>
               )}
               {worstEmotion && (
-                <div>
-                  <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most deferrals when feeling</p>
-                  <p style={{ margin: 0, color: worstEmotion.em?.pillText ?? "#082d1d", fontWeight: 600 }}>
+                <div style={{ background: worstEmotion.em?.pillBg ?? "#f8f9f5", borderRadius: 4, padding: "8px 10px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferrals when feeling</p>
+                  <p style={{ margin: 0, color: worstEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12.5 }}>
                     {worstEmotion.em?.emoji} {worstEmotion.em?.label}
                     <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {worstEmotion.count}</span>
                   </p>
                 </div>
               )}
               {weekly?.most_deferred_task && (
-                <div>
-                  <p style={{ margin: "0 0 2px", fontSize: 11, color: "#4a6d47" }}>Most deferred task</p>
-                  <p style={{ margin: 0, color: "#082d1d" }}>
+                <div style={{ background: "#FFF0EC", borderRadius: 4, padding: "8px 10px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferred task</p>
+                  <p style={{ margin: 0, color: "#082d1d", fontSize: 12.5 }}>
                     &ldquo;{weekly.most_deferred_task.title}&rdquo;
                     <span style={{ color: "#D14626", fontWeight: 600, marginLeft: 6 }}>· {weekly.most_deferred_task.deferredCount}×</span>
                   </p>
