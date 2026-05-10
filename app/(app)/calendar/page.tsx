@@ -34,6 +34,12 @@ function fmtTime(dueAt: Date | string | null) {
 function loadNote(id: string) {
   try { return localStorage.getItem(`orin_note_${id}`) ?? ""; } catch { return ""; }
 }
+function persistNote(id: string, text: string) {
+  try {
+    if (text.trim()) localStorage.setItem(`orin_note_${id}`, text);
+    else localStorage.removeItem(`orin_note_${id}`);
+  } catch {}
+}
 
 function isOverdue(task: TaskWithSubtasks): boolean {
   if (task.isCompleted || !task.dueAt) return false;
@@ -191,6 +197,8 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
   const [editEmotion, setEditEmotion] = useState<TaskWithSubtasks["emotionalState"]>("NEUTRAL");
   const [editDate, setEditDate]       = useState("");
   const [editTime, setEditTime]       = useState("");
+  const [editNote, setEditNote]       = useState("");
+  const [editNoteOpen, setEditNoteOpen] = useState(false);
 
   function startEdit(t: TaskWithSubtasks) {
     setEditingId(t.id);
@@ -204,6 +212,9 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
       setEditDate("");
       setEditTime("");
     }
+    const existing = loadNote(t.id);
+    setEditNote(existing);
+    setEditNoteOpen(existing.trim().length > 0);
   }
 
   function saveEdit(t: TaskWithSubtasks) {
@@ -215,6 +226,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
       emotionalState: editEmotion,
       dueAt,
     });
+    persistNote(t.id, editNote);
     setEditingId(null);
   }
 
@@ -271,20 +283,57 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                 background: "#fff",
               }}>
                 <div style={{ border: "1px solid #059669", borderRadius: 4, background: "#fff" }}>
-                  {/* Title row */}
+                  {/* Title + note */}
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px 6px" }}>
                     <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px solid #059669", flexShrink: 0, marginTop: 2 }} />
-                    <input
-                      autoFocus
-                      value={editTitle}
-                      onChange={ev => setEditTitle(ev.target.value)}
-                      onKeyDown={ev => { if (ev.key === "Enter") saveEdit(task); if (ev.key === "Escape") setEditingId(null); }}
-                      style={{
-                        flex: 1, border: "none", outline: "none", fontFamily: "inherit",
-                        fontSize: 12, fontWeight: 400, letterSpacing: "-0.01em",
-                        color: "#082d1d", background: "transparent",
-                      }}
-                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <textarea
+                        autoFocus
+                        value={editTitle}
+                        onChange={ev => setEditTitle(ev.target.value)}
+                        onKeyDown={ev => {
+                          if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) saveEdit(task);
+                          if (ev.key === "Escape") setEditingId(null);
+                        }}
+                        rows={1}
+                        style={{
+                          width: "100%", border: "none", outline: "none", fontFamily: "inherit",
+                          fontSize: 12, fontWeight: 400, letterSpacing: "-0.01em",
+                          color: "#082d1d", background: "transparent",
+                          resize: "none", lineHeight: 1.5, padding: 0, display: "block",
+                          marginBottom: 2,
+                          overflow: "hidden",
+                        }}
+                        ref={el => {
+                          if (el) { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }
+                        }}
+                      />
+                      {editNoteOpen ? (
+                        <textarea
+                          value={editNote}
+                          onChange={ev => setEditNote(ev.target.value)}
+                          placeholder="Notes"
+                          rows={2}
+                          style={{
+                            width: "100%", border: "none", outline: "none", fontFamily: "inherit",
+                            fontSize: 11, color: "#3d5a4a", background: "transparent",
+                            resize: "none", lineHeight: 1.5, padding: 0, display: "block",
+                            overflow: "hidden",
+                          }}
+                          onInput={ev => {
+                            const t = ev.currentTarget;
+                            t.style.height = "auto"; t.style.height = t.scrollHeight + "px";
+                          }}
+                        />
+                      ) : (
+                        <div
+                          onClick={() => setEditNoteOpen(true)}
+                          style={{ fontSize: 11, color: "#b9d3c4", cursor: "text" }}
+                        >
+                          {editNote.trim() || "+ Add note"}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Chip bar — same shape as inline create form */}
