@@ -72,29 +72,42 @@ interface WeeklyReport {
   most_deferred_task: { title: string; deferredCount: number; emotionalState: string } | null;
 }
 
-// ── Section wrapper ──────────────────────────────────────────────────
+// ── Hierarchy: Group → Section → Body ────────────────────────────────
+
+function Group({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginTop: 18 }}>
+      <p style={{
+        fontSize: 10, fontWeight: 600, color: "#4a6d47",
+        textTransform: "uppercase", letterSpacing: "0.10em",
+        margin: "0 0 4px",
+      }}>{label}</p>
+      {children}
+    </div>
+  );
+}
 
 function Section({ icon, title, children, defaultOpen = true }: {
   icon: React.ReactNode; title: string; children: React.ReactNode; defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div style={{ marginBottom: 4 }}>
+    <div>
       <button
         onClick={() => setOpen(o => !o)}
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          width: "100%", padding: "10px 0", background: "none", border: "none",
+          width: "100%", padding: "12px 0 10px", background: "none", border: "none",
           cursor: "pointer", fontFamily: "inherit",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <span style={{ color: "#059669" }}>{icon}</span>
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ color: "#4a6d47", display: "inline-flex" }}>{icon}</span>
+          <span style={{ fontSize: 13.5, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
         </div>
-        {open ? <ChevronUp size={13} color="#b9d3c4" /> : <ChevronDown size={13} color="#b9d3c4" />}
+        {open ? <ChevronUp size={14} color="#b9d3c4" /> : <ChevronDown size={14} color="#b9d3c4" />}
       </button>
-      {open && <div style={{ paddingBottom: 12 }}>{children}</div>}
+      {open && <div style={{ paddingBottom: 14, paddingLeft: 22 }}>{children}</div>}
       <div style={{ height: 1, background: "#f1f3ef" }} />
     </div>
   );
@@ -227,6 +240,7 @@ export function AIPanel({ onClose }: Props) {
       {/* Scrollable body */}
       <div style={{ flex: 1, overflowY: "auto", padding: "4px 18px 24px" }}>
 
+        <Group label="Today">
         {/* ── 1. Daily Briefing ── */}
         <Section icon={<Zap size={14} />} title="Today's briefing">
           <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13, lineHeight: 1.55 }}>
@@ -245,6 +259,37 @@ export function AIPanel({ onClose }: Props) {
           </div>
         </Section>
 
+        {/* ── 3. Task Coach (moved up — also a 'Today' insight) ── */}
+        <Section icon={<Compass size={14} />} title="What to work on next">
+          {pending.length === 0 ? (
+            <p style={{ fontSize: 13, color: "#059669", margin: 0 }}>🎉 All caught up — no pending tasks for today.</p>
+          ) : recommended ? (
+            <div style={{ fontSize: 13, lineHeight: 1.55 }}>
+              <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
+                Start with:{" "}
+                <strong style={{ color: "#082d1d" }}>&ldquo;{recommended.title}&rdquo;</strong>
+              </p>
+              <p style={{ margin: "0 0 6px", display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {recommended.dueAt && new Date(recommended.dueAt) < new Date() && (
+                  <span style={{ color: "#D14626", fontWeight: 600 }}>Overdue</span>
+                )}
+                {(() => {
+                  const em = EMOTION_MAP[recommended.emotionalState as keyof typeof EMOTION_MAP];
+                  return em ? <span style={{ color: em.pillText, fontWeight: 600 }}>{em.emoji} {em.label}</span> : null;
+                })()}
+                {recommended.deferredCount > 0 && (
+                  <span style={{ color: "#D14626", fontWeight: 600 }}>Deferred {recommended.deferredCount}×</span>
+                )}
+              </p>
+              <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>
+                Scored highest on urgency + emotional weight across your {pending.length} pending tasks.
+              </p>
+            </div>
+          ) : null}
+        </Section>
+        </Group>
+
+        <Group label="This week">
         {/* ── 2. Weekly Patterns ── */}
         <Section icon={<TrendingUp size={14} />} title="Weekly patterns">
           {!weekly ? (
@@ -297,35 +342,6 @@ export function AIPanel({ onClose }: Props) {
           )}
         </Section>
 
-        {/* ── 3. Task Coach ── */}
-        <Section icon={<Compass size={14} />} title="What to work on next">
-          {pending.length === 0 ? (
-            <p style={{ fontSize: 13, color: "#059669", margin: 0 }}>🎉 All caught up — no pending tasks for today.</p>
-          ) : recommended ? (
-            <div style={{ fontSize: 13, lineHeight: 1.55 }}>
-              <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
-                Start with:{" "}
-                <strong style={{ color: "#082d1d" }}>&ldquo;{recommended.title}&rdquo;</strong>
-              </p>
-              <p style={{ margin: "0 0 6px", display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {recommended.dueAt && new Date(recommended.dueAt) < new Date() && (
-                  <span style={{ color: "#D14626", fontWeight: 600 }}>Overdue</span>
-                )}
-                {(() => {
-                  const em = EMOTION_MAP[recommended.emotionalState as keyof typeof EMOTION_MAP];
-                  return em ? <span style={{ color: em.pillText, fontWeight: 600 }}>{em.emoji} {em.label}</span> : null;
-                })()}
-                {recommended.deferredCount > 0 && (
-                  <span style={{ color: "#D14626", fontWeight: 600 }}>Deferred {recommended.deferredCount}×</span>
-                )}
-              </p>
-              <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>
-                Scored highest on urgency + emotional weight across your {pending.length} pending tasks.
-              </p>
-            </div>
-          ) : null}
-        </Section>
-
         {/* ── 4. Reframe Assistant ── */}
         <Section icon={<Lightbulb size={14} />} title="Reframe a dreaded task" defaultOpen={!!dreaded}>
           {!dreaded ? (
@@ -371,6 +387,7 @@ export function AIPanel({ onClose }: Props) {
             </div>
           )}
         </Section>
+        </Group>
       </div>
     </aside>
   );
