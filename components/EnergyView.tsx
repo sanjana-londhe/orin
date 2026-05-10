@@ -293,10 +293,10 @@ export function EnergyView() {
 
       {/* ── 2. What lifts / pulls ── */}
       <div style={card}>
-        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>What's moving you</p>
+        <p style={{ fontSize: 11, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>What&apos;s moving you</p>
         <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.02em" }}>Lifts your mood vs. pulls it down</h3>
         {!liftsPulls?.hasAny ? (
-          <EmptyState icon={Lightbulb} title="Not enough signal yet" description="Tag your check-ins with what's affecting you to see what lifts you." compact />
+          <EmptyState icon={Lightbulb} title="Not enough signal yet" description="Tag your check-ins with what&apos;s affecting you to see what lifts you." compact />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
             <div style={{ background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4, padding: "10px 12px" }}>
