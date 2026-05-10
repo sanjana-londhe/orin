@@ -196,30 +196,35 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
           {/* Stats */}
           {!isCollapsed && (
             <div style={{
-              background: "#fff", border: "1px solid #e9ede9",
-              borderRadius: 4, padding: "12px 14px", marginBottom: 14,
+              background: "transparent",
+              padding: "0 4px", marginBottom: 14,
             }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", marginBottom: 10, margin: "0 0 10px" }}>This week</p>
+              <p style={{
+                fontSize: 10, fontWeight: 600,
+                color: "#4a6d47",
+                textTransform: "uppercase", letterSpacing: "0.08em",
+                margin: "0 0 8px",
+              }}>This week</p>
               {[
                 { dot: getEmotion("EXCITED").strip,  label: "Completed", val: 0 },
                 { dot: getEmotion("DREADING").strip, label: "Deferred",  val: deferred },
                 { dot: getEmotion("ANXIOUS").strip,  label: "Pending",   val: pending },
               ].map((row, i, arr) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: i < arr.length - 1 ? 8 : 0 }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12.5, color: "#4a6d47" }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: row.dot }} />
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: i < arr.length - 1 ? 6 : 0 }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "#3d5a4a" }}>
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: row.dot, opacity: 0.7 }} />
                     {row.label}
                   </span>
-                  <span style={{ fontSize: 12.5, fontWeight: 700, color: "#082d1d" }}>{row.val}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 500, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{row.val}</span>
                 </div>
               ))}
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #e9ede9" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
                   <span style={{ color: "#4a6d47" }}>Completion</span>
-                  <span style={{ fontWeight: 700, color: "#059669" }}>0%</span>
+                  <span style={{ fontWeight: 500, color: "#3d5a4a", fontVariantNumeric: "tabular-nums" }}>0%</span>
                 </div>
-                <div style={{ height: 3, background: "#e9ede9", borderRadius: 999 }}>
-                  <div style={{ height: "100%", borderRadius: 999, background: "#59d10b", width: "0%" }} />
+                <div style={{ height: 2, background: "#e9ede9", borderRadius: 999 }}>
+                  <div style={{ height: "100%", borderRadius: 999, background: "#059669", width: "0%", opacity: 0.6 }} />
                 </div>
               </div>
             </div>
