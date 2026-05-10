@@ -176,16 +176,55 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
 
 // ── Day Task List Modal — inline checkbox toggle, no second popup ─────
 
-function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEdit, onDelete }: {
+function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUpdate, onDelete }: {
   date: string; tasks: TaskWithSubtasks[];
   onClose: () => void;
   onMarkDone: (id: string) => void;
   onMarkUndone: (id: string) => void;
-  onEdit: (task: TaskWithSubtasks) => void;
+  onUpdate: (id: string, patch: Partial<{ title: string; emotionalState: TaskWithSubtasks["emotionalState"]; dueAt: Date | null }>) => void;
   onDelete: (id: string) => void;
 }) {
   const isMobile   = useIsMobile();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle]     = useState("");
+  const [editEmotion, setEditEmotion] = useState<TaskWithSubtasks["emotionalState"]>("NEUTRAL");
+  const [editDate, setEditDate]       = useState("");
+  const [editTime, setEditTime]       = useState("");
+
+  function startEdit(t: TaskWithSubtasks) {
+    setEditingId(t.id);
+    setEditTitle(t.title);
+    setEditEmotion(t.emotionalState);
+    if (t.dueAt) {
+      const iso = new Date(t.dueAt).toISOString();
+      setEditDate(iso.slice(0, 10));
+      setEditTime(iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16));
+    } else {
+      setEditDate("");
+      setEditTime("");
+    }
+  }
+
+  function saveEdit(t: TaskWithSubtasks) {
+    const dueAt = editDate
+      ? (editTime ? new Date(`${editDate}T${editTime}`) : new Date(`${editDate}T00:00:00.000Z`))
+      : null;
+    onUpdate(t.id, {
+      title: editTitle.trim() || t.title,
+      emotionalState: editEmotion,
+      dueAt,
+    });
+    setEditingId(null);
+  }
+
+  // Cycle through emotions on chip click
+  const EMOTION_KEYS = ["DREADING", "ANXIOUS", "NEUTRAL", "WILLING", "EXCITED"] as const;
+  function cycleEmotion() {
+    const i = EMOTION_KEYS.indexOf(editEmotion as typeof EMOTION_KEYS[number]);
+    setEditEmotion(EMOTION_KEYS[(i + 1) % EMOTION_KEYS.length]);
+  }
+
   const cardStyle: React.CSSProperties = isMobile ? {
     position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
     background: "#fff", borderRadius: "16px 16px 0 0",
@@ -215,12 +254,96 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
           </button>
         </div>
 
-        {/* Task rows — checkbox toggles directly, no second modal */}
+        {/* Task rows — checkbox toggles directly, edit happens inline */}
         {tasks.map((task, idx) => {
-          const e = em(task.emotionalState); const colour = e.strip;
+          const e = em(task.emotionalState);
           const time    = fmtTime(task.dueAt);
           const isDone  = task.isCompleted;
           const overdue = isOverdue(task);
+          const isEditing = editingId === task.id;
+
+          if (isEditing) {
+            const editEm = em(editEmotion);
+            return (
+              <div key={task.id} style={{
+                padding: "12px 16px",
+                borderBottom: idx < tasks.length - 1 ? "1px solid #f1f3ef" : "none",
+                background: "#f8f9f5",
+              }}>
+                <input
+                  autoFocus
+                  value={editTitle}
+                  onChange={ev => setEditTitle(ev.target.value)}
+                  onKeyDown={ev => { if (ev.key === "Enter") saveEdit(task); if (ev.key === "Escape") setEditingId(null); }}
+                  style={{
+                    width: "100%", padding: "8px 10px", borderRadius: 4,
+                    border: "1.5px solid #dde4de", fontSize: 12, color: "#082d1d",
+                    fontFamily: "inherit", outline: "none", background: "#fff",
+                    boxSizing: "border-box", marginBottom: 8,
+                  }}
+                  onFocus={ev => (ev.currentTarget.style.borderColor = "#059669")}
+                  onBlur={ev => (ev.currentTarget.style.borderColor = "#dde4de")}
+                />
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", marginBottom: 8 }}>
+                  <button
+                    onClick={cycleEmotion}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "4px 9px", borderRadius: 4,
+                      background: editEm.pillBg, color: editEm.pillText,
+                      border: `1px solid ${editEm.pillBg}`,
+                      fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >
+                    {editEm.emoji} {editEm.label}
+                  </button>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={ev => setEditDate(ev.target.value)}
+                    style={{
+                      padding: "4px 8px", borderRadius: 4,
+                      border: "1px solid #dde4de", fontSize: 11, color: "#082d1d",
+                      fontFamily: "inherit", outline: "none", background: "#fff",
+                    }}
+                  />
+                  <input
+                    type="time"
+                    value={editTime}
+                    onChange={ev => setEditTime(ev.target.value)}
+                    disabled={!editDate}
+                    style={{
+                      padding: "4px 8px", borderRadius: 4,
+                      border: "1px solid #dde4de", fontSize: 11, color: "#082d1d",
+                      fontFamily: "inherit", outline: "none",
+                      background: editDate ? "#fff" : "#f1f3ef",
+                    }}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                  <button
+                    onClick={() => setEditingId(null)}
+                    style={{
+                      padding: "5px 12px", borderRadius: 4,
+                      border: "1px solid #dde4de", background: "#fff",
+                      color: "#3d5a4a", fontSize: 11, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >Cancel</button>
+                  <button
+                    onClick={() => saveEdit(task)}
+                    style={{
+                      padding: "5px 14px", borderRadius: 4, border: "none",
+                      background: "#059669", color: "#fff",
+                      fontSize: 11, fontWeight: 600,
+                      cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >Save</button>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div
               key={task.id}
@@ -276,7 +399,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
                   transition: "opacity 0.15s",
                 }}>
                   <button
-                    onClick={e => { e.stopPropagation(); onClose(); onEdit(task); }}
+                    onClick={ev => { ev.stopPropagation(); startEdit(task); }}
                     title="Edit"
                     style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
                     onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e2.currentTarget as HTMLElement).style.color = "#3d5a4a"; }}
@@ -285,7 +408,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
                     <Pencil size={11} />
                   </button>
                   <button
-                    onClick={e => { e.stopPropagation(); onDelete(task.id); }}
+                    onClick={ev => { ev.stopPropagation(); onDelete(task.id); }}
                     title="Delete"
                     style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
                     onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#FFF0EC"; (e2.currentTarget as HTMLElement).style.color = "#D14626"; (e2.currentTarget as HTMLElement).style.borderColor = "#e9c3c1"; }}
@@ -867,7 +990,7 @@ export default function CalendarPage() {
           <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} onUpdate={(id, patch) => updateTask({ id, patch })} />
         )}
         {dayTaskList && (
-          <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onEdit={task => { setDayTaskList(null); setSelectedTask(task); }} onDelete={id => deleteTask(id)} />
+          <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => deleteTask(id)} />
         )}
         <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
       </div>
@@ -986,7 +1109,7 @@ export default function CalendarPage() {
         />
       )}
       {dayTaskList && (
-        <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onEdit={task => { setDayTaskList(null); setSelectedTask(task); }} onDelete={id => deleteTask(id)} />
+        <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => deleteTask(id)} />
       )}
       <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
     </div>
