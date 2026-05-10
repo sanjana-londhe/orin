@@ -284,7 +284,7 @@ export function AllTasksView() {
       {/* Tasks (N) label */}
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: T.textSecondary }}>Tasks</span>
-        <span style={{ fontSize: 11.5, color: T.textMuted }}>
+        <span style={{ fontSize: 11, color: T.textMuted }}>
           ({allTasks.filter(t => !t.isCompleted).length})
         </span>
       </div>
@@ -299,7 +299,7 @@ export function AllTasksView() {
           background: active ? "#f1f3ef" : "#f8f9f5",
           border: `0.5px solid ${active && fg ? fg + "44" : "rgba(0,0,0,0.08)"}`,
           color: active && fg ? fg : "#5f5e5a",
-          fontSize: 11.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
         });
         const EMOTIONS_CYCLE: Emotion[] = ["DREADING","ANXIOUS","NEUTRAL","WILLING","EXCITED"];
         function cycleEmotion() {
@@ -320,7 +320,7 @@ export function AllTasksView() {
           background: "#f8f9f5",
           border: `0.5px solid ${fg ? fg + "33" : "rgba(0,0,0,0.08)"}`,
           color: fg ?? "#5f5e5a",
-          fontSize: 11.5, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
           position: "relative", overflow: "hidden",
         });
         return (
@@ -347,12 +347,12 @@ export function AllTasksView() {
                       onChange={e => { setTitle(e.target.value); if (titleError && e.target.value.trim()) setTitleError(false); const d = detectEmotion(e.target.value); if (d) setEmotion(d as Emotion); }}
                       onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") resetForm(); }}
                       placeholder="Task name"
-                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 13, letterSpacing: "-0.01em", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />
+                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, letterSpacing: "-0.01em", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />
                     {noteOpen ? (
                       <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Notes" rows={2}
-                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 11.5, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
+                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 11, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
                     ) : (
-                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 11.5, color: "#b9d3c4", cursor: "text" }}>{note.trim() || "Notes"}</div>
+                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 11, color: "#b9d3c4", cursor: "text" }}>{note.trim() || "Notes"}</div>
                     )}
                   </div>
                 </div>
@@ -446,7 +446,7 @@ export function AllTasksView() {
                             </button>
                             {dueTime && (
                               <button onClick={() => { setDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
-                                style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 11.5, color: "#D14626", fontFamily: "inherit", textAlign: "left" }}>
+                                style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 11, color: "#D14626", fontFamily: "inherit", textAlign: "left" }}>
                                 Remove time
                               </button>
                             )}
@@ -463,7 +463,7 @@ export function AllTasksView() {
 
                   <div style={{ flex: 1 }} />
                   <button onClick={submit} disabled={submitting}
-                    style={{ padding: "5px 14px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                    style={{ padding: "5px 14px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
                     {submitting ? "…" : "Add"}
                   </button>
                 </div>

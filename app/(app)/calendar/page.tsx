@@ -127,7 +127,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
               </svg>
             )}
           </div>
-          <p style={{ fontSize: 13, fontWeight: 400, color: "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
+          <p style={{ fontSize: 12, fontWeight: 400, color: "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
             {task.title}
           </p>
           <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 10 }}>
@@ -138,7 +138,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
         {/* Date + emotion — same chips as TaskCard row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "10px 16px", borderBottom: note ? "1px solid #e9ede9" : "none" }}>
           {dateLabel && (
-            <span style={{ fontSize: 11.5, fontWeight: 500, color: overdue ? "#D14626" : "#059669" }}>
+            <span style={{ fontSize: 11, fontWeight: 500, color: overdue ? "#D14626" : "#059669" }}>
               {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
             </span>
           )}
@@ -156,7 +156,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
         {/* Note */}
         {note && (
           <div style={{ padding: "10px 16px", borderBottom: "1px solid #e9ede9" }}>
-            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0, lineHeight: 1.5 }}>{note}</p>
+            <p style={{ fontSize: 11, color: "#b9d3c4", margin: 0, lineHeight: 1.5 }}>{note}</p>
           </div>
         )}
 
@@ -165,7 +165,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
           <p style={{ fontSize: 11, color: "#b9d3c4", margin: 0 }}>
             {isDone ? "Tap circle to mark incomplete" : "Tap circle to mark done"}
           </p>
-          <button onClick={onClose} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 11.5, cursor: "pointer", fontFamily: "inherit" }}>
+          <button onClick={onClose} style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>
             Close
           </button>
         </div>
@@ -208,7 +208,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
           <div>
             <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>All tasks</p>
-            <p style={{ fontSize: 12.5, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
           </div>
           <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
             <X size={12} />
@@ -253,7 +253,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 12.5, fontWeight: 400, color: "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
+                <p style={{ fontSize: 12, fontWeight: 400, color: "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
                   {task.title}
                 </p>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -454,7 +454,7 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
             {isDone && <svg width="10" height="7" viewBox="0 0 11 8" fill="none"><path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           </div>
 
-          <p style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#082d1d", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none", paddingTop: 1 }}>{task.title}</p>
+          <p style={{ flex: 1, fontSize: 12, fontWeight: 600, color: "#082d1d", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none", paddingTop: 1 }}>{task.title}</p>
 
           {/* Edit + Delete + Close */}
           <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
@@ -482,8 +482,8 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
               <DatePickerField value={editDate} onChange={setEditDate} label="Due date" />
               <TimePickerField value={editTime} onChange={setEditTime} label="Due time (optional)" selectedDate={editDate} />
               <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                <button onClick={() => setEditing(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 11.5, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
-                <button onClick={saveEdit} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Save</button>
+                <button onClick={() => setEditing(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
+                <button onClick={saveEdit} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Save</button>
               </div>
             </div>
           ) : (
@@ -504,7 +504,7 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
               {note && (
                 <div style={{ background: "#f8f9f5", borderRadius: 8, padding: "10px 12px" }}>
                   <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 4px" }}>Note</p>
-                  <p style={{ fontSize: 11.5, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{note}</p>
+                  <p style={{ fontSize: 11, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{note}</p>
                 </div>
               )}
               <p style={{ fontSize: 11, color: "#b9d3c4", margin: 0 }}>
@@ -570,7 +570,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
               autoFocus
               value={editTitle}
               onChange={e => setEditTitle(e.target.value)}
-              style={{ border: "none", outline: "none", fontFamily: "inherit", fontSize: 13, fontWeight: 600, color: "#082d1d", background: "transparent", flex: 1 }}
+              style={{ border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, fontWeight: 600, color: "#082d1d", background: "transparent", flex: 1 }}
             />
           </div>
           <button onClick={() => setEditing(false)} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 8 }}>
@@ -593,7 +593,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
             onChange={e => setEditNote(e.target.value)}
             placeholder="Add a note…"
             rows={4}
-            style={{ width: "100%", fontSize: 13, color: "#082d1d", background: "#f8f9f5", border: "1.5px solid #dde4de", borderRadius: 8, padding: "10px 12px", outline: "none", fontFamily: "inherit", resize: "none", lineHeight: 1.5, boxSizing: "border-box", transition: "border-color 0.14s" }}
+            style={{ width: "100%", fontSize: 12, color: "#082d1d", background: "#f8f9f5", border: "1.5px solid #dde4de", borderRadius: 8, padding: "10px 12px", outline: "none", fontFamily: "inherit", resize: "none", lineHeight: 1.5, boxSizing: "border-box", transition: "border-color 0.14s" }}
             onFocus={e => (e.currentTarget.style.borderColor = "#059669")}
             onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")}
           />
@@ -601,7 +601,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
 
         {/* Save */}
         <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9", display: "flex", justifyContent: "flex-end" }}>
-          <button onClick={saveEdit} style={{ padding: "10px 28px", borderRadius: 8, border: "none", background: "#059669", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+          <button onClick={saveEdit} style={{ padding: "10px 28px", borderRadius: 8, border: "none", background: "#059669", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
             Save
           </button>
         </div>
@@ -614,7 +614,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
     <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "#fff", display: "flex", flexDirection: "column" }}>
       {/* Title row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid #e9ede9" }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
+        <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: 0, flex: 1, textDecoration: isDone ? "line-through" : "none", paddingRight: 12 }}>{task.title}</p>
         <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0 }}>
           <X size={13} />
         </button>
@@ -648,7 +648,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
       <div style={{ padding: "12px 18px 28px", borderTop: "1px solid #e9ede9", display: "flex", justifyContent: "flex-end", gap: 8 }}>
         <button
           onClick={() => setEditing(true)}
-          style={{ padding: "10px 20px", borderRadius: 8, border: "1.5px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+          style={{ padding: "10px 20px", borderRadius: 8, border: "1.5px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
         >
           Edit
         </button>
@@ -657,7 +657,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
           style={{
             padding: "10px 24px", borderRadius: 8, border: "none",
             background: "#059669", color: "#fff",
-            fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+            fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
             transition: "background 0.12s",
           }}
         >
@@ -711,7 +711,7 @@ function MobileCalendar({
               {/* Left: day + date — top-aligned when there are multiple tasks */}
               <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: isToday ? "#059669" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
-                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: isToday ? 700 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
+                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isToday ? 700 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
               </div>
 
               {/* Right: colored pill per task, no checkboxes */}
@@ -728,14 +728,14 @@ function MobileCalendar({
                         display: "flex", alignItems: "center", gap: 6, overflow: "hidden",
                       }}
                     >
-                      <span style={{ fontSize: 11.5, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
+                      <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
                         {fmtTime(task.dueAt) && <span style={{ fontFamily: "inherit", marginRight: 4, opacity: 0.8 }}>{fmtTime(task.dueAt)}</span>}
                         {task.title}
                       </span>
                     </div>
                   );
                 })}
-                <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11.5, color: dayTasks.length === 0 ? "#dde4de" : "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "2px 0", alignSelf: "flex-start" }}>
+                <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: dayTasks.length === 0 ? "#dde4de" : "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "2px 0", alignSelf: "flex-start" }}>
                   <Plus size={11} /> {dayTasks.length === 0 ? "Add task" : "Add"}
                 </button>
               </div>
@@ -937,7 +937,7 @@ export default function CalendarPage() {
               >
                 {/* Date number */}
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>
-                  <span style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11.5, fontWeight: isToday ? 700 : 400, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isOtherMonth ? "#c4cbc2" : "#082d1d" }}>
+                  <span style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: isToday ? 700 : 400, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isOtherMonth ? "#c4cbc2" : "#082d1d" }}>
                     {day.getDate()}
                   </span>
                 </div>

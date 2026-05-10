@@ -272,7 +272,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
     const chip = (fg?: string): React.CSSProperties => ({
       display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6,
       background:"#f8f9f5", border:`0.5px solid ${fg ? fg+"33" : "rgba(0,0,0,0.08)"}`,
-      color: fg ?? "#5f5e5a", fontSize: 11.5, fontWeight:500, cursor:"pointer", fontFamily:"inherit",
+      color: fg ?? "#5f5e5a", fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit",
     });
 
     return (
@@ -286,12 +286,12 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               <input ref={editTitleRef} value={editTitle}
                 onChange={e => setEditTitle(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") closeEdit(); }}
-                style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 13, fontWeight:400, letterSpacing:"-0.01em", color:T.textPrimary, background:"transparent", marginBottom:2, display:"block" }} />
+                style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 12, fontWeight:400, letterSpacing:"-0.01em", color:T.textPrimary, background:"transparent", marginBottom:2, display:"block" }} />
               {editNoteOpen ? (
                 <textarea value={editNote} onChange={e => setEditNote(e.target.value)} placeholder="Notes" rows={2}
-                  style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 11.5, color:"#3d5a4a", background:"transparent", resize:"none", lineHeight:1.5, padding:0, display:"block" }} />
+                  style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 11, color:"#3d5a4a", background:"transparent", resize:"none", lineHeight:1.5, padding:0, display:"block" }} />
               ) : (
-                <div onClick={() => setEditNoteOpen(true)} style={{ fontSize: 11.5, color:"#b9d3c4", cursor:"text", marginBottom:2 }}>
+                <div onClick={() => setEditNoteOpen(true)} style={{ fontSize: 11, color:"#b9d3c4", cursor:"text", marginBottom:2 }}>
                   {editNote.trim() || "Notes"}
                 </div>
               )}
@@ -377,7 +377,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                       </button>
                       {editTime && (
                         <button onClick={()=>{ setEditTime(""); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
-                          style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 11.5, color: "#D14626", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>
+                          style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 11, color: "#D14626", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>
                       )}
                     </div>
                     {showEditCustomTime && (
@@ -396,7 +396,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
             <div style={{ flex:1 }} />
             <button onClick={saveEdit}
-              style={{ padding:"5px 14px", borderRadius:6, border:"none", background:T.accent, color:"#fff", fontSize: 11.5, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+              style={{ padding:"5px 14px", borderRadius:6, border:"none", background:T.accent, color:"#fff", fontSize: 11, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
               Save
             </button>
           </div>
@@ -461,7 +461,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Title */}
           <div style={{
-            fontSize: 13, fontWeight: 400,
+            fontSize: 12, fontWeight: 400,
             color: done ? T.textMuted : T.textPrimary,
             lineHeight: 1.45,
             letterSpacing: "-0.01em",
@@ -503,7 +503,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
           )}
 
           {mounted && note && (
-            <div style={{ fontSize: 11.5, color: T.textMuted, lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <div style={{ fontSize: 11, color: T.textMuted, lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {note}
             </div>
           )}
@@ -556,7 +556,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
             border: "1px solid #dde4de", boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
             padding: "20px",
           }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "#082d1d", margin: "0 0 6px" }}>Future task</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#082d1d", margin: "0 0 6px" }}>Future task</p>
             <p style={{ fontSize: 12, color: "#3d5a4a", margin: "0 0 16px", lineHeight: 1.5 }}>
               This task is due <strong>{due?.dateLabel}</strong>. Would you like to move it to today?
             </p>
@@ -580,7 +580,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               </button>
               <button
                 onClick={() => setShowUncompletePrompt(false)}
-                style={{ padding: "6px", borderRadius: 8, border: "none", background: "none", color: "#b9d3c4", fontSize: 11.5, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ padding: "6px", borderRadius: 8, border: "none", background: "none", color: "#b9d3c4", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
               >
                 Cancel
               </button>

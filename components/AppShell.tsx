@@ -71,7 +71,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
                 padding: "6px 12px", borderRadius: 4,
                 background: "#082d1d", color: "#fff",
                 border: "none", cursor: "pointer",
-                fontSize: 11.5, fontWeight: 600,
+                fontSize: 11, fontWeight: 600,
                 boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
                 letterSpacing: "-0.01em", whiteSpace: "nowrap",
               }}
@@ -112,7 +112,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
               padding: "7px 14px", borderRadius: 4,
               background: "#082d1d", color: "#fff",
               border: "none", cursor: "pointer",
-              fontSize: 11.5, fontWeight: 600,
+              fontSize: 11, fontWeight: 600,
               boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
               letterSpacing: "-0.01em",
             }}
@@ -149,7 +149,7 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
               <div style={{
                 width: 32, height: 32, borderRadius: "50%", background: "#059669",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 11.5, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
+                fontSize: 11, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
               }}>
                 {avatarContent}
               </div>

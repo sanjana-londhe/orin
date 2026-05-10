@@ -226,7 +226,7 @@ function ModalForm({
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "5px 11px", borderRadius: 999, cursor: "pointer",
-                  fontFamily: "inherit", fontSize: 11.5,
+                  fontFamily: "inherit", fontSize: 11,
                   fontWeight: active ? 600 : 400,
                   border: `1.5px solid ${active ? f.fg : "#e9ede9"}`,
                   background: active ? f.bg : "#fff",
@@ -293,7 +293,7 @@ function ModalForm({
         />
       </div>
 
-      {error && <p style={{ fontSize: 11.5, color: "#D14626", margin: 0 }}>{error}</p>}
+      {error && <p style={{ fontSize: 11, color: "#D14626", margin: 0 }}>{error}</p>}
     </div>
   );
 
@@ -309,7 +309,7 @@ function ModalForm({
         }}>
           <button onClick={onClose} style={{
             padding: "6px 0", background: "none", border: "none",
-            cursor: "pointer", fontSize: 13, color: "#3d5a4a", fontFamily: "inherit",
+            cursor: "pointer", fontSize: 12, color: "#3d5a4a", fontFamily: "inherit",
           }}>Cancel</button>
           <span style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", letterSpacing: "-0.01em" }}>New task</span>
           <button
@@ -319,7 +319,7 @@ function ModalForm({
               padding: "6px 16px", borderRadius: 8, border: "none",
               background: title.trim() ? "#059669" : "#e9ede9",
               color: title.trim() ? "#fff" : "#c4cbc2",
-              fontSize: 13, fontWeight: 700,
+              fontSize: 12, fontWeight: 700,
               cursor: title.trim() ? "pointer" : "default",
               fontFamily: "inherit", transition: "background 0.12s",
             }}

@@ -81,7 +81,7 @@ function MoodChart({ data }: { data: { label: string; value: number | null }[] }
           <line key={v} x1={0} x2={iW} y1={y(v)} y2={y(v)} stroke="#f1f3ef" strokeWidth={1} />
         ))}
         {[1, 3, 5].map(v => (
-          <text key={v} x={-8} y={y(v) + 4} textAnchor="end" fontSize={9} fill="#c4cbc2">
+          <text key={v} x={-8} y={y(v) + 4} textAnchor="end" fontSize={10} fill="#c4cbc2">
             {MOODS[v - 1].label}
           </text>
         ))}
@@ -123,7 +123,7 @@ function MoodChart({ data }: { data: { label: string; value: number | null }[] }
           </text>
         )}
         {data.map((d, i) => (
-          <text key={i} x={x(i)} y={iH + 18} textAnchor="middle" fontSize={9} fill="#4a6d47">
+          <text key={i} x={x(i)} y={iH + 18} textAnchor="middle" fontSize={10} fill="#4a6d47">
             {d.label}
           </text>
         ))}
@@ -254,7 +254,7 @@ export function EnergyView() {
           {todayEntries.length > 0 && (
             <button onClick={() => setModalOpen(true)} style={{
               padding: "5px 12px", borderRadius: 6, border: "0.5px solid rgba(0,0,0,0.12)",
-              background: "#fff", color: "#059669", fontSize: 11.5, fontWeight: 500,
+              background: "#fff", color: "#059669", fontSize: 11, fontWeight: 500,
               cursor: "pointer", fontFamily: "inherit",
             }}>+ Log again</button>
           )}
@@ -309,7 +309,7 @@ export function EnergyView() {
                     display: "flex", alignItems: "center", gap: 5,
                     padding: "4px 10px", borderRadius: 6,
                     background: "#f8f9f5", border: "0.5px solid rgba(0,0,0,0.08)",
-                    fontSize: 11.5, color: "#3d5a4a",
+                    fontSize: 11, color: "#3d5a4a",
                   }}>
                     <span>{moodEmoji(e.mood)}</span>
                     <span>{moodLabel(e.mood)}</span>
@@ -319,7 +319,7 @@ export function EnergyView() {
               </div>
             )}
             {todayAvg !== null && todayEntries.length > 1 && (
-              <p style={{ fontSize: 11.5, color: "#059669", fontWeight: 500, margin: "10px 0 0" }}>
+              <p style={{ fontSize: 11, color: "#059669", fontWeight: 500, margin: "10px 0 0" }}>
                 📊 Today&apos;s average: {moodLabel(todayAvg)}
               </p>
             )}
@@ -410,7 +410,7 @@ export function EnergyView() {
                     <span style={{ fontSize: 12, color: "#082d1d" }}>{em.emoji} {em.label}</span>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 11, color: "#4a6d47" }}>{done} of {total}</span>
-                      <span style={{ fontSize: 11.5, fontWeight: 600, color: rateColor }}>{rate}%</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: rateColor }}>{rate}%</span>
                     </div>
                   </div>
                   <div style={{ height: 3, background: "rgba(0,0,0,0.08)", borderRadius: 999 }}>

@@ -295,8 +295,8 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                       opacity: isPast ? 0.4 : 1,
                     }}
                   >
-                    <span style={{ fontSize: 13, color: D.textPrimary }}>{opt.label}</span>
-                    <span style={{ fontSize: 11.5, color: D.textMuted }}>{isPast ? "past" : opt.sub}</span>
+                    <span style={{ fontSize: 12, color: D.textPrimary }}>{opt.label}</span>
+                    <span style={{ fontSize: 11, color: D.textMuted }}>{isPast ? "past" : opt.sub}</span>
                   </button>
                 );
               })}
@@ -369,13 +369,13 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <Clock size={14} color={D.textTertiary} />
-                    <p style={{ fontSize: 11.5, fontWeight: 600, color: D.textTertiary, margin: 0 }}>Pick a time</p>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: D.textTertiary, margin: 0 }}>Pick a time</p>
                   </div>
                   <WheelTimePicker value={value || "09:00"} onChange={onChange} />
                   <button type="button" onClick={() => { setOpen(false); setShowCustom(false); }} style={{
                     padding: "7px 16px", borderRadius: 8,
                     background: D.accent, border: "none", color: "#fff",
-                    fontSize: 11.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                    fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
                   }}>Confirm</button>
                 </div>
               )}

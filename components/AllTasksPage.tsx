@@ -139,7 +139,7 @@ export function AllTasksPage() {
           onClick={() => { setPreset(null); setFrom(""); setTo(""); }}
           style={{
             padding: isMobile ? "8px 16px" : "6px 14px",
-            borderRadius: 6, fontSize: 11.5, fontWeight: 500,
+            borderRadius: 6, fontSize: 11, fontWeight: 500,
             border: `1.5px solid ${preset === null ? T.accent : T.border}`,
             background: preset === null ? T.accent : T.surface,
             color: preset === null ? "#fff" : T.textSecondary,
@@ -156,7 +156,7 @@ export function AllTasksPage() {
               onClick={() => { setPreset(p.key); if (p.key !== "custom") { setFrom(""); setTo(""); } }}
               style={{
                 padding: isMobile ? "8px 16px" : "6px 14px",
-                borderRadius: 6, fontSize: 11.5, fontWeight: 500,
+                borderRadius: 6, fontSize: 11, fontWeight: 500,
                 border: `1.5px solid ${active ? T.accent : T.border}`,
                 background: active ? T.accent : T.surface,
                 color: active ? "#fff" : T.textSecondary,
@@ -179,7 +179,7 @@ export function AllTasksPage() {
           <div style={{ width: isMobile ? "100%" : 160 }}>
             <DatePickerField value={from} onChange={setFrom} label="From" calendarOnly />
           </div>
-          {!isMobile && <span style={{ fontSize: 11.5, color: T.textTertiary, paddingBottom: 10, flexShrink: 0 }}>to</span>}
+          {!isMobile && <span style={{ fontSize: 11, color: T.textTertiary, paddingBottom: 10, flexShrink: 0 }}>to</span>}
           <div style={{ width: isMobile ? "100%" : 160 }}>
             <DatePickerField value={to} onChange={setTo} label="To" calendarOnly />
           </div>
@@ -243,7 +243,7 @@ export function AllTasksPage() {
               {preset && (
                 <div style={{ textAlign: "center", marginTop: -36, paddingBottom: 24 }}>
                   <button onClick={() => { setPreset(null); setFrom(""); setTo(""); }} style={{
-                    fontSize: 11.5, color: T.accent, background: "none",
+                    fontSize: 11, color: T.accent, background: "none",
                     border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "inherit",
                   }}>Clear date filter</button>
                 </div>

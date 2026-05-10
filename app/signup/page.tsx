@@ -40,7 +40,7 @@ export default function SignUpPage() {
               width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
               padding: "13px 20px", borderRadius: 10,
               border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
-              fontSize: 13, fontWeight: 500, color: "#082d1d",
+              fontSize: 12, fontWeight: 500, color: "#082d1d",
               cursor: "pointer", fontFamily: "inherit",
               transition: "border-color 0.14s",
               opacity: googlePending ? 0.6 : 1,
@@ -65,7 +65,7 @@ export default function SignUpPage() {
           </button>
         </form>
 
-        <p style={{ textAlign: "center", fontSize: 11.5, color: "#4a6d47", marginTop: 28 }}>
+        <p style={{ textAlign: "center", fontSize: 11, color: "#4a6d47", marginTop: 28 }}>
           Already have an account?{" "}
           <Link href="/login" style={{ color: "#059669", fontWeight: 500, textDecoration: "none" }}>
             Sign in

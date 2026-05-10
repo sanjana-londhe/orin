@@ -59,7 +59,7 @@ function Block({ icon: Icon, title, children }: {
         }}>
           <Icon size={12} />
         </span>
-        <span style={{ fontSize: 11.5, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
       </div>
       <div>{children}</div>
     </div>
@@ -281,7 +281,7 @@ export function AIPanel({ onClose }: Props) {
                 border: tab === t ? "1px solid #e9ede9" : "1px solid transparent",
                 background: tab === t ? "#fff" : "transparent",
                 color: tab === t ? "#082d1d" : "#4a6d47",
-                fontSize: 11.5, fontWeight: tab === t ? 600 : 500,
+                fontSize: 11, fontWeight: tab === t ? 600 : 500,
                 cursor: "pointer", fontFamily: "inherit",
                 boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.04)" : "none",
                 textTransform: "capitalize", transition: "all 0.12s",
@@ -301,7 +301,7 @@ export function AIPanel({ onClose }: Props) {
           <div style={{ marginTop: 14, padding: "14px 14px", background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4 }}>
             <p style={{ fontSize: 11, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Get started</p>
             <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: "0 0 8px", letterSpacing: "-0.01em" }}>Unlock insights in 3 steps</p>
-            <ol style={{ margin: 0, paddingLeft: 18, fontSize: 11.5, color: "#3d5a4a", lineHeight: 1.6 }}>
+            <ol style={{ margin: 0, paddingLeft: 18, fontSize: 11, color: "#3d5a4a", lineHeight: 1.6 }}>
               <li>Add a few tasks with how you feel about each</li>
               <li>Log an energy check-in to capture your mood</li>
               <li>Complete or defer them — patterns will appear here</li>
@@ -317,11 +317,11 @@ export function AIPanel({ onClose }: Props) {
             </p>
             <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
               <span style={{ fontSize: 22, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pending.length}</span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
                 task{pending.length !== 1 ? "s" : ""} remaining
               </span>
             </p>
-            <p style={{ margin: 0, fontSize: 11.5, color: overdue.length > 0 ? "#D14626" : "#4a6d47", fontWeight: overdue.length > 0 ? 600 : 400 }}>
+            <p style={{ margin: 0, fontSize: 11, color: overdue.length > 0 ? "#D14626" : "#4a6d47", fontWeight: overdue.length > 0 ? 600 : 400 }}>
               {overdue.length > 0
                 ? `⚠ ${overdue.length} overdue${hasEnergy ? " · energy logged" : ""}`
                 : (hasEnergy ? "Nothing overdue · energy logged" : "Nothing overdue · log energy to unlock patterns")}
@@ -332,11 +332,11 @@ export function AIPanel({ onClose }: Props) {
             <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Streak</p>
             <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
               <span style={{ fontSize: 22, fontWeight: 600, color: "#059669", fontVariantNumeric: "tabular-nums" }}>{streak}</span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
                 day{streak === 1 ? "" : "s"} in a row
               </span>
             </p>
-            <p style={{ margin: 0, fontSize: 11.5, color: "#4a6d47" }}>
+            <p style={{ margin: 0, fontSize: 11, color: "#4a6d47" }}>
               {weekly
                 ? <><strong style={{ color: "#082d1d" }}>{weekly.total_completed}</strong> done · <strong style={{ color: "#082d1d" }}>{weekly.total_deferrals}</strong> deferred this week</>
                 : "Loading…"}
@@ -351,7 +351,7 @@ export function AIPanel({ onClose }: Props) {
         {/* Avoidance alert — slipping tasks */}
         {avoidance.length > 0 && (
           <Block icon={AlertCircle} title="Slipping tasks">
-            <p style={{ fontSize: 11.5, color: "#3d5a4a", margin: "0 0 8px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 11, color: "#3d5a4a", margin: "0 0 8px", lineHeight: 1.5 }}>
               Deferred 3+ times — consider doing just step 1.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -378,7 +378,7 @@ export function AIPanel({ onClose }: Props) {
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
               }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: t.color, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>{t.val}</span>
-                <span style={{ fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
               </div>
             ))}
           </div>
@@ -447,7 +447,7 @@ export function AIPanel({ onClose }: Props) {
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
                 }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: t.color, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>{t.val}</span>
-                  <span style={{ fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
                 </div>
               ))}
             </div>
@@ -470,8 +470,8 @@ export function AIPanel({ onClose }: Props) {
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {bestEmotion && (
                 <div style={{ background: bestEmotion.em?.pillBg ?? "#f8f9f5", borderRadius: 4, padding: "8px 10px" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most completions when feeling</p>
-                  <p style={{ margin: 0, color: bestEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12.5 }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most completions when feeling</p>
+                  <p style={{ margin: 0, color: bestEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12 }}>
                     {bestEmotion.em?.emoji} {bestEmotion.em?.label}
                     <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {bestEmotion.count}</span>
                   </p>
@@ -479,8 +479,8 @@ export function AIPanel({ onClose }: Props) {
               )}
               {worstEmotion && (
                 <div style={{ background: worstEmotion.em?.pillBg ?? "#f8f9f5", borderRadius: 4, padding: "8px 10px" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferrals when feeling</p>
-                  <p style={{ margin: 0, color: worstEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12.5 }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferrals when feeling</p>
+                  <p style={{ margin: 0, color: worstEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12 }}>
                     {worstEmotion.em?.emoji} {worstEmotion.em?.label}
                     <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {worstEmotion.count}</span>
                   </p>
@@ -488,8 +488,8 @@ export function AIPanel({ onClose }: Props) {
               )}
               {weekly?.most_deferred_task && (
                 <div style={{ background: "#FFF0EC", borderRadius: 4, padding: "8px 10px" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 9.5, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferred task</p>
-                  <p style={{ margin: 0, color: "#082d1d", fontSize: 12.5 }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferred task</p>
+                  <p style={{ margin: 0, color: "#082d1d", fontSize: 12 }}>
                     &ldquo;{weekly.most_deferred_task.title}&rdquo;
                     <span style={{ color: "#D14626", fontWeight: 600, marginLeft: 6 }}>· {weekly.most_deferred_task.deferredCount}×</span>
                   </p>
@@ -509,7 +509,7 @@ export function AIPanel({ onClose }: Props) {
                 <span style={{ color: "#082d1d", fontWeight: 600 }}>{moodVsCompletion.lowAvg}</span> on low-mood days.
               </p>
               {moodVsCompletion.ratio && (
-                <p style={{ margin: 0, fontSize: 11.5, color: "#4a6d47" }}>
+                <p style={{ margin: 0, fontSize: 11, color: "#4a6d47" }}>
                   You finish <strong>{moodVsCompletion.ratio}×</strong> more when feeling good — protect your high-mood time.
                 </p>
               )}
@@ -538,7 +538,7 @@ export function AIPanel({ onClose }: Props) {
                   if (!n) return null;
                   const em = EMOTION_MAP[key];
                   return (
-                    <span key={key} style={{ fontSize: 11.5, color: em.pillText, fontWeight: 500 }}>
+                    <span key={key} style={{ fontSize: 11, color: em.pillText, fontWeight: 500 }}>
                       {em.emoji} {n}
                     </span>
                   );

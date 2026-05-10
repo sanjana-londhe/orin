@@ -209,7 +209,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
               <p style={{ fontSize: 11, margin: "0 0 10px", color: "#3d5a4a", lineHeight: 1.5 }}>
                 Log how you feel and see patterns over time.
               </p>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
             </button>
           )}
         </div>
@@ -220,7 +220,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
             <button onClick={openCreate} style={{
               display: "flex", alignItems: "center", gap: 8, width: "100%",
               padding: "7px 10px", borderRadius: 8, border: "1.5px dashed #c4cbc2",
-              background: "none", cursor: "pointer", fontSize: 11.5, color: "#4a6d47",
+              background: "none", cursor: "pointer", fontSize: 11, color: "#4a6d47",
               fontFamily: "inherit", marginBottom: 6,
             }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.color = "#059669"; (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
@@ -240,7 +240,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                     width: "100%", padding: "9px 10px", borderRadius: 8,
                     border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
-                    cursor: "pointer", fontSize: 11.5, fontWeight: 500, color: "#082d1d",
+                    cursor: "pointer", fontSize: 11, fontWeight: 500, color: "#082d1d",
                     fontFamily: "inherit",
                   }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.25)"}
@@ -278,7 +278,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 <div style={{
                   width: 30, height: 30, borderRadius: "50%", background: "#059669",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 11.5, fontWeight: 700, color: "#fff", flexShrink: 0, overflow: "hidden",
+                  fontSize: 11, fontWeight: 700, color: "#fff", flexShrink: 0, overflow: "hidden",
                 }}>
                   {avatarSrc
                     ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />

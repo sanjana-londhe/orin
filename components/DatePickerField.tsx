@@ -67,7 +67,7 @@ export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: stri
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronLeft size={14} /></button>
 
-        <span style={{ fontSize: 11.5, fontWeight: 600, color: D.limeInk }}>
+        <span style={{ fontSize: 11, fontWeight: 600, color: D.limeInk }}>
           {MONTHS[month]} {year}
         </span>
 
@@ -99,7 +99,7 @@ export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: stri
               border: isToday && !isSelected ? `1.5px solid ${D.accent}` : "none",
               background: isSelected ? D.accent : "transparent",
               color: isSelected ? "#fff" : isPast ? D.textMuted : D.limeInk,
-              fontSize: 11.5,
+              fontSize: 11,
               fontWeight: isSelected || isToday ? 700 : 400,
               cursor: isPast ? "default" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -200,7 +200,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
         onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.stone500; }}
         onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.stone400; }}
       >
-        <span style={{ fontSize: 12.5, color: value ? D.limeInk : D.textMuted }}>
+        <span style={{ fontSize: 12, color: value ? D.limeInk : D.textMuted }}>
           {displayText}
         </span>
         <ChevronDown
@@ -240,8 +240,8 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                       background: value === opt.val ? D.accentSubtle : "none",
                       border: "none", cursor: "pointer", fontFamily: "inherit",
                     }}>
-                      <span style={{ fontSize: 13, color: D.limeInk, fontWeight: value === opt.val ? 600 : 400 }}>{opt.label}</span>
-                      <span style={{ fontSize: 11.5, color: D.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
+                      <span style={{ fontSize: 12, color: D.limeInk, fontWeight: value === opt.val ? 600 : 400 }}>{opt.label}</span>
+                      <span style={{ fontSize: 11, color: D.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
                     </button>
                   ))}
                   <div style={{ height: 1, background: D.stone400, margin: "4px 0" }} />
@@ -251,7 +251,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                     background: showCal ? D.accentSubtle : "none",
                     border: "none", cursor: "pointer", fontFamily: "inherit",
                   }}>
-                    <span style={{ fontSize: 13, color: D.limeInk }}>Custom date</span>
+                    <span style={{ fontSize: 12, color: D.limeInk }}>Custom date</span>
                     <ChevronRight size={14} color={D.textMuted} />
                   </button>
                 </>
@@ -261,7 +261,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                   <button type="button" onClick={() => setShowCal(false)} style={{
                     display: "flex", alignItems: "center", gap: 6, padding: "4px 8px 10px",
                     background: "none", border: "none", cursor: "pointer", color: D.textTertiary,
-                    fontSize: 11.5, fontFamily: "inherit",
+                    fontSize: 11, fontFamily: "inherit",
                   }}>
                     <ChevronLeft size={13} /> Back
                   </button>
@@ -294,7 +294,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                         onMouseEnter={e => { if (value !== opt.val) (e.currentTarget as HTMLElement).style.background = D.stone200; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = value === opt.val ? D.accentSubtle : "none"; }}
                       >
-                        <span style={{ fontSize: 12.5, color: D.limeInk, fontWeight: value === opt.val ? 600 : 400 }}>{opt.label}</span>
+                        <span style={{ fontSize: 12, color: D.limeInk, fontWeight: value === opt.val ? 600 : 400 }}>{opt.label}</span>
                         <span style={{ fontSize: 11, color: D.textMuted, fontFamily: "inherit" }}>{opt.sub}</span>
                       </button>
                     ))}
@@ -308,7 +308,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                       onMouseEnter={e => { if (!showCal) (e.currentTarget as HTMLElement).style.background = D.stone200; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showCal ? D.accentSubtle : "none"; }}
                     >
-                      <span style={{ fontSize: 12.5, color: D.limeInk, fontWeight: showCal ? 600 : 400 }}>Custom date</span>
+                      <span style={{ fontSize: 12, color: D.limeInk, fontWeight: showCal ? 600 : 400 }}>Custom date</span>
                       <ChevronRight size={13} color={showCal ? D.accent : D.textMuted} />
                     </button>
                   </div>
