@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -9,7 +9,7 @@ import {
   ChevronLeft, Plus,
 } from "lucide-react";
 import { ProfileModal } from "@/components/ProfileModal";
-import { useUIStore } from "@/store/ui";
+import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { EnergyCheckInModal, loadEnergyStore, saveEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
 import { getEmotion } from "@/lib/emotions";
 import { signOut, signInWithGoogle } from "@/app/actions/auth";
@@ -27,13 +27,9 @@ interface Props { userName: string; email?: string; initial?: string; isGuest?: 
 
 export function Sidebar({ userName, email = "", initial = "", isGuest = false }: Props) {
   const pathname   = usePathname();
-  const router     = useRouter();
   const isMobile   = useIsMobile();
-  const requestCreateTask = useUIStore(s => s.requestCreateTask);
-  function openCreate() {
-    requestCreateTask();
-    if (pathname !== "/") router.push("/");
-  }
+  const [createOpen, setCreateOpen]   = useState(false);
+  function openCreate() { setCreateOpen(true); }
   const [collapsed, setCollapsed]     = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [showUser, setShowUser]       = useState(false);
@@ -100,6 +96,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
             );
           })}
         </nav>
+        <TaskCreateModal open={createOpen} onOpenChange={setCreateOpen} />
       </>
     );
   }
@@ -368,6 +365,8 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
           )}
         </div>
       </aside>
+
+      <TaskCreateModal open={createOpen} onOpenChange={setCreateOpen} />
 
       {energyModalOpen && (
         <EnergyCheckInModal
