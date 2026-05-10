@@ -231,24 +231,33 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
   }
 
 
-  const cardStyle: React.CSSProperties = isMobile ? {
+  const mobileCardStyle: React.CSSProperties = {
     position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
     background: "#fff", borderRadius: "16px 16px 0 0",
     border: "1.5px solid #dde4de", borderBottom: "none",
     boxShadow: "0 -4px 24px rgba(0,0,0,0.1)", maxHeight: "65vh", overflowY: "auto",
-  } : {
-    position: "fixed", top: "50%", left: "50%",
-    transform: "translate(-50%, -50%)",
-    zIndex: 70, width: 420,
-    background: "#fff", borderRadius: 4,
+  };
+  // Desktop: flex wrapper centers the card. NO transform on the card itself —
+  // transforms create a containing block which traps `position: fixed` children
+  // (the pickers' dropdowns), making them appear inside the modal scroll area.
+  const desktopWrapperStyle: React.CSSProperties = {
+    position: "fixed", inset: 0, zIndex: 70,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    pointerEvents: "none",
+  };
+  const desktopCardStyle: React.CSSProperties = {
+    width: 420, background: "#fff", borderRadius: 4,
     border: "1px solid #dde4de",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)", maxHeight: "70vh", overflowY: "auto",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    maxHeight: "70vh", overflowY: "auto",
+    pointerEvents: "auto",
   };
 
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)", backdropFilter: "blur(2px)" }} />
-      <div style={cardStyle}>
+      <div style={isMobile ? mobileCardStyle : desktopWrapperStyle}>
+      <div style={isMobile ? { display: "contents" } : desktopCardStyle} onClick={isMobile ? undefined : (e => e.stopPropagation())}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
           <div>
@@ -483,6 +492,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
             </div>
           );
         })}
+      </div>
       </div>
     </>
   );
