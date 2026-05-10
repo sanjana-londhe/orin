@@ -230,12 +230,6 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
     setEditingId(null);
   }
 
-  // Cycle through emotions on chip click
-  const EMOTION_KEYS = ["DREADING", "ANXIOUS", "NEUTRAL", "WILLING", "EXCITED"] as const;
-  function cycleEmotion() {
-    const i = EMOTION_KEYS.indexOf(editEmotion as typeof EMOTION_KEYS[number]);
-    setEditEmotion(EMOTION_KEYS[(i + 1) % EMOTION_KEYS.length]);
-  }
 
   const cardStyle: React.CSSProperties = isMobile ? {
     position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
@@ -275,7 +269,6 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
           const isEditing = editingId === task.id;
 
           if (isEditing) {
-            const editEm = em(editEmotion);
             return (
               <div key={task.id} style={{
                 padding: "8px 12px",
@@ -355,54 +348,44 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                     </div>
                   </div>
 
-                  {/* Chip bar — same shape as inline create form */}
+                  {/* Pickers — same components task creation uses */}
                   <div style={{
-                    display: "flex", gap: 5, padding: "6px 14px 10px",
-                    borderTop: "0.5px solid rgba(0,0,0,0.05)", flexWrap: "wrap", alignItems: "center",
+                    padding: "10px 14px",
+                    borderTop: "0.5px solid rgba(0,0,0,0.05)",
+                    display: "flex", flexDirection: "column", gap: 8,
                   }}>
-                    <button
-                      onClick={cycleEmotion}
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 5,
-                        padding: "4px 9px", borderRadius: 6,
-                        background: editEm.pillBg, color: editEm.pillText,
-                        border: `0.5px solid ${editEm.pillText}33`,
-                        fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
-                      }}
-                    >
-                      {editEm.emoji} {editEm.label}
-                    </button>
-                    <input
-                      type="date"
-                      value={editDate}
-                      onChange={ev => setEditDate(ev.target.value)}
-                      style={{
-                        padding: "4px 9px", borderRadius: 6,
-                        border: "0.5px solid rgba(5,150,105,0.25)",
-                        background: "#f8f9f5", color: "#059669",
-                        fontSize: 11, fontWeight: 500,
-                        fontFamily: "inherit", outline: "none",
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={editTime}
-                      onChange={ev => setEditTime(ev.target.value)}
-                      disabled={!editDate}
-                      style={{
-                        padding: "4px 9px", borderRadius: 6,
-                        border: "0.5px solid rgba(0,0,0,0.08)",
-                        background: editDate ? "#f8f9f5" : "#f1f3ef",
-                        color: "#3d5a4a",
-                        fontSize: 11, fontWeight: 500,
-                        fontFamily: "inherit", outline: "none",
-                      }}
-                    />
-                    <div style={{ flex: 1 }} />
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                      <FeelingPickerField
+                        value={editEmotion as Feeling}
+                        onChange={v => setEditEmotion(v as TaskWithSubtasks["emotionalState"])}
+                        label=""
+                        dropUp
+                      />
+                      <DatePickerField
+                        value={editDate}
+                        onChange={setEditDate}
+                        label=""
+                        dropUp
+                      />
+                      <TimePickerField
+                        value={editTime}
+                        onChange={setEditTime}
+                        label=""
+                        selectedDate={editDate}
+                        dropUp
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right-aligned actions */}
+                  <div style={{
+                    display: "flex", gap: 6, justifyContent: "flex-end",
+                    padding: "0 14px 12px",
+                  }}>
                     <button
                       onClick={() => setEditingId(null)}
                       style={{
-                        padding: "4px 11px", borderRadius: 6,
+                        padding: "5px 14px", borderRadius: 6,
                         border: "0.5px solid #dde4de", background: "#fff",
                         color: "#3d5a4a", fontSize: 11, fontWeight: 500,
                         cursor: "pointer", fontFamily: "inherit",
@@ -411,7 +394,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                     <button
                       onClick={() => saveEdit(task)}
                       style={{
-                        padding: "5px 14px", borderRadius: 6, border: "none",
+                        padding: "6px 16px", borderRadius: 6, border: "none",
                         background: "#059669", color: "#fff",
                         fontSize: 11, fontWeight: 600,
                         cursor: "pointer", fontFamily: "inherit",
