@@ -689,7 +689,7 @@ function MobileCalendar({
       {/* Month header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", flexShrink: 0, background: "#fff" }}>
         <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={16} color="#4a6d47" /></button>
-        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 19, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
+        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
           {MONTH_NAMES[month]} {year}
           <ChevronRight size={14} color="#059669" style={{ transform: pickerOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
         </button>
@@ -886,7 +886,7 @@ export default function CalendarPage() {
           <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>Workspace · Calendar</p>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 14, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-            <h1 style={{ fontSize: 28, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
               {new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </h1>
             <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 14, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
@@ -965,7 +965,7 @@ export default function CalendarPage() {
                     </button>
                   )}
                   {dayTasks.length === 0 && (
-                    <div style={{ textAlign: "center", marginTop: 4, fontSize: 17, color: "#dde4de", lineHeight: 1 }}>+</div>
+                    <div style={{ textAlign: "center", marginTop: 4, fontSize: 14, color: "#dde4de", lineHeight: 1 }}>+</div>
                   )}
                 </div>
               </div>

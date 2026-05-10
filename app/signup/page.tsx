@@ -23,7 +23,7 @@ export default function SignUpPage() {
               <circle cx="50" cy="59" r="18" fill="#59d10b"/>
             </svg>
           </div>
-          <h1 style={{ fontSize: 23, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: "0 0 6px" }}>
+          <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: "0 0 6px" }}>
             Create your account
           </h1>
           <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>

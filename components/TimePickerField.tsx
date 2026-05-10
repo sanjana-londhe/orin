@@ -137,7 +137,7 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
       <div style={{ display: "flex", height: "100%", gap: 4 }}>
         <WheelColumn items={HOURS_12} value={hour12} onChange={v => update(v, m, ampm)} format={v => String(v)} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: WHEEL_HEIGHT, width: 8 }}>
-          <span style={{ fontSize: 18, fontWeight: 700, color: "#082d1d" }}>:</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "#082d1d" }}>:</span>
         </div>
         <WheelColumn items={MINUTES} value={m} onChange={v => update(hour12, v, ampm)} format={v => String(v).padStart(2, "0")} />
         <WheelColumn items={[...AMPMS]} value={ampm} onChange={v => update(hour12, m, v)} format={v => v} />

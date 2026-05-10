@@ -25,7 +25,7 @@ function LoginPageInner() {
                 <circle cx="50" cy="59" r="18" fill="#59d10b"/>
               </svg>
             </div>
-            <h1 style={{ fontSize: 23, fontWeight:500, letterSpacing:"-0.03em", color:"#082d1d", margin:"0 0 8px" }}>Welcome to orin</h1>
+            <h1 style={{ fontSize: 22, fontWeight:500, letterSpacing:"-0.03em", color:"#082d1d", margin:"0 0 8px" }}>Welcome to orin</h1>
             <p style={{ fontSize: 12, color:"#3d5a4a", margin:0, lineHeight:1.6 }}>
               Your personal space to manage tasks,<br/>track energy, and understand yourself better.
             </p>

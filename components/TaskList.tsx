@@ -479,7 +479,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
       {/* ── Page header ── */}
       <div style={{ marginBottom: 16, marginTop: 8 }}>
         <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>Workspace · Today</p>
-        <h1 style={{ fontSize: 28, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>Today</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>Today</h1>
       </div>
 
       {/* ── Cards ── */}

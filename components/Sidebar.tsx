@@ -128,7 +128,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 <circle cx="50" cy="41" r="18" fill="#059669"/>
                 <circle cx="50" cy="59" r="18" fill="#59d10b"/>
               </svg>
-              <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
+              <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
             </Link>
           )}
           <button

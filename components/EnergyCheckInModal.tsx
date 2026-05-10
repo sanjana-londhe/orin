@@ -207,7 +207,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         cursor: "pointer", fontFamily: "inherit",
                         transition: "background 0.12s, border-color 0.12s",
                       }}>
-                      <span style={{ fontSize: 21 }}>{m.emoji}</span>
+                      <span style={{ fontSize: 14 }}>{m.emoji}</span>
                       <span style={{
                         fontSize: 10, fontWeight: 600,
                         color: active ? T.accent : T.textTertiary,

@@ -43,7 +43,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
       <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480, background: "#fff", borderRadius: 4, boxShadow: "0 24px 64px rgba(0,0,0,0.15)", overflow: "hidden" }}>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid #f0f0f0" }}>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: "#0a2010", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: "#0a2010", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
           <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: "50%", border: "1px solid #e5e7eb", background: "#f9fafb", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280" }}>
             <X size={14} />
           </button>
@@ -92,7 +92,7 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
                     background: active ? s.activeBg : s.bg, color: active ? "#fff" : s.fg,
                     border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.12s",
                   }}>
-                    <span style={{ fontSize: 15 }}>{s.emoji}</span> {s.label}
+                    <span style={{ fontSize: 14 }}>{s.emoji}</span> {s.label}
                   </button>
                 );
               })}
