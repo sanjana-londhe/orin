@@ -51,9 +51,10 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-// ── Mood week — 7-day emoji row, no chart ────────────────────────────
+// ── Mood week — 7-day vertical bar row ───────────────────────────────
 
 function MoodChart({ data }: { data: { label: string; value: number | null }[] }) {
+  const BAR_AREA = 64;
   const hasData = data.some(d => d.value !== null);
   if (!hasData) {
     return (
@@ -69,20 +70,30 @@ function MoodChart({ data }: { data: { label: string; value: number | null }[] }
     }}>
       {data.map((d, i) => {
         const has = d.value !== null;
+        const v = d.value ?? 0;
+        // bar height = (mood / 5) * area, with a 6px floor when there's any data
+        const h = has ? Math.max(6, (v / 5) * BAR_AREA) : 0;
         return (
           <div key={i} style={{
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-            padding: "10px 4px",
-            background: has ? "#f8f9f5" : "transparent",
-            borderRadius: 4,
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
           }}>
-            <span style={{
-              fontSize: 22, lineHeight: 1,
-              opacity: has ? 1 : 0.25,
-              filter: has ? "none" : "grayscale(1)",
+            <div style={{
+              width: "100%", height: BAR_AREA,
+              display: "flex", alignItems: "flex-end", justifyContent: "center",
             }}>
-              {has ? moodEmoji(d.value!) : "·"}
-            </span>
+              {has ? (
+                <div style={{
+                  width: "60%",
+                  height: h,
+                  background: moodColor(v),
+                  borderRadius: 2,
+                  opacity: 0.85,
+                  transition: "height 0.25s ease",
+                }} />
+              ) : (
+                <span style={{ fontSize: 14, color: "#dde4de", paddingBottom: 2 }}>·</span>
+              )}
+            </div>
             <span style={{
               fontSize: 10, fontWeight: 600,
               color: "#4a6d47",
