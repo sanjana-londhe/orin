@@ -51,84 +51,47 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-// ── SVG mood trend chart ─────────────────────────────────────────────
+// ── Mood week — 7-day emoji row, no chart ────────────────────────────
 
 function MoodChart({ data }: { data: { label: string; value: number | null }[] }) {
-  const [hovered, setHovered] = useState<{ i: number; v: number } | null>(null);
-  const W = 560, H = 120, PAD = { top: 16, right: 12, bottom: 26, left: 92 };
-  const iW = W - PAD.left - PAD.right;
-  const iH = H - PAD.top - PAD.bottom;
   const hasData = data.some(d => d.value !== null);
-
-  const x = (i: number) => (i / (data.length - 1)) * iW;
-  const y = (v: number) => iH - ((v - 1) / 4) * iH;
-
-  const filled = data.map((d, i) => ({ ...d, i, v: d.value ?? 0 }));
-  const areaPath = hasData
-    ? `M${x(0)},${iH} ${filled.map(d => `L${x(d.i)},${y(d.v)}`).join(" ")} L${x(data.length - 1)},${iH} Z`
-    : "";
-
+  if (!hasData) {
+    return (
+      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "12px 0" }}>
+        Log your feelings to see your mood across the week.
+      </p>
+    );
+  }
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", overflow: "visible" }}>
-      <defs>
-        <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#059669" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#059669" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <g transform={`translate(${PAD.left},${PAD.top})`}>
-        {[1, 2, 3, 4, 5].map(v => (
-          <line key={v} x1={0} x2={iW} y1={y(v)} y2={y(v)} stroke="#f1f3ef" strokeWidth={1} />
-        ))}
-        {[1, 3, 5].map(v => (
-          <text key={v} x={-8} y={y(v) + 4} textAnchor="end" fontSize={10} fill="#c4cbc2">
-            {MOODS[v - 1].label}
-          </text>
-        ))}
-        {hasData ? (
-          <>
-            <path d={areaPath} fill="url(#moodGrad)" />
-            <polyline
-              points={filled.filter(d => d.value !== null).map(d => `${x(d.i)},${y(d.v)}`).join(" ")}
-              fill="none" stroke="#059669" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round"
-            />
-            {filled.map(d => d.value !== null && (
-              <circle key={d.i} cx={x(d.i)} cy={y(d.v)} r={5}
-                fill={moodColor(d.v)} stroke="#fff" strokeWidth={2}
-                style={{ cursor: "pointer" }}
-                onMouseEnter={() => setHovered({ i: d.i, v: d.v })}
-                onMouseLeave={() => setHovered(null)}
-              />
-            ))}
-            {hovered && (() => {
-              const cx = x(hovered.i);
-              const cy = y(hovered.v);
-              const label = moodLabel(hovered.v);
-              const tw = label.length * 6.2 + 20;
-              const tx = Math.max(0, Math.min(cx - tw / 2, iW - tw));
-              const ty = cy - 36;
-              return (
-                <g style={{ pointerEvents: "none" }}>
-                  <rect x={tx} y={ty} width={tw} height={22} rx={5} fill="#082d1d" />
-                  <text x={tx + tw / 2} y={ty + 15} textAnchor="middle" fontSize={10} fill="#fff" fontWeight="600">
-                    {label}
-                  </text>
-                </g>
-              );
-            })()}
-          </>
-        ) : (
-          <text x={iW / 2} y={iH / 2 + 4} textAnchor="middle" fontSize={11} fill="#c4cbc2">
-            Log your feelings to see your mood trend
-          </text>
-        )}
-        {data.map((d, i) => (
-          <text key={i} x={x(i)} y={iH + 18} textAnchor="middle" fontSize={10} fill="#4a6d47">
-            {d.label}
-          </text>
-        ))}
-      </g>
-    </svg>
+    <div style={{
+      display: "grid", gridTemplateColumns: "repeat(7, 1fr)",
+      gap: 6,
+    }}>
+      {data.map((d, i) => {
+        const has = d.value !== null;
+        return (
+          <div key={i} style={{
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+            padding: "10px 4px",
+            background: has ? "#f8f9f5" : "transparent",
+            borderRadius: 4,
+          }}>
+            <span style={{
+              fontSize: 22, lineHeight: 1,
+              opacity: has ? 1 : 0.25,
+              filter: has ? "none" : "grayscale(1)",
+            }}>
+              {has ? moodEmoji(d.value!) : "·"}
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 600,
+              color: "#4a6d47",
+              textTransform: "uppercase", letterSpacing: "0.06em",
+            }}>{d.label}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
