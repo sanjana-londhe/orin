@@ -36,37 +36,41 @@ interface WeeklyReport {
   most_deferred_task: { title: string; deferredCount: number; emotionalState: string } | null;
 }
 
-// ── Hierarchy: Group → Card → Body ───────────────────────────────────
+// ── Hierarchy: Card (Today / Week) → Block (insight) ─────────────────
 
-function Group({ label, children }: { label: string; children: React.ReactNode }) {
+function Card({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginTop: 18 }}>
+    <div style={{
+      marginTop: 12,
+      background: "#fff",
+      border: "1px solid #e9ede9",
+      borderRadius: 4,
+      padding: "14px 16px",
+    }}>
       <p style={{
         fontSize: 10, fontWeight: 600, color: "#4a6d47",
         textTransform: "uppercase", letterSpacing: "0.10em",
-        margin: "0 0 4px",
+        margin: "0 0 14px",
       }}>{label}</p>
-      {children}
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {children}
+      </div>
     </div>
   );
 }
 
-function Card({ icon: Icon, title, children }: {
+function Block({ icon: Icon, title, children }: {
   icon: LucideIcon; title: string; children: React.ReactNode;
 }) {
   return (
     <div>
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "12px 0 8px",
-      }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
         <span style={{ color: "#4a6d47", display: "inline-flex" }}>
-          <Icon size={14} />
+          <Icon size={12} />
         </span>
-        <span style={{ fontSize: 12.5, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
+        <span style={{ fontSize: 11.5, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
       </div>
-      <div style={{ paddingBottom: 14, paddingLeft: 22 }}>{children}</div>
-      <div style={{ height: 1, background: "#f1f3ef" }} />
+      <div style={{ paddingLeft: 19 }}>{children}</div>
     </div>
   );
 }
@@ -289,11 +293,11 @@ export function AIPanel({ onClose }: Props) {
           </div>
         ) : null}
 
-        <Group label="Today">
+        <Card label="Today">
 
         {/* Avoidance alert — slipping tasks */}
         {avoidance.length > 0 && (
-          <Card icon={AlertCircle} title="Slipping tasks">
+          <Block icon={AlertCircle} title="Slipping tasks">
             <p style={{ fontSize: 11.5, color: "#3d5a4a", margin: "0 0 8px", lineHeight: 1.5 }}>
               Deferred 3+ times — consider doing just step 1.
             </p>
@@ -305,11 +309,11 @@ export function AIPanel({ onClose }: Props) {
                 </div>
               ))}
             </div>
-          </Card>
+          </Block>
         )}
 
         {/* Today's briefing */}
-        <Card icon={Zap} title="Today's briefing">
+        <Block icon={Zap} title="Today's briefing">
           <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, lineHeight: 1.55 }}>
             <p style={{ margin: 0, color: overdue.length > 0 ? "#D14626" : "#3d5a4a", fontWeight: overdue.length > 0 ? 600 : 400 }}>
               {overdue.length > 0 ? `${overdue.length} overdue` : "Nothing overdue."}
@@ -324,10 +328,10 @@ export function AIPanel({ onClose }: Props) {
               )}
             </p>
           </div>
-        </Card>
+        </Block>
 
         {/* What to work on next — mood-aware */}
-        <Card icon={Compass} title={isEvening ? "Wrapping up the day" : "What to work on next"}>
+        <Block icon={Compass} title={isEvening ? "Wrapping up the day" : "What to work on next"}>
           {pending.length === 0 ? (
             <p style={{ fontSize: 12, color: "#059669", margin: 0 }}>🎉 All caught up — nothing pending today.</p>
           ) : recommended ? (
@@ -355,26 +359,26 @@ export function AIPanel({ onClose }: Props) {
               </p>
             </div>
           ) : null}
-        </Card>
+        </Block>
 
         {/* End-of-day reflection — only after 6pm */}
         {isEvening && (
-          <Card icon={Moon} title="End-of-day reflection">
+          <Block icon={Moon} title="End-of-day reflection">
             <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.55 }}>
               {pending.length === 0
                 ? "You finished everything today. Take a breath and call it done."
                 : <>{pending.length} task{pending.length === 1 ? "" : "s"} unfinished — that&apos;s okay. Reschedule what won&apos;t happen tonight.</>
               }
             </p>
-          </Card>
+          </Block>
         )}
 
-        </Group>
+        </Card>
 
-        <Group label="This week">
+        <Card label="This week">
 
         {/* At a glance */}
-        <Card icon={TrendingUp} title="At a glance">
+        <Block icon={TrendingUp} title="At a glance">
           {!weekly ? (
             <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Loading…</p>
           ) : (
@@ -394,10 +398,10 @@ export function AIPanel({ onClose }: Props) {
               ))}
             </div>
           )}
-        </Card>
+        </Block>
 
         {/* Streak */}
-        <Card icon={Flame} title="Streak">
+        <Block icon={Flame} title="Streak">
           {streak === 0 ? (
             <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Complete a task today to start a streak.</p>
           ) : (
@@ -406,10 +410,10 @@ export function AIPanel({ onClose }: Props) {
               <span style={{ marginLeft: 6 }}>day{streak === 1 ? "" : "s"} in a row with at least one task done.</span>
             </p>
           )}
-        </Card>
+        </Block>
 
         {/* Patterns */}
-        <Card icon={Sparkles} title="Patterns">
+        <Block icon={Sparkles} title="Patterns">
           {!weekly || (weekly.total_completed === 0 && !bestEmotion && !worstEmotion) ? (
             <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>
               Complete and defer some tasks this week to see patterns here.
@@ -445,10 +449,10 @@ export function AIPanel({ onClose }: Props) {
               )}
             </div>
           )}
-        </Card>
+        </Block>
 
         {/* Mood ↔ productivity correlation */}
-        <Card icon={Heart} title="Mood vs. productivity">
+        <Block icon={Heart} title="Mood vs. productivity">
           {!moodVsCompletion ? (
             <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>
               Log moods + complete tasks for two weeks to see how they relate.
@@ -467,10 +471,10 @@ export function AIPanel({ onClose }: Props) {
               )}
             </div>
           )}
-        </Card>
+        </Block>
 
         {/* Tomorrow's emotional load */}
-        <Card icon={CalendarClock} title="Tomorrow's load">
+        <Block icon={CalendarClock} title="Tomorrow's load">
           {!tomorrowLoad ? (
             <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Nothing scheduled for tomorrow.</p>
           ) : (
@@ -500,21 +504,21 @@ export function AIPanel({ onClose }: Props) {
               </div>
             </div>
           )}
-        </Card>
+        </Block>
 
         {/* Sunday review — only on Sundays */}
         {isSunday && weekly && (
-          <Card icon={Lightbulb} title="Sunday review">
+          <Block icon={Lightbulb} title="Sunday review">
             <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.55 }}>
               This week: <strong style={{ color: "#082d1d" }}>{weekly.total_completed}</strong> done,{" "}
               <strong style={{ color: "#082d1d" }}>{weekly.total_deferrals}</strong> deferred.{" "}
               {bestEmotion ? <>You moved best when feeling <span style={{ color: bestEmotion.em?.pillText, fontWeight: 600 }}>{bestEmotion.em?.label}</span>.</> : null}
               {" "}Take a breath and pick one thing to bring into next week.
             </p>
-          </Card>
+          </Block>
         )}
 
-        </Group>
+        </Card>
       </div>
     </aside>
   );
