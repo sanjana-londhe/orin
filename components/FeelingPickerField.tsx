@@ -32,9 +32,11 @@ interface Props {
   onChange: (v: Feeling) => void;
   label?: string;
   dropUp?: boolean;
+  /** Render the trigger as a chip (matches inline create-form chip style). */
+  compact?: boolean;
 }
 
-export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp }: Props) {
+export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp, compact }: Props) {
   const [open, setOpen]         = useState(false);
   const [fixedPos, setFixedPos] = useState({ top: 0, left: 0 });
   const isMobile  = useIsMobile();
@@ -90,7 +92,15 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
         ref={buttonRef}
         type="button"
         onClick={handleOpen}
-        style={{
+        style={compact ? {
+          display: "inline-flex", alignItems: "center", gap: 5,
+          padding: "4px 9px", borderRadius: 6,
+          background: selected?.bg ?? D.surfacePage,
+          border: `0.5px solid ${selected ? selected.fg + "33" : "rgba(0,0,0,0.08)"}`,
+          color: selected?.fg ?? D.textTertiary,
+          fontSize: 11, fontWeight: 500,
+          cursor: "pointer", fontFamily: "inherit",
+        } : {
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,
           border: `1.5px solid ${open ? D.accent : D.border}`,
@@ -98,16 +108,18 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp 
           cursor: "pointer", fontFamily: "inherit",
           transition: "border-color 0.14s", boxSizing: "border-box", outline: "none",
         }}
-        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.borderHover; }}
-        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.border; }}
+        onMouseEnter={e => { if (!compact && !open) (e.currentTarget as HTMLElement).style.borderColor = D.borderHover; }}
+        onMouseLeave={e => { if (!compact && !open) (e.currentTarget as HTMLElement).style.borderColor = D.border; }}
       >
-        <span style={{ fontSize: 12, color: value ? D.textPrimary : D.textMuted }}>
+        <span style={{ fontSize: compact ? 11 : 12, color: compact ? "inherit" : (value ? D.textPrimary : D.textMuted) }}>
           {displayText}
         </span>
-        <ChevronDown
-          size={13} color={D.textTertiary}
-          style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }}
-        />
+        {!compact && (
+          <ChevronDown
+            size={13} color={D.textTertiary}
+            style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }}
+          />
+        )}
       </button>
 
       {open && (

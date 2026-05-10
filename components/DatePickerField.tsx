@@ -121,9 +121,11 @@ interface Props {
   label?: string;
   calendarOnly?: boolean;
   dropUp?: boolean;
+  /** Render the trigger as a chip (matches inline create-form chip style). */
+  compact?: boolean;
 }
 
-export function DatePickerField({ value, onChange, label = "Due date", calendarOnly = false, dropUp }: Props) {
+export function DatePickerField({ value, onChange, label = "Due date", calendarOnly = false, dropUp, compact }: Props) {
   const today    = getToday();
   const tomorrow = getTomorrow();
   const [open, setOpen]       = useState(false);
@@ -188,7 +190,15 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
         ref={buttonRef}
         type="button"
         onClick={handleOpen}
-        style={{
+        style={compact ? {
+          display: "inline-flex", alignItems: "center", gap: 5,
+          padding: "4px 9px", borderRadius: 6,
+          background: "#f8f9f5",
+          border: "0.5px solid rgba(5,150,105,0.25)",
+          color: D.accent,
+          fontSize: 11, fontWeight: 500,
+          cursor: "pointer", fontFamily: "inherit",
+        } : {
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,
           border: `1.5px solid ${open ? D.accent : D.stone400}`,
@@ -197,16 +207,16 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
           transition: "border-color 0.14s",
           boxSizing: "border-box", outline: "none",
         }}
-        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.stone500; }}
-        onMouseLeave={e => { if (!open) (e.currentTarget as HTMLElement).style.borderColor = D.stone400; }}
+        onMouseEnter={e => { if (!compact && !open) (e.currentTarget as HTMLElement).style.borderColor = D.stone500; }}
+        onMouseLeave={e => { if (!compact && !open) (e.currentTarget as HTMLElement).style.borderColor = D.stone400; }}
       >
-        <span style={{ fontSize: 12, color: value ? D.limeInk : D.textMuted }}>
-          {displayText}
+        <span style={{ fontSize: compact ? 11 : 12, color: compact ? "inherit" : (value ? D.limeInk : D.textMuted) }}>
+          📅 {displayText}
         </span>
-        <ChevronDown
+        {!compact && <ChevronDown
           size={13} color={D.textTertiary}
           style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.14s" }}
-        />
+        />}
       </button>
 
       {open && (

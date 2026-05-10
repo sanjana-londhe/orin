@@ -357,44 +357,36 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                     </div>
                   </div>
 
-                  {/* Pickers — same components task creation uses */}
+                  {/* Chip bar — same compact pickers the create form uses */}
                   <div style={{
-                    padding: "10px 14px",
+                    display: "flex", gap: 5, padding: "6px 14px 10px",
                     borderTop: "0.5px solid rgba(0,0,0,0.05)",
-                    display: "flex", flexDirection: "column", gap: 8,
+                    flexWrap: "wrap", alignItems: "center",
                   }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                      <FeelingPickerField
-                        value={editEmotion as Feeling}
-                        onChange={v => setEditEmotion(v as TaskWithSubtasks["emotionalState"])}
-                        label=""
-                        dropUp
-                      />
-                      <DatePickerField
-                        value={editDate}
-                        onChange={setEditDate}
-                        label=""
-                        dropUp
-                      />
-                      <TimePickerField
-                        value={editTime}
-                        onChange={setEditTime}
-                        label=""
-                        selectedDate={editDate}
-                        dropUp
-                      />
-                    </div>
-                  </div>
-
-                  {/* Right-aligned actions */}
-                  <div style={{
-                    display: "flex", gap: 6, justifyContent: "flex-end",
-                    padding: "0 14px 12px",
-                  }}>
+                    <FeelingPickerField
+                      value={editEmotion as Feeling}
+                      onChange={v => setEditEmotion(v as TaskWithSubtasks["emotionalState"])}
+                      label=""
+                      compact
+                    />
+                    <DatePickerField
+                      value={editDate}
+                      onChange={setEditDate}
+                      label=""
+                      compact
+                    />
+                    <TimePickerField
+                      value={editTime}
+                      onChange={setEditTime}
+                      label=""
+                      selectedDate={editDate}
+                      compact
+                    />
+                    <div style={{ flex: 1 }} />
                     <button
                       onClick={() => setEditingId(null)}
                       style={{
-                        padding: "5px 14px", borderRadius: 6,
+                        padding: "4px 11px", borderRadius: 6,
                         border: "0.5px solid #dde4de", background: "#fff",
                         color: "#3d5a4a", fontSize: 11, fontWeight: 500,
                         cursor: "pointer", fontFamily: "inherit",
@@ -403,7 +395,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                     <button
                       onClick={() => saveEdit(task)}
                       style={{
-                        padding: "6px 16px", borderRadius: 6, border: "none",
+                        padding: "5px 14px", borderRadius: 6, border: "none",
                         background: "#059669", color: "#fff",
                         fontSize: 11, fontWeight: 600,
                         cursor: "pointer", fontFamily: "inherit",
