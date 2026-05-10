@@ -36,34 +36,13 @@ interface WeeklyReport {
   most_deferred_task: { title: string; deferredCount: number; emotionalState: string } | null;
 }
 
-// ── Hierarchy: Card (Today / Week) → Block (insight) ─────────────────
-
-function Card({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div style={{
-      marginTop: 12,
-      background: "#fff",
-      border: "1px solid #e9ede9",
-      borderRadius: 4,
-      padding: "14px 16px",
-    }}>
-      <p style={{
-        fontSize: 10, fontWeight: 600, color: "#4a6d47",
-        textTransform: "uppercase", letterSpacing: "0.10em",
-        margin: "0 0 14px",
-      }}>{label}</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {children}
-      </div>
-    </div>
-  );
-}
+// ── Block: one insight (icon + title + content), separated by hairline ─
 
 function Block({ icon: Icon, title, children }: {
   icon: LucideIcon; title: string; children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div style={{ paddingTop: 14, paddingBottom: 14, borderBottom: "1px solid #f1f3ef" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 6 }}>
         <span style={{ color: "#4a6d47", display: "inline-flex" }}>
           <Icon size={12} />
@@ -81,6 +60,7 @@ interface Props { onClose: () => void }
 
 export function AIPanel({ onClose }: Props) {
   const [mounted, setMounted] = useState(false);
+  const [tab, setTab] = useState<"today" | "week">("today");
   useEffect(() => setMounted(true), []);
 
   const { data: todayTasks = [] } = useQuery<TaskWithSubtasks[]>({
@@ -277,12 +257,36 @@ export function AIPanel({ onClose }: Props) {
         </button>
       </div>
 
-      {/* Scrollable body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "4px 18px 24px" }}>
+      {/* ── Tabs ── */}
+      <div style={{ padding: "10px 18px 0", borderBottom: "1px solid #f1f3ef" }}>
+        <div style={{ display: "flex", gap: 4, background: "#f8f9f5", border: "1px solid #e9ede9", borderRadius: 4, padding: 3 }}>
+          {(["today", "week"] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{
+                flex: 1, padding: "5px 0", borderRadius: 3,
+                border: tab === t ? "1px solid #e9ede9" : "1px solid transparent",
+                background: tab === t ? "#fff" : "transparent",
+                color: tab === t ? "#082d1d" : "#4a6d47",
+                fontSize: 11.5, fontWeight: tab === t ? 600 : 500,
+                cursor: "pointer", fontFamily: "inherit",
+                boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.04)" : "none",
+                textTransform: "capitalize", transition: "all 0.12s",
+              }}
+            >
+              {t === "week" ? "This week" : "Today"}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        {/* ── Empty-week onboarding takes over when there's no data yet ── */}
+      {/* ── Scrollable body ── */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "0 18px 24px" }}>
+
+        {/* Empty-week onboarding pinned at top */}
         {noDataYet && mounted ? (
-          <div style={{ marginTop: 12, padding: "14px 14px", background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4 }}>
+          <div style={{ marginTop: 14, padding: "14px 14px", background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4 }}>
             <p style={{ fontSize: 11, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Get started</p>
             <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: "0 0 8px", letterSpacing: "-0.01em" }}>Unlock insights in 3 steps</p>
             <ol style={{ margin: 0, paddingLeft: 18, fontSize: 11.5, color: "#3d5a4a", lineHeight: 1.6 }}>
@@ -293,7 +297,44 @@ export function AIPanel({ onClose }: Props) {
           </div>
         ) : null}
 
-        <Card label="Today">
+        {/* ── Hero ── */}
+        {tab === "today" ? (
+          <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f1f3ef", marginBottom: 6 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>
+              {new Date().toLocaleDateString("en-US", { weekday: "long" })}
+            </p>
+            <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
+              <span style={{ fontSize: 27, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pending.length}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
+                task{pending.length !== 1 ? "s" : ""} remaining
+              </span>
+            </p>
+            <p style={{ margin: 0, fontSize: 11.5, color: overdue.length > 0 ? "#D14626" : "#4a6d47", fontWeight: overdue.length > 0 ? 600 : 400 }}>
+              {overdue.length > 0
+                ? `⚠ ${overdue.length} overdue${hasEnergy ? " · energy logged" : ""}`
+                : (hasEnergy ? "Nothing overdue · energy logged" : "Nothing overdue · log energy to unlock patterns")}
+            </p>
+          </div>
+        ) : (
+          <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f1f3ef", marginBottom: 6 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Streak</p>
+            <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
+              <span style={{ fontSize: 27, fontWeight: 600, color: "#059669", fontVariantNumeric: "tabular-nums" }}>{streak}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
+                day{streak === 1 ? "" : "s"} in a row
+              </span>
+            </p>
+            <p style={{ margin: 0, fontSize: 11.5, color: "#4a6d47" }}>
+              {weekly
+                ? <><strong style={{ color: "#082d1d" }}>{weekly.total_completed}</strong> done · <strong style={{ color: "#082d1d" }}>{weekly.total_deferrals}</strong> deferred this week</>
+                : "Loading…"}
+            </p>
+          </div>
+        )}
+
+        {/* ── Tab content ── */}
+        {tab === "today" ? (
+          <>
 
         {/* Avoidance alert — slipping tasks */}
         {avoidance.length > 0 && (
@@ -373,9 +414,9 @@ export function AIPanel({ onClose }: Props) {
           </Block>
         )}
 
-        </Card>
-
-        <Card label="This week">
+          </>
+        ) : (
+          <>
 
         {/* At a glance */}
         <Block icon={TrendingUp} title="At a glance">
@@ -518,7 +559,8 @@ export function AIPanel({ onClose }: Props) {
           </Block>
         )}
 
-        </Card>
+          </>
+        )}
       </div>
     </aside>
   );
