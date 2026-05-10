@@ -98,7 +98,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
     zIndex: 70, width: 400,
-    background: "#fff", borderRadius: 12,
+    background: "#fff", borderRadius: 4,
     border: "1px solid #dde4de",
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)", overflow: "hidden",
   };
@@ -138,7 +138,7 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
         {/* Date + emotion — same chips as TaskCard row */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", padding: "10px 16px", borderBottom: note ? "1px solid #e9ede9" : "none" }}>
           {dateLabel && (
-            <span style={{ fontSize: 12.5, fontWeight: 500, color: overdue ? "#c23934" : "#059669" }}>
+            <span style={{ fontSize: 12.5, fontWeight: 500, color: overdue ? "#D14626" : "#059669" }}>
               {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
             </span>
           )}
@@ -195,7 +195,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
     zIndex: 70, width: 420,
-    background: "#fff", borderRadius: 12,
+    background: "#fff", borderRadius: 4,
     border: "1px solid #dde4de",
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)", maxHeight: "70vh", overflowY: "auto",
   };
@@ -258,7 +258,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onEd
                 </p>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {time && (
-                    <span style={{ fontSize: 11, fontWeight: 500, color: overdue ? "#c23934" : "#4a6d47" }}>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: overdue ? "#D14626" : "#4a6d47" }}>
                       {overdue && "⚠ "}{time}
                     </span>
                   )}
@@ -310,7 +310,7 @@ function MonthPicker({ year, month, onSelect, onClose }: { year: number; month: 
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80, background: "rgba(8,45,29,0.15)" }} />
-      <div style={{ position: "fixed", top: 52, left: 12, right: 12, zIndex: 90, background: "#fff", borderRadius: 12, border: "1.5px solid #dde4de", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", padding: "12px 8px" }}>
+      <div style={{ position: "fixed", top: 52, left: 12, right: 12, zIndex: 90, background: "#fff", borderRadius: 4, border: "1.5px solid #dde4de", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", padding: "12px 8px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, padding: "0 4px" }}>
           <button onClick={() => setPickerYear(y => y - 1)} style={{ width: 32, height: 32, border: "1px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={14} color="#4a6d47" /></button>
           <span style={{ fontSize: 15, fontWeight: 700, color: "#082d1d" }}>{pickerYear}</span>
@@ -495,7 +495,7 @@ function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, o
                   {em(task.emotionalState).emoji} {em(task.emotionalState).label}
                 </span>
                 {dateLabel && (
-                  <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: "#f8f9f5", color: overdue ? "#D14626" : "#4a6d47" }}>
                     {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
                   </span>
                 )}
@@ -626,7 +626,7 @@ function MobileTaskInfoPage({ task, onClose, onMarkDone, onMarkUndone, onUpdate 
           {em(task.emotionalState).emoji} {em(task.emotionalState).label}
         </span>
         {dateLabel && (
-          <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: "#f8f9f5", color: overdue ? "#c23934" : "#4a6d47" }}>
+          <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: "#f8f9f5", color: overdue ? "#D14626" : "#4a6d47" }}>
             {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
           </span>
         )}
