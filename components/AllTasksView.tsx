@@ -276,7 +276,7 @@ export function AllTasksView() {
             ? "Workspace · All Tasks"
             : new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
         </p>
-        <h1 style={{ fontSize: isMobile ? 24 : 30, fontWeight: 500, letterSpacing: "-0.03em", color: T.textPrimary, margin: 0, lineHeight: 1 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: T.textPrimary, margin: 0, lineHeight: 1 }}>
           {isAllPage ? "All Tasks" : "Today"}
         </h1>
       </div>
