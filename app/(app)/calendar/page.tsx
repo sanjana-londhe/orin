@@ -290,39 +290,58 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                       <textarea
                         autoFocus
                         value={editTitle}
-                        onChange={ev => setEditTitle(ev.target.value)}
+                        onChange={ev => {
+                          setEditTitle(ev.target.value);
+                          const t = ev.currentTarget;
+                          t.style.height = "auto";
+                          t.style.height = t.scrollHeight + "px";
+                        }}
                         onKeyDown={ev => {
                           if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) saveEdit(task);
                           if (ev.key === "Escape") setEditingId(null);
                         }}
                         rows={1}
+                        ref={el => {
+                          // Size to content on mount and whenever React re-renders this row
+                          if (el) {
+                            requestAnimationFrame(() => {
+                              el.style.height = "auto";
+                              el.style.height = el.scrollHeight + "px";
+                            });
+                          }
+                        }}
                         style={{
                           width: "100%", border: "none", outline: "none", fontFamily: "inherit",
                           fontSize: 12, fontWeight: 400, letterSpacing: "-0.01em",
                           color: "#082d1d", background: "transparent",
                           resize: "none", lineHeight: 1.5, padding: 0, display: "block",
-                          marginBottom: 2,
-                          overflow: "hidden",
-                        }}
-                        ref={el => {
-                          if (el) { el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }
+                          marginBottom: 2, overflow: "hidden",
                         }}
                       />
                       {editNoteOpen ? (
                         <textarea
                           value={editNote}
-                          onChange={ev => setEditNote(ev.target.value)}
+                          onChange={ev => {
+                            setEditNote(ev.target.value);
+                            const t = ev.currentTarget;
+                            t.style.height = "auto";
+                            t.style.height = t.scrollHeight + "px";
+                          }}
                           placeholder="Notes"
                           rows={2}
+                          ref={el => {
+                            if (el) {
+                              requestAnimationFrame(() => {
+                                el.style.height = "auto";
+                                el.style.height = el.scrollHeight + "px";
+                              });
+                            }
+                          }}
                           style={{
                             width: "100%", border: "none", outline: "none", fontFamily: "inherit",
                             fontSize: 11, color: "#3d5a4a", background: "transparent",
                             resize: "none", lineHeight: 1.5, padding: 0, display: "block",
                             overflow: "hidden",
-                          }}
-                          onInput={ev => {
-                            const t = ev.currentTarget;
-                            t.style.height = "auto"; t.style.height = t.scrollHeight + "px";
                           }}
                         />
                       ) : (
