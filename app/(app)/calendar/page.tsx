@@ -266,79 +266,90 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
             const editEm = em(editEmotion);
             return (
               <div key={task.id} style={{
-                padding: "12px 16px",
+                padding: "8px 12px",
                 borderBottom: idx < tasks.length - 1 ? "1px solid #f1f3ef" : "none",
-                background: "#f8f9f5",
+                background: "#fff",
               }}>
-                <input
-                  autoFocus
-                  value={editTitle}
-                  onChange={ev => setEditTitle(ev.target.value)}
-                  onKeyDown={ev => { if (ev.key === "Enter") saveEdit(task); if (ev.key === "Escape") setEditingId(null); }}
-                  style={{
-                    width: "100%", padding: "8px 10px", borderRadius: 4,
-                    border: "1.5px solid #dde4de", fontSize: 12, color: "#082d1d",
-                    fontFamily: "inherit", outline: "none", background: "#fff",
-                    boxSizing: "border-box", marginBottom: 8,
-                  }}
-                  onFocus={ev => (ev.currentTarget.style.borderColor = "#059669")}
-                  onBlur={ev => (ev.currentTarget.style.borderColor = "#dde4de")}
-                />
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", marginBottom: 8 }}>
-                  <button
-                    onClick={cycleEmotion}
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: 4,
-                      padding: "4px 9px", borderRadius: 4,
-                      background: editEm.pillBg, color: editEm.pillText,
-                      border: `1px solid ${editEm.pillBg}`,
-                      fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
-                    }}
-                  >
-                    {editEm.emoji} {editEm.label}
-                  </button>
-                  <input
-                    type="date"
-                    value={editDate}
-                    onChange={ev => setEditDate(ev.target.value)}
-                    style={{
-                      padding: "4px 8px", borderRadius: 4,
-                      border: "1px solid #dde4de", fontSize: 11, color: "#082d1d",
-                      fontFamily: "inherit", outline: "none", background: "#fff",
-                    }}
-                  />
-                  <input
-                    type="time"
-                    value={editTime}
-                    onChange={ev => setEditTime(ev.target.value)}
-                    disabled={!editDate}
-                    style={{
-                      padding: "4px 8px", borderRadius: 4,
-                      border: "1px solid #dde4de", fontSize: 11, color: "#082d1d",
-                      fontFamily: "inherit", outline: "none",
-                      background: editDate ? "#fff" : "#f1f3ef",
-                    }}
-                  />
-                </div>
-                <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    style={{
-                      padding: "5px 12px", borderRadius: 4,
-                      border: "1px solid #dde4de", background: "#fff",
-                      color: "#3d5a4a", fontSize: 11, fontWeight: 500,
-                      cursor: "pointer", fontFamily: "inherit",
-                    }}
-                  >Cancel</button>
-                  <button
-                    onClick={() => saveEdit(task)}
-                    style={{
-                      padding: "5px 14px", borderRadius: 4, border: "none",
-                      background: "#059669", color: "#fff",
-                      fontSize: 11, fontWeight: 600,
-                      cursor: "pointer", fontFamily: "inherit",
-                    }}
-                  >Save</button>
+                <div style={{ border: "1px solid #059669", borderRadius: 4, background: "#fff" }}>
+                  {/* Title row */}
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px 6px" }}>
+                    <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px solid #059669", flexShrink: 0, marginTop: 2 }} />
+                    <input
+                      autoFocus
+                      value={editTitle}
+                      onChange={ev => setEditTitle(ev.target.value)}
+                      onKeyDown={ev => { if (ev.key === "Enter") saveEdit(task); if (ev.key === "Escape") setEditingId(null); }}
+                      style={{
+                        flex: 1, border: "none", outline: "none", fontFamily: "inherit",
+                        fontSize: 12, fontWeight: 400, letterSpacing: "-0.01em",
+                        color: "#082d1d", background: "transparent",
+                      }}
+                    />
+                  </div>
+
+                  {/* Chip bar — same shape as inline create form */}
+                  <div style={{
+                    display: "flex", gap: 5, padding: "6px 14px 10px",
+                    borderTop: "0.5px solid rgba(0,0,0,0.05)", flexWrap: "wrap", alignItems: "center",
+                  }}>
+                    <button
+                      onClick={cycleEmotion}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        padding: "4px 9px", borderRadius: 6,
+                        background: editEm.pillBg, color: editEm.pillText,
+                        border: `0.5px solid ${editEm.pillText}33`,
+                        fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+                      }}
+                    >
+                      {editEm.emoji} {editEm.label}
+                    </button>
+                    <input
+                      type="date"
+                      value={editDate}
+                      onChange={ev => setEditDate(ev.target.value)}
+                      style={{
+                        padding: "4px 9px", borderRadius: 6,
+                        border: "0.5px solid rgba(5,150,105,0.25)",
+                        background: "#f8f9f5", color: "#059669",
+                        fontSize: 11, fontWeight: 500,
+                        fontFamily: "inherit", outline: "none",
+                      }}
+                    />
+                    <input
+                      type="time"
+                      value={editTime}
+                      onChange={ev => setEditTime(ev.target.value)}
+                      disabled={!editDate}
+                      style={{
+                        padding: "4px 9px", borderRadius: 6,
+                        border: "0.5px solid rgba(0,0,0,0.08)",
+                        background: editDate ? "#f8f9f5" : "#f1f3ef",
+                        color: "#3d5a4a",
+                        fontSize: 11, fontWeight: 500,
+                        fontFamily: "inherit", outline: "none",
+                      }}
+                    />
+                    <div style={{ flex: 1 }} />
+                    <button
+                      onClick={() => setEditingId(null)}
+                      style={{
+                        padding: "4px 11px", borderRadius: 6,
+                        border: "0.5px solid #dde4de", background: "#fff",
+                        color: "#3d5a4a", fontSize: 11, fontWeight: 500,
+                        cursor: "pointer", fontFamily: "inherit",
+                      }}
+                    >Cancel</button>
+                    <button
+                      onClick={() => saveEdit(task)}
+                      style={{
+                        padding: "5px 14px", borderRadius: 6, border: "none",
+                        background: "#059669", color: "#fff",
+                        fontSize: 11, fontWeight: 600,
+                        cursor: "pointer", fontFamily: "inherit",
+                      }}
+                    >Save</button>
+                  </div>
                 </div>
               </div>
             );
