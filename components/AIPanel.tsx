@@ -371,7 +371,8 @@ export function AIPanel({ onClose }: Props) {
           </div>
         </Block>
 
-        {/* What to work on next — mood-aware */}
+        {/* What to work on next — only when there's a recommendation or a celebration to give */}
+        {(recommended || (pending.length === 0 && todayTasks.length > 0)) && (
         <Block icon={Compass} title={isEvening ? "Wrapping up the day" : "What to work on next"}>
           {pending.length === 0 ? (
             <p style={{ fontSize: 12, color: "#059669", margin: 0 }}>🎉 All caught up — nothing pending today.</p>
@@ -401,6 +402,7 @@ export function AIPanel({ onClose }: Props) {
             </div>
           ) : null}
         </Block>
+        )}
 
         {/* End-of-day reflection — only after 6pm */}
         {isEvening && (
@@ -418,11 +420,9 @@ export function AIPanel({ onClose }: Props) {
         ) : (
           <>
 
-        {/* At a glance */}
-        <Block icon={TrendingUp} title="At a glance">
-          {!weekly ? (
-            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Loading…</p>
-          ) : (
+        {/* At a glance — only if any totals are non-zero */}
+        {weekly && (weekly.total_completed > 0 || weekly.total_deferrals > 0 || pending.length > 0) && (
+          <Block icon={TrendingUp} title="At a glance">
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {[
                 { label: "Completed", val: weekly.total_completed, dot: "#22c55e" },
@@ -438,28 +438,22 @@ export function AIPanel({ onClose }: Props) {
                 </div>
               ))}
             </div>
-          )}
-        </Block>
+          </Block>
+        )}
 
-        {/* Streak */}
-        <Block icon={Flame} title="Streak">
-          {streak === 0 ? (
-            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Complete a task today to start a streak.</p>
-          ) : (
+        {/* Streak — only if streak > 0 */}
+        {streak > 0 && (
+          <Block icon={Flame} title="Streak">
             <p style={{ margin: 0, fontSize: 12, color: "#3d5a4a", lineHeight: 1.55 }}>
               <strong style={{ color: "#059669", fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{streak}</strong>
               <span style={{ marginLeft: 6 }}>day{streak === 1 ? "" : "s"} in a row with at least one task done.</span>
             </p>
-          )}
-        </Block>
+          </Block>
+        )}
 
-        {/* Patterns */}
-        <Block icon={Sparkles} title="Patterns">
-          {!weekly || (weekly.total_completed === 0 && !bestEmotion && !worstEmotion) ? (
-            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>
-              Complete and defer some tasks this week to see patterns here.
-            </p>
-          ) : (
+        {/* Patterns — only if at least one pattern exists */}
+        {(bestEmotion || worstEmotion || weekly?.most_deferred_task) && (
+          <Block icon={Sparkles} title="Patterns">
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 12, lineHeight: 1.5 }}>
               {bestEmotion && (
                 <div>
@@ -489,16 +483,12 @@ export function AIPanel({ onClose }: Props) {
                 </div>
               )}
             </div>
-          )}
-        </Block>
+          </Block>
+        )}
 
-        {/* Mood ↔ productivity correlation */}
-        <Block icon={Heart} title="Mood vs. productivity">
-          {!moodVsCompletion ? (
-            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>
-              Log moods + complete tasks for two weeks to see how they relate.
-            </p>
-          ) : (
+        {/* Mood ↔ productivity — only when correlation is computable */}
+        {moodVsCompletion && (
+          <Block icon={Heart} title="Mood vs. productivity">
             <div style={{ fontSize: 12, lineHeight: 1.55 }}>
               <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
                 <span style={{ color: "#082d1d", fontWeight: 600 }}>{moodVsCompletion.highAvg}</span> tasks/day on high-mood days
@@ -511,14 +501,12 @@ export function AIPanel({ onClose }: Props) {
                 </p>
               )}
             </div>
-          )}
-        </Block>
+          </Block>
+        )}
 
-        {/* Tomorrow's emotional load */}
-        <Block icon={CalendarClock} title="Tomorrow's load">
-          {!tomorrowLoad ? (
-            <p style={{ fontSize: 11.5, color: "#b9d3c4", margin: 0 }}>Nothing scheduled for tomorrow.</p>
-          ) : (
+        {/* Tomorrow's load — only when there's something due tomorrow */}
+        {tomorrowLoad && (
+          <Block icon={CalendarClock} title="Tomorrow's load">
             <div style={{ fontSize: 12, lineHeight: 1.5 }}>
               <p style={{ margin: "0 0 8px", color: "#3d5a4a" }}>
                 <strong style={{ color: "#082d1d" }}>{tomorrowLoad.total}</strong> task{tomorrowLoad.total === 1 ? "" : "s"} due tomorrow.
@@ -544,8 +532,8 @@ export function AIPanel({ onClose }: Props) {
                 })}
               </div>
             </div>
-          )}
-        </Block>
+          </Block>
+        )}
 
         {/* Sunday review — only on Sundays */}
         {isSunday && weekly && (
