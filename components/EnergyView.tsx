@@ -32,7 +32,6 @@ function moodMeta(v: number) { return MOODS[Math.round(v) - 1] ?? MOODS[2]; }
 function moodEmoji(v: number) { return moodMeta(v).emoji; }
 function moodLabel(v: number) { return moodMeta(v).label; }
 function moodColor(v: number) { return moodMeta(v).color; }
-function moodSoft(v: number)  { return moodMeta(v).soft; }
 
 function avgMood(entries: CheckIn[]): number | null {
   if (!entries.length) return null;
@@ -69,14 +68,6 @@ function rangeDays(r: Range): number | null {
   if (r === "90d") return 90;
   if (r === "1y")  return 365;
   return null;
-}
-
-function rangeLongLabel(r: Range): string {
-  if (r === "7d")  return "Last 7 days";
-  if (r === "30d") return "Last 30 days";
-  if (r === "90d") return "Last 90 days";
-  if (r === "1y")  return "Last year";
-  return "All time";
 }
 
 // ── GitHub-style mood heatmap ────────────────────────────────────────
@@ -444,10 +435,6 @@ export function EnergyView() {
     );
   }
 
-  const heroMood = summary ? Math.round(summary.avg) : null;
-  const heroColor = summary ? moodColor(summary.avg) : "#7a8a7a";
-  const heroSoft  = summary ? moodSoft(summary.avg)  : "#f1f3ef";
-
   return (
     <div style={{ maxWidth: 820, margin: "0 auto", padding: pad }}>
 
@@ -571,49 +558,6 @@ export function EnergyView() {
             );
           })}
         </div>
-      </div>
-
-      {/* ── Hero: average mood for range ── */}
-      <div style={{
-        background: "#fff",
-        border: "1px solid #dde4de",
-        borderTop: `3px solid ${heroColor}`,
-        borderRadius: 8,
-        padding: isMobile ? "22px 16px" : "28px 24px",
-        marginBottom: 12,
-        textAlign: "center",
-      }}>
-        {summary ? (
-          <>
-            <div style={{ fontSize: 60, lineHeight: 1, margin: "0 0 10px" }}>
-              {moodEmoji(summary.avg)}
-            </div>
-            <p style={{ fontSize: 20, fontWeight: 600, color: "#082d1d", margin: "0 0 8px", letterSpacing: "-0.015em" }}>
-              {heroMood !== null ? moodLabel(heroMood) : "—"}
-            </p>
-            <p style={{ fontSize: 13, color: "#3d5a4a", margin: 0, lineHeight: 1.55 }}>
-              avg <strong style={{ color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{summary.avg.toFixed(1)}</strong> / 5
-              <span style={{ color: "#c4cbc2", margin: "0 8px" }}>·</span>
-              {summary.days} day{summary.days === 1 ? "" : "s"} logged
-              <span style={{ color: "#c4cbc2", margin: "0 8px" }}>·</span>
-              {summary.entries} check-in{summary.entries === 1 ? "" : "s"}
-            </p>
-            {!summary.flat && (
-              <p style={{ fontSize: 12, color: "#4a6d47", margin: "12px 0 0" }}>
-                {summary.trend === "rising"  && <>Trending <strong style={{ color: "#082d1d" }}>upward</strong> · </>}
-                {summary.trend === "falling" && <>Trending <strong style={{ color: "#082d1d" }}>downward</strong> · </>}
-                {summary.trend === "steady"  && <>Steady · </>}
-                best <strong style={{ color: "#082d1d" }}>{summary.bestLabel}</strong>
-              </p>
-            )}
-          </>
-        ) : (
-          <>
-            <div style={{ fontSize: 44, lineHeight: 1, margin: "0 0 8px", opacity: 0.4 }}>🌱</div>
-            <p style={{ fontSize: 14, fontWeight: 500, color: "#3d5a4a", margin: "0 0 4px" }}>Nothing here yet</p>
-            <p style={{ fontSize: 12, color: "#7a8a7a", margin: 0 }}>Log a check-in to see your mood across {rangeLongLabel(range).toLowerCase()}.</p>
-          </>
-        )}
       </div>
 
       {/* ── Quick stat strip: streak + most common mood ── */}
