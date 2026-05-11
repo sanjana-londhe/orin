@@ -1013,6 +1013,15 @@ export default function CalendarPage() {
 
   const todayIso = isoDate(today);
 
+  // The side panel / mobile detail page hold `selectedTask` in local state,
+  // captured at click time. Optimistic toggles update the query cache only,
+  // so without re-deriving from `tasks` the panel's checkbox would never
+  // update visually after a mark-done / mark-undone click.
+  const liveSelectedTask = useMemo(() => {
+    if (!selectedTask) return null;
+    return tasks.find(t => t.id === selectedTask.id) ?? selectedTask;
+  }, [tasks, selectedTask]);
+
   const tasksByDate = useMemo(() => {
     const map = new Map<string, TaskWithSubtasks[]>();
     for (const t of tasks) {
@@ -1049,9 +1058,16 @@ export default function CalendarPage() {
           onTaskTap={task => setSelectedTask(task)}
         />
 
-        {/* Mobile: full-screen task info page */}
-        {selectedTask && (
-          <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} onUpdate={(id, patch) => updateTask({ id, patch })} />
+        {/* Mobile: full-screen task info page — drive off liveSelectedTask
+            so the checkbox reflects optimistic completes/uncompletes. */}
+        {liveSelectedTask && (
+          <MobileTaskInfoPage
+            task={liveSelectedTask}
+            onClose={() => setSelectedTask(null)}
+            onMarkDone={id => markDone(id)}
+            onMarkUndone={id => markUndone(id)}
+            onUpdate={(id, patch) => updateTask({ id, patch })}
+          />
         )}
         {dayTaskList && (
           <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => { deleteTask(id); if ((tasksByDate.get(dayTaskList) ?? []).length <= 1) setDayTaskList(null); }} />
@@ -1161,10 +1177,11 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Desktop: right-side task panel */}
-      {selectedTask && (
+      {/* Desktop: right-side task panel — driven by liveSelectedTask so
+          the checkbox stays in sync with the optimistic cache. */}
+      {liveSelectedTask && (
         <DesktopTaskPanel
-          task={selectedTask}
+          task={liveSelectedTask}
           onClose={() => setSelectedTask(null)}
           onMarkDone={id => { markDone(id); }}
           onMarkUndone={id => { markUndone(id); }}
