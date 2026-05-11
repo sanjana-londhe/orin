@@ -18,14 +18,15 @@ import {
 
 // ── Mood constants ───────────────────────────────────────────────────
 
-// Earth-tone gradient — terracotta → sand → sage. Slightly punched up
-// from the prior palette so the 5 steps read clearly on the heatmap.
+// Brighter mood gradient — coral → amber → lime → emerald. Vivid enough
+// that each step is distinct at a glance on the heatmap, with the
+// brand-leaning emerald anchoring the high end.
 const MOODS = [
-  { value: 1, emoji: "😔", label: "Very unpleasant", color: "#b3554a", soft: "#f1d8d3" },
-  { value: 2, emoji: "😕", label: "Unpleasant",      color: "#d99a72", soft: "#f5e1d2" },
-  { value: 3, emoji: "😐", label: "Neutral",         color: "#c9bd87", soft: "#efe9d2" },
-  { value: 4, emoji: "🙂", label: "Pleasant",        color: "#84c194", soft: "#dcedde" },
-  { value: 5, emoji: "😄", label: "Very pleasant",   color: "#2f8a5b", soft: "#c8e1d0" },
+  { value: 1, emoji: "😔", label: "Very unpleasant", color: "#ef6a55", soft: "#fde2dc" },
+  { value: 2, emoji: "😕", label: "Unpleasant",      color: "#f5a261", soft: "#fde9d7" },
+  { value: 3, emoji: "😐", label: "Neutral",         color: "#f1c95a", soft: "#fdf2cc" },
+  { value: 4, emoji: "🙂", label: "Pleasant",        color: "#74cf63", soft: "#dff5d5" },
+  { value: 5, emoji: "😄", label: "Very pleasant",   color: "#1f9e6b", soft: "#c8e9d4" },
 ];
 
 function moodMeta(v: number) { return MOODS[Math.round(v) - 1] ?? MOODS[2]; }
@@ -615,7 +616,7 @@ export function EnergyView() {
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
             <div>
               <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
-                <span style={{ color: "#4e8a6a" }}>▲</span> Lifts you
+                <span style={{ color: "#1a9444" }}>▲</span> Lifts you
               </p>
               {liftsPulls.lifts.length === 0 ? (
                 <p style={{ fontSize: 12, color: "#7a8a7a", margin: 0 }}>—</p>
@@ -631,8 +632,8 @@ export function EnergyView() {
                       <span>{l.tag} <span style={{ color: "#7a8a7a", fontSize: 10, marginLeft: 4 }}>{l.count}×</span></span>
                       <span style={{
                         padding: "2px 9px", borderRadius: 6,
-                        background: "#e3ede2", border: "1px solid #c8e0c8",
-                        color: "#4e8a6a",
+                        background: "#EEFAF1", border: "1px solid #c8f7ae",
+                        color: "#1A9444",
                         fontWeight: 600, fontSize: 11, fontVariantNumeric: "tabular-nums",
                       }}>{l.avg.toFixed(1)}</span>
                     </div>
@@ -642,7 +643,7 @@ export function EnergyView() {
             </div>
             <div>
               <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
-                <span style={{ color: "#b86a5e" }}>▼</span> Pulls you down
+                <span style={{ color: "#D14626" }}>▼</span> Pulls you down
               </p>
               {liftsPulls.pulls.length === 0 ? (
                 <p style={{ fontSize: 12, color: "#7a8a7a", margin: 0 }}>—</p>
@@ -658,8 +659,8 @@ export function EnergyView() {
                       <span>{p.tag} <span style={{ color: "#7a8a7a", fontSize: 10, marginLeft: 4 }}>{p.count}×</span></span>
                       <span style={{
                         padding: "2px 9px", borderRadius: 6,
-                        background: "#f1e2dd", border: "1px solid #e0c2b8",
-                        color: "#b86a5e",
+                        background: "#FFF0EC", border: "1px solid #e9c3c1",
+                        color: "#D14626",
                         fontWeight: 600, fontSize: 11, fontVariantNumeric: "tabular-nums",
                       }}>{p.avg.toFixed(1)}</span>
                     </div>
