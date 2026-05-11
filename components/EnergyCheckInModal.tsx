@@ -124,12 +124,12 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
       justifyContent: "center",
       padding: isMobile ? 0 : "0 20px",
     }}>
-      {/* Backdrop */}
+      {/* Backdrop — matches DeferralModal / TaskCreateModal */}
       <div onClick={onClose} style={{
         position: "absolute", inset: 0,
-        background: "rgba(8,45,29,0.32)",
-        backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
+        background: "rgba(8,45,29,0.25)",
+        backdropFilter: "blur(2px)",
+        WebkitBackdropFilter: "blur(2px)",
       }} />
 
       {/* Card */}
@@ -138,11 +138,11 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
         width: "100%",
         maxWidth: isMobile ? "100%" : 460,
         background: T.surface,
-        borderRadius: isMobile ? "16px 16px 0 0" : 14,
-        border: `1px solid ${T.border}`,
+        borderRadius: isMobile ? "16px 16px 0 0" : 12,
+        border: `1.5px solid ${T.border}`,
         boxShadow: isMobile
           ? "0 -4px 24px rgba(0,0,0,0.08)"
-          : "0 8px 32px rgba(0,0,0,0.10)",
+          : "0 8px 24px rgba(0,0,0,0.08)",
         overflow: "hidden",
         paddingBottom: isMobile ? 20 : 0,
         maxHeight: isMobile ? "92vh" : "auto",
@@ -201,7 +201,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         flex: 1,
                         display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                         padding: "10px 2px",
-                        borderRadius: 4,
+                        borderRadius: 6,
                         border: `1.5px solid ${active ? T.accent : T.border}`,
                         background: active ? T.accentSubtle : T.stone100,
                         cursor: "pointer", fontFamily: "inherit",
@@ -235,7 +235,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         style={{
                           display: "flex", alignItems: "center", gap: 6,
                           padding: "8px 10px",
-                          borderRadius: 8,
+                          borderRadius: 6,
                           border: `1px solid ${active ? T.accent : T.border}`,
                           background: active ? T.accentSubtle : T.surface,
                           cursor: "pointer", fontFamily: "inherit",
@@ -256,7 +256,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                     style={{
                       display: "flex", alignItems: "center", gap: 6,
                       padding: "8px 10px",
-                      borderRadius: 8,
+                      borderRadius: 6,
                       border: `1px solid ${otherActive ? T.accent : T.border}`,
                       background: otherActive ? T.accentSubtle : T.surface,
                       cursor: "pointer", fontFamily: "inherit",
