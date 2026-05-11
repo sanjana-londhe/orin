@@ -361,7 +361,7 @@ export function AllTasksView() {
                   {/* Feeling chip + dropdown */}
                   <div style={{ position: "relative" }}>
                     <button onClick={() => { setShowEmoPicker(o => !o); setShowDatePicker(false); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); }}
-                      style={chipStyle(em.fg)}>
+                      style={{ ...chipStyle(em.fg), background: em.bg }}>
                       <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                     </button>
                     {showEmoPicker && (

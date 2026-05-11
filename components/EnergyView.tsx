@@ -323,13 +323,17 @@ export function EnergyView() {
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {todayEntries.slice(0, -1).map((e, i) => (
                   <div key={i} style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    padding: "4px 10px", borderRadius: 4,
-                    background: "#f8f9f5", border: "0.5px solid rgba(0,0,0,0.08)",
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "4px 10px 4px 8px", borderRadius: "0 4px 4px 0",
+                    background: "#f8f9f5",
+                    borderLeft: `2px solid ${moodColor(e.mood)}`,
+                    borderTop: "0.5px solid rgba(0,0,0,0.06)",
+                    borderRight: "0.5px solid rgba(0,0,0,0.06)",
+                    borderBottom: "0.5px solid rgba(0,0,0,0.06)",
                     fontSize: 11, color: "#3d5a4a",
                   }}>
-                    <span>{moodEmoji(e.mood)}</span>
-                    <span>{moodLabel(e.mood)}</span>
+                    <span style={{ fontSize: 13 }}>{moodEmoji(e.mood)}</span>
+                    <span style={{ fontWeight: 500, color: "#082d1d" }}>{moodLabel(e.mood)}</span>
                     <span style={{ color: "#4a6d47" }}>{timeAgo(e.time)}</span>
                   </div>
                 ))}
