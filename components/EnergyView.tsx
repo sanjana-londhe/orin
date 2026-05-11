@@ -18,14 +18,14 @@ import {
 
 // ── Mood constants ───────────────────────────────────────────────────
 
-// Muted, single-hue-leaning palette — clay → sand → sage. Easier on the
-// eyes than the saturated red→green of most mood trackers.
+// Earth-tone gradient — terracotta → sand → sage. Slightly punched up
+// from the prior palette so the 5 steps read clearly on the heatmap.
 const MOODS = [
-  { value: 1, emoji: "😔", label: "Very unpleasant", color: "#b86a5e", soft: "#f1e2dd" },
-  { value: 2, emoji: "😕", label: "Unpleasant",      color: "#c89478", soft: "#f3e7da" },
-  { value: 3, emoji: "😐", label: "Neutral",         color: "#a89c75", soft: "#eee9d8" },
-  { value: 4, emoji: "🙂", label: "Pleasant",        color: "#7aa68a", soft: "#e3ede2" },
-  { value: 5, emoji: "😄", label: "Very pleasant",   color: "#4e8a6a", soft: "#d7e6d8" },
+  { value: 1, emoji: "😔", label: "Very unpleasant", color: "#b3554a", soft: "#f1d8d3" },
+  { value: 2, emoji: "😕", label: "Unpleasant",      color: "#d99a72", soft: "#f5e1d2" },
+  { value: 3, emoji: "😐", label: "Neutral",         color: "#c9bd87", soft: "#efe9d2" },
+  { value: 4, emoji: "🙂", label: "Pleasant",        color: "#84c194", soft: "#dcedde" },
+  { value: 5, emoji: "😄", label: "Very pleasant",   color: "#2f8a5b", soft: "#c8e1d0" },
 ];
 
 function moodMeta(v: number) { return MOODS[Math.round(v) - 1] ?? MOODS[2]; }
@@ -116,75 +116,104 @@ function MoodHeatmap({
     );
   }
 
-  const cellSize = grid.columns.length > 30 ? 10 : grid.columns.length > 14 ? 14 : isMobile ? 18 : 22;
-  const gap = grid.columns.length > 30 ? 2 : 3;
-  const dowLabels = ["Mon", "Wed", "Fri"];
+  // Cells size themselves to fill the container width. Each column is
+  // flex:1 inside a flex row, and each cell is aspect-ratio:1 inside
+  // its column — so the grid is always a perfect rectangle of squares.
+  const gap = isMobile ? 2 : 3;
+  const dowGutter = isMobile ? 22 : 26;
+  const todayIso = isoDay(new Date());
 
   return (
-    <div style={{ overflowX: "auto", paddingBottom: 2, marginLeft: -2 }}>
-      <div style={{ display: "inline-flex", flexDirection: "column", gap: 4 }}>
-        {/* Month labels row */}
-        <div style={{ position: "relative", height: 12, marginLeft: 26 }}>
-          {grid.monthLabels.map(m => (
-            <span key={m.col} style={{
-              position: "absolute",
-              left: m.col * (cellSize + gap),
-              fontSize: 10, color: "#4a6d47", fontWeight: 600, letterSpacing: "0.04em",
-              textTransform: "uppercase",
-            }}>{m.label}</span>
-          ))}
-        </div>
-        {/* DOW labels + grid */}
-        <div style={{ display: "flex", gap: 6 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap, paddingTop: 0, width: 20 }}>
-            {[0,1,2,3,4,5,6].map(dow => (
+    <div style={{ width: "100%" }}>
+      {/* Month labels row — same flex layout so labels align with their column */}
+      <div style={{ display: "flex", gap, marginBottom: 4, paddingLeft: dowGutter + 6 }}>
+        {grid.columns.map((_, idx) => {
+          const monthEntry = grid.monthLabels.find(m => m.col === idx);
+          return (
+            <div key={idx} style={{
+              flex: 1, minWidth: 0,
+              fontSize: 10, color: "#4a6d47", fontWeight: 600,
+              letterSpacing: "0.04em", textTransform: "uppercase",
+              whiteSpace: "nowrap", lineHeight: 1, height: 12,
+            }}>{monthEntry?.label ?? ""}</div>
+          );
+        })}
+      </div>
+
+      {/* DOW labels + grid */}
+      <div style={{ display: "flex", gap: 6 }}>
+        {/* DOW labels column */}
+        <div style={{
+          width: dowGutter,
+          display: "flex", flexDirection: "column", gap,
+          flexShrink: 0,
+        }}>
+          {[0,1,2,3,4,5,6].map(dow => {
+            const showLabel = dow === 1 || dow === 3 || dow === 5;
+            const label = dow === 1 ? "Mon" : dow === 3 ? "Wed" : dow === 5 ? "Fri" : "";
+            return (
               <div key={dow} style={{
-                height: cellSize, fontSize: 9, color: "#7a8a7a",
-                display: "flex", alignItems: "center",
-                visibility: dow === 1 || dow === 3 || dow === 5 ? "visible" : "hidden",
-              }}>{dowLabels[dow === 1 ? 0 : dow === 3 ? 1 : 2]}</div>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap }}>
-            {grid.columns.map((col, ci) => (
-              <div key={ci} style={{ display: "flex", flexDirection: "column", gap }}>
-                {col.map((cell, ri) => {
-                  if (!cell) {
-                    // Padding cell to keep the rectangle complete — same
-                    // empty color as a no-data day, slightly faded.
-                    return (
-                      <div key={ri} style={{
-                        width: cellSize, height: cellSize, borderRadius: 3,
-                        background: "#eef1ed", opacity: 0.55,
-                      }} />
-                    );
-                  }
-                  const has = cell.value !== null;
-                  const today = isoDay(new Date()) === cell.key;
+                flex: 1, aspectRatio: "1",
+                fontSize: 9, color: "#7a8a7a",
+                display: "flex", alignItems: "center", justifyContent: "flex-end",
+                paddingRight: 2,
+                visibility: showLabel ? "visible" : "hidden",
+              }}>{label}</div>
+            );
+          })}
+        </div>
+
+        {/* Heatmap columns — flex:1 each so they share the available width */}
+        <div style={{ flex: 1, display: "flex", gap }}>
+          {grid.columns.map((col, ci) => (
+            <div key={ci} style={{
+              flex: 1, minWidth: 0,
+              display: "flex", flexDirection: "column", gap,
+            }}>
+              {col.map((cell, ri) => {
+                if (!cell) {
                   return (
-                    <div key={ri} title={`${cell.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}${has ? ` · ${moodLabel(cell.value!)}` : " · no entry"}`}
-                      style={{
-                        width: cellSize, height: cellSize, borderRadius: 3,
-                        background: has ? moodColor(cell.value!) : "#eef1ed",
-                        opacity: has ? 0.92 : 1,
-                        border: today ? "1.5px solid #082d1d" : "none",
-                        boxSizing: "border-box",
-                      }}
-                    />
+                    <div key={ri} style={{
+                      aspectRatio: "1", width: "100%",
+                      borderRadius: 3,
+                      background: "#eef1ed", opacity: 0.5,
+                    }} />
                   );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Legend */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, marginLeft: 26 }}>
-          <span style={{ fontSize: 10, color: "#7a8a7a" }}>Less</span>
-          {MOODS.map(m => (
-            <div key={m.value} style={{ width: 10, height: 10, borderRadius: 2, background: m.color, opacity: 0.92 }} />
+                }
+                const has = cell.value !== null;
+                const today = todayIso === cell.key;
+                return (
+                  <div
+                    key={ri}
+                    title={`${cell.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}${has ? ` · ${moodLabel(cell.value!)}` : " · no entry"}`}
+                    style={{
+                      aspectRatio: "1", width: "100%",
+                      borderRadius: 3,
+                      background: has ? moodColor(cell.value!) : "#eef1ed",
+                      outline: today ? "2px solid #082d1d" : "none",
+                      outlineOffset: today ? -1 : 0,
+                      boxSizing: "border-box",
+                    }}
+                  />
+                );
+              })}
+            </div>
           ))}
-          <span style={{ fontSize: 10, color: "#7a8a7a" }}>More</span>
         </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 6,
+        marginTop: 10, paddingLeft: dowGutter + 6,
+      }}>
+        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Less</span>
+        {MOODS.map(m => (
+          <div key={m.value} style={{
+            width: 11, height: 11, borderRadius: 3, background: m.color,
+          }} />
+        ))}
+        <span style={{ fontSize: 10, color: "#7a8a7a" }}>More</span>
       </div>
     </div>
   );
