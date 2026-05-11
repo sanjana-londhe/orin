@@ -543,13 +543,12 @@ export function EnergyView() {
         )}
       </Section>
 
-      {/* ── Range filter divider ── */}
+      {/* ── Range filter ── */}
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center", justifyContent: "flex-end",
         gap: 12, flexWrap: "wrap",
         margin: "22px 2px 12px",
       }}>
-        <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0 }}>{rangeLongLabel(range)}</p>
         <div style={{ display: "inline-flex", gap: 4 }}>
           {RANGE_OPTIONS.map(opt => {
             const active = range === opt.value;
