@@ -65,6 +65,8 @@ function rangeDays(r: Range): number | null {
 
 // ── GitHub-style mood heatmap ────────────────────────────────────────
 
+type HeatCell = { date: Date; key: string; value: number | null; entries: CheckIn[] };
+
 function MoodHeatmap({
   startDate,
   endDate,
@@ -76,11 +78,14 @@ function MoodHeatmap({
   store: EnergyStore;
   isMobile: boolean;
 }) {
+  const [tip, setTip] = useState<{ cell: HeatCell; rect: DOMRect } | null>(null);
+
   const days = useMemo(() => {
-    const out: { date: Date; key: string; value: number | null }[] = [];
+    const out: HeatCell[] = [];
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const key = isoDay(d);
-      out.push({ date: new Date(d), key, value: avgMood(store[key] ?? []) });
+      const entries = store[key] ?? [];
+      out.push({ date: new Date(d), key, value: avgMood(entries), entries });
     }
     return out;
   }, [startDate, endDate, store]);
@@ -190,7 +195,8 @@ function MoodHeatmap({
                 return (
                   <div
                     key={ri}
-                    title={`${cell.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}${has ? ` · ${moodLabel(cell.value!)}` : " · no entry"}`}
+                    onMouseEnter={e => setTip({ cell, rect: e.currentTarget.getBoundingClientRect() })}
+                    onMouseLeave={() => setTip(t => t?.cell.key === cell.key ? null : t)}
                     style={{
                       aspectRatio: "1", width: "100%",
                       borderRadius: 3,
@@ -198,6 +204,7 @@ function MoodHeatmap({
                       outline: today ? "2px solid #082d1d" : "none",
                       outlineOffset: today ? -1 : 0,
                       boxSizing: "border-box",
+                      cursor: "pointer",
                     }}
                   />
                 );
@@ -220,6 +227,83 @@ function MoodHeatmap({
         ))}
         <span style={{ fontSize: 10, color: "#7a8a7a" }}>More</span>
       </div>
+
+      {tip && <HeatmapTooltip cell={tip.cell} rect={tip.rect} />}
+    </div>
+  );
+}
+
+function HeatmapTooltip({ cell, rect }: { cell: HeatCell; rect: DOMRect }) {
+  // Position above the cell when there's room; otherwise below.
+  const above = rect.top > 140;
+  const top = above ? rect.top - 8 : rect.bottom + 8;
+  const left = rect.left + rect.width / 2;
+
+  const dateLabel = cell.date.toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric",
+  });
+
+  return (
+    <div style={{
+      position: "fixed",
+      top, left,
+      transform: `translate(-50%, ${above ? "-100%" : "0"})`,
+      background: "#fff",
+      border: "1px solid #dde4de",
+      borderRadius: 8,
+      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+      padding: "10px 12px",
+      fontSize: 11.5,
+      fontFamily: "inherit",
+      color: "#082d1d",
+      zIndex: 200,
+      pointerEvents: "none",
+      minWidth: 180, maxWidth: 260,
+      lineHeight: 1.45,
+    }}>
+      <p style={{
+        fontSize: 10, fontWeight: 600, color: "#7a8a7a",
+        letterSpacing: "0.08em", textTransform: "uppercase",
+        margin: "0 0 4px",
+      }}>{dateLabel}</p>
+
+      {cell.entries.length === 0 ? (
+        <p style={{ margin: 0, color: "#7a8a7a", fontSize: 11 }}>No check-in</p>
+      ) : cell.entries.length === 1 ? (
+        <>
+          <p style={{ margin: 0, fontSize: 12, fontWeight: 600 }}>
+            <span style={{ marginRight: 4 }}>{moodEmoji(cell.entries[0].mood)}</span>
+            {moodLabel(cell.entries[0].mood)}
+          </p>
+          {cell.entries[0].contributions.length > 0 && (
+            <p style={{ margin: "3px 0 0", fontSize: 11, color: "#3d5a4a" }}>
+              {cell.entries[0].contributions.join(" · ")}
+            </p>
+          )}
+        </>
+      ) : (
+        <>
+          <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600 }}>
+            <span style={{ marginRight: 4 }}>{moodEmoji(cell.value!)}</span>
+            {moodLabel(cell.value!)}
+            <span style={{ color: "#7a8a7a", fontWeight: 500, marginLeft: 6 }}>
+              avg of {cell.entries.length}
+            </span>
+          </p>
+          {cell.entries.map((e, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 6,
+              fontSize: 11, color: "#3d5a4a",
+              marginTop: i === 0 ? 4 : 2,
+            }}>
+              <span style={{ fontSize: 12 }}>{moodEmoji(e.mood)}</span>
+              <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {e.contributions.length > 0 ? e.contributions.join(" · ") : moodLabel(e.mood)}
+              </span>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }
