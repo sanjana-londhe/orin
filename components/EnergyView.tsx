@@ -149,15 +149,19 @@ function MoodHeatmap({
           display: "flex", flexDirection: "column", gap,
           flexShrink: 0,
         }}>
+          {/* DOW rows flex to match the heatmap cell heights — no
+              aspect-ratio here, because the column on the right
+              (where cell width = container-width / 53) determines
+              the row height. */}
           {[0,1,2,3,4,5,6].map(dow => {
             const showLabel = dow === 1 || dow === 3 || dow === 5;
             const label = dow === 1 ? "Mon" : dow === 3 ? "Wed" : dow === 5 ? "Fri" : "";
             return (
               <div key={dow} style={{
-                flex: 1, aspectRatio: "1",
+                flex: 1, minHeight: 0,
                 fontSize: 9, color: "#7a8a7a",
                 display: "flex", alignItems: "center", justifyContent: "flex-end",
-                paddingRight: 2,
+                paddingRight: 4, lineHeight: 1,
                 visibility: showLabel ? "visible" : "hidden",
               }}>{label}</div>
             );
@@ -475,8 +479,8 @@ export function EnergyView() {
       <Section>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: todayEntries.length === 0 ? 0 : 12 }}>
           <div>
-            <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>Today</p>
-            <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
+            <p style={{ fontSize: 10, color: "#7a8a7a", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>Today</p>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </h3>
           </div>
