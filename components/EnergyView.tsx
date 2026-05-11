@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Heart, Lightbulb } from "lucide-react";
+import { Heart, Lightbulb, Flame } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/EmptyState";
@@ -16,26 +16,21 @@ import {
   type EnergyStore,
 } from "@/components/EnergyCheckInModal";
 
-// ── Constants ────────────────────────────────────────────────────────
+// ── Mood constants ───────────────────────────────────────────────────
 
 const MOODS = [
-  { value: 1, emoji: "😔", label: "Very unpleasant" },
-  { value: 2, emoji: "😕", label: "Unpleasant" },
-  { value: 3, emoji: "😐", label: "Neutral" },
-  { value: 4, emoji: "🙂", label: "Pleasant" },
-  { value: 5, emoji: "😄", label: "Very pleasant" },
+  { value: 1, emoji: "😔", label: "Very unpleasant", color: "#ef4444", soft: "#FEE4E2" },
+  { value: 2, emoji: "😕", label: "Unpleasant",      color: "#f97316", soft: "#FFEDD5" },
+  { value: 3, emoji: "😐", label: "Neutral",         color: "#f59e0b", soft: "#FEF3C7" },
+  { value: 4, emoji: "🙂", label: "Pleasant",        color: "#34d399", soft: "#D1FAE5" },
+  { value: 5, emoji: "😄", label: "Very pleasant",   color: "#059669", soft: "#A7F3D0" },
 ];
 
-function moodEmoji(v: number) { return MOODS[Math.round(v) - 1]?.emoji ?? "😐"; }
-function moodLabel(v: number) { return MOODS[Math.round(v) - 1]?.label ?? "Neutral"; }
-
-function moodColor(v: number) {
-  if (v >= 4.5) return "#059669";
-  if (v >= 3.5) return "#34d399";
-  if (v >= 2.5) return "#f59e0b";
-  if (v >= 1.5) return "#f97316";
-  return "#ef4444";
-}
+function moodMeta(v: number) { return MOODS[Math.round(v) - 1] ?? MOODS[2]; }
+function moodEmoji(v: number) { return moodMeta(v).emoji; }
+function moodLabel(v: number) { return moodMeta(v).label; }
+function moodColor(v: number) { return moodMeta(v).color; }
+function moodSoft(v: number)  { return moodMeta(v).soft; }
 
 function avgMood(entries: CheckIn[]): number | null {
   if (!entries.length) return null;
@@ -82,59 +77,167 @@ function rangeLongLabel(r: Range): string {
   return "All time";
 }
 
-// ── Mood chart — adapts to range ─────────────────────────────────────
+// ── GitHub-style mood heatmap ────────────────────────────────────────
 
-type Bar = { label: string; value: number | null; isLast?: boolean };
+function MoodHeatmap({
+  startDate,
+  endDate,
+  store,
+  isMobile,
+}: {
+  startDate: Date;
+  endDate: Date;
+  store: EnergyStore;
+  isMobile: boolean;
+}) {
+  const days = useMemo(() => {
+    const out: { date: Date; key: string; value: number | null }[] = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const key = isoDay(d);
+      out.push({ date: new Date(d), key, value: avgMood(store[key] ?? []) });
+    }
+    return out;
+  }, [startDate, endDate, store]);
 
-function MoodChart({ data, dense }: { data: Bar[]; dense?: boolean }) {
-  const BAR_AREA = 72;
-  const hasData = data.some(d => d.value !== null);
-  if (!hasData) {
+  // Build week-columns. First column starts on Sunday of startDate's week.
+  const grid = useMemo(() => {
+    if (days.length === 0) return { columns: [], monthLabels: [] };
+    const firstDow = days[0].date.getDay();
+    const cells: (typeof days[number] | null)[] = [];
+    for (let i = 0; i < firstDow; i++) cells.push(null);
+    cells.push(...days);
+    // Pad trailing
+    while (cells.length % 7 !== 0) cells.push(null);
+    const columns: ((typeof days[number] | null)[])[] = [];
+    for (let i = 0; i < cells.length; i += 7) columns.push(cells.slice(i, i + 7));
+    // Month label positions
+    const monthLabels: { col: number; label: string }[] = [];
+    let lastMonth = -1;
+    columns.forEach((col, idx) => {
+      const firstReal = col.find(c => c !== null);
+      if (firstReal && firstReal.date.getMonth() !== lastMonth) {
+        monthLabels.push({ col: idx, label: firstReal.date.toLocaleDateString("en-US", { month: "short" }) });
+        lastMonth = firstReal.date.getMonth();
+      }
+    });
+    return { columns, monthLabels };
+  }, [days]);
+
+  if (days.every(d => d.value === null)) {
     return (
-      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "18px 0" }}>
-        Log your feelings to see your mood trend.
+      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "20px 0" }}>
+        Log check-ins to fill your mood map.
+      </p>
+    );
+  }
+
+  const cellSize = grid.columns.length > 30 ? 10 : grid.columns.length > 14 ? 14 : isMobile ? 18 : 22;
+  const gap = grid.columns.length > 30 ? 2 : 3;
+  const dowLabels = ["Mon", "Wed", "Fri"];
+
+  return (
+    <div style={{ overflowX: "auto", paddingBottom: 2, marginLeft: -2 }}>
+      <div style={{ display: "inline-flex", flexDirection: "column", gap: 4 }}>
+        {/* Month labels row */}
+        <div style={{ position: "relative", height: 12, marginLeft: 26 }}>
+          {grid.monthLabels.map(m => (
+            <span key={m.col} style={{
+              position: "absolute",
+              left: m.col * (cellSize + gap),
+              fontSize: 10, color: "#4a6d47", fontWeight: 600, letterSpacing: "0.04em",
+              textTransform: "uppercase",
+            }}>{m.label}</span>
+          ))}
+        </div>
+        {/* DOW labels + grid */}
+        <div style={{ display: "flex", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap, paddingTop: 0, width: 20 }}>
+            {[0,1,2,3,4,5,6].map(dow => (
+              <div key={dow} style={{
+                height: cellSize, fontSize: 9, color: "#7a8a7a",
+                display: "flex", alignItems: "center",
+                visibility: dow === 1 || dow === 3 || dow === 5 ? "visible" : "hidden",
+              }}>{dowLabels[dow === 1 ? 0 : dow === 3 ? 1 : 2]}</div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap }}>
+            {grid.columns.map((col, ci) => (
+              <div key={ci} style={{ display: "flex", flexDirection: "column", gap }}>
+                {col.map((cell, ri) => {
+                  if (!cell) return <div key={ri} style={{ width: cellSize, height: cellSize }} />;
+                  const has = cell.value !== null;
+                  const today = isoDay(new Date()) === cell.key;
+                  return (
+                    <div key={ri} title={`${cell.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}${has ? ` · ${moodLabel(cell.value!)}` : " · no entry"}`}
+                      style={{
+                        width: cellSize, height: cellSize, borderRadius: 3,
+                        background: has ? moodColor(cell.value!) : "#eef1ed",
+                        opacity: has ? 0.92 : 1,
+                        border: today ? "1.5px solid #082d1d" : "none",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Legend */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, marginLeft: 26 }}>
+          <span style={{ fontSize: 10, color: "#7a8a7a" }}>Less</span>
+          {MOODS.map(m => (
+            <div key={m.value} style={{ width: 10, height: 10, borderRadius: 2, background: m.color, opacity: 0.92 }} />
+          ))}
+          <span style={{ fontSize: 10, color: "#7a8a7a" }}>More</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Mood distribution — stacked horizontal bar ───────────────────────
+
+function MoodDistribution({ counts, total }: { counts: number[]; total: number }) {
+  if (total === 0) {
+    return (
+      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "12px 0" }}>
+        No check-ins in this range.
       </p>
     );
   }
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: `repeat(${data.length}, 1fr)`,
-      gap: dense ? 2 : 6,
-    }}>
-      {data.map((d, i) => {
-        const has = d.value !== null;
-        const v = d.value ?? 0;
-        const h = has ? Math.max(6, (v / 5) * BAR_AREA) : 0;
-        return (
-          <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, minWidth: 0 }}>
-            <div style={{
-              width: "100%", height: BAR_AREA,
-              display: "flex", alignItems: "flex-end", justifyContent: "center",
+    <div>
+      <div style={{ display: "flex", width: "100%", height: 16, borderRadius: 4, overflow: "hidden", background: "#f1f3ef", marginBottom: 12 }}>
+        {MOODS.map((m, i) => {
+          const c = counts[i] ?? 0;
+          if (c === 0) return null;
+          const pct = (c / total) * 100;
+          return (
+            <div key={m.value} title={`${m.label} · ${c}`} style={{
+              width: `${pct}%`, background: m.color, opacity: 0.92,
+            }} />
+          );
+        })}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
+        {MOODS.map((m, i) => {
+          const c = counts[i] ?? 0;
+          const pct = total ? Math.round((c / total) * 100) : 0;
+          return (
+            <div key={m.value} style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+              padding: "6px 4px", borderRadius: 4,
+              background: c > 0 ? m.soft : "#f8f9f5",
+              opacity: c > 0 ? 1 : 0.55,
             }}>
-              {has ? (
-                <div style={{
-                  width: dense ? "85%" : "60%",
-                  height: h,
-                  background: moodColor(v),
-                  borderRadius: 2,
-                  opacity: d.isLast ? 1 : 0.85,
-                  transition: "height 0.25s ease",
-                }} />
-              ) : (
-                <span style={{ fontSize: 14, color: "#dde4de", paddingBottom: 2 }}>·</span>
-              )}
+              <span style={{ fontSize: 16 }}>{m.emoji}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: c > 0 ? m.color : "#7a8a7a", fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
+              <span style={{ fontSize: 9, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.04em" }}>{c}</span>
             </div>
-            <span style={{
-              fontSize: 9, fontWeight: 600,
-              color: "#4a6d47",
-              textTransform: "uppercase", letterSpacing: "0.04em",
-              whiteSpace: "nowrap", overflow: "hidden",
-              minHeight: 11,
-            }}>{d.label}</span>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -145,7 +248,7 @@ export function EnergyView() {
   const [store, setStore]       = useState<EnergyStore>({});
   const [mounted, setMounted]   = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [range, setRange]       = useState<Range>("7d");
+  const [range, setRange]       = useState<Range>("30d");
 
   useEffect(() => { setStore(loadEnergyStore()); setMounted(true); }, []);
   useEffect(() => {
@@ -166,131 +269,71 @@ export function EnergyView() {
   const latest       = todayEntries.at(-1);
   const todayAvg     = avgMood(todayEntries);
 
-  // ── Date-range scoping ────────────────────────────────────────────
-  const rangeStart = useMemo(() => {
+  // ── Date range scoping ────────────────────────────────────────────
+  const { rangeStart, rangeEnd } = useMemo(() => {
+    const end = startOfDay(new Date());
     const days = rangeDays(range);
-    if (days === null) return null;
-    const d = startOfDay(new Date());
-    d.setDate(d.getDate() - (days - 1));
-    return d;
-  }, [range]);
-
-  function inRange(iso: string) {
-    if (!rangeStart) return true;
-    return new Date(iso + "T00:00:00") >= rangeStart;
-  }
-
-  const filteredStore = useMemo(() => {
-    if (!rangeStart) return store;
-    const out: EnergyStore = {};
-    Object.entries(store).forEach(([k, v]) => { if (inRange(k)) out[k] = v; });
-    return out;
-  }, [store, rangeStart]);
-
-  // ── Chart data — adapts to range ──────────────────────────────────
-  const chartData: Bar[] = useMemo(() => {
-    const todayD = startOfDay(new Date());
-    if (range === "7d" || range === "30d") {
-      const days = range === "7d" ? 7 : 30;
-      const bars: Bar[] = [];
-      for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(todayD); d.setDate(d.getDate() - i);
-        const key = isoDay(d);
-        const isLast = i === 0;
-        let label = "";
-        if (days === 7) label = d.toLocaleDateString("en-US", { weekday: "short" });
-        else label = (d.getDay() === 1 || isLast) ? `${d.getMonth() + 1}/${d.getDate()}` : "";
-        bars.push({ label, value: avgMood(store[key] ?? []), isLast });
-      }
-      return bars;
-    }
-    if (range === "90d") {
-      // 13 weekly buckets
-      const bars: Bar[] = [];
-      for (let w = 12; w >= 0; w--) {
-        const end = new Date(todayD); end.setDate(end.getDate() - w * 7);
-        const start = new Date(end); start.setDate(start.getDate() - 6);
-        const vals: number[] = [];
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          const a = avgMood(store[isoDay(d)] ?? []);
-          if (a !== null) vals.push(a);
-        }
-        const isLast = w === 0;
-        const label = (w % 2 === 0 || isLast) ? `${end.getMonth() + 1}/${end.getDate()}` : "";
-        bars.push({
-          label,
-          value: vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null,
-          isLast,
-        });
-      }
-      return bars;
-    }
-    // 1y + all → monthly buckets
-    let monthsBack = 12;
-    if (range === "all") {
+    let start: Date;
+    if (days === null) {
       const keys = Object.keys(store).sort();
-      if (keys.length > 0) {
-        const earliest = new Date(keys[0] + "T00:00:00");
-        const monthsSpan = (todayD.getFullYear() - earliest.getFullYear()) * 12
-                          + (todayD.getMonth() - earliest.getMonth()) + 1;
-        monthsBack = Math.max(1, Math.min(24, monthsSpan));
-      } else {
-        monthsBack = 1;
-      }
+      start = keys.length ? startOfDay(new Date(keys[0] + "T00:00:00")) : new Date(end);
+    } else {
+      start = new Date(end); start.setDate(start.getDate() - (days - 1));
     }
-    const bars: Bar[] = [];
-    for (let m = monthsBack - 1; m >= 0; m--) {
-      const d = new Date(todayD.getFullYear(), todayD.getMonth() - m, 1);
-      const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-      const vals: number[] = [];
-      for (let day = new Date(d); day < next; day.setDate(day.getDate() + 1)) {
-        const a = avgMood(store[isoDay(day)] ?? []);
-        if (a !== null) vals.push(a);
-      }
-      const isLast = m === 0;
-      bars.push({
-        label: d.toLocaleDateString("en-US", { month: "short" }),
-        value: vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null,
-        isLast,
-      });
-    }
-    return bars;
+    return { rangeStart: start, rangeEnd: end };
   }, [range, store]);
 
-  const chartDense = chartData.length > 14;
-
-  // ── Headline / summary over filtered range ───────────────────────
-  const headline = useMemo(() => {
-    const filledKeys: { key: string; value: number }[] = [];
-    Object.entries(filteredStore).forEach(([k, entries]) => {
-      const a = avgMood(entries);
-      if (a !== null) filledKeys.push({ key: k, value: a });
+  const filteredStore = useMemo(() => {
+    const out: EnergyStore = {};
+    Object.entries(store).forEach(([k, v]) => {
+      const d = new Date(k + "T00:00:00");
+      if (d >= rangeStart && d <= rangeEnd) out[k] = v;
     });
-    if (filledKeys.length === 0) return null;
-    filledKeys.sort((a, b) => a.key.localeCompare(b.key));
-    const avg = filledKeys.reduce((s, d) => s + d.value, 0) / filledKeys.length;
-    const best  = filledKeys.reduce((a, b) => (b.value > a.value ? b : a));
-    const worst = filledKeys.reduce((a, b) => (b.value < a.value ? b : a));
-    const lean = avg >= 4 ? "Pleasant" : avg >= 3 ? "Neutral" : avg >= 2 ? "Low" : "Tough";
-    const half = Math.ceil(filledKeys.length / 2);
-    const firstHalf = filledKeys.slice(0, half).reduce((s, d) => s + d.value, 0) / half;
-    const lastHalf  = filledKeys.slice(-half).reduce((s, d) => s + d.value, 0) / half;
-    const trend = lastHalf > firstHalf + 0.4 ? "rising"
-                : lastHalf < firstHalf - 0.4 ? "falling"
-                : "steady";
+    return out;
+  }, [store, rangeStart, rangeEnd]);
+
+  // ── Hero summary: hero mood + headline trend ─────────────────────
+  const summary = useMemo(() => {
+    const entries: CheckIn[] = [];
+    const byDay: { key: string; value: number }[] = [];
+    Object.entries(filteredStore).forEach(([k, ent]) => {
+      ent.forEach(e => entries.push(e));
+      const a = avgMood(ent);
+      if (a !== null) byDay.push({ key: k, value: a });
+    });
+    if (entries.length === 0) return null;
+    byDay.sort((a, b) => a.key.localeCompare(b.key));
+
+    const avg = entries.reduce((s, e) => s + e.mood, 0) / entries.length;
+    const counts = [0, 0, 0, 0, 0];
+    entries.forEach(e => { counts[Math.round(e.mood) - 1]++; });
+
+    const best  = byDay.reduce((a, b) => (b.value > a.value ? b : a));
+    const worst = byDay.reduce((a, b) => (b.value < a.value ? b : a));
+    const half = Math.ceil(byDay.length / 2);
+    const fh = byDay.slice(0, half).reduce((s, d) => s + d.value, 0) / half;
+    const lh = byDay.slice(-half).reduce((s, d) => s + d.value, 0) / half;
+    const trend = lh > fh + 0.4 ? "rising" : lh < fh - 0.4 ? "falling" : "steady";
+
     function fmtDay(k: string) {
       const d = new Date(k + "T00:00:00");
       return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
     }
     return {
-      avg: avg.toFixed(1),
-      lean, trend,
-      bestLabel:  fmtDay(best.key),
-      worstLabel: fmtDay(worst.key),
-      flat: best.value === worst.value,
-      checkIns: filledKeys.length,
+      avg, counts, entries: entries.length, days: byDay.length,
+      trend, flat: best.value === worst.value,
+      bestLabel: fmtDay(best.key), worstLabel: fmtDay(worst.key),
     };
   }, [filteredStore]);
+
+  // ── Streak: consecutive days with a check-in, ending today/yesterday ─
+  const streak = useMemo(() => {
+    let n = 0;
+    const d = startOfDay(new Date());
+    if (!store[isoDay(d)]?.length) d.setDate(d.getDate() - 1);
+    while (store[isoDay(d)]?.length) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }, [store]);
 
   // ── What lifts you / pulls you down (within range) ───────────────
   const liftsPulls = useMemo(() => {
@@ -308,25 +351,22 @@ export function EnergyView() {
       .map(([tag, arr]) => ({ tag, avg: arr.reduce((s, m) => s + m, 0) / arr.length, count: arr.length }))
       .sort((a, b) => b.avg - a.avg);
     if (avgs.length === 0) return null;
-    const lifts = avgs.filter(x => x.avg >= 3.5).slice(0, 3);
-    const pulls = [...avgs].filter(x => x.avg < 3).slice(0, 3);
+    const lifts = avgs.filter(x => x.avg >= 3.5).slice(0, 4);
+    const pulls = [...avgs].filter(x => x.avg < 3).slice(0, 4);
     return { lifts, pulls, hasAny: lifts.length + pulls.length > 0 };
   }, [filteredStore]);
 
-  // ── Task data — fetched once, filtered by range ──────────────────
+  // ── Task data ────────────────────────────────────────────────────
   const { data: allTasks = [] }       = useQuery<TaskWithSubtasks[]>({ queryKey: ["tasks", "all"],       queryFn: () => fetch("/api/tasks?filter=all").then(r => r.json()),       retry: 1 });
   const { data: completedTasks = [] } = useQuery<TaskWithSubtasks[]>({ queryKey: ["tasks", "completed"], queryFn: () => fetch("/api/tasks?filter=completed").then(r => r.json()), retry: 1 });
 
-  const filteredCompleted = useMemo(() => {
-    if (!rangeStart) return completedTasks;
-    return completedTasks.filter(t => new Date(t.updatedAt) >= rangeStart);
-  }, [completedTasks, rangeStart]);
-  const filteredAll = useMemo(() => {
-    if (!rangeStart) return [...allTasks, ...completedTasks];
-    return [...allTasks, ...completedTasks].filter(t => new Date(t.createdAt) >= rangeStart);
-  }, [allTasks, completedTasks, rangeStart]);
+  const filteredCompleted = useMemo(() =>
+    completedTasks.filter(t => { const d = new Date(t.updatedAt); return d >= rangeStart && d <= rangeEnd; }),
+    [completedTasks, rangeStart, rangeEnd]);
+  const filteredAll = useMemo(() =>
+    [...allTasks, ...completedTasks].filter(t => { const d = new Date(t.createdAt); return d >= rangeStart && d <= rangeEnd; }),
+    [allTasks, completedTasks, rangeStart, rangeEnd]);
 
-  // Mood × tasks within range
   const moodVsTasks = useMemo(() => {
     const completionsByDay: Record<string, number> = {};
     filteredCompleted.forEach(t => {
@@ -369,33 +409,40 @@ export function EnergyView() {
 
   const pad = isMobile ? "16px 14px 80px" : "24px 28px 64px";
 
-  const card: React.CSSProperties = {
-    background: "#fff",
-    border: "0.5px solid rgba(0,0,0,0.09)",
-    borderRadius: 6,
-    padding: isMobile ? "16px" : "20px 24px",
-    marginBottom: 14,
-  };
-
-  // ── Section header — visual divider + label ──────────────────────
-  function SectionHeader({ eyebrow, title, hint }: { eyebrow: string; title: string; hint?: string }) {
+  // ── Reusable: small section card ─────────────────────────────────
+  function Section({ eyebrow, title, hint, children }: {
+    eyebrow?: string; title?: string; hint?: string; children: React.ReactNode;
+  }) {
     return (
-      <div style={{ marginBottom: 14 }}>
-        <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>{eyebrow}</p>
-        <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>{title}</h3>
-        {hint && (
-          <p style={{ fontSize: 11, color: "#4a6d47", margin: "4px 0 0" }}>{hint}</p>
+      <div style={{
+        background: "#fff",
+        border: "0.5px solid rgba(0,0,0,0.09)",
+        borderRadius: 8,
+        padding: isMobile ? "16px" : "20px 22px",
+        marginBottom: 12,
+      }}>
+        {(eyebrow || title) && (
+          <div style={{ marginBottom: 14 }}>
+            {eyebrow && <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>{eyebrow}</p>}
+            {title && <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>{title}</h3>}
+            {hint && <p style={{ fontSize: 11, color: "#4a6d47", margin: "4px 0 0" }}>{hint}</p>}
+          </div>
         )}
+        {children}
       </div>
     );
   }
 
+  const heroMood = summary ? Math.round(summary.avg) : null;
+  const heroColor = summary ? moodColor(summary.avg) : "#7a8a7a";
+  const heroSoft  = summary ? moodSoft(summary.avg)  : "#f1f3ef";
+
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: pad }}>
+    <div style={{ maxWidth: 820, margin: "0 auto", padding: pad }}>
 
       {/* ── Page header ── */}
       <div style={{ marginBottom: isMobile ? 16 : 20 }}>
-        <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
+        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
           Workspace · My Energy
         </p>
         <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: 0, lineHeight: 1 }}>
@@ -403,9 +450,9 @@ export function EnergyView() {
         </h1>
       </div>
 
-      {/* ── Section 1: Today — action anchor ── */}
-      <div style={card}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+      {/* ── Today action anchor ── */}
+      <Section>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: todayEntries.length === 0 ? 0 : 12 }}>
           <div>
             <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>Today</p>
             <h3 style={{ fontSize: 14, fontWeight: 500, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
@@ -426,7 +473,7 @@ export function EnergyView() {
             <EmptyState icon={Heart} title="No check-in yet today" description="How are you feeling right now?" compact />
             <div style={{ display: "flex", justifyContent: "center", marginTop: -6 }}>
               <button onClick={() => setModalOpen(true)} style={{
-                padding: "8px 20px", borderRadius: 6, border: "none",
+                padding: "9px 22px", borderRadius: 999, border: "none",
                 background: "#059669", color: "#fff", fontSize: 12, fontWeight: 600,
                 cursor: "pointer", fontFamily: "inherit",
               }}>Log my feelings</button>
@@ -439,7 +486,7 @@ export function EnergyView() {
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "10px 12px 10px 14px",
                 borderLeft: `2px solid ${moodColor(latest.mood)}`,
-                background: "#f8f9f5", borderRadius: "0 4px 4px 0", marginBottom: 10,
+                background: "#f8f9f5", borderRadius: "0 6px 6px 0", marginBottom: 10,
               }}>
                 <span style={{ fontSize: 22 }}>{moodEmoji(latest.mood)}</span>
                 <div style={{ flex: 1 }}>
@@ -485,13 +532,13 @@ export function EnergyView() {
             )}
           </div>
         )}
-      </div>
+      </Section>
 
       {/* ── Range filter divider ── */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 12, flexWrap: "wrap",
-        margin: "20px 2px 10px",
+        margin: "22px 2px 12px",
       }}>
         <div>
           <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 2px" }}>Insights</p>
@@ -501,7 +548,7 @@ export function EnergyView() {
           display: "inline-flex", padding: 3, gap: 2,
           background: "#f8f9f5",
           border: "0.5px solid rgba(0,0,0,0.08)",
-          borderRadius: 8,
+          borderRadius: 999,
         }}>
           {RANGE_OPTIONS.map(opt => {
             const active = range === opt.value;
@@ -510,7 +557,7 @@ export function EnergyView() {
                 key={opt.value}
                 onClick={() => setRange(opt.value)}
                 style={{
-                  padding: "5px 11px", borderRadius: 6, border: "none",
+                  padding: "5px 12px", borderRadius: 999, border: "none",
                   background: active ? "#fff" : "transparent",
                   color: active ? "#059669" : "#4a6d47",
                   fontSize: 11, fontWeight: active ? 600 : 500,
@@ -524,64 +571,133 @@ export function EnergyView() {
         </div>
       </div>
 
-      {/* ── Section 2: Mood trend ── */}
-      <div style={card}>
-        <SectionHeader eyebrow="Mood trend" title="How your energy moves" />
-        {headline ? (
-          <p style={{ fontSize: 13, color: "#082d1d", margin: "0 0 14px", letterSpacing: "-0.01em", lineHeight: 1.5 }}>
-            You leaned <strong>{headline.lean}</strong>
-            {headline.trend === "rising"  && <> · trended <strong style={{ color: "#059669" }}>upward</strong></>}
-            {headline.trend === "falling" && <> · trended <strong style={{ color: "#D14626" }}>downward</strong></>}
-            {headline.trend === "steady" && !headline.flat && <> · stayed <strong>steady</strong></>}
-            .{" "}
-            {!headline.flat && (
-              <>Best <strong>{headline.bestLabel}</strong>, dipped <strong>{headline.worstLabel}</strong>.</>
+      {/* ── Hero: average mood for range ── */}
+      <div style={{
+        background: heroSoft,
+        border: `0.5px solid ${heroColor}33`,
+        borderRadius: 12,
+        padding: isMobile ? "20px 16px" : "28px 24px",
+        marginBottom: 12,
+        textAlign: "center",
+      }}>
+        {summary ? (
+          <>
+            <div style={{ fontSize: 56, lineHeight: 1, margin: "0 0 8px" }}>
+              {moodEmoji(summary.avg)}
+            </div>
+            <p style={{ fontSize: 18, fontWeight: 600, color: heroColor, margin: "0 0 6px", letterSpacing: "-0.01em" }}>
+              {heroMood !== null ? moodLabel(heroMood) : "—"}
+            </p>
+            <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>
+              avg <strong style={{ color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{summary.avg.toFixed(1)}</strong> / 5
+              <span style={{ color: "#b9d3c4", margin: "0 6px" }}>·</span>
+              {summary.days} day{summary.days === 1 ? "" : "s"} logged
+              <span style={{ color: "#b9d3c4", margin: "0 6px" }}>·</span>
+              {summary.entries} check-in{summary.entries === 1 ? "" : "s"}
+            </p>
+            {!summary.flat && (
+              <p style={{ fontSize: 11, color: "#4a6d47", margin: "10px 0 0" }}>
+                {summary.trend === "rising"  && <>Trending <strong style={{ color: "#059669" }}>upward</strong> · </>}
+                {summary.trend === "falling" && <>Trending <strong style={{ color: "#D14626" }}>downward</strong> · </>}
+                {summary.trend === "steady"  && <>Steady · </>}
+                best <strong style={{ color: "#082d1d" }}>{summary.bestLabel}</strong>
+              </p>
             )}
-          </p>
+          </>
         ) : (
-          <p style={{ fontSize: 13, color: "#3d5a4a", margin: "0 0 14px", lineHeight: 1.5 }}>
-            No check-ins in this range yet.
-          </p>
-        )}
-        <MoodChart data={chartData} dense={chartDense} />
-        {headline && (
-          <p style={{ fontSize: 11, color: "#4a6d47", margin: "14px 0 0", textAlign: "center" }}>
-            {headline.checkIns} day{headline.checkIns === 1 ? "" : "s"} logged · avg <strong style={{ color: "#082d1d" }}>{headline.avg}</strong> / 5
-          </p>
+          <>
+            <div style={{ fontSize: 44, lineHeight: 1, margin: "0 0 8px", opacity: 0.4 }}>🌱</div>
+            <p style={{ fontSize: 14, fontWeight: 500, color: "#3d5a4a", margin: "0 0 4px" }}>Nothing here yet</p>
+            <p style={{ fontSize: 12, color: "#7a8a7a", margin: 0 }}>Log a check-in to see your mood across {rangeLongLabel(range).toLowerCase()}.</p>
+          </>
         )}
       </div>
 
-      {/* ── Section 3: What lifts / pulls ── */}
-      <div style={card}>
-        <SectionHeader eyebrow="What's moving you" title="Lifts your mood vs. pulls it down" />
+      {/* ── Quick stat strip: streak + most common mood ── */}
+      {summary && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+          <div style={{
+            background: "#fff", border: "0.5px solid rgba(0,0,0,0.09)",
+            borderRadius: 8, padding: "12px 14px",
+            display: "flex", alignItems: "center", gap: 10,
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: "#FFF8E8", color: "#B07A10",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}><Flame size={16} /></div>
+            <div>
+              <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 2px" }}>Streak</p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", margin: 0 }}>
+                {streak} <span style={{ fontSize: 11, color: "#4a6d47", fontWeight: 500 }}>day{streak === 1 ? "" : "s"}</span>
+              </p>
+            </div>
+          </div>
+          {(() => {
+            const idx = summary.counts.indexOf(Math.max(...summary.counts));
+            const m = MOODS[idx];
+            return (
+              <div style={{
+                background: "#fff", border: "0.5px solid rgba(0,0,0,0.09)",
+                borderRadius: 8, padding: "12px 14px",
+                display: "flex", alignItems: "center", gap: 10,
+              }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: m.soft,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18,
+                }}>{m.emoji}</div>
+                <div>
+                  <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 2px" }}>Most felt</p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", margin: 0 }}>{m.label}</p>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* ── Mood map (heatmap) ── */}
+      <Section eyebrow="Mood map" title="Your days, at a glance" hint="Each square is a day — color = average mood">
+        <MoodHeatmap startDate={rangeStart} endDate={rangeEnd} store={store} isMobile={isMobile} />
+      </Section>
+
+      {/* ── Mood distribution ── */}
+      <Section eyebrow="How often" title="Time spent in each mood" hint="Share of all check-ins in this range">
+        <MoodDistribution counts={summary?.counts ?? [0,0,0,0,0]} total={summary?.entries ?? 0} />
+      </Section>
+
+      {/* ── What lifts / pulls ── */}
+      <Section eyebrow="What's moving you" title="Lifts your mood vs. pulls it down">
         {!liftsPulls?.hasAny ? (
           <EmptyState icon={Lightbulb} title="Not enough signal yet" description="Tag your check-ins with what&apos;s affecting you to see what lifts you." compact />
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
-            <div style={{ background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4, padding: "10px 12px" }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Lifts you</p>
+            <div style={{ background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 6, padding: "12px 14px" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>Lifts you</p>
               {liftsPulls.lifts.length === 0 ? (
                 <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {liftsPulls.lifts.map(l => (
-                    <div key={l.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
-                      <span>{l.tag}</span>
+                    <div key={l.tag} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#082d1d" }}>
+                      <span>{l.tag} <span style={{ color: "#7a8a7a", fontSize: 10 }}>· {l.count}×</span></span>
                       <span style={{ color: "#059669", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{l.avg.toFixed(1)}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            <div style={{ background: "#FFF0EC", border: "1px solid #fecaca", borderRadius: 4, padding: "10px 12px" }}>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 6px" }}>Pulls you down</p>
+            <div style={{ background: "#FFF0EC", border: "1px solid #fecaca", borderRadius: 6, padding: "12px 14px" }}>
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#D14626", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>Pulls you down</p>
               {liftsPulls.pulls.length === 0 ? (
                 <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>—</p>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {liftsPulls.pulls.map(p => (
-                    <div key={p.tag} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#082d1d" }}>
-                      <span>{p.tag}</span>
+                    <div key={p.tag} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#082d1d" }}>
+                      <span>{p.tag} <span style={{ color: "#7a8a7a", fontSize: 10 }}>· {p.count}×</span></span>
                       <span style={{ color: "#D14626", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{p.avg.toFixed(1)}</span>
                     </div>
                   ))}
@@ -590,23 +706,21 @@ export function EnergyView() {
             </div>
           </div>
         )}
-      </div>
+      </Section>
 
-      {/* ── Section 4: Mood × tasks ── */}
+      {/* ── Mood × tasks ── */}
       {(moodVsTasks || taskByEmotion) && (
-        <div style={card}>
-          <SectionHeader eyebrow="Mood × tasks" title="How feelings turn into action" />
-
+        <Section eyebrow="Mood × tasks" title="How feelings turn into action">
           {moodVsTasks && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: taskByEmotion ? 14 : 0 }}>
-              <div style={{ background: "#f2fdec", borderRadius: 4, padding: "10px 12px" }}>
+              <div style={{ background: "#f2fdec", borderRadius: 6, padding: "12px 14px" }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>High-mood days</p>
                 <p style={{ margin: 0, color: "#082d1d" }}>
                   <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.highAvg}</strong>
                   <span style={{ fontSize: 11, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
                 </p>
               </div>
-              <div style={{ background: "#f8f9f5", borderRadius: 4, padding: "10px 12px" }}>
+              <div style={{ background: "#f8f9f5", borderRadius: 6, padding: "12px 14px" }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Low-mood days</p>
                 <p style={{ margin: 0, color: "#082d1d" }}>
                   <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.lowAvg}</strong>
@@ -624,14 +738,14 @@ export function EnergyView() {
 
           {taskByEmotion && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div style={{ background: taskByEmotion.best.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
+              <div style={{ background: taskByEmotion.best.em?.pillBg, borderRadius: 6, padding: "12px 14px" }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Most likely to finish</p>
                 <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.best.em?.pillText, fontWeight: 600 }}>
                   {taskByEmotion.best.em?.emoji} {taskByEmotion.best.em?.label}
                   <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.best.rate * 100)}%</span>
                 </p>
               </div>
-              <div style={{ background: taskByEmotion.worst.em?.pillBg, borderRadius: 4, padding: "10px 12px" }}>
+              <div style={{ background: taskByEmotion.worst.em?.pillBg, borderRadius: 6, padding: "12px 14px" }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 4px" }}>Least likely to finish</p>
                 <p style={{ margin: 0, fontSize: 13, color: taskByEmotion.worst.em?.pillText, fontWeight: 600 }}>
                   {taskByEmotion.worst.em?.emoji} {taskByEmotion.worst.em?.label}
@@ -640,7 +754,7 @@ export function EnergyView() {
               </div>
             </div>
           )}
-        </div>
+        </Section>
       )}
 
       {/* Modal */}
