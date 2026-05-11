@@ -1054,7 +1054,7 @@ export default function CalendarPage() {
           <MobileTaskInfoPage task={selectedTask} onClose={() => setSelectedTask(null)} onMarkDone={id => { markDone(id); setSelectedTask(null); }} onMarkUndone={id => { markUndone(id); setSelectedTask(null); }} onUpdate={(id, patch) => updateTask({ id, patch })} />
         )}
         {dayTaskList && (
-          <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => deleteTask(id)} />
+          <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => { deleteTask(id); if ((tasksByDate.get(dayTaskList) ?? []).length <= 1) setDayTaskList(null); }} />
         )}
         <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
       </div>
@@ -1173,7 +1173,7 @@ export default function CalendarPage() {
         />
       )}
       {dayTaskList && (
-        <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => deleteTask(id)} />
+        <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => { deleteTask(id); if ((tasksByDate.get(dayTaskList) ?? []).length <= 1) setDayTaskList(null); }} />
       )}
       <TaskCreateModal open={!!createDate} onOpenChange={open => { if (!open) setCreateDate(null); }} defaultDate={createDate ?? undefined} />
     </div>
