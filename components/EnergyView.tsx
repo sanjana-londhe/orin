@@ -427,7 +427,7 @@ export function EnergyView() {
     return (
       <div style={{
         background: "#fff",
-        border: "0.5px solid rgba(0,0,0,0.09)",
+        border: "1px solid #dde4de",
         borderRadius: 8,
         padding: isMobile ? "16px" : "20px 22px",
         marginBottom: 12,
@@ -456,7 +456,7 @@ export function EnergyView() {
         <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
           Workspace · My Energy
         </p>
-        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: 0, lineHeight: 1 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d", margin: 0, lineHeight: 1.05 }}>
           My Energy
         </h1>
       </div>
@@ -472,8 +472,8 @@ export function EnergyView() {
           </div>
           {todayEntries.length > 0 && (
             <button onClick={() => setModalOpen(true)} style={{
-              padding: "5px 12px", borderRadius: 6, border: "0.5px solid rgba(0,0,0,0.12)",
-              background: "#fff", color: "#059669", fontSize: 11, fontWeight: 500,
+              padding: "5px 12px", borderRadius: 6, border: "1px solid #dde4de",
+              background: "#fff", color: "#059669", fontSize: 11.5, fontWeight: 500,
               cursor: "pointer", fontFamily: "inherit",
             }}>+ Log again</button>
           )}
@@ -484,8 +484,9 @@ export function EnergyView() {
             <EmptyState icon={Heart} title="No check-in yet today" description="How are you feeling right now?" compact />
             <div style={{ display: "flex", justifyContent: "center", marginTop: -6 }}>
               <button onClick={() => setModalOpen(true)} style={{
-                padding: "9px 22px", borderRadius: 999, border: "none",
-                background: "#059669", color: "#fff", fontSize: 12, fontWeight: 600,
+                padding: "9px 22px", borderRadius: 8,
+                border: "1px solid #050e11",
+                background: "#059669", color: "#fff", fontSize: 12.5, fontWeight: 600,
                 cursor: "pointer", fontFamily: "inherit",
               }}>Log my feelings</button>
             </div>
@@ -496,7 +497,7 @@ export function EnergyView() {
               <div style={{
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "12px 14px",
-                background: "#f8f9f5", border: "0.5px solid rgba(0,0,0,0.06)",
+                background: "#f8f9f5", border: "1px solid #e9ede9",
                 borderRadius: 8, marginBottom: 10,
               }}>
                 <span style={{ fontSize: 22 }}>{moodEmoji(latest.mood)}</span>
@@ -506,8 +507,8 @@ export function EnergyView() {
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                       {latest.contributions.map(c => (
                         <span key={c} style={{
-                          padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 500,
-                          background: "#fff", border: "0.5px solid rgba(0,0,0,0.08)",
+                          padding: "3px 9px", borderRadius: 6, fontSize: 11, fontWeight: 500,
+                          background: "#fff", border: "1px solid #dde4de",
                           color: "#3d5a4a",
                         }}>{c}</span>
                       ))}
@@ -522,8 +523,8 @@ export function EnergyView() {
                 {todayEntries.slice(0, -1).map((e, i) => (
                   <div key={i} style={{
                     display: "flex", alignItems: "center", gap: 6,
-                    padding: "4px 10px", borderRadius: 999,
-                    background: "#f8f9f5", border: "0.5px solid rgba(0,0,0,0.08)",
+                    padding: "4px 10px", borderRadius: 6,
+                    background: "#f8f9f5", border: "1px solid #dde4de",
                     fontSize: 11, color: "#3d5a4a",
                   }}>
                     <span style={{ fontSize: 13 }}>{moodEmoji(e.mood)}</span>
@@ -549,12 +550,7 @@ export function EnergyView() {
         margin: "22px 2px 12px",
       }}>
         <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0 }}>{rangeLongLabel(range)}</p>
-        <div style={{
-          display: "inline-flex", padding: 3, gap: 2,
-          background: "#f8f9f5",
-          border: "0.5px solid rgba(0,0,0,0.08)",
-          borderRadius: 999,
-        }}>
+        <div style={{ display: "inline-flex", gap: 4 }}>
           {RANGE_OPTIONS.map(opt => {
             const active = range === opt.value;
             return (
@@ -562,14 +558,16 @@ export function EnergyView() {
                 key={opt.value}
                 onClick={() => setRange(opt.value)}
                 style={{
-                  padding: "5px 12px", borderRadius: 999, border: "none",
-                  background: active ? "#fff" : "transparent",
-                  color: active ? "#059669" : "#4a6d47",
-                  fontSize: 11, fontWeight: active ? 600 : 500,
+                  padding: "5px 11px", borderRadius: 6,
+                  border: active ? "1px solid #050e11" : "1px solid #dde4de",
+                  background: active ? "#059669" : "#fff",
+                  color: active ? "#fff" : "#3d5a4a",
+                  fontSize: 11.5, fontWeight: active ? 600 : 500,
                   cursor: "pointer", fontFamily: "inherit",
-                  boxShadow: active ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                  transition: "background 0.14s, color 0.14s",
+                  transition: "background 0.14s, color 0.14s, border-color 0.14s",
                 }}
+                onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "#f2fdec"; (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; } }}
+                onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; } }}
               >{opt.label}</button>
             );
           })}
@@ -579,7 +577,7 @@ export function EnergyView() {
       {/* ── Hero: average mood for range ── */}
       <div style={{
         background: "#fff",
-        border: "0.5px solid rgba(0,0,0,0.09)",
+        border: "1px solid #dde4de",
         borderTop: `3px solid ${heroColor}`,
         borderRadius: 8,
         padding: isMobile ? "22px 16px" : "28px 24px",
@@ -623,7 +621,7 @@ export function EnergyView() {
       {summary && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
           <div style={{
-            background: "#fff", border: "0.5px solid rgba(0,0,0,0.09)",
+            background: "#fff", border: "1px solid #dde4de",
             borderRadius: 8, padding: "14px 16px",
             display: "flex", alignItems: "center", gap: 12,
           }}>
@@ -644,7 +642,7 @@ export function EnergyView() {
             const m = MOODS[idx];
             return (
               <div style={{
-                background: "#fff", border: "0.5px solid rgba(0,0,0,0.09)",
+                background: "#fff", border: "1px solid #dde4de",
                 borderRadius: 8, padding: "14px 16px",
                 display: "flex", alignItems: "center", gap: 12,
               }}>
@@ -692,13 +690,14 @@ export function EnergyView() {
                     <div key={l.tag} style={{
                       display: "flex", justifyContent: "space-between", alignItems: "center",
                       padding: "8px 12px", borderRadius: 8,
-                      background: "#f8f9f5", border: "0.5px solid rgba(0,0,0,0.06)",
+                      background: "#f8f9f5", border: "1px solid #e9ede9",
                       fontSize: 13, color: "#082d1d",
                     }}>
                       <span>{l.tag} <span style={{ color: "#7a8a7a", fontSize: 10, marginLeft: 4 }}>{l.count}×</span></span>
                       <span style={{
-                        padding: "2px 8px", borderRadius: 999,
-                        background: "#e3ede2", color: "#4e8a6a",
+                        padding: "2px 9px", borderRadius: 6,
+                        background: "#e3ede2", border: "1px solid #c8e0c8",
+                        color: "#4e8a6a",
                         fontWeight: 600, fontSize: 11, fontVariantNumeric: "tabular-nums",
                       }}>{l.avg.toFixed(1)}</span>
                     </div>
@@ -718,13 +717,14 @@ export function EnergyView() {
                     <div key={p.tag} style={{
                       display: "flex", justifyContent: "space-between", alignItems: "center",
                       padding: "8px 12px", borderRadius: 8,
-                      background: "#f8f9f5", border: "0.5px solid rgba(0,0,0,0.06)",
+                      background: "#f8f9f5", border: "1px solid #e9ede9",
                       fontSize: 13, color: "#082d1d",
                     }}>
                       <span>{p.tag} <span style={{ color: "#7a8a7a", fontSize: 10, marginLeft: 4 }}>{p.count}×</span></span>
                       <span style={{
-                        padding: "2px 8px", borderRadius: 999,
-                        background: "#f1e2dd", color: "#b86a5e",
+                        padding: "2px 9px", borderRadius: 6,
+                        background: "#f1e2dd", border: "1px solid #e0c2b8",
+                        color: "#b86a5e",
                         fontWeight: 600, fontSize: 11, fontVariantNumeric: "tabular-nums",
                       }}>{p.avg.toFixed(1)}</span>
                     </div>
@@ -743,7 +743,7 @@ export function EnergyView() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: taskByEmotion ? 14 : 0 }}>
               <div style={{
                 background: "#f8f9f5", borderRadius: 8,
-                border: "0.5px solid rgba(0,0,0,0.06)",
+                border: "1px solid #e9ede9",
                 padding: "14px 16px",
               }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>High-mood days</p>
@@ -754,7 +754,7 @@ export function EnergyView() {
               </div>
               <div style={{
                 background: "#f8f9f5", borderRadius: 8,
-                border: "0.5px solid rgba(0,0,0,0.06)",
+                border: "1px solid #e9ede9",
                 padding: "14px 16px",
               }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Low-mood days</p>
@@ -776,7 +776,7 @@ export function EnergyView() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div style={{
                 background: "#f8f9f5", borderRadius: 8,
-                border: "0.5px solid rgba(0,0,0,0.06)",
+                border: "1px solid #e9ede9",
                 padding: "14px 16px",
               }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Most likely to finish</p>
@@ -787,7 +787,7 @@ export function EnergyView() {
               </div>
               <div style={{
                 background: "#f8f9f5", borderRadius: 8,
-                border: "0.5px solid rgba(0,0,0,0.06)",
+                border: "1px solid #e9ede9",
                 padding: "14px 16px",
               }}>
                 <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Least likely to finish</p>
