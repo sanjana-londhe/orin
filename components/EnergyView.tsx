@@ -166,7 +166,16 @@ function MoodHeatmap({
             {grid.columns.map((col, ci) => (
               <div key={ci} style={{ display: "flex", flexDirection: "column", gap }}>
                 {col.map((cell, ri) => {
-                  if (!cell) return <div key={ri} style={{ width: cellSize, height: cellSize }} />;
+                  if (!cell) {
+                    // Padding cell to keep the rectangle complete — same
+                    // empty color as a no-data day, slightly faded.
+                    return (
+                      <div key={ri} style={{
+                        width: cellSize, height: cellSize, borderRadius: 3,
+                        background: "#eef1ed", opacity: 0.55,
+                      }} />
+                    );
+                  }
                   const has = cell.value !== null;
                   const today = isoDay(new Date()) === cell.key;
                   return (
@@ -276,13 +285,14 @@ export function EnergyView() {
     const days = rangeDays(range);
     let start: Date;
     if (days === null) {
-      const keys = Object.keys(store).sort();
-      start = keys.length ? startOfDay(new Date(keys[0] + "T00:00:00")) : new Date(end);
+      // "All time" — fixed 52-week lookback, GitHub-style. The grid
+      // is the same rectangle whether you logged once or every day.
+      start = new Date(end); start.setDate(start.getDate() - 364);
     } else {
       start = new Date(end); start.setDate(start.getDate() - (days - 1));
     }
     return { rangeStart: start, rangeEnd: end };
-  }, [range, store]);
+  }, [range]);
 
   const filteredStore = useMemo(() => {
     const out: EnergyStore = {};
