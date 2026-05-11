@@ -541,10 +541,7 @@ export function EnergyView() {
         gap: 12, flexWrap: "wrap",
         margin: "22px 2px 12px",
       }}>
-        <div>
-          <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 2px" }}>Insights</p>
-          <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0 }}>{rangeLongLabel(range)}</p>
-        </div>
+        <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0 }}>{rangeLongLabel(range)}</p>
         <div style={{
           display: "inline-flex", padding: 3, gap: 2,
           background: "#f8f9f5",
