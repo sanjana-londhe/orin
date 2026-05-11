@@ -54,14 +54,6 @@ function startOfDay(d: Date) { const x = new Date(d); x.setHours(0, 0, 0, 0); re
 
 type Range = "7d" | "30d" | "90d" | "1y" | "all";
 
-const RANGE_OPTIONS: { value: Range; label: string }[] = [
-  { value: "7d",  label: "7d"  },
-  { value: "30d", label: "30d" },
-  { value: "90d", label: "90d" },
-  { value: "1y",  label: "1y"  },
-  { value: "all", label: "All" },
-];
-
 function rangeDays(r: Range): number | null {
   if (r === "7d")  return 7;
   if (r === "30d") return 30;
@@ -249,7 +241,8 @@ export function EnergyView() {
   const [store, setStore]       = useState<EnergyStore>({});
   const [mounted, setMounted]   = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [range, setRange]       = useState<Range>("30d");
+  // Range filter removed — page always shows the full year window.
+  const range: Range = "all";
 
   useEffect(() => { setStore(loadEnergyStore()); setMounted(true); }, []);
   useEffect(() => {
@@ -529,36 +522,6 @@ export function EnergyView() {
           </div>
         )}
       </Section>
-
-      {/* ── Range filter ── */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "flex-end",
-        gap: 12, flexWrap: "wrap",
-        margin: "22px 2px 12px",
-      }}>
-        <div style={{ display: "inline-flex", gap: 4 }}>
-          {RANGE_OPTIONS.map(opt => {
-            const active = range === opt.value;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setRange(opt.value)}
-                style={{
-                  padding: "5px 11px", borderRadius: 6,
-                  border: active ? "1px solid #050e11" : "1px solid #dde4de",
-                  background: active ? "#059669" : "#fff",
-                  color: active ? "#fff" : "#3d5a4a",
-                  fontSize: 11.5, fontWeight: active ? 600 : 500,
-                  cursor: "pointer", fontFamily: "inherit",
-                  transition: "background 0.14s, color 0.14s, border-color 0.14s",
-                }}
-                onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "#f2fdec"; (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; } }}
-                onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "#fff"; (e.currentTarget as HTMLElement).style.borderColor = "#dde4de"; } }}
-              >{opt.label}</button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* ── Quick stat strip: streak + most common mood ── */}
       {summary && (
