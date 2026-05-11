@@ -219,13 +219,13 @@ function MoodHeatmap({
         display: "flex", alignItems: "center", gap: 6,
         marginTop: 10, paddingLeft: dowGutter + 6,
       }}>
-        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Less</span>
+        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Unpleasant</span>
         {MOODS.map(m => (
           <div key={m.value} style={{
             width: 11, height: 11, borderRadius: 3, background: m.color,
           }} />
         ))}
-        <span style={{ fontSize: 10, color: "#7a8a7a" }}>More</span>
+        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Pleasant</span>
       </div>
 
       {tip && <HeatmapTooltip cell={tip.cell} rect={tip.rect} />}
