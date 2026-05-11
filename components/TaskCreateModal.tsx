@@ -279,7 +279,7 @@ function InlineCreateForm({
               setShowDatePicker(false); setShowCustomDate(false);
               setShowTimePicker(false); setShowCustomTime(false);
             }}
-            style={{ ...chipStyle(em.fg), background: em.bg }}
+            style={chipStyle(em.fg)}
           >
             <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
           </button>
