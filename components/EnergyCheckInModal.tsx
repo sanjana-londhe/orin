@@ -132,17 +132,17 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
         WebkitBackdropFilter: "blur(2px)",
       }} />
 
-      {/* Card */}
+      {/* Card — DESIGN.md §7 modal style: accent green border + soft drop shadow */}
       <div style={{
         position: "relative", zIndex: 1,
         width: "100%",
         maxWidth: isMobile ? "100%" : 460,
         background: T.surface,
         borderRadius: isMobile ? "16px 16px 0 0" : 12,
-        border: `1.5px solid ${T.border}`,
+        border: `1.5px solid ${T.accent}`,
         boxShadow: isMobile
-          ? "0 -4px 24px rgba(0,0,0,0.08)"
-          : "0 8px 24px rgba(0,0,0,0.08)",
+          ? "0 -4px 24px rgba(5,150,105,0.10)"
+          : "0 8px 32px rgba(5,150,105,0.12)",
         overflow: "hidden",
         paddingBottom: isMobile ? 20 : 0,
         maxHeight: isMobile ? "92vh" : "auto",
@@ -159,9 +159,8 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
 
         {/* Header */}
         <div style={{
-          padding: "14px 18px",
+          padding: "16px 18px 12px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          borderBottom: `1px solid ${T.border}`,
         }}>
           <div>
             <p style={{ ...eyebrow, marginBottom: 2 }}>Mood · {todayLabel}</p>
@@ -291,12 +290,10 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
             )}
         </div>
 
-        {/* Footer */}
+        {/* Footer — sits on white, no stone wash or divider */}
         <div style={{
-          padding: "12px 18px",
+          padding: "4px 18px 16px",
           display: "flex", justifyContent: "flex-end", gap: 8,
-          borderTop: `1px solid ${T.border}`,
-          background: T.stone100,
         }}>
           <button onClick={onClose} style={{
             padding: "8px 16px", borderRadius: 8,
