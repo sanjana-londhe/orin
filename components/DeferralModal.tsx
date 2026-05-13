@@ -374,7 +374,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           {/* Defer tab */}
           {tab === "defer" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 8 }}>
                 {HOUR_OPTIONS.map(opt => {
                   const active = selected?.kind === "hours" && (selected as { hours: number }).hours === opt.hours;
                   return (
@@ -436,13 +436,17 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                   {dropdownOpen && (
                     <div style={{
                       position: "absolute", top: "calc(100% + 6px)", left: 0,
-                      display: "flex", gap: 8, zIndex: 20,
+                      display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, zIndex: 20,
+                      maxWidth: isMobile ? "calc(100vw - 36px)" : undefined,
+                      right: isMobile ? 0 : undefined,
                     }}>
                       {/* Options list */}
                       <div style={{
                         background: T.surface, border: `1.5px solid ${T.border}`,
                         borderRadius: 4, padding: "4px 0",
-                        boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 200,
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
+                        minWidth: isMobile ? 0 : 200,
+                        width: isMobile ? "100%" : undefined,
                       }}>
                         {opts.map(opt => {
                           const active = rescheduleKey === opt.key;

@@ -310,7 +310,7 @@ function HeatmapTooltip({ cell, rect }: { cell: HeatCell; rect: DOMRect }) {
 
 // ── Mood distribution — stacked horizontal bar ───────────────────────
 
-function MoodDistribution({ counts, total }: { counts: number[]; total: number }) {
+function MoodDistribution({ counts, total, isMobile = false }: { counts: number[]; total: number; isMobile?: boolean }) {
   if (total === 0) {
     return (
       <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "12px 0" }}>
@@ -332,18 +332,18 @@ function MoodDistribution({ counts, total }: { counts: number[]; total: number }
           );
         })}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: isMobile ? 4 : 8 }}>
         {MOODS.map((m, i) => {
           const c = counts[i] ?? 0;
           const pct = total ? Math.round((c / total) * 100) : 0;
           return (
             <div key={m.value} style={{
               display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-              padding: "8px 4px",
+              padding: isMobile ? "8px 2px" : "8px 4px",
               opacity: c > 0 ? 1 : 0.45,
             }}>
-              <span style={{ fontSize: 20 }}>{m.emoji}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
+              <span style={{ fontSize: isMobile ? 18 : 20 }}>{m.emoji}</span>
+              <span style={{ fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
               <span style={{ fontSize: 10, color: "#7a8a7a", letterSpacing: "0.02em" }}>{c} log{c === 1 ? "" : "s"}</span>
             </div>
           );
@@ -693,7 +693,7 @@ export function EnergyView() {
 
       {/* ── Mood distribution ── */}
       <Section eyebrow="How often" title="Time spent in each mood" hint="Share of all check-ins in this range">
-        <MoodDistribution counts={summary?.counts ?? [0,0,0,0,0]} total={summary?.entries ?? 0} />
+        <MoodDistribution counts={summary?.counts ?? [0,0,0,0,0]} total={summary?.entries ?? 0} isMobile={isMobile} />
       </Section>
 
       {/* ── What lifts / pulls ── */}

@@ -323,8 +323,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               <button onClick={(e) => { pickDropDirection(e); setShowEditDatePicker(o=>!o); setShowEditCustomDate(false); setShowEditEmoPicker(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                 style={chip("#059669")}><span style={{ fontSize: 10 }}>📅</span> {editDateLabel}</button>
               {showEditDatePicker && (
-                <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", flexDirection: isMobile ? "column" : "row", gap:8, maxWidth: isMobile ? "calc(100vw - 32px)" : undefined }}>
+                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth: isMobile ? 0 : 200, width: isMobile ? "100%" : undefined, padding:"4px 0", overflow:"hidden" }}>
                     {getDatePresets().map(opt=>(
                       <button key={opt.value} onClick={() => { setEditDate(opt.value); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
                         style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
@@ -355,8 +355,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                 const nowTime=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                 const slots = getTimeSlots(isToday, nowTime);
                 return (
-                  <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                  <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", flexDirection: isMobile ? "column" : "row", gap:8, maxWidth: isMobile ? "calc(100vw - 32px)" : undefined }}>
+                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth: isMobile ? 0 : 190, width: isMobile ? "100%" : undefined, padding:"4px 0", overflow:"hidden" }}>
                       {slots.map(opt=>(
                         <button key={opt.value} onClick={() => { setEditTime(opt.value); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                           style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
@@ -552,7 +552,9 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
           <div style={{
             position: "fixed", top: "50%", left: "50%",
             transform: "translate(-50%, -50%)", zIndex: 201,
-            width: 300, background: "#fff", borderRadius: 4,
+            width: isMobile ? "calc(100vw - 32px)" : 300,
+            maxWidth: 360,
+            background: "#fff", borderRadius: 4,
             border: "1px solid #dde4de", boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
             padding: "20px",
           }}>

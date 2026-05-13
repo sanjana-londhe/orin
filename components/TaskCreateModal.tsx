@@ -127,6 +127,7 @@ function InlineCreateForm({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
+  const isMobile    = useIsMobile();
   const [title, setTitle]           = useState(defaultTitle ?? "");
   const [emotion, setEmotion]       = useState<Emotion>("NEUTRAL");
   const [dueDate, setDueDate]       = useState(defaultDate ?? todayString());
@@ -324,10 +325,11 @@ function InlineCreateForm({
             <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
           </button>
           {showDatePicker && (
-            <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
+            <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 32px)" : undefined }}>
               <div style={{
                 background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: isMobile ? 0 : 200,
+                width: isMobile ? "100%" : undefined,
                 padding: "4px 0", overflow: "hidden",
               }}>
                 {getDatePresets().map(opt => (
@@ -388,10 +390,11 @@ function InlineCreateForm({
             const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
             const slots = getTimeSlots(isToday, nowTime);
             return (
-              <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
+              <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 32px)" : undefined }}>
                 <div style={{
                   background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: isMobile ? 0 : 190,
+                  width: isMobile ? "100%" : undefined,
                   padding: "4px 0", overflow: "hidden",
                 }}>
                   {slots.map(opt => (

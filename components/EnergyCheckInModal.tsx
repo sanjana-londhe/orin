@@ -224,7 +224,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                 <p style={{ ...eyebrow, marginBottom: 8 }}>What influenced this? (optional)</p>
                 <div style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
                   gap: 6,
                 }}>
                   {CONTRIBUTIONS.map(c => {
