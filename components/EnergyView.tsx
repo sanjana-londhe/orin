@@ -90,14 +90,8 @@ function MoodHeatmap({
     return out;
   }, [startDate, endDate, store]);
 
-  // Mobile gets a totally different layout: last 12 weeks as rows so each
-  // cell is large enough to read and tap. The 52-wide GitHub grid is
-  // unreadable below ~6px / cell on a 375px screen.
-  if (isMobile) {
-    return <MoodHeatmapMobile days={days} store={store} />;
-  }
-
   // Build week-columns. First column starts on Sunday of startDate's week.
+  // Keep this hook above any early-return so the hook order is stable.
   const grid = useMemo(() => {
     if (days.length === 0) return { columns: [], monthLabels: [] };
     const firstDow = days[0].date.getDay();
@@ -120,6 +114,13 @@ function MoodHeatmap({
     });
     return { columns, monthLabels };
   }, [days]);
+
+  // Mobile gets a totally different layout: last 12 weeks as rows so each
+  // cell is large enough to read and tap. The 52-wide GitHub grid is
+  // unreadable below ~6px / cell on a 375px screen.
+  if (isMobile) {
+    return <MoodHeatmapMobile days={days} store={store} />;
+  }
 
   if (days.every(d => d.value === null)) {
     return (
