@@ -12,7 +12,7 @@ function LoginPageInner() {
   const error = searchParams.get("error");
 
   return (
-    <div style={{ height:"100vh", overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"inherit", position:"relative" }}>
+    <div style={{ position:"fixed", inset:0, overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"inherit" }}>
       <div style={{ position:"fixed", inset:0, zIndex:0, backgroundImage:"url('/login-bg.jpg')", backgroundSize:"cover", backgroundPosition:"center" }} />
       <div style={{ width:"100%", maxWidth:360, padding:"0 24px", position:"relative", zIndex:1 }}>
         <div style={{ background:"rgba(255,255,255,0.82)", backdropFilter:"blur(12px)", WebkitBackdropFilter:"blur(12px)", borderRadius: 4, border:"0.5px solid rgba(255,255,255,0.9)", boxShadow:"0 8px 32px rgba(0,0,0,0.12)", padding:"36px 28px 28px" }}>
