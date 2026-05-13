@@ -583,7 +583,7 @@ export function EnergyView() {
             <div style={{ display: "flex", justifyContent: "center", marginTop: -6 }}>
               <button onClick={() => setModalOpen(true)} style={{
                 padding: "9px 22px", borderRadius: 8,
-                border: "1px solid #050e11",
+                border: "none",
                 background: "#059669", color: "#fff", fontSize: 12.5, fontWeight: 600,
                 cursor: "pointer", fontFamily: "inherit",
               }}>Log my feelings</button>
