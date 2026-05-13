@@ -151,6 +151,21 @@ export function AllTasksView() {
   const titleRef = useRef<HTMLInputElement>(null);
   const chipBarRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const nativeDateRef = useRef<HTMLInputElement>(null);
+  const nativeTimeRef = useRef<HTMLInputElement>(null);
+
+  function openNativeDate() {
+    const el = nativeDateRef.current;
+    if (!el) return;
+    if (typeof el.showPicker === "function") { try { el.showPicker(); return; } catch {} }
+    el.focus(); el.click();
+  }
+  function openNativeTime() {
+    const el = nativeTimeRef.current;
+    if (!el) return;
+    if (typeof el.showPicker === "function") { try { el.showPicker(); return; } catch {} }
+    el.focus(); el.click();
+  }
 
   // Only listen for outside clicks when the create form (or one of its
   // pickers) is actually open. Avoids a permanent doc-level handler firing
@@ -384,8 +399,8 @@ export function AllTasksView() {
                       <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                     </button>
                     {showDatePicker && (
-                      <div style={isMobile ? { position: "fixed", left: 16, right: 16, bottom: 16, zIndex: 300, display: "flex", flexDirection: "column", gap: 8, maxHeight: "70vh", overflowY: "auto" } : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: "row", gap: 8 }}>
-                        <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: isMobile ? 8 : 4, boxShadow: isMobile ? "0 -8px 24px rgba(0,0,0,0.12)" : "0 4px 20px rgba(0,0,0,0.1)", width: isMobile ? "100%" : undefined, minWidth: isMobile ? undefined : 200, padding: "4px 0", overflow: "hidden", boxSizing: "border-box" }}>
+                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
+                        <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding: "4px 0", overflow: "hidden" }}>
                           {getDatePresets().map(opt => (
                             <button key={opt.value} onClick={() => { setDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
                               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueDate === opt.value ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
@@ -394,17 +409,19 @@ export function AllTasksView() {
                             </button>
                           ))}
                           <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
-                          <button onClick={() => { setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomDate ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                            <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
-                            <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
+                          <button onClick={() => {
+                            if (isMobile) { setShowDatePicker(false); openNativeDate(); }
+                            else { setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }
+                          }}
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: !isMobile && showCustomDate ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
+                            <span style={{ fontSize: 12, color: "#082d1d", fontWeight: !isMobile && showCustomDate ? 500 : 400 }}>Custom date</span>
+                            <ChevronRight size={13} color={!isMobile && showCustomDate ? "#059669" : "#888780"} />
                           </button>
                         </div>
-                        {showCustomDate && (
+                        {!isMobile && showCustomDate && (
                           <MiniCalendar
                             selected={dueDate}
                             onSelect={iso => { setDueDate(iso); setShowDatePicker(false); setShowCustomDate(false); }}
-                            fullWidth={isMobile}
                           />
                         )}
                       </div>
@@ -424,8 +441,8 @@ export function AllTasksView() {
                       const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                       const slots = getTimeSlots(isToday, nowTime, fmtTimeLbl);
                       return (
-                        <div style={isMobile ? { position: "fixed", left: 16, right: 16, bottom: 16, zIndex: 300, display: "flex", flexDirection: "column", gap: 8, maxHeight: "70vh", overflowY: "auto" } : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: "row", gap: 8 }}>
-                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: isMobile ? 8 : 4, boxShadow: isMobile ? "0 -8px 24px rgba(0,0,0,0.12)" : "0 4px 20px rgba(0,0,0,0.1)", width: isMobile ? "100%" : undefined, minWidth: isMobile ? undefined : 190, padding: "4px 0", overflow: "hidden", boxSizing: "border-box" }}>
+                        <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }}>
+                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding: "4px 0", overflow: "hidden" }}>
                             {slots.map(opt => (
                               <button key={opt.value}
                                 onClick={() => { setDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
@@ -436,14 +453,15 @@ export function AllTasksView() {
                             ))}
                             <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
                             <button onClick={() => {
+                              if (isMobile) { setShowTimePicker(false); openNativeTime(); return; }
                               const opening = !showCustomTime;
                               setShowCustomTime(opening);
                               setShowDatePicker(false); setShowCustomDate(false);
                               if (opening && !dueTime) setDueTime("09:00");
                             }}
-                              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomTime ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                              <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
-                              <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
+                              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: !isMobile && showCustomTime ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
+                              <span style={{ fontSize: 12, color: "#082d1d", fontWeight: !isMobile && showCustomTime ? 500 : 400 }}>Custom time</span>
+                              <ChevronRight size={13} color={!isMobile && showCustomTime ? "#059669" : "#888780"} />
                             </button>
                             {dueTime && (
                               <button onClick={() => { setDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
@@ -452,8 +470,8 @@ export function AllTasksView() {
                               </button>
                             )}
                           </div>
-                          {showCustomTime && (
-                            <div style={{ background: "#fff", border: "1.5px solid #dde4de", borderRadius: isMobile ? 8 : 4, boxShadow: isMobile ? "0 -4px 16px rgba(0,0,0,0.09)" : "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px", display: isMobile ? "flex" : undefined, justifyContent: isMobile ? "center" : undefined, boxSizing: "border-box" }}>
+                          {!isMobile && showCustomTime && (
+                            <div style={{ background: "#fff", border: "1.5px solid #dde4de", borderRadius: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px" }}>
                               <WheelTimePicker value={dueTime || "09:00"} onChange={t => setDueTime(t)} />
                             </div>
                           )}
@@ -468,6 +486,20 @@ export function AllTasksView() {
                     {submitting ? "…" : "Add"}
                   </button>
                 </div>
+
+                {/* Hidden native pickers — triggered by "Custom date/time" on mobile */}
+                <input
+                  ref={nativeDateRef} type="date" value={dueDate}
+                  onChange={e => { if (e.target.value) setDueDate(e.target.value); }}
+                  style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: 0, top: 0 }}
+                  tabIndex={-1} aria-hidden
+                />
+                <input
+                  ref={nativeTimeRef} type="time" value={dueTime || ""}
+                  onChange={e => setDueTime(e.target.value)}
+                  style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none", left: 0, top: 0 }}
+                  tabIndex={-1} aria-hidden
+                />
               </div>
             )}
           </div>
