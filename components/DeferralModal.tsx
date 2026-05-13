@@ -437,7 +437,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                     <div style={{
                       position: "absolute", top: "calc(100% + 6px)", left: 0,
                       display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, zIndex: 20,
-                      maxWidth: isMobile ? "calc(100vw - 36px)" : undefined,
+                      maxWidth: isMobile ? "calc(100vw - 48px)" : undefined,
                       right: isMobile ? 0 : undefined,
                     }}>
                       {/* Options list */}
@@ -445,8 +445,8 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                         background: T.surface, border: `1.5px solid ${T.border}`,
                         borderRadius: 4, padding: "4px 0",
                         boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
-                        minWidth: isMobile ? 0 : 200,
                         width: isMobile ? "100%" : undefined,
+                        minWidth: isMobile ? undefined : 200,
                       }}>
                         {opts.map(opt => {
                           const active = rescheduleKey === opt.key;

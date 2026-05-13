@@ -384,8 +384,8 @@ export function AllTasksView() {
                       <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                     </button>
                     {showDatePicker && (
-                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 32px)" : undefined }}>
-                        <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: isMobile ? 0 : 200, width: isMobile ? "100%" : undefined, padding: "4px 0", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 48px)" : undefined }}>
+                        <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", width: isMobile ? 248 : undefined, minWidth: isMobile ? undefined : 200, padding: "4px 0", overflow: "hidden" }}>
                           {getDatePresets().map(opt => (
                             <button key={opt.value} onClick={() => { setDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
                               style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueDate === opt.value ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
@@ -423,8 +423,8 @@ export function AllTasksView() {
                       const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                       const slots = getTimeSlots(isToday, nowTime, fmtTimeLbl);
                       return (
-                        <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 32px)" : undefined }}>
-                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: isMobile ? 0 : 190, width: isMobile ? "100%" : undefined, padding: "4px 0", overflow: "hidden" }}>
+                        <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 48px)" : undefined }}>
+                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", width: isMobile ? 248 : undefined, minWidth: isMobile ? undefined : 190, padding: "4px 0", overflow: "hidden" }}>
                             {slots.map(opt => (
                               <button key={opt.value}
                                 onClick={() => { setDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
