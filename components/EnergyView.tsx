@@ -90,6 +90,13 @@ function MoodHeatmap({
     return out;
   }, [startDate, endDate, store]);
 
+  // Mobile gets a totally different layout: last 12 weeks as rows so each
+  // cell is large enough to read and tap. The 52-wide GitHub grid is
+  // unreadable below ~6px / cell on a 375px screen.
+  if (isMobile) {
+    return <MoodHeatmapMobile days={days} store={store} />;
+  }
+
   // Build week-columns. First column starts on Sunday of startDate's week.
   const grid = useMemo(() => {
     if (days.length === 0) return { columns: [], monthLabels: [] };
@@ -229,6 +236,174 @@ function MoodHeatmap({
       </div>
 
       {tip && <HeatmapTooltip cell={tip.cell} rect={tip.rect} />}
+    </div>
+  );
+}
+
+// Mobile mood map: last 12 weeks vertical layout. Each row is a week,
+// each column is a day (Sun-Sat). Cells are ~36px so they read well
+// and accept taps; tapping opens an inline detail row below the grid.
+function MoodHeatmapMobile({ days, store }: { days: HeatCell[]; store: EnergyStore }) {
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const todayIso = isoDay(new Date());
+
+  // Trailing 12-week window ending Saturday of this week, so the most
+  // recent days sit at the bottom-right and the rectangle is always full.
+  const weeks = useMemo(() => {
+    const WEEKS = 12;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const end = new Date(today);
+    end.setDate(end.getDate() + (6 - end.getDay())); // Saturday of current week
+    const start = new Date(end);
+    start.setDate(start.getDate() - (WEEKS * 7 - 1)); // Sunday 12 weeks back
+    const byKey = new Map(days.map(d => [d.key, d]));
+    const rows: HeatCell[][] = [];
+    for (let w = 0; w < WEEKS; w++) {
+      const row: HeatCell[] = [];
+      for (let d = 0; d < 7; d++) {
+        const date = new Date(start);
+        date.setDate(start.getDate() + w * 7 + d);
+        const key = isoDay(date);
+        const entries = store[key] ?? [];
+        row.push(byKey.get(key) ?? { date, key, value: avgMood(entries), entries });
+      }
+      rows.push(row);
+    }
+    return rows;
+  }, [days, store]);
+
+  // Reuse weeks state for the row label (start-of-week date).
+  const weekLabel = (row: HeatCell[]) =>
+    row[0].date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const selected = selectedKey ? (weeks.flat().find(c => c.key === selectedKey) ?? null) : null;
+
+  if (days.every(d => d.value === null)) {
+    return (
+      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "20px 0" }}>
+        Log check-ins to fill your mood map.
+      </p>
+    );
+  }
+
+  const DOW = ["S", "M", "T", "W", "T", "F", "S"];
+  const labelCol = 44;
+
+  return (
+    <div style={{ width: "100%" }}>
+      {/* DOW header */}
+      <div style={{ display: "flex", gap: 4, paddingLeft: labelCol, marginBottom: 6 }}>
+        {DOW.map((d, i) => (
+          <div key={i} style={{
+            flex: 1, textAlign: "center",
+            fontSize: 10, fontWeight: 600, color: "#7a8a7a",
+          }}>{d}</div>
+        ))}
+      </div>
+
+      {/* Week rows */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {weeks.map((row, ri) => (
+          <div key={ri} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{
+              width: labelCol - 4, flexShrink: 0,
+              fontSize: 10, color: "#7a8a7a",
+              letterSpacing: "0.02em", textAlign: "right", paddingRight: 4,
+            }}>{weekLabel(row)}</div>
+            {row.map(cell => {
+              const has = cell.value !== null;
+              const isToday = cell.key === todayIso;
+              const isFuture = cell.date > new Date(todayIso + "T23:59:59");
+              const isSelected = cell.key === selectedKey;
+              return (
+                <button
+                  key={cell.key}
+                  onClick={() => setSelectedKey(k => k === cell.key ? null : cell.key)}
+                  disabled={isFuture}
+                  style={{
+                    flex: 1, aspectRatio: "1",
+                    borderRadius: 6,
+                    background: has ? moodColor(cell.value!) : "#eef1ed",
+                    opacity: isFuture ? 0.35 : 1,
+                    border: isSelected
+                      ? "2px solid #082d1d"
+                      : isToday ? "2px solid #082d1d" : "1px solid transparent",
+                    boxSizing: "border-box",
+                    cursor: isFuture ? "default" : "pointer",
+                    padding: 0,
+                    transition: "transform 0.1s",
+                    transform: isSelected ? "scale(1.05)" : "scale(1)",
+                  }}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Selected detail */}
+      {selected && (
+        <div style={{
+          marginTop: 12,
+          padding: "12px 14px",
+          background: "#f8f9f5",
+          border: "1px solid #e9ede9",
+          borderRadius: 8,
+        }}>
+          <p style={{
+            fontSize: 10, fontWeight: 600, color: "#7a8a7a",
+            letterSpacing: "0.08em", textTransform: "uppercase",
+            margin: "0 0 6px",
+          }}>{selected.date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+          {selected.entries.length === 0 ? (
+            <p style={{ margin: 0, color: "#7a8a7a", fontSize: 12 }}>No check-in this day.</p>
+          ) : selected.entries.length === 1 ? (
+            <>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#082d1d" }}>
+                <span style={{ marginRight: 6 }}>{moodEmoji(selected.entries[0].mood)}</span>
+                {moodLabel(selected.entries[0].mood)}
+              </p>
+              {selected.entries[0].contributions.length > 0 && (
+                <p style={{ margin: "4px 0 0", fontSize: 12, color: "#3d5a4a" }}>
+                  {selected.entries[0].contributions.join(" · ")}
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 600, color: "#082d1d" }}>
+                <span style={{ marginRight: 6 }}>{moodEmoji(selected.value!)}</span>
+                {moodLabel(selected.value!)}
+                <span style={{ color: "#7a8a7a", fontWeight: 500, marginLeft: 6, fontSize: 11 }}>
+                  avg of {selected.entries.length}
+                </span>
+              </p>
+              {selected.entries.map((e, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#3d5a4a", marginTop: i === 0 ? 4 : 2 }}>
+                  <span>{moodEmoji(e.mood)}</span>
+                  <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {e.contributions.length > 0 ? e.contributions.join(" · ") : moodLabel(e.mood)}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Legend */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+        marginTop: 12,
+      }}>
+        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Unpleasant</span>
+        {MOODS.map(m => (
+          <div key={m.value} style={{
+            width: 12, height: 12, borderRadius: 3, background: m.color,
+          }} />
+        ))}
+        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Pleasant</span>
+      </div>
     </div>
   );
 }
