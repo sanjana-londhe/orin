@@ -1,11 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signInWithGoogle } from "@/app/actions/auth";
 
 export default function SignUpPage() {
   const [googlePending, setGooglePending] = useState(false);
+
+  // Lock body scroll so mobile browsers can't rubber-band the auth screen.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = { html: html.style.overflow, body: body.style.overflow };
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => { html.style.overflow = prev.html; body.style.overflow = prev.body; };
+  }, []);
 
   return (
     <div style={{

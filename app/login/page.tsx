@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { signInWithGoogle, signInAsGuest } from "@/app/actions/auth";
 
@@ -10,6 +10,16 @@ function LoginPageInner() {
   const [guestPending, setGuestPending]   = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+
+  // Lock body scroll so mobile browsers can't rubber-band the auth screen.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = { html: html.style.overflow, body: body.style.overflow };
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => { html.style.overflow = prev.html; body.style.overflow = prev.body; };
+  }, []);
 
   return (
     <div style={{ position:"fixed", inset:0, overflow:"hidden", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"inherit" }}>
