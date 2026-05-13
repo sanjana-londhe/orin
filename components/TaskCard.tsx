@@ -323,8 +323,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               <button onClick={(e) => { pickDropDirection(e); setShowEditDatePicker(o=>!o); setShowEditCustomDate(false); setShowEditEmoPicker(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                 style={chip("#059669")}><span style={{ fontSize: 10 }}>📅</span> {editDateLabel}</button>
               {showEditDatePicker && (
-                <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", flexDirection: isMobile ? "column" : "row", gap:8, maxWidth: isMobile ? "calc(100vw - 48px)" : undefined }}>
-                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", width: isMobile ? 248 : undefined, minWidth: isMobile ? undefined : 200, padding:"4px 0", overflow:"hidden" }}>
+                <div style={isMobile ? { position: "fixed", left: 16, right: 16, bottom: 16, zIndex: 300, display: "flex", flexDirection: "column", gap: 8, maxHeight: "70vh", overflowY: "auto" } : { position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", flexDirection: "row", gap:8 }}>
+                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: isMobile ? 8 : 4, boxShadow: isMobile ? "0 -8px 24px rgba(0,0,0,0.12)" : (editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)"), width: isMobile ? "100%" : undefined, minWidth: isMobile ? undefined : 200, padding:"4px 0", overflow:"hidden", boxSizing: "border-box" }}>
                     {getDatePresets().map(opt=>(
                       <button key={opt.value} onClick={() => { setEditDate(opt.value); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
                         style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
@@ -340,7 +340,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                     </button>
                   </div>
                   {showEditCustomDate && (
-                    <MiniCalendar selected={editDate} onSelect={iso => { setEditDate(iso); setShowEditDatePicker(false); setShowEditCustomDate(false); }} />
+                    <MiniCalendar selected={editDate} onSelect={iso => { setEditDate(iso); setShowEditDatePicker(false); setShowEditCustomDate(false); }} fullWidth={isMobile} />
                   )}
                 </div>
               )}
@@ -355,8 +355,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                 const nowTime=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                 const slots = getTimeSlots(isToday, nowTime);
                 return (
-                  <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", flexDirection: isMobile ? "column" : "row", gap:8, maxWidth: isMobile ? "calc(100vw - 48px)" : undefined }}>
-                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", width: isMobile ? 248 : undefined, minWidth: isMobile ? undefined : 190, padding:"4px 0", overflow:"hidden" }}>
+                  <div style={isMobile ? { position: "fixed", left: 16, right: 16, bottom: 16, zIndex: 300, display: "flex", flexDirection: "column", gap: 8, maxHeight: "70vh", overflowY: "auto" } : { position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", flexDirection: "row", gap:8 }}>
+                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: isMobile ? 8 : 4, boxShadow: isMobile ? "0 -8px 24px rgba(0,0,0,0.12)" : (editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)"), width: isMobile ? "100%" : undefined, minWidth: isMobile ? undefined : 190, padding:"4px 0", overflow:"hidden", boxSizing: "border-box" }}>
                       {slots.map(opt=>(
                         <button key={opt.value} onClick={() => { setEditTime(opt.value); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                           style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
@@ -381,7 +381,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                       )}
                     </div>
                     {showEditCustomTime && (
-                      <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 16px rgba(0,0,0,0.09)" : "0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
+                      <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius: isMobile ? 8 : 4, boxShadow: isMobile ? "0 -4px 16px rgba(0,0,0,0.09)" : (editDropUp ? "0 -4px 16px rgba(0,0,0,0.09)" : "0 4px 16px rgba(0,0,0,0.09)"), padding:"12px 14px", display: isMobile ? "flex" : undefined, justifyContent: isMobile ? "center" : undefined, boxSizing: "border-box" }}>
                         <WheelTimePicker value={editTime || "09:00"} onChange={t => setEditTime(t)} />
                       </div>
                     )}

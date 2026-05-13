@@ -325,13 +325,21 @@ function InlineCreateForm({
             <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
           </button>
           {showDatePicker && (
-            <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 48px)" : undefined }}>
+            <div style={isMobile ? {
+              position: "fixed", left: 16, right: 16, bottom: 16, zIndex: 300,
+              display: "flex", flexDirection: "column", gap: 8,
+              maxHeight: "70vh", overflowY: "auto",
+            } : {
+              position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
+              display: "flex", flexDirection: "row", gap: 8,
+            }}>
               <div style={{
-                background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                width: isMobile ? 248 : undefined,
+                background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: isMobile ? 8 : 4,
+                boxShadow: isMobile ? "0 -8px 24px rgba(0,0,0,0.12)" : "0 4px 20px rgba(0,0,0,0.1)",
+                width: isMobile ? "100%" : undefined,
                 minWidth: isMobile ? undefined : 200,
                 padding: "4px 0", overflow: "hidden",
+                boxSizing: "border-box",
               }}>
                 {getDatePresets().map(opt => (
                   <button
@@ -366,6 +374,7 @@ function InlineCreateForm({
                 <MiniCalendar
                   selected={dueDate}
                   onSelect={iso => { setDueDate(iso); setShowDatePicker(false); setShowCustomDate(false); }}
+                  fullWidth={isMobile}
                 />
               )}
             </div>
@@ -391,13 +400,21 @@ function InlineCreateForm({
             const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
             const slots = getTimeSlots(isToday, nowTime);
             return (
-              <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, maxWidth: isMobile ? "calc(100vw - 48px)" : undefined }}>
+              <div style={isMobile ? {
+                position: "fixed", left: 16, right: 16, bottom: 16, zIndex: 300,
+                display: "flex", flexDirection: "column", gap: 8,
+                maxHeight: "70vh", overflowY: "auto",
+              } : {
+                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
+                display: "flex", flexDirection: "row", gap: 8,
+              }}>
                 <div style={{
-                  background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  width: isMobile ? 248 : undefined,
+                  background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: isMobile ? 8 : 4,
+                  boxShadow: isMobile ? "0 -8px 24px rgba(0,0,0,0.12)" : "0 4px 20px rgba(0,0,0,0.1)",
+                  width: isMobile ? "100%" : undefined,
                   minWidth: isMobile ? undefined : 190,
                   padding: "4px 0", overflow: "hidden",
+                  boxSizing: "border-box",
                 }}>
                   {slots.map(opt => (
                     <button
@@ -449,8 +466,12 @@ function InlineCreateForm({
                 </div>
                 {showCustomTime && (
                   <div style={{
-                    background: "#fff", border: "1.5px solid #dde4de", borderRadius: 4,
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px",
+                    background: "#fff", border: "1.5px solid #dde4de", borderRadius: isMobile ? 8 : 4,
+                    boxShadow: isMobile ? "0 -4px 16px rgba(0,0,0,0.09)" : "0 4px 16px rgba(0,0,0,0.09)",
+                    padding: "12px 14px",
+                    display: isMobile ? "flex" : undefined,
+                    justifyContent: isMobile ? "center" : undefined,
+                    boxSizing: "border-box",
                   }}>
                     <WheelTimePicker value={dueTime || "09:00"} onChange={t => setDueTime(t)} />
                   </div>
