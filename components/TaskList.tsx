@@ -209,6 +209,10 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showCustomDate, setShowCustomDate] = useState(false);
   const [showCustomTime, setShowCustomTime] = useState(false);
+  const [chipBarBottom, setChipBarBottom] = useState(0);
+  function captureChipBarBottom() {
+    if (chipBarRef.current) setChipBarBottom(chipBarRef.current.getBoundingClientRect().bottom);
+  }
   const [noteOpen, setNoteOpen] = useState(false);
   const [titleError, setTitleError] = useState(false);
   const chipBarRef = useRef<HTMLDivElement>(null);
@@ -391,7 +395,11 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                   </button>
                   {showDatePicker && (
-                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                    <div style={
+                      isMobile && showCustomDate
+                        ? { position:"fixed", top: chipBarBottom + 6, left: 16, right: 16, zIndex: 300, display:"flex", justifyContent:"center" }
+                        : { position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }
+                    }>
                       {!(isMobile && showCustomDate) && (
                         <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
                           {getDatePresets().map(opt => (
@@ -402,7 +410,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                             </button>
                           ))}
                           <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
-                          <button onClick={() => { setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
+                          <button onClick={() => { if (isMobile) captureChipBarBottom(); setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
                             style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomDate?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
                             <span style={{ fontSize: 12, color:"#082d1d", fontWeight:showCustomDate?500:400 }}>Custom date</span>
                             <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
@@ -413,6 +421,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                         <MiniCalendar
                           selected={inlineDueDate}
                           onSelect={iso => { setInlineDueDate(iso); setShowDatePicker(false); setShowCustomDate(false); }}
+                          fullWidth={isMobile}
                         />
                       )}
                     </div>
@@ -432,7 +441,11 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
                     const slots = getTimeSlots(isToday, nowTime);
                     return (
-                      <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
+                      <div style={
+                        isMobile && showCustomTime
+                          ? { position:"fixed", top: chipBarBottom + 6, left: 16, right: 16, zIndex: 300, display:"flex", justifyContent:"center" }
+                          : { position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }
+                      }>
                         {!(isMobile && showCustomTime) && (
                           <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
                             {slots.map(opt => (
@@ -446,6 +459,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                             <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
                             <button onClick={() => {
                               const opening = !showCustomTime;
+                              if (isMobile && opening) captureChipBarBottom();
                               setShowCustomTime(opening);
                               setShowDatePicker(false); setShowCustomDate(false);
                               if (opening && !inlineDueTime) setInlineDueTime("09:00");

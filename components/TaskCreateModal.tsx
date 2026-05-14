@@ -140,8 +140,13 @@ function InlineCreateForm({
   const [showCustomDate, setShowCustomDate] = useState(false);
   const [showCustomTime, setShowCustomTime] = useState(false);
   const [noteOpen, setNoteOpen]             = useState(false);
+  const [chipBarBottom, setChipBarBottom]   = useState(0);
   const titleRef       = useRef<HTMLInputElement>(null);
   const chipBarRef     = useRef<HTMLDivElement>(null);
+
+  function captureChipBarBottom() {
+    if (chipBarRef.current) setChipBarBottom(chipBarRef.current.getBoundingClientRect().bottom);
+  }
 
   useEffect(() => { setTimeout(() => titleRef.current?.focus(), 20); }, []);
 
@@ -325,10 +330,11 @@ function InlineCreateForm({
             <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
           </button>
           {showDatePicker && (
-            <div style={{
-              position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
-              display: "flex", gap: 8,
-            }}>
+            <div style={
+              isMobile && showCustomDate
+                ? { position: "fixed", top: chipBarBottom + 6, left: 16, right: 16, zIndex: 300, display: "flex", justifyContent: "center" }
+                : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }
+            }>
               {!(isMobile && showCustomDate) && (
                 <div style={{
                   background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
@@ -353,7 +359,7 @@ function InlineCreateForm({
                   ))}
                   <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
                   <button
-                    onClick={() => { setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
+                    onClick={() => { if (isMobile) captureChipBarBottom(); setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
                       width: "100%", padding: "8px 14px",
@@ -370,6 +376,7 @@ function InlineCreateForm({
                 <MiniCalendar
                   selected={dueDate}
                   onSelect={iso => { setDueDate(iso); setShowDatePicker(false); setShowCustomDate(false); }}
+                  fullWidth={isMobile}
                 />
               )}
             </div>
@@ -395,10 +402,11 @@ function InlineCreateForm({
             const nowTime = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
             const slots = getTimeSlots(isToday, nowTime);
             return (
-              <div style={{
-                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
-                display: "flex", gap: 8,
-              }}>
+              <div style={
+                isMobile && showCustomTime
+                  ? { position: "fixed", top: chipBarBottom + 6, left: 16, right: 16, zIndex: 300, display: "flex", justifyContent: "center" }
+                  : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }
+              }>
                 {!(isMobile && showCustomTime) && (
                   <div style={{
                     background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
@@ -425,6 +433,7 @@ function InlineCreateForm({
                     <button
                       onClick={() => {
                         const opening = !showCustomTime;
+                        if (isMobile && opening) captureChipBarBottom();
                         setShowCustomTime(opening);
                         setShowDatePicker(false); setShowCustomDate(false);
                         if (opening && !dueTime) setDueTime("09:00");
