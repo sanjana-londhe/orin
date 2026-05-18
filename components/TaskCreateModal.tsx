@@ -152,7 +152,8 @@ function InlineCreateForm({
             placeholder="Task name"
             style={{
               width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-              fontSize: 12, letterSpacing: "-0.01em", color: "#082d1d",
+              // 16px on mweb to suppress iOS Safari's zoom-on-focus; 12px on desktop.
+              fontSize: isMobile ? 16 : 12, letterSpacing: "-0.01em", color: "#082d1d",
               background: "transparent", marginBottom: 2,
             }}
           />
@@ -162,12 +163,15 @@ function InlineCreateForm({
               placeholder="Notes" rows={2}
               style={{
                 width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-                fontSize: 11, color: "#3d5a4a", background: "transparent",
+                fontSize: isMobile ? 16 : 11, color: "#3d5a4a", background: "transparent",
                 resize: "none", lineHeight: 1.5, padding: 0,
               }}
             />
           ) : (
-            <div onClick={() => setNoteOpen(true)} style={{ fontSize: 11, color: "#b9d3c4", cursor: "text" }}>
+            <div
+              onClick={() => setNoteOpen(true)}
+              style={{ fontSize: isMobile ? 16 : 11, color: "#b9d3c4", cursor: "text" }}
+            >
               {note.trim() || "Notes"}
             </div>
           )}
