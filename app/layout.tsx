@@ -18,6 +18,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Prevent iOS Safari from auto-zooming when an input/textarea has
+  // fontSize < 16px. Trade-off: users can't pinch-zoom the page.
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
