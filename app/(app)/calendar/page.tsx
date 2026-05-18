@@ -381,15 +381,6 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                         <>
                           <div style={{ flex: 1 }} />
                           <button
-                            onClick={() => setEditingId(null)}
-                            style={{
-                              padding: "4px 11px", borderRadius: 6,
-                              border: "0.5px solid #dde4de", background: "#fff",
-                              color: "#3d5a4a", fontSize: 11, fontWeight: 500,
-                              cursor: "pointer", fontFamily: "inherit",
-                            }}
-                          >Cancel</button>
-                          <button
                             onClick={() => saveEdit(task)}
                             style={{
                               padding: "5px 14px", borderRadius: 6, border: "none",
@@ -774,17 +765,19 @@ function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpdate, onD
                 />
               </div>
 
-              {/* Cancel + Save CTAs — right-aligned, defer-modal style */}
+              {/* Save CTA — right-aligned. Cancel kept on mobile only (X close handles it on desktop). */}
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "10px 18px 14px" }}>
-                <button
-                  onClick={() => setEditing(false)}
-                  style={{
-                    padding: "7px 16px", borderRadius: 8,
-                    border: "1.5px solid #dde4de", background: "#fff",
-                    color: "#3d5a4a", fontSize: 12, fontWeight: 500,
-                    cursor: "pointer", fontFamily: "inherit",
-                  }}
-                >Cancel</button>
+                {isMobile && (
+                  <button
+                    onClick={() => setEditing(false)}
+                    style={{
+                      padding: "7px 16px", borderRadius: 8,
+                      border: "1.5px solid #dde4de", background: "#fff",
+                      color: "#3d5a4a", fontSize: 12, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >Cancel</button>
+                )}
                 <button
                   onClick={saveEdit}
                   style={{
