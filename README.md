@@ -2,11 +2,8 @@
 
 **A todo app that takes the emotional weight of tasks seriously.**
 
-[Live demo →](https://orin-hazel.vercel.app)
+[Live →](https://orin-hazel.vercel.app)
 
-![Orin screenshot](docs/screenshot.png)
-
-> Replace `docs/screenshot.png` with a real screenshot of the Today view.
 
 ## Why this exists
 
