@@ -123,9 +123,12 @@ interface Props {
   dropUp?: boolean;
   /** Render the trigger as a chip (matches inline create-form chip style). */
   compact?: boolean;
+  /** On mobile, anchor the dropdown under the trigger (like the create-form
+   *  chip pickers) instead of docking to the bottom nav. */
+  inlinePopup?: boolean;
 }
 
-export function DatePickerField({ value, onChange, label = "Due date", calendarOnly = false, dropUp, compact }: Props) {
+export function DatePickerField({ value, onChange, label = "Due date", calendarOnly = false, dropUp, compact, inlinePopup }: Props) {
   const today    = getToday();
   const tomorrow = getTomorrow();
   const [open, setOpen]       = useState(false);
@@ -146,7 +149,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
   }, []);
 
   function handleOpen() {
-    if (!isMobile && buttonRef.current) {
+    if (buttonRef.current && (!isMobile || inlinePopup)) {
       const r = buttonRef.current.getBoundingClientRect();
       setFixedPos({ top: r.bottom + 6, left: r.left });
     }
@@ -161,7 +164,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
     value === tomorrow ? "Tomorrow" :
     value              ? shortFmt(value) : "Pick a date";
 
-  // Mobile: full-width panel anchored above tab bar
+  // Mobile: full-width panel anchored above tab bar (default).
   const mobileDropdownStyle: React.CSSProperties = {
     position: "fixed",
     bottom: 68,
@@ -169,6 +172,16 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
     right: 16,
     zIndex: 300,
     maxHeight: "70vh",
+    overflowY: "auto",
+  };
+  // Mobile inline-popup: positioned right below the chip, like the create form.
+  const mobileInlineStyle: React.CSSProperties = {
+    position: "fixed",
+    top: fixedPos.top,
+    left: 16,
+    right: 16,
+    zIndex: 300,
+    maxHeight: "60vh",
     overflowY: "auto",
   };
 
@@ -230,12 +243,13 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
           )}
 
           {isMobile ? (
-            /* Mobile: stacked panel fixed above bottom nav */
+            /* Mobile: stacked panel — bottom-anchored by default, or below the
+               trigger when inlinePopup is set (matches create-form pickers). */
             <div style={{
-              ...mobileDropdownStyle,
+              ...(inlinePopup ? mobileInlineStyle : mobileDropdownStyle),
               background: D.surface, border: `1.5px solid ${D.stone400}`,
               borderRadius: 4, padding: "8px 0",
-              boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
+              boxShadow: inlinePopup ? "0 4px 20px rgba(0,0,0,0.1)" : "0 -4px 24px rgba(0,0,0,0.1)",
             }}>
               {/* Quick picks */}
               {!showCal && (

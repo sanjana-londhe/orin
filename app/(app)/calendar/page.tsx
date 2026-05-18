@@ -385,6 +385,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                       onChange={setEditDate}
                       label=""
                       compact
+                      inlinePopup
                     />
                     <TimePickerField
                       value={editTime}
@@ -392,6 +393,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                       label=""
                       selectedDate={editDate}
                       compact
+                      inlinePopup
                     />
                     {/* Desktop: inline Cancel + Save buttons on the chip bar */}
                     {!isMobile && (
