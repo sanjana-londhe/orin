@@ -261,8 +261,9 @@ export function AIPanel({ onClose }: Props) {
           </div>
         </div>
         <button onClick={onClose} style={{
-          width: 28, height: 28, borderRadius: "50%", border: "1px solid #e9ede9",
-          background: "#fff", cursor: "pointer",
+          width: 28, height: 28, borderRadius: 8,
+          border: "1.5px solid #dde4de", background: "#f8f9f5",
+          cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47",
         }}>
           <X size={13} />

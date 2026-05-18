@@ -135,8 +135,8 @@ function TaskDetailModal({ task, onClose, onMarkDone, onMarkUndone }: {
           <p style={{ fontSize: 12, fontWeight: 400, color: "#082d1d", margin: 0, flex: 1, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>
             {task.title}
           </p>
-          <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 10 }}>
-            <X size={12} />
+          <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47", flexShrink: 0, marginLeft: 10 }}>
+            <X size={13} />
           </button>
         </div>
 
@@ -274,8 +274,8 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
             <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 2px" }}>All tasks</p>
             <p style={{ fontSize: 12, fontWeight: 700, color: "#082d1d", margin: 0 }}>{fmtDate(date)}</p>
           </div>
-          <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
-            <X size={12} />
+          <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+            <X size={13} />
           </button>
         </div>
 
@@ -718,8 +718,8 @@ function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpdate, onD
             <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
               {editing ? "Edit task" : "Task"}
             </p>
-            <button onClick={onClose} style={{ width: 26, height: 26, border: "1.5px solid #dde4de", borderRadius: 7, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
-              <X size={12} />
+            <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+              <X size={13} />
             </button>
           </div>
 

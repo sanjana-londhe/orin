@@ -44,8 +44,8 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid #f0f0f0" }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: "#0a2010", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
-          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: "50%", border: "1px solid #e5e7eb", background: "#f9fafb", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280" }}>
-            <X size={14} />
+          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+            <X size={13} />
           </button>
         </div>
 
