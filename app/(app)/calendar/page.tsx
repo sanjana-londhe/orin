@@ -231,11 +231,22 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
   }
 
 
+  // Mobile: top-aligned popup matching the TaskCreateModal mweb dimensions
+  // (padding 60px 16px 0, maxWidth 520) so the day-list opens like the
+  // create form, not as a bottom sheet.
+  const mobileWrapperStyle: React.CSSProperties = {
+    position: "fixed", inset: 0, zIndex: 70,
+    display: "flex", alignItems: "flex-start", justifyContent: "center",
+    padding: "60px 16px 0",
+    pointerEvents: "none",
+  };
   const mobileCardStyle: React.CSSProperties = {
-    position: "fixed", bottom: 60, left: 0, right: 0, zIndex: 70,
-    background: "#fff", borderRadius: "16px 16px 0 0",
-    border: "1.5px solid #dde4de", borderBottom: "none",
-    boxShadow: "0 -4px 24px rgba(0,0,0,0.1)", maxHeight: "65vh", overflowY: "auto",
+    width: "100%", maxWidth: 520,
+    background: "#fff", borderRadius: 4,
+    border: "1px solid #dde4de",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    maxHeight: "calc(100vh - 120px)", overflowY: "auto",
+    pointerEvents: "auto",
   };
   // Desktop: flex wrapper centers the card. NO transform on the card itself —
   // transforms create a containing block which traps `position: fixed` children
@@ -256,8 +267,8 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
   return (
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)", backdropFilter: "blur(2px)" }} />
-      <div style={isMobile ? mobileCardStyle : desktopWrapperStyle}>
-      <div style={isMobile ? { display: "contents" } : desktopCardStyle} onClick={isMobile ? undefined : (e => e.stopPropagation())}>
+      <div style={isMobile ? mobileWrapperStyle : desktopWrapperStyle}>
+      <div style={isMobile ? mobileCardStyle : desktopCardStyle} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #e9ede9", position: "sticky", top: 0, background: "#fff" }}>
           <div>
