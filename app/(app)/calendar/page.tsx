@@ -980,7 +980,7 @@ function MobileCalendar({
                         display: "flex", alignItems: "center", gap: 6, overflow: "hidden",
                       }}
                     >
-                      <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
+                      <span style={{ fontSize: 12, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
                         {fmtTime(task.dueAt) && <span style={{ fontFamily: "inherit", marginRight: 4, opacity: 0.8 }}>{fmtTime(task.dueAt)}</span>}
                         {task.title}
                       </span>
@@ -1241,7 +1241,7 @@ export default function CalendarPage() {
                         onClick={e => { e.stopPropagation(); setDayTaskList(key); }}
                         style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden" }}
                       >
-                        <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
                           {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
                         </span>
                       </div>
