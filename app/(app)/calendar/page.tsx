@@ -393,26 +393,56 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                       selectedDate={editDate}
                       compact
                     />
-                    <div style={{ flex: 1 }} />
-                    <button
-                      onClick={() => setEditingId(null)}
-                      style={{
-                        padding: "4px 11px", borderRadius: 6,
-                        border: "0.5px solid #dde4de", background: "#fff",
-                        color: "#3d5a4a", fontSize: 11, fontWeight: 500,
-                        cursor: "pointer", fontFamily: "inherit",
-                      }}
-                    >Cancel</button>
-                    <button
-                      onClick={() => saveEdit(task)}
-                      style={{
-                        padding: "5px 14px", borderRadius: 6, border: "none",
-                        background: "#059669", color: "#fff",
-                        fontSize: 11, fontWeight: 600,
-                        cursor: "pointer", fontFamily: "inherit",
-                      }}
-                    >Save</button>
+                    {/* Desktop: inline Cancel + Save buttons on the chip bar */}
+                    {!isMobile && (
+                      <>
+                        <div style={{ flex: 1 }} />
+                        <button
+                          onClick={() => setEditingId(null)}
+                          style={{
+                            padding: "4px 11px", borderRadius: 6,
+                            border: "0.5px solid #dde4de", background: "#fff",
+                            color: "#3d5a4a", fontSize: 11, fontWeight: 500,
+                            cursor: "pointer", fontFamily: "inherit",
+                          }}
+                        >Cancel</button>
+                        <button
+                          onClick={() => saveEdit(task)}
+                          style={{
+                            padding: "5px 14px", borderRadius: 6, border: "none",
+                            background: "#059669", color: "#fff",
+                            fontSize: 11, fontWeight: 600,
+                            cursor: "pointer", fontFamily: "inherit",
+                          }}
+                        >Save</button>
+                      </>
+                    )}
                   </div>
+
+                  {/* Mobile: full-width Cancel + Save CTAs below the chips,
+                      matching the Edit/Delete CTA pattern. */}
+                  {isMobile && (
+                    <div style={{ display: "flex", gap: 8, padding: "0 14px 12px" }}>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        style={{
+                          flex: 1, padding: "8px 12px", borderRadius: 6,
+                          border: "1px solid #dde4de", background: "#f8f9f5",
+                          color: "#3d5a4a", fontSize: 12, fontWeight: 500,
+                          cursor: "pointer", fontFamily: "inherit",
+                        }}
+                      >Cancel</button>
+                      <button
+                        onClick={() => saveEdit(task)}
+                        style={{
+                          flex: 1, padding: "8px 12px", borderRadius: 6,
+                          border: "none", background: "#059669",
+                          color: "#fff", fontSize: 12, fontWeight: 600,
+                          cursor: "pointer", fontFamily: "inherit",
+                        }}
+                      >Save</button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
