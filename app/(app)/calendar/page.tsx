@@ -876,48 +876,87 @@ function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpdate, onD
 }
 
 // ── Mobile agenda view ───────────────────────────────────────────────
+// Rolling agenda: today is anchored at the top on open, but the user can
+// scroll up to revisit past dates and down to plan ahead. The month label
+// in the header tracks whatever day is currently topmost.
 
 function MobileCalendar({
-  viewDate, setViewDate, tasksByDate, today,
+  tasksByDate, today,
   onAddTask, onTaskTap,
 }: {
-  viewDate: Date; setViewDate: (d: Date) => void;
   tasksByDate: Map<string, TaskWithSubtasks[]>; today: Date;
   onAddTask: (date: string) => void;
   onTaskTap: (task: TaskWithSubtasks) => void;
 }) {
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const year  = viewDate.getFullYear();
-  const month = viewDate.getMonth();
-  const daysArr = Array.from({ length: new Date(year, month + 1, 0).getDate() }, (_, i) => new Date(year, month, i + 1));
+  const scrollRef = useRef<HTMLDivElement>(null);
   const todayIso = isoDate(today);
+  const [headerLabel, setHeaderLabel] = useState(`${MONTH_NAMES[today.getMonth()]} ${today.getFullYear()}`);
+
+  // 60 days back, 240 days forward — ~10 months of agenda.
+  const daysArr = useMemo(() => {
+    const start = new Date(today); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - 60);
+    return Array.from({ length: 301 }, (_, i) => {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      return d;
+    });
+  }, [todayIso]);
+
+  // Position today's row at the top of the scroll container on mount.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const todayRow = el.querySelector<HTMLElement>('[data-today="true"]');
+    if (todayRow) el.scrollTop = todayRow.offsetTop;
+  }, [todayIso]);
+
+  // Header label tracks the month of whichever day row is currently topmost.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    function update() {
+      if (!el) return;
+      const containerTop = el.getBoundingClientRect().top;
+      const rows = el.querySelectorAll<HTMLElement>('[data-day]');
+      for (const row of Array.from(rows)) {
+        const r = row.getBoundingClientRect();
+        if (r.top + r.height > containerTop + 1) {
+          const iso = row.dataset.day!;
+          const d = new Date(iso + "T12:00:00");
+          setHeaderLabel(`${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`);
+          break;
+        }
+      }
+    }
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    return () => el.removeEventListener("scroll", update);
+  }, []);
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Month header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", flexShrink: 0, background: "#fff" }}>
-        <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={16} color="#4a6d47" /></button>
-        <button onClick={() => setPickerOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.02em", fontFamily: "inherit" }}>
-          {MONTH_NAMES[month]} {year}
-          <ChevronRight size={14} color="#059669" style={{ transform: pickerOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
-        </button>
-        <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 36, height: 36, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronRight size={16} color="#4a6d47" /></button>
+      {/* Header tracks the visible month */}
+      <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", flexShrink: 0, background: "#fff", textAlign: "center" }}>
+        <h1 style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.02em", margin: 0, fontFamily: "inherit" }}>
+          {headerLabel}
+        </h1>
       </div>
 
-      {pickerOpen && <MonthPicker year={year} month={month} onSelect={(y, m) => setViewDate(new Date(y, m, 1))} onClose={() => setPickerOpen(false)} />}
-
-      {/* Day rows — all tasks shown, inline checkbox toggle */}
-      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+      {/* Day rows */}
+      <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
         {daysArr.map(day => {
           const key      = isoDate(day);
           const dayTasks = tasksByDate.get(key) ?? [];
-          const isToday  = key === isoDate(today);
+          const isToday  = key === todayIso;
           const dow      = DAY_NAMES[day.getDay()];
-
-          const isPast = key < todayIso;
+          const isPast   = key < todayIso;
 
           return (
-            <div key={key} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : isPast ? "#fafbf7" : "#fff" }}>
+            <div
+              key={key}
+              data-day={key}
+              data-today={isToday ? "true" : undefined}
+              style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : isPast ? "#fafbf7" : "#fff" }}
+            >
               {/* Left: day + date — top-aligned when there are multiple tasks */}
               <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: isToday ? "#059669" : isPast ? "#c4cbc2" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
@@ -969,7 +1008,7 @@ function MobileCalendar({
             </div>
           );
         })}
-        <div style={{ height: 16 }} />
+        <div style={{ height: 32 }} />
       </div>
     </div>
   );
@@ -980,19 +1019,32 @@ function MobileCalendar({
 export default function CalendarPage() {
   const queryClient  = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
-  const today        = new Date();
   const isMobile     = useIsMobile();
+  // Pin `today` once per mount so range computation and the rolling agenda
+  // stay stable across renders.
+  const today        = useMemo(() => new Date(), []);
 
   const [viewDate, setViewDate]     = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [createDate, setCreateDate] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<TaskWithSubtasks | null>(null);
   const [dayTaskList, setDayTaskList]   = useState<string | null>(null); // just the date — tasks come from live tasksByDate
 
-  // Fetch only the ±1 month window around the current view — much smaller payload
+  // Mobile renders a rolling agenda (today − 60 days → today + 240 days), so
+  // the fetch range covers that whole window. Desktop keeps the per-month
+  // ±1 window keyed off viewDate.
   const viewYear  = viewDate.getFullYear();
   const viewMonth = viewDate.getMonth();
-  const rangeFrom = new Date(viewYear, viewMonth - 1, 1).toISOString().slice(0, 10);
-  const rangeTo   = new Date(viewYear, viewMonth + 2, 0).toISOString().slice(0, 10);
+  const { rangeFrom, rangeTo } = useMemo(() => {
+    if (isMobile) {
+      const from = new Date(today); from.setDate(from.getDate() - 60);
+      const to   = new Date(today); to.setDate(to.getDate() + 240);
+      return { rangeFrom: from.toISOString().slice(0, 10), rangeTo: to.toISOString().slice(0, 10) };
+    }
+    return {
+      rangeFrom: new Date(viewYear, viewMonth - 1, 1).toISOString().slice(0, 10),
+      rangeTo:   new Date(viewYear, viewMonth + 2, 0).toISOString().slice(0, 10),
+    };
+  }, [isMobile, today, viewYear, viewMonth]);
 
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "calendar", rangeFrom, rangeTo],
@@ -1092,7 +1144,6 @@ export default function CalendarPage() {
     return (
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <MobileCalendar
-          viewDate={viewDate} setViewDate={setViewDate}
           tasksByDate={tasksByDate} today={today}
           onAddTask={date => { if (date < todayIso) return; setCreateDate(date); }}
           onTaskTap={task => setSelectedTask(task)}
