@@ -422,7 +422,6 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
             <div
               key={task.id}
               style={{
-                display: "flex", alignItems: "flex-start",
                 padding: "12px 16px",
                 borderBottom: idx < tasks.length - 1 ? "1px solid #f1f3ef" : "none",
                 background: hoveredId === task.id ? "#f8f9f5" : "#fff", transition: "background 0.1s",
@@ -430,67 +429,99 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
               onMouseEnter={() => setHoveredId(task.id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              {/* Clickable checkbox */}
-              <div
-                onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
-                style={{
-                  width: 20, height: 20, borderRadius: "50%",
-                  border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
-                  background: isDone ? "#059669" : "transparent",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0, marginTop: 2, marginRight: 12, cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                {isDone && (
-                  <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
-                    <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+              <div style={{ display: "flex", alignItems: "flex-start" }}>
+                {/* Clickable checkbox */}
+                <div
+                  onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
+                  style={{
+                    width: 20, height: 20, borderRadius: "50%",
+                    border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`,
+                    background: isDone ? "#059669" : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, marginTop: 2, marginRight: 12, cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {isDone && (
+                    <svg width="10" height="7" viewBox="0 0 11 8" fill="none">
+                      <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 12, fontWeight: 400, color: "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
+                    {task.title}
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {time && (
+                      <span style={{ fontSize: 11, fontWeight: 500, color: overdue ? "#D14626" : "#4a6d47" }}>
+                        {overdue && "⚠ "}{time}
+                      </span>
+                    )}
+                    <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: e.pillBg, color: e.pillText }}>
+                      {em(task.emotionalState).emoji} {em(task.emotionalState).label}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Desktop: hover-revealed icon buttons */}
+                {!isMobile && (
+                  <div style={{
+                    display: "flex", gap: 4, flexShrink: 0, marginLeft: 8,
+                    opacity: hoveredId === task.id ? 1 : 0, transition: "opacity 0.15s",
+                  }}>
+                    <button
+                      onClick={ev => { ev.stopPropagation(); startEdit(task); }}
+                      title="Edit"
+                      style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
+                      onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e2.currentTarget as HTMLElement).style.color = "#3d5a4a"; }}
+                      onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; }}
+                    >
+                      <Pencil size={11} />
+                    </button>
+                    <button
+                      onClick={ev => { ev.stopPropagation(); onDelete(task.id); }}
+                      title="Delete"
+                      style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
+                      onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#FFF0EC"; (e2.currentTarget as HTMLElement).style.color = "#D14626"; (e2.currentTarget as HTMLElement).style.borderColor = "#e9c3c1"; }}
+                      onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; (e2.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
                 )}
               </div>
 
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 12, fontWeight: 400, color: "#082d1d", margin: "0 0 3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isDone ? "line-through" : "none" }}>
-                  {task.title}
-                </p>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {time && (
-                    <span style={{ fontSize: 11, fontWeight: 500, color: overdue ? "#D14626" : "#4a6d47" }}>
-                      {overdue && "⚠ "}{time}
-                    </span>
-                  )}
-                  <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: e.pillBg, color: e.pillText }}>
-                    {em(task.emotionalState).emoji} {em(task.emotionalState).label}
-                  </span>
+              {/* Mobile: full-text CTAs below the row, easier to tap */}
+              {isMobile && (
+                <div style={{ display: "flex", gap: 8, marginTop: 10, marginLeft: 32 }}>
+                  <button
+                    onClick={ev => { ev.stopPropagation(); startEdit(task); }}
+                    style={{
+                      flex: 1, padding: "8px 12px", borderRadius: 6,
+                      border: "1px solid #dde4de", background: "#f8f9f5",
+                      color: "#3d5a4a", fontSize: 12, fontWeight: 500,
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >
+                    <Pencil size={13} /> Edit
+                  </button>
+                  <button
+                    onClick={ev => { ev.stopPropagation(); onDelete(task.id); }}
+                    style={{
+                      flex: 1, padding: "8px 12px", borderRadius: 6,
+                      border: "1px solid #e9c3c1", background: "#FFF0EC",
+                      color: "#D14626", fontSize: 12, fontWeight: 500,
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >
+                    <Trash2 size={13} /> Delete
+                  </button>
                 </div>
-              </div>
-
-              {/* Edit + Delete — always visible on mobile, hover-shown on desktop */}
-              <div style={{
-                display: "flex", gap: 4, flexShrink: 0, marginLeft: 8,
-                ...(isMobile
-                  ? {}
-                  : { opacity: hoveredId === task.id ? 1 : 0, transition: "opacity 0.15s" }),
-              }}>
-                <button
-                  onClick={ev => { ev.stopPropagation(); startEdit(task); }}
-                  title="Edit"
-                  style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
-                  onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e2.currentTarget as HTMLElement).style.color = "#3d5a4a"; }}
-                  onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; }}
-                >
-                  <Pencil size={11} />
-                </button>
-                <button
-                  onClick={ev => { ev.stopPropagation(); onDelete(task.id); }}
-                  title="Delete"
-                  style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
-                  onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#FFF0EC"; (e2.currentTarget as HTMLElement).style.color = "#D14626"; (e2.currentTarget as HTMLElement).style.borderColor = "#e9c3c1"; }}
-                  onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; (e2.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
-                >
-                  <Trash2 size={11} />
-                </button>
-              </div>
+              )}
             </div>
           );
         })}
