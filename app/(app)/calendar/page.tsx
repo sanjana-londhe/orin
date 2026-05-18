@@ -870,6 +870,7 @@ function MobileCalendar({
   const year  = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const daysArr = Array.from({ length: new Date(year, month + 1, 0).getDate() }, (_, i) => new Date(year, month, i + 1));
+  const todayIso = isoDate(today);
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -893,22 +894,27 @@ function MobileCalendar({
           const isToday  = key === isoDate(today);
           const dow      = DAY_NAMES[day.getDay()];
 
+          const isPast = key < todayIso;
+
           return (
-            <div key={key} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : "#fff" }}>
+            <div key={key} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : isPast ? "#fafbf7" : "#fff" }}>
               {/* Left: day + date — top-aligned when there are multiple tasks */}
               <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
-                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: isToday ? "#059669" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
-                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isToday ? 700 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : "#082d1d" }}>{day.getDate()}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: isToday ? "#059669" : isPast ? "#c4cbc2" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
+                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isToday ? 700 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isPast ? "#c4cbc2" : "#082d1d" }}>{day.getDate()}</span>
               </div>
 
-              {/* Right: colored pill per task, no checkboxes */}
-              <div style={{ flex: 1, padding: "8px 10px", display: "flex", flexDirection: "column", gap: 5 }}>
+              {/* Right: tap anywhere on the empty area to add a task */}
+              <div
+                onClick={() => { if (!isPast) onAddTask(key); }}
+                style={{ flex: 1, padding: "8px 10px", display: "flex", flexDirection: "column", gap: 5, cursor: isPast ? "default" : "pointer" }}
+              >
                 {dayTasks.map(task => {
                   const ps = pillStyle(task);
                   return (
                     <div
                       key={task.id}
-                      onClick={() => onTaskTap(task)}
+                      onClick={e => { e.stopPropagation(); onTaskTap(task); }}
                       style={{
                         padding: "4px 10px", borderRadius: 6,
                         background: ps.background, cursor: "pointer",
@@ -922,9 +928,23 @@ function MobileCalendar({
                     </div>
                   );
                 })}
-                <button onClick={() => onAddTask(key)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: dayTasks.length === 0 ? "#dde4de" : "#b9d3c4", display: "flex", alignItems: "center", gap: 4, fontFamily: "inherit", padding: "2px 0", alignSelf: "flex-start" }}>
-                  <Plus size={11} /> {dayTasks.length === 0 ? "Add task" : "Add"}
-                </button>
+                {!isPast && (
+                  <button
+                    onClick={e => { e.stopPropagation(); onAddTask(key); }}
+                    style={{
+                      background: dayTasks.length === 0 ? "#f2fdec" : "none",
+                      border: dayTasks.length === 0 ? "1px dashed #b6d9c2" : "none",
+                      borderRadius: 6, cursor: "pointer",
+                      fontSize: 11, fontWeight: 500, color: "#059669",
+                      display: "flex", alignItems: "center", gap: 5,
+                      fontFamily: "inherit",
+                      padding: dayTasks.length === 0 ? "6px 10px" : "4px 0",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    <Plus size={12} /> {dayTasks.length === 0 ? "Add task" : "Add"}
+                  </button>
+                )}
               </div>
             </div>
           );
