@@ -11,6 +11,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { resolveTz, todayInTz, startOfDayUtc, endOfDayUtc } from "@/lib/timezone";
+import { TaskCreateSchema, parseJson } from "@/lib/schemas";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -96,48 +97,45 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const supabase = await createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
-  const { title, dueAt, emotionalState, parentTaskId, recurrenceRule } = body;
+    const parsed = await parseJson(request, TaskCreateSchema);
+    if (parsed instanceof NextResponse) return parsed;
+    const { title, dueAt, emotionalState, parentTaskId, recurrenceRule } = parsed;
 
-  if (!title?.trim()) {
-    return NextResponse.json({ error: "Title is required" }, { status: 400 });
-  }
-
-  // Max depth: 1 level — reject if parent is itself a subtask
-  if (parentTaskId) {
-    const parent = await prisma.task.findFirst({
-      where: { id: parentTaskId, userId: user.id },
-      select: { parentTaskId: true },
-    });
-    if (!parent) return NextResponse.json({ error: "Parent task not found" }, { status: 404 });
-    if (parent.parentTaskId) {
-      return NextResponse.json({ error: "Subtasks cannot have their own subtasks" }, { status: 400 });
+    // Max depth: 1 level — reject if parent is itself a subtask
+    if (parentTaskId) {
+      const parent = await prisma.task.findFirst({
+        where: { id: parentTaskId, userId: user.id },
+        select: { parentTaskId: true },
+      });
+      if (!parent) return NextResponse.json({ error: "Parent task not found" }, { status: 404 });
+      if (parent.parentTaskId) {
+        return NextResponse.json({ error: "Subtasks cannot have their own subtasks" }, { status: 400 });
+      }
     }
-  }
 
-  const lastTask = await prisma.task.findFirst({
-    where: { userId: user.id, parentTaskId: parentTaskId ?? null },
-    orderBy: { sortOrder: "desc" },
-    select: { sortOrder: true },
-  });
+    const lastTask = await prisma.task.findFirst({
+      where: { userId: user.id, parentTaskId: parentTaskId ?? null },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    });
 
-  const task = await prisma.task.create({
-    data: {
-      userId: user.id,
-      title: title.trim(),
-      dueAt: dueAt ? new Date(dueAt) : null,
-      emotionalState: emotionalState ?? "NEUTRAL",
-      sortOrder: (lastTask?.sortOrder ?? -1) + 1,
-      parentTaskId: parentTaskId ?? null,
-      recurrenceRule: recurrenceRule ?? null,
-    },
-  });
+    const task = await prisma.task.create({
+      data: {
+        userId: user.id,
+        title,
+        dueAt: dueAt ? new Date(dueAt) : null,
+        emotionalState: emotionalState ?? "NEUTRAL",
+        sortOrder: (lastTask?.sortOrder ?? -1) + 1,
+        parentTaskId: parentTaskId ?? null,
+        recurrenceRule: recurrenceRule ?? null,
+      },
+    });
 
-  return NextResponse.json(task, { status: 201 });
+    return NextResponse.json(task, { status: 201 });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Server error";
     return NextResponse.json({ error: msg }, { status: 500 });

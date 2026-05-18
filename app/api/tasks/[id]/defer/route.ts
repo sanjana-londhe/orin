@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { DeferSchema, parseJson } from "@/lib/schemas";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -9,20 +10,9 @@ export async function POST(request: Request, { params }: Params) {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
-  const { new_due_at, confirmed, reason } = body;
-
-  // Confirmed flag is mandatory — deferral must be an intentional user action
-  if (!confirmed) {
-    return NextResponse.json(
-      { error: "Deferral requires confirmed: true" },
-      { status: 400 }
-    );
-  }
-
-  if (!new_due_at) {
-    return NextResponse.json({ error: "new_due_at is required" }, { status: 400 });
-  }
+  const parsed = await parseJson(request, DeferSchema);
+  if (parsed instanceof NextResponse) return parsed;
+  const { new_due_at, reason } = parsed;
 
   const { id } = await params;
   const task = await prisma.task.findFirst({ where: { id, userId: user.id } });

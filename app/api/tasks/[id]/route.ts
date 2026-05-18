@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { TaskUpdateSchema, parseJson } from "@/lib/schemas";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -10,8 +11,10 @@ export async function PATCH(request: Request, { params }: Params) {
   if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const body = await request.json();
-  const { title, dueAt, emotionalState, isCompleted, sortOrder } = body;
+
+  const parsed = await parseJson(request, TaskUpdateSchema);
+  if (parsed instanceof NextResponse) return parsed;
+  const { title, dueAt, emotionalState, isCompleted, sortOrder } = parsed;
 
   const existing = await prisma.task.findFirst({ where: { id, userId: user.id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -19,7 +22,7 @@ export async function PATCH(request: Request, { params }: Params) {
   const task = await prisma.task.update({
     where: { id },
     data: {
-      ...(title !== undefined && { title: title.trim() }),
+      ...(title !== undefined && { title }),
       ...(dueAt !== undefined && { dueAt: dueAt ? new Date(dueAt) : null }),
       ...(emotionalState !== undefined && { emotionalState }),
       ...(isCompleted !== undefined && { isCompleted }),
