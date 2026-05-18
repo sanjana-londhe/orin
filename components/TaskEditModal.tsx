@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { X } from "lucide-react";
 import type { Task } from "@prisma/client";
 import type { TaskWithSubtasks } from "@/lib/types";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const EMOTIONS = [
   { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626", activeBg: "#D14626" },
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function TaskEditModal({ task, onClose, onUpdate }: Props) {
+  const isMobile = useIsMobile();
   const [title, setTitle]     = useState(task.title);
   const [emotion, setEmotion] = useState(task.emotionalState as typeof EMOTIONS[number]["value"]);
   const [dateStr, setDateStr] = useState(task.dueAt ? new Date(task.dueAt).toISOString().slice(0, 10) : "");
@@ -100,10 +102,12 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
           </div>
 
           <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
-            <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 4, border: "1.5px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-              Cancel
-            </button>
-            <button onClick={handleSave} style={{ flex: 2, padding: "11px 0", borderRadius: 4, border: "none", background: "#16a34a", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+            {isMobile && (
+              <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 4, border: "1.5px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                Cancel
+              </button>
+            )}
+            <button onClick={handleSave} style={{ flex: isMobile ? 2 : 1, padding: "11px 0", borderRadius: 4, border: "none", background: "#16a34a", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
               Save changes
             </button>
           </div>
