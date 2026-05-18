@@ -89,8 +89,22 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
   const [showCustomDate, setShowCustomDate] = useState(false);
   const [showCustomTime, setShowCustomTime] = useState(false);
   const [chipBarBottom, setChipBarBottom]   = useState(0);
+  // Per-chip trigger rect for position:fixed dropdowns — required so the
+  // panels render above ancestors with overflow: auto (e.g. the calendar
+  // popup) instead of being clipped.
+  const [emoAnchor,  setEmoAnchor]  = useState({ top: 0, left: 0 });
+  const [dateAnchor, setDateAnchor] = useState({ top: 0, left: 0 });
+  const [timeAnchor, setTimeAnchor] = useState({ top: 0, left: 0 });
   const chipBarRef = useRef<HTMLDivElement>(null);
+  const emoBtnRef  = useRef<HTMLButtonElement>(null);
+  const dateBtnRef = useRef<HTMLButtonElement>(null);
+  const timeBtnRef = useRef<HTMLButtonElement>(null);
 
+  function anchorOf(btn: HTMLButtonElement | null) {
+    if (!btn) return { top: 0, left: 0 };
+    const r = btn.getBoundingClientRect();
+    return { top: r.bottom + 6, left: r.left };
+  }
   function captureChipBarBottom() {
     if (chipBarRef.current) setChipBarBottom(chipBarRef.current.getBoundingClientRect().bottom);
   }
@@ -130,8 +144,10 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
       {/* Feeling chip */}
       <div style={{ position: "relative" }}>
         <button
+          ref={emoBtnRef}
           type="button"
           onClick={() => {
+            setEmoAnchor(anchorOf(emoBtnRef.current));
             setShowEmoPicker(o => !o);
             setShowDatePicker(false); setShowCustomDate(false);
             setShowTimePicker(false); setShowCustomTime(false);
@@ -142,7 +158,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
         </button>
         {showEmoPicker && (
           <div style={{
-            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
+            position: "fixed", top: emoAnchor.top, left: emoAnchor.left, zIndex: 300,
             background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 150,
             padding: "4px 0", overflow: "hidden",
@@ -172,8 +188,10 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
       {/* Date chip */}
       <div style={{ position: "relative" }}>
         <button
+          ref={dateBtnRef}
           type="button"
           onClick={() => {
+            setDateAnchor(anchorOf(dateBtnRef.current));
             setShowDatePicker(o => !o);
             setShowCustomDate(false); setShowTimePicker(false);
             setShowCustomTime(false); setShowEmoPicker(false);
@@ -186,7 +204,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
           <div style={
             isMobile && showCustomDate
               ? { position: "fixed", top: chipBarBottom + 6, left: 16, right: 16, zIndex: 300, display: "flex", justifyContent: "center" }
-              : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }
+              : { position: "fixed", top: dateAnchor.top, left: dateAnchor.left, zIndex: 300, display: "flex", gap: 8 }
           }>
             {!(isMobile && showCustomDate) && (
               <div style={{
@@ -241,8 +259,10 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
       {/* Time chip */}
       <div style={{ position: "relative" }}>
         <button
+          ref={timeBtnRef}
           type="button"
           onClick={() => {
+            setTimeAnchor(anchorOf(timeBtnRef.current));
             setShowTimePicker(o => !o);
             setShowCustomTime(false); setShowDatePicker(false);
             setShowCustomDate(false); setShowEmoPicker(false);
@@ -261,7 +281,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
             <div style={
               isMobile && showCustomTime
                 ? { position: "fixed", top: chipBarBottom + 6, left: 16, right: 16, zIndex: 300, display: "flex", justifyContent: "center" }
-                : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }
+                : { position: "fixed", top: timeAnchor.top, left: timeAnchor.left, zIndex: 300, display: "flex", gap: 8 }
             }>
               {!(isMobile && showCustomTime) && (
                 <div style={{
