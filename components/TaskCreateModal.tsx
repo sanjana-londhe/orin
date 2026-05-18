@@ -200,16 +200,26 @@ function InlineCreateForm({
         />
       </div>
 
-      {/* Mobile: full-width primary CTA below the chip bar — same size as
-          the Save CTA in the calendar edit popup. */}
+      {/* Mobile: Cancel + Add CTAs in the same right-aligned, compact pattern
+          as the DeferralModal (padding 7px, borderRadius 8, fontSize 12). */}
       {isMobile && (
-        <div style={{ padding: "0 16px 12px" }}>
+        <div style={{ padding: "10px 18px 14px", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "7px 16px", borderRadius: 8,
+              border: "1.5px solid #dde4de", background: "#fff",
+              color: "#3d5a4a", fontSize: 12, fontWeight: 500,
+              cursor: "pointer", fontFamily: "inherit",
+            }}
+          >Cancel</button>
           <button
             onClick={submit} disabled={isPending}
             style={{
-              width: "100%", padding: "10px 12px", borderRadius: 6, border: "none",
-              background: "#059669", color: "#fff",
-              fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+              padding: "7px 20px", borderRadius: 8, border: "none",
+              background: isPending ? "#c4cbc2" : "#059669",
+              color: "#fff", fontSize: 12, fontWeight: 700,
+              cursor: isPending ? "default" : "pointer", fontFamily: "inherit",
             }}
           >
             {isPending ? "…" : "Add"}

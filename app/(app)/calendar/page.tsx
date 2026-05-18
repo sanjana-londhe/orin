@@ -403,15 +403,15 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                     />
                   </div>
 
-                  {/* Mobile: full-width Cancel + Save CTAs below the chips,
-                      matching the Add CTA in the create modal. */}
+                  {/* Mobile: right-aligned Cancel + Save CTAs matching the
+                      DeferralModal pattern (same in create + edit popups). */}
                   {isMobile && (
-                    <div style={{ display: "flex", gap: 8, padding: "0 14px 12px" }}>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "10px 18px 14px" }}>
                       <button
                         onClick={() => setEditingId(null)}
                         style={{
-                          flex: 1, padding: "10px 12px", borderRadius: 6,
-                          border: "1px solid #dde4de", background: "#f8f9f5",
+                          padding: "7px 16px", borderRadius: 8,
+                          border: "1.5px solid #dde4de", background: "#fff",
                           color: "#3d5a4a", fontSize: 12, fontWeight: 500,
                           cursor: "pointer", fontFamily: "inherit",
                         }}
@@ -419,9 +419,9 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                       <button
                         onClick={() => saveEdit(task)}
                         style={{
-                          flex: 1, padding: "10px 12px", borderRadius: 6,
-                          border: "none", background: "#059669",
-                          color: "#fff", fontSize: 12, fontWeight: 600,
+                          padding: "7px 20px", borderRadius: 8, border: "none",
+                          background: "#059669", color: "#fff",
+                          fontSize: 12, fontWeight: 700,
                           cursor: "pointer", fontFamily: "inherit",
                         }}
                       >Save</button>
@@ -774,15 +774,25 @@ function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpdate, onD
                 />
               </div>
 
-              {/* Cancel + Save CTAs */}
-              <div style={{ display: "flex", gap: 8, padding: "0 16px 16px" }}>
+              {/* Cancel + Save CTAs — right-aligned, defer-modal style */}
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "10px 18px 14px" }}>
                 <button
                   onClick={() => setEditing(false)}
-                  style={{ flex: 1, padding: "10px 12px", borderRadius: 6, border: "1px solid #dde4de", background: "#f8f9f5", color: "#3d5a4a", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
+                  style={{
+                    padding: "7px 16px", borderRadius: 8,
+                    border: "1.5px solid #dde4de", background: "#fff",
+                    color: "#3d5a4a", fontSize: 12, fontWeight: 500,
+                    cursor: "pointer", fontFamily: "inherit",
+                  }}
                 >Cancel</button>
                 <button
                   onClick={saveEdit}
-                  style={{ flex: 1, padding: "10px 12px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+                  style={{
+                    padding: "7px 20px", borderRadius: 8, border: "none",
+                    background: "#059669", color: "#fff",
+                    fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", fontFamily: "inherit",
+                  }}
                 >Save</button>
               </div>
             </>
