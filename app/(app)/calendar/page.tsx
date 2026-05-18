@@ -454,33 +454,32 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                 </div>
               </div>
 
-              {/* Edit + Delete — visible on desktop hover */}
-              {!isMobile && (
-                <div style={{
-                  display: "flex", gap: 4, flexShrink: 0, marginLeft: 8,
-                  opacity: hoveredId === task.id ? 1 : 0,
-                  transition: "opacity 0.15s",
-                }}>
-                  <button
-                    onClick={ev => { ev.stopPropagation(); startEdit(task); }}
-                    title="Edit"
-                    style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
-                    onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e2.currentTarget as HTMLElement).style.color = "#3d5a4a"; }}
-                    onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; }}
-                  >
-                    <Pencil size={11} />
-                  </button>
-                  <button
-                    onClick={ev => { ev.stopPropagation(); onDelete(task.id); }}
-                    title="Delete"
-                    style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
-                    onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#FFF0EC"; (e2.currentTarget as HTMLElement).style.color = "#D14626"; (e2.currentTarget as HTMLElement).style.borderColor = "#e9c3c1"; }}
-                    onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; (e2.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
-                  >
-                    <Trash2 size={11} />
-                  </button>
-                </div>
-              )}
+              {/* Edit + Delete — always visible on mobile, hover-shown on desktop */}
+              <div style={{
+                display: "flex", gap: 4, flexShrink: 0, marginLeft: 8,
+                ...(isMobile
+                  ? {}
+                  : { opacity: hoveredId === task.id ? 1 : 0, transition: "opacity 0.15s" }),
+              }}>
+                <button
+                  onClick={ev => { ev.stopPropagation(); startEdit(task); }}
+                  title="Edit"
+                  style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
+                  onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f1f3ef"; (e2.currentTarget as HTMLElement).style.color = "#3d5a4a"; }}
+                  onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; }}
+                >
+                  <Pencil size={11} />
+                </button>
+                <button
+                  onClick={ev => { ev.stopPropagation(); onDelete(task.id); }}
+                  title="Delete"
+                  style={{ width: 26, height: 26, border: "1px solid #dde4de", borderRadius: 6, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}
+                  onMouseEnter={e2 => { (e2.currentTarget as HTMLElement).style.background = "#FFF0EC"; (e2.currentTarget as HTMLElement).style.color = "#D14626"; (e2.currentTarget as HTMLElement).style.borderColor = "#e9c3c1"; }}
+                  onMouseLeave={e2 => { (e2.currentTarget as HTMLElement).style.background = "#f8f9f5"; (e2.currentTarget as HTMLElement).style.color = "#4a6d47"; (e2.currentTarget as HTMLElement).style.borderColor = "#dde4de"; }}
+                >
+                  <Trash2 size={11} />
+                </button>
+              </div>
             </div>
           );
         })}
@@ -1075,20 +1074,14 @@ export default function CalendarPage() {
           viewDate={viewDate} setViewDate={setViewDate}
           tasksByDate={tasksByDate} today={today}
           onAddTask={date => { if (date < todayIso) return; setCreateDate(date); }}
-          onTaskTap={task => setSelectedTask(task)}
+          onTaskTap={task => {
+            // Match desktop: clicking a task opens the day's task list with
+            // inline edit + checkbox toggle, not a separate detail page.
+            if (!task.dueAt) return;
+            setDayTaskList(isoDate(new Date(task.dueAt)));
+          }}
         />
 
-        {/* Mobile: full-screen task info page — drive off liveSelectedTask
-            so the checkbox reflects optimistic completes/uncompletes. */}
-        {liveSelectedTask && (
-          <MobileTaskInfoPage
-            task={liveSelectedTask}
-            onClose={() => setSelectedTask(null)}
-            onMarkDone={id => markDone(id)}
-            onMarkUndone={id => markUndone(id)}
-            onUpdate={(id, patch) => updateTask({ id, patch })}
-          />
-        )}
         {dayTaskList && (
           <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => { deleteTask(id); if ((tasksByDate.get(dayTaskList) ?? []).length <= 1) setDayTaskList(null); }} />
         )}
