@@ -477,18 +477,40 @@ function InlineCreateForm({
           })()}
         </div>
 
-        <div style={{ flex: 1 }} />
-        <button
-          onClick={submit} disabled={isPending}
-          style={{
-            padding: "5px 14px", borderRadius: 6, border: "none",
-            background: "#059669", color: "#fff",
-            fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-          }}
-        >
-          {isPending ? "…" : "Add"}
-        </button>
+        {/* Desktop: inline chip-style Add in the chip bar */}
+        {!isMobile && (
+          <>
+            <div style={{ flex: 1 }} />
+            <button
+              onClick={submit} disabled={isPending}
+              style={{
+                padding: "5px 14px", borderRadius: 6, border: "none",
+                background: "#059669", color: "#fff",
+                fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+              }}
+            >
+              {isPending ? "…" : "Add"}
+            </button>
+          </>
+        )}
       </div>
+
+      {/* Mobile: full-width primary CTA below the chip bar — same size as
+          the Save CTA in the calendar edit popup. */}
+      {isMobile && (
+        <div style={{ padding: "0 16px 12px" }}>
+          <button
+            onClick={submit} disabled={isPending}
+            style={{
+              width: "100%", padding: "10px 12px", borderRadius: 6, border: "none",
+              background: "#059669", color: "#fff",
+              fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+            }}
+          >
+            {isPending ? "…" : "Add"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

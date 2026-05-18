@@ -422,13 +422,13 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                   </div>
 
                   {/* Mobile: full-width Cancel + Save CTAs below the chips,
-                      matching the Edit/Delete CTA pattern. */}
+                      matching the Add CTA in the create modal. */}
                   {isMobile && (
                     <div style={{ display: "flex", gap: 8, padding: "0 14px 12px" }}>
                       <button
                         onClick={() => setEditingId(null)}
                         style={{
-                          flex: 1, padding: "8px 12px", borderRadius: 6,
+                          flex: 1, padding: "10px 12px", borderRadius: 6,
                           border: "1px solid #dde4de", background: "#f8f9f5",
                           color: "#3d5a4a", fontSize: 12, fontWeight: 500,
                           cursor: "pointer", fontFamily: "inherit",
@@ -437,7 +437,7 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                       <button
                         onClick={() => saveEdit(task)}
                         style={{
-                          flex: 1, padding: "8px 12px", borderRadius: 6,
+                          flex: 1, padding: "10px 12px", borderRadius: 6,
                           border: "none", background: "#059669",
                           color: "#fff", fontSize: 12, fontWeight: 600,
                           cursor: "pointer", fontFamily: "inherit",
