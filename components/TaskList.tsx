@@ -20,6 +20,7 @@ import { TimePickerField, WheelTimePicker } from "@/components/TimePickerField";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import { Plus, ChevronRight } from "lucide-react";
 import type { TaskWithSubtasks } from "@/lib/types";
+import { withTz } from "@/lib/client-tz";
 
 type Emotion = "DREADING" | "ANXIOUS" | "NEUTRAL" | "WILLING" | "EXCITED";
 
@@ -136,8 +137,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
     queryKey: ["tasks", selectedDate],
     queryFn: async () => {
       const url = isToday
-        ? "/api/tasks?filter=today"
-        : `/api/tasks?date=${selectedDate}`;
+        ? withTz("/api/tasks?filter=today")
+        : withTz(`/api/tasks?date=${selectedDate}`);
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch tasks");
       return res.json();

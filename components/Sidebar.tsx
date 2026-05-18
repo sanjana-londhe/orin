@@ -13,6 +13,7 @@ import { TaskCreateModal } from "@/components/TaskCreateModal";
 import { EnergyCheckInModal, loadEnergyStore, saveEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
 import { signOut, signInWithGoogle } from "@/app/actions/auth";
 import type { TaskWithSubtasks } from "@/lib/types";
+import { withTz } from "@/lib/client-tz";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 const VIEWS = [
@@ -41,7 +42,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
   const { data: tasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "today"],
     queryFn: async () => {
-      const res = await fetch("/api/tasks?filter=today");
+      const res = await fetch(withTz("/api/tasks?filter=today"));
       if (!res.ok) return [];
       return res.json();
     },

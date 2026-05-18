@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useUIStore } from "@/store/ui";
 import type { TaskWithSubtasks } from "@/lib/types";
+import { withTz } from "@/lib/client-tz";
 
 const T = {
   bg:           "#fcfdfc",
@@ -184,13 +185,13 @@ export function AllTasksView() {
 
   const { data: allTasks = [], isLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", activeFilter],
-    queryFn: () => fetch(`/api/tasks?filter=${activeFilter}`).then(r => r.json()),
+    queryFn: () => fetch(withTz(`/api/tasks?filter=${activeFilter}`)).then(r => r.json()),
     retry: 1,
   });
 
   const { data: completedTasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", completedFilter],
-    queryFn: () => fetch(`/api/tasks?filter=${completedFilter}`).then(r => r.json()),
+    queryFn: () => fetch(withTz(`/api/tasks?filter=${completedFilter}`)).then(r => r.json()),
     retry: 1,
   });
 

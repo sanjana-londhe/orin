@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { loadEnergyStore, todayKey, type CheckIn } from "@/components/EnergyCheckInModal";
 import { EMOTION_MAP } from "@/lib/emotions";
 import type { TaskWithSubtasks } from "@/lib/types";
+import { withTz } from "@/lib/client-tz";
 
 // ── Scoring ──────────────────────────────────────────────────────────
 
@@ -77,7 +78,7 @@ export function AIPanel({ onClose }: Props) {
 
   const { data: todayTasks = [] } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", new Date().toISOString().slice(0, 10)],
-    queryFn: () => fetch("/api/tasks?filter=today").then(r => r.json()),
+    queryFn: () => fetch(withTz("/api/tasks?filter=today")).then(r => r.json()),
     retry: 1,
   });
 

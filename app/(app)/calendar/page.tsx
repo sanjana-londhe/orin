@@ -9,6 +9,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EMOTION_MAP } from "@/lib/emotions";
 import { ChevronLeft, ChevronRight, Plus, X, Pencil, Trash2 } from "lucide-react";
+import { withTz } from "@/lib/client-tz";
 
 function em(key: string) {
   return EMOTION_MAP[key as keyof typeof EMOTION_MAP] ?? EMOTION_MAP.NEUTRAL;
@@ -1042,7 +1043,7 @@ export default function CalendarPage() {
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "calendar", rangeFrom, rangeTo],
     queryFn: async () => {
-      const res = await fetch(`/api/tasks?filter=calendar&from=${rangeFrom}&to=${rangeTo}`);
+      const res = await fetch(withTz(`/api/tasks?filter=calendar&from=${rangeFrom}&to=${rangeTo}`));
       if (!res.ok) return [];
       return res.json();
     },

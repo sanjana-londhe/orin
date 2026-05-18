@@ -1,6 +1,16 @@
+/**
+ * /api/tasks
+ *
+ * Timezone convention: stored timestamps are UTC. Callers that depend on a
+ * "day" definition (today, ?date=, ?from=/?to=) pass `?tz=<IANA zone>`. The
+ * server computes UTC day boundaries in that zone. Missing/invalid `tz`
+ * falls back to UTC. See lib/timezone.ts.
+ */
+
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { resolveTz, todayInTz, startOfDayUtc, endOfDayUtc } from "@/lib/timezone";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -8,21 +18,24 @@ export async function GET(request: Request) {
   if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
-  const filter = searchParams.get("filter");
+  const filter    = searchParams.get("filter");
   const dateParam = searchParams.get("date"); // YYYY-MM-DD — browse a specific day
+  const tz        = resolveTz(searchParams.get("tz"));
 
-  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+  const today    = todayInTz(tz);
+  const dayStart = startOfDayUtc(today, tz);
+  const dayEnd   = endOfDayUtc(today, tz);
 
-  // Build where clause based on filter
   type WhereClause = Record<string, unknown>;
   let where: WhereClause = { userId: user.id, parentTaskId: null };
   let orderBy: Record<string, string> | Record<string, string>[] = { sortOrder: "asc" };
 
-  // Specific date browse — show all tasks (inc. completed) due on that day
+  // Specific date browse — show all tasks (inc. completed) due on that day.
   if (dateParam) {
-    const dayStart = new Date(dateParam + "T00:00:00");
-    const dayEnd   = new Date(dateParam + "T23:59:59");
-    where = { ...where, dueAt: { gte: dayStart, lte: dayEnd } };
+    where = {
+      ...where,
+      dueAt: { gte: startOfDayUtc(dateParam, tz), lte: endOfDayUtc(dateParam, tz) },
+    };
     orderBy = { dueAt: "asc" };
   }
 
@@ -31,7 +44,7 @@ export async function GET(request: Request) {
       where = { ...where, isCompleted: false };
       break;
     case "scheduled":
-      where = { ...where, isCompleted: false, dueAt: { gt: todayEnd } };
+      where = { ...where, isCompleted: false, dueAt: { gt: dayEnd } };
       orderBy = { dueAt: "asc" };
       break;
     case "flagged":
@@ -42,32 +55,32 @@ export async function GET(request: Request) {
       where = { ...where, isCompleted: true };
       orderBy = { updatedAt: "desc" };
       break;
-    case "today-completed": {
-      // All tasks completed today (by updatedAt) — not limited to those due today
-      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-      where = { ...where, isCompleted: true, updatedAt: { gte: todayStart } };
+    case "today-completed":
+      // All tasks completed today (by updatedAt) — not limited to those due today.
+      where = { ...where, isCompleted: true, updatedAt: { gte: dayStart } };
       orderBy = { updatedAt: "desc" };
       break;
-    }
     case "today-active":
       where = { ...where, isCompleted: false };
       break;
     case "calendar": {
-      // All tasks (complete + incomplete) within a date range passed by the client
+      // All tasks (complete + incomplete) within a date range from the client.
       const from = searchParams.get("from");
       const to   = searchParams.get("to");
+      const yearStart = `${new Date().getUTCFullYear()}-01-01`;
+      const yearEnd   = `${new Date().getUTCFullYear() + 1}-12-31`;
       where = {
         ...where,
         dueAt: {
-          gte: from ? new Date(from + "T00:00:00Z") : new Date(new Date().getFullYear(), 0, 1),
-          lte: to   ? new Date(to   + "T23:59:59Z") : new Date(new Date().getFullYear() + 1, 11, 31),
+          gte: startOfDayUtc(from ?? yearStart, tz),
+          lte: endOfDayUtc(to ?? yearEnd, tz),
         },
       };
       orderBy = { dueAt: "asc" };
       break;
     }
     default:
-      // "all" — all incomplete, newest first
+      // "all" — all incomplete, newest first.
       where = { ...where, isCompleted: false };
       orderBy = { createdAt: "desc" };
   }

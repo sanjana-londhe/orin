@@ -6,6 +6,7 @@ import { TaskGrid } from "@/components/TaskGrid";
 import { EmptyState } from "@/components/EmptyState";
 import { PAGE_STYLE } from "@/lib/utils";
 import type { TaskWithSubtasks } from "@/lib/types";
+import { withTz } from "@/lib/client-tz";
 
 interface Props {
   title: string;
@@ -24,7 +25,7 @@ export function SimpleTaskView({ title, emoji, filter, emptyText }: Props) {
   const { data: tasks = [], isLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", filter],
     queryFn: async () => {
-      const res = await fetch(`/api/tasks?filter=${filter}`);
+      const res = await fetch(withTz(`/api/tasks?filter=${filter}`));
       if (!res.ok) return [];
       return res.json();
     },
