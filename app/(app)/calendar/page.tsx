@@ -3,9 +3,8 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskCreateModal } from "@/components/TaskCreateModal";
-import { FeelingPickerField, type Feeling } from "@/components/FeelingPickerField";
-import { DatePickerField } from "@/components/DatePickerField";
-import { TimePickerField } from "@/components/TimePickerField";
+import { type Feeling } from "@/components/FeelingPickerField";
+import { InlineChipBar, type InlineEmotion } from "@/components/InlineChipBar";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { EMOTION_MAP } from "@/lib/emotions";
@@ -368,57 +367,40 @@ function DayTaskListModal({ date, tasks, onClose, onMarkDone, onMarkUndone, onUp
                     </div>
                   </div>
 
-                  {/* Chip bar — same compact pickers the create form uses */}
+                  {/* Chip bar — shares the same pickers as the create form */}
                   <div style={{
-                    display: "flex", gap: 5, padding: "6px 14px 10px",
+                    padding: "6px 14px 10px",
                     borderTop: "0.5px solid rgba(0,0,0,0.05)",
-                    flexWrap: "wrap", alignItems: "center",
                   }}>
-                    <FeelingPickerField
-                      value={editEmotion as Feeling}
-                      onChange={v => setEditEmotion(v as TaskWithSubtasks["emotionalState"])}
-                      label=""
-                      compact
+                    <InlineChipBar
+                      emotion={editEmotion as InlineEmotion}
+                      setEmotion={v => setEditEmotion(v as TaskWithSubtasks["emotionalState"])}
+                      dueDate={editDate} setDueDate={setEditDate}
+                      dueTime={editTime} setDueTime={setEditTime}
+                      trailing={!isMobile && (
+                        <>
+                          <div style={{ flex: 1 }} />
+                          <button
+                            onClick={() => setEditingId(null)}
+                            style={{
+                              padding: "4px 11px", borderRadius: 6,
+                              border: "0.5px solid #dde4de", background: "#fff",
+                              color: "#3d5a4a", fontSize: 11, fontWeight: 500,
+                              cursor: "pointer", fontFamily: "inherit",
+                            }}
+                          >Cancel</button>
+                          <button
+                            onClick={() => saveEdit(task)}
+                            style={{
+                              padding: "5px 14px", borderRadius: 6, border: "none",
+                              background: "#059669", color: "#fff",
+                              fontSize: 11, fontWeight: 600,
+                              cursor: "pointer", fontFamily: "inherit",
+                            }}
+                          >Save</button>
+                        </>
+                      )}
                     />
-                    <DatePickerField
-                      value={editDate}
-                      onChange={setEditDate}
-                      label=""
-                      compact
-                      inlinePopup
-                    />
-                    <TimePickerField
-                      value={editTime}
-                      onChange={setEditTime}
-                      label=""
-                      selectedDate={editDate}
-                      compact
-                      inlinePopup
-                    />
-                    {/* Desktop: inline Cancel + Save buttons on the chip bar */}
-                    {!isMobile && (
-                      <>
-                        <div style={{ flex: 1 }} />
-                        <button
-                          onClick={() => setEditingId(null)}
-                          style={{
-                            padding: "4px 11px", borderRadius: 6,
-                            border: "0.5px solid #dde4de", background: "#fff",
-                            color: "#3d5a4a", fontSize: 11, fontWeight: 500,
-                            cursor: "pointer", fontFamily: "inherit",
-                          }}
-                        >Cancel</button>
-                        <button
-                          onClick={() => saveEdit(task)}
-                          style={{
-                            padding: "5px 14px", borderRadius: 6, border: "none",
-                            background: "#059669", color: "#fff",
-                            fontSize: 11, fontWeight: 600,
-                            cursor: "pointer", fontFamily: "inherit",
-                          }}
-                        >Save</button>
-                      </>
-                    )}
                   </div>
 
                   {/* Mobile: full-width Cancel + Save CTAs below the chips,
@@ -648,136 +630,6 @@ function MobileCalendarSkeleton() {
   );
 }
 
-// ── Desktop right-side task panel ────────────────────────────────────
-
-function DesktopTaskPanel({ task, onClose, onMarkDone, onMarkUndone, onDelete, onUpdate }: {
-  task: TaskWithSubtasks; onClose: () => void;
-  onMarkDone: (id: string) => void; onMarkUndone: (id: string) => void;
-  onDelete: (id: string) => void;
-  onUpdate: (id: string, patch: { title?: string; emotionalState?: string; dueAt?: string | null }) => void;
-}) {
-  const isDone  = task.isCompleted;
-  const overdue = isOverdue(task);
-  const e = em(task.emotionalState); const colour = e.strip;
-  const time    = fmtTime(task.dueAt);
-  const note    = loadNote(task.id);
-
-  const taskIso  = task.dueAt ? new Date(task.dueAt).toISOString().slice(0, 10) : null;
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const tmrwIso  = (() => { const d = new Date(); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
-  const dateLabel = !taskIso ? null : taskIso === todayIso ? "Today" : taskIso === tmrwIso ? "Tomorrow" : new Date(taskIso + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric" });
-
-  const [editing, setEditing]           = useState(false);
-  const [confirmDel, setConfirmDel]     = useState(false);
-  const [editTitle, setEditTitle]       = useState(task.title);
-  const [editEmotion, setEditEmotion]   = useState<Feeling>(task.emotionalState as Feeling);
-  const [editDate, setEditDate]         = useState(taskIso ?? "");
-  const [editTime, setEditTime]         = useState(() => {
-    if (!task.dueAt) return "";
-    const iso = new Date(task.dueAt).toISOString();
-    return iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16);
-  });
-
-  useEffect(() => {
-    setEditTitle(task.title);
-    setEditEmotion(task.emotionalState as Feeling);
-    setEditDate(taskIso ?? "");
-    setEditTime(() => {
-      if (!task.dueAt) return "";
-      const iso = new Date(task.dueAt).toISOString();
-      return iso.slice(11) === "00:00:00.000Z" ? "" : iso.slice(11, 16);
-    });
-    setEditing(false);
-    setConfirmDel(false);
-  }, [task.id]);
-
-  function saveEdit() {
-    const dueAt = editDate
-      ? (editTime ? new Date(`${editDate}T${editTime}`).toISOString() : `${editDate}T00:00:00.000Z`)
-      : null;
-    onUpdate(task.id, { title: editTitle.trim() || task.title, emotionalState: editEmotion, dueAt: dueAt ?? undefined });
-    setEditing(false);
-  }
-
-  return (
-    <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 49, background: "rgba(8,45,29,0.08)" }} />
-      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 320, zIndex: 50, background: "#fff", borderLeft: "1px solid #dde4de", boxShadow: "-4px 0 20px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column" }}>
-
-        {/* Header: circle + title + icons */}
-        <div style={{ padding: "16px", borderBottom: "1px solid #e9ede9", display: "flex", alignItems: "flex-start", gap: 10 }}>
-          {/* Complete circle */}
-          <div
-            onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
-            style={{ width: 22, height: 22, borderRadius: "50%", border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`, background: isDone ? "#059669" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2, cursor: "pointer", transition: "all 0.15s" }}
-          >
-            {isDone && <svg width="10" height="7" viewBox="0 0 11 8" fill="none"><path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-          </div>
-
-          <p style={{ flex: 1, fontSize: 12, fontWeight: 600, color: "#082d1d", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none", paddingTop: 1 }}>{task.title}</p>
-
-          {/* Edit + Delete + Close */}
-          <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
-            <button onClick={() => { setEditing(e => !e); setConfirmDel(false); }} title="Edit" style={{ width: 28, height: 28, borderRadius: 6, border: `1px solid ${editing ? "#059669" : "#dde4de"}`, background: editing ? "#f2fdec" : "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: editing ? "#059669" : "#4a6d47" }}>
-              <Pencil size={12} />
-            </button>
-            {!confirmDel
-              ? <button onClick={() => setConfirmDel(true)} title="Delete" style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}><Trash2 size={12} /></button>
-              : <button onClick={() => onDelete(task.id)} title="Confirm delete" style={{ height: 28, padding: "0 8px", borderRadius: 6, border: "1px solid #c23934", background: "#FFF0EC", cursor: "pointer", color: "#D14626", fontSize: 11, fontWeight: 700, fontFamily: "inherit" }}>Delete?</button>
-            }
-            <button onClick={onClose} title="Close" style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}><X size={12} /></button>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-          {editing ? (
-            /* Edit form */
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 6px" }}>Title</p>
-                <input value={editTitle} onChange={e => setEditTitle(e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1.5px solid #dde4de", fontSize: 12, outline: "none", fontFamily: "inherit", boxSizing: "border-box", transition: "border-color 0.14s" }} onFocus={e => (e.currentTarget.style.borderColor = "#059669")} onBlur={e => (e.currentTarget.style.borderColor = "#dde4de")} />
-              </div>
-              <FeelingPickerField value={editEmotion} onChange={v => setEditEmotion(v as Feeling)} label="Feeling" />
-              <DatePickerField value={editDate} onChange={setEditDate} label="Due date" />
-              <TimePickerField value={editTime} onChange={setEditTime} label="Due time (optional)" selectedDate={editDate} />
-              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                <button onClick={() => setEditing(false)} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
-                <button onClick={saveEdit} style={{ flex: 1, padding: "8px 0", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Save</button>
-              </div>
-            </div>
-          ) : (
-            /* Task info */
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ height: 3, background: colour, borderRadius: 2 }} />
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: e.pillBg, color: e.pillText }}>
-                  {em(task.emotionalState).emoji} {em(task.emotionalState).label}
-                </span>
-                {dateLabel && (
-                  <span style={{ fontSize: 11, fontWeight: 500, padding: "2px 6px", borderRadius: 3, background: "#f8f9f5", color: overdue ? "#D14626" : "#4a6d47" }}>
-                    {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
-                  </span>
-                )}
-                {task.deferredCount > 0 && <span style={{ fontSize: 11, padding: "2px 6px", borderRadius: 3, background: "#FFF0EC", color: "#D14626" }}>Deferred {task.deferredCount}×</span>}
-              </div>
-              {note && (
-                <div style={{ background: "#f8f9f5", borderRadius: 8, padding: "10px 12px" }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#4a6d47", margin: "0 0 4px" }}>Note</p>
-                  <p style={{ fontSize: 11, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{note}</p>
-                </div>
-              )}
-              <p style={{ fontSize: 11, color: "#b9d3c4", margin: 0 }}>
-                {isDone ? "Click circle to mark incomplete" : "Click circle to mark done"}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
 // ── Mobile focused single-task popup ─────────────────────────────────
 // Opens when a task pill is tapped on mweb. Mirrors the TaskCreateModal
 // sizing (top-aligned popup, maxWidth 520) and exposes Done / Edit /
@@ -912,11 +764,14 @@ function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpdate, onD
                 </div>
               </div>
 
-              {/* Chip pickers — use inlinePopup so dropdowns anchor under the chip */}
-              <div style={{ display: "flex", gap: 5, padding: "8px 16px 12px", borderTop: "0.5px solid rgba(0,0,0,0.05)", flexWrap: "wrap", alignItems: "center" }}>
-                <FeelingPickerField value={editEmotion} onChange={v => setEditEmotion(v as Feeling)} label="" compact />
-                <DatePickerField value={editDate} onChange={setEditDate} label="" compact inlinePopup />
-                <TimePickerField value={editTime} onChange={setEditTime} label="" selectedDate={editDate} compact inlinePopup />
+              {/* Chip pickers — shared with the create form */}
+              <div style={{ padding: "8px 16px 12px", borderTop: "0.5px solid rgba(0,0,0,0.05)" }}>
+                <InlineChipBar
+                  emotion={editEmotion as InlineEmotion}
+                  setEmotion={v => setEditEmotion(v as Feeling)}
+                  dueDate={editDate} setDueDate={setEditDate}
+                  dueTime={editTime} setDueTime={setEditTime}
+                />
               </div>
 
               {/* Cancel + Save CTAs */}
@@ -1348,18 +1203,6 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Desktop: right-side task panel — driven by liveSelectedTask so
-          the checkbox stays in sync with the optimistic cache. */}
-      {liveSelectedTask && (
-        <DesktopTaskPanel
-          task={liveSelectedTask}
-          onClose={() => setSelectedTask(null)}
-          onMarkDone={id => { markDone(id); }}
-          onMarkUndone={id => { markUndone(id); }}
-          onDelete={id => { deleteTask(id); }}
-          onUpdate={(id, patch) => updateTask({ id, patch })}
-        />
-      )}
       {dayTaskList && (
         <DayTaskListModal date={dayTaskList} tasks={tasksByDate.get(dayTaskList) ?? []} onClose={() => setDayTaskList(null)} onMarkDone={id => markDone(id)} onMarkUndone={id => markUndone(id)} onUpdate={(id, patch) => updateTask({ id, patch })} onDelete={id => { deleteTask(id); if ((tasksByDate.get(dayTaskList) ?? []).length <= 1) setDayTaskList(null); }} />
       )}
