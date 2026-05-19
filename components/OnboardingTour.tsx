@@ -164,11 +164,11 @@ export function OnboardingTour({ open, name, onClose }: Props) {
   ];
 
   async function markComplete() {
-    try { localStorage.setItem("orin:onboarding_done", "1"); } catch { /* ignore */ }
+    try { localStorage.setItem("orin:onboarding_v2_done", "1"); } catch { /* ignore */ }
     try {
       const supabase = createClient();
       await supabase.auth.updateUser({
-        data: { onboarding_completed_at: new Date().toISOString() },
+        data: { onboarding_v2_completed_at: new Date().toISOString() },
       });
     } catch { /* non-blocking */ }
   }

@@ -14,7 +14,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const name    = isGuest ? "Guest" : (user ? displayName(user as Parameters<typeof displayName>[0]) : "there");
   const email   = user?.email ?? "";
   const initial = name.charAt(0).toUpperCase();
-  const onboardingCompleted = !!(user?.user_metadata as { onboarding_completed_at?: string } | undefined)?.onboarding_completed_at;
+  const onboardingCompleted = !!(user?.user_metadata as { onboarding_v2_completed_at?: string } | undefined)?.onboarding_v2_completed_at;
 
   // Seed isMobile from the User-Agent so SSR renders the right layout
   // and we don't briefly flash desktop UI on mweb refresh.

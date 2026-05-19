@@ -41,11 +41,9 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const forced = params.get("intro");
-    const localDone = localStorage.getItem("orin:onboarding_done") === "1";
-    // eslint-disable-next-line no-console
-    console.log("[orin tour]", { isGuest, onboardingCompleted, localDone, forced });
+    const localDone = localStorage.getItem("orin:onboarding_v2_done") === "1";
     if (forced === "1" || forced === "force") {
-      if (forced === "force") localStorage.removeItem("orin:onboarding_done");
+      if (forced === "force") localStorage.removeItem("orin:onboarding_v2_done");
       setTourOpen(true);
       return;
     }
@@ -270,30 +268,6 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
       )}
 
       {aiOpen && <AIPanel onClose={() => setAiOpen(false)} />}
-
-      {/* Always-visible tour trigger so the FTUE is recoverable */}
-      {!tourOpen && (
-        <button
-          onClick={() => setTourOpen(true)}
-          aria-label="Take the tour"
-          style={{
-            position: "fixed",
-            bottom: isMobile ? 140 : 18,
-            left: isMobile ? 16 : 256,
-            zIndex: 40,
-            display: "inline-flex", alignItems: "center", gap: 6,
-            padding: "8px 12px", borderRadius: 999,
-            background: "#fff", color: "#082d1d",
-            border: "1px solid #dde4de",
-            cursor: "pointer",
-            fontSize: 11, fontWeight: 600,
-            fontFamily: "inherit",
-            boxShadow: "0 4px 12px rgba(8,45,29,0.08)",
-          }}
-        >
-          ✨ Take the tour
-        </button>
-      )}
 
       <OnboardingTour
         open={tourOpen}
