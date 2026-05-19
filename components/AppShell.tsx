@@ -37,20 +37,19 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
   const [avatarSrc, setAvatarSrc]         = useState<string | null>(null);
   const [tourOpen, setTourOpen]           = useState(false);
 
-  // Open the tour on first paint if:
-  // 1. URL has ?intro=1 (force show), OR
-  // 2. Supabase metadata flag is unset AND localStorage flag is unset
   useEffect(() => {
-    if (isGuest) return;
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const forced = params.get("intro");
+    const localDone = localStorage.getItem("orin:onboarding_done") === "1";
+    // eslint-disable-next-line no-console
+    console.log("[orin tour]", { isGuest, onboardingCompleted, localDone, forced });
     if (forced === "1" || forced === "force") {
       if (forced === "force") localStorage.removeItem("orin:onboarding_done");
       setTourOpen(true);
       return;
     }
-    const localDone = localStorage.getItem("orin:onboarding_done") === "1";
+    if (isGuest) return;
     if (!onboardingCompleted && !localDone) setTourOpen(true);
   }, [onboardingCompleted, isGuest]);
 
@@ -271,6 +270,30 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
       )}
 
       {aiOpen && <AIPanel onClose={() => setAiOpen(false)} />}
+
+      {/* Always-visible tour trigger so the FTUE is recoverable */}
+      {!tourOpen && (
+        <button
+          onClick={() => setTourOpen(true)}
+          aria-label="Take the tour"
+          style={{
+            position: "fixed",
+            bottom: isMobile ? 140 : 18,
+            left: isMobile ? 16 : 256,
+            zIndex: 40,
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "8px 12px", borderRadius: 999,
+            background: "#fff", color: "#082d1d",
+            border: "1px solid #dde4de",
+            cursor: "pointer",
+            fontSize: 11, fontWeight: 600,
+            fontFamily: "inherit",
+            boxShadow: "0 4px 12px rgba(8,45,29,0.08)",
+          }}
+        >
+          ✨ Take the tour
+        </button>
+      )}
 
       <OnboardingTour
         open={tourOpen}
