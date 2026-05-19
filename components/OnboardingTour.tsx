@@ -164,6 +164,7 @@ export function OnboardingTour({ open, name, onClose }: Props) {
   ];
 
   async function markComplete() {
+    try { localStorage.setItem("orin:onboarding_done", "1"); } catch { /* ignore */ }
     try {
       const supabase = createClient();
       await supabase.auth.updateUser({

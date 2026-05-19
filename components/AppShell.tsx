@@ -35,7 +35,24 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
   const [energyOpen, setEnergyOpen]       = useState(false);
   const [currentName, setCurrentName]     = useState(userName);
   const [avatarSrc, setAvatarSrc]         = useState<string | null>(null);
-  const [tourOpen, setTourOpen]           = useState(!onboardingCompleted);
+  const [tourOpen, setTourOpen]           = useState(false);
+
+  // Open the tour on first paint if:
+  // 1. URL has ?intro=1 (force show), OR
+  // 2. Supabase metadata flag is unset AND localStorage flag is unset
+  useEffect(() => {
+    if (isGuest) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const forced = params.get("intro");
+    if (forced === "1" || forced === "force") {
+      if (forced === "force") localStorage.removeItem("orin:onboarding_done");
+      setTourOpen(true);
+      return;
+    }
+    const localDone = localStorage.getItem("orin:onboarding_done") === "1";
+    if (!onboardingCompleted && !localDone) setTourOpen(true);
+  }, [onboardingCompleted, isGuest]);
 
   useEffect(() => {
     const handler = () => setTourOpen(true);
