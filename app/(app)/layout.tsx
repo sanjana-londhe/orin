@@ -31,7 +31,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         email={email}
         initial={initial}
         isGuest={isGuest}
-        onboardingCompleted={onboardingCompleted || isGuest}
+        onboardingCompleted={onboardingCompleted}
       >
         {children}
       </AppShell>

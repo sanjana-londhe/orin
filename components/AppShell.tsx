@@ -47,9 +47,8 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
       setTourOpen(true);
       return;
     }
-    if (isGuest) return;
     if (!onboardingCompleted && !localDone) setTourOpen(true);
-  }, [onboardingCompleted, isGuest]);
+  }, [onboardingCompleted]);
 
   useEffect(() => {
     const handler = () => setTourOpen(true);
