@@ -11,7 +11,7 @@ interface Props {
   task: TaskWithSubtasks;
   onMarkDone?: (id: string) => void;
   onUncomplete?: (id: string) => void;
-  onDefer?: (id: string, newDueAt: Date) => void;
+  onDefer?: (id: string, newDueAt: Date, reason?: string) => void;
   onUpdate?: (id: string, patch: Partial<Pick<Task, "title" | "dueAt" | "emotionalState">>) => void;
   onDelete?: (id: string) => void;
   onPushUp?: (id: string) => void;

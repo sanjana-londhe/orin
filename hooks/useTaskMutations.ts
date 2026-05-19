@@ -114,10 +114,14 @@ export function useTaskMutations() {
 
   // ── deferTask ─────────────────────────────────────────────────────
   const deferTask = useMutation({
-    mutationFn: async ({ id, newDueAt }: { id: string; newDueAt: Date }) => {
+    mutationFn: async ({ id, newDueAt, reason }: { id: string; newDueAt: Date; reason?: string }) => {
       const res = await fetch(`/api/tasks/${id}/defer`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_due_at: newDueAt.toISOString(), confirmed: true }),
+        body: JSON.stringify({
+          new_due_at: newDueAt.toISOString(),
+          confirmed: true,
+          ...(reason ? { reason } : {}),
+        }),
       });
       if (!res.ok) throw new Error("Failed");
       return res.json();
@@ -165,7 +169,7 @@ export function useTaskMutations() {
     [updateTask.mutate],
   );
   const deferTaskCb = useCallback(
-    (id: string, newDueAt: Date) => deferTask.mutate({ id, newDueAt }),
+    (id: string, newDueAt: Date, reason?: string) => deferTask.mutate({ id, newDueAt, reason }),
     [deferTask.mutate],
   );
 

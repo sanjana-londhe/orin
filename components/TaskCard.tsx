@@ -157,7 +157,7 @@ interface Props {
   onPushUp?: (id: string) => void;
   onMarkDone?: (id: string) => void;
   onUncomplete?: (id: string) => void;
-  onDefer?: (id: string, newDueAt: Date) => void;
+  onDefer?: (id: string, newDueAt: Date, reason?: string) => void;
   onUpdate?: (id: string, patch: Partial<Pick<Task, "title" | "dueAt" | "emotionalState">>) => void;
   onDelete?: (id: string) => void;
 }
@@ -541,7 +541,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
           {isNudged && !done && (
             <div style={{ marginTop: 8 }}>
-              <NudgeBanner task={task} onDefer={onDefer ? d => onDefer(task.id, d) : undefined} onMarkDone={() => onMarkDone?.(task.id)} />
+              <NudgeBanner task={task} onDefer={onDefer ? (d, r) => onDefer(task.id, d, r) : undefined} onMarkDone={() => onMarkDone?.(task.id)} />
             </div>
           )}
         </div>
@@ -570,8 +570,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         onOpenChange={setDeferOpen}
         task={task}
         defaultTab="defer"
-        onConfirm={d => {
-          if (onDefer) onDefer(task.id, d);
+        onConfirm={(d, r) => {
+          if (onDefer) onDefer(task.id, d, r);
           else onUpdate?.(task.id, { dueAt: d as unknown as Date });
         }}
       />

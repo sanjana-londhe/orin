@@ -7,7 +7,7 @@ import type { Task } from "@prisma/client";
 
 interface Props {
   task: Task;
-  onDefer?: (newDueAt: Date) => void;
+  onDefer?: (newDueAt: Date, reason?: string) => void;
   onMarkDone?: () => void;
 }
 
@@ -109,8 +109,8 @@ export function NudgeBanner({ task, onDefer, onMarkDone }: Props) {
           onOpenChange={setDeferOpen}
           task={task}
           defaultTab={deferTab}
-          onConfirm={(newDueAt) => {
-            onDefer(newDueAt);
+          onConfirm={(newDueAt, reason) => {
+            onDefer(newDueAt, reason);
             dismissNudge(task.id);
           }}
         />

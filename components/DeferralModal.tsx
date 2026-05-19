@@ -64,9 +64,11 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   task: Task;
-  onConfirm: (newDueAt: Date) => void;
+  onConfirm: (newDueAt: Date, reason?: string) => void;
   defaultTab?: Tab;
 }
+
+const REASON_MAX = 500;
 
 const T = {
   surface:       "#ffffff",
@@ -187,6 +189,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
       : null
   );
   const [customHours, setCustomHours] = useState("");
+  const [reason, setReason]           = useState("");
 
   // Reschedule state
   const [rescheduleKey, setRescheduleKey]   = useState<RescheduleKey>("tomorrow");
@@ -253,12 +256,15 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
 
   function handleConfirm() {
     if (!preview) return;
-    onConfirm(preview); onOpenChange(false); reset();
+    const trimmed = reason.trim();
+    onConfirm(preview, trimmed ? trimmed : undefined);
+    onOpenChange(false); reset();
   }
 
   function reset() {
     setTab(defaultTab); setSelected(null);
-    setCustomHours(""); setRescheduleKey("tomorrow");
+    setCustomHours(""); setReason("");
+    setRescheduleKey("tomorrow");
     setRescheduleDate(isoDate(tomorrow())); setRescheduleTime("09:00");
     setDropdownOpen(false); setCalendarDate("");
   }
@@ -524,6 +530,39 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             </div>
           </div>
         )}
+
+        {/* Reason — optional context for the deferral */}
+        <div style={{ padding: "12px 18px", borderBottom: `1px solid ${T.border}` }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", margin: "0 0 6px" }}>
+            <label htmlFor="defer-reason" style={{
+              fontFamily: "inherit", fontSize: 10, fontWeight: 600,
+              color: T.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em",
+            }}>
+              Reason <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: T.textMuted }}>· optional</span>
+            </label>
+            {reason.length > 0 && (
+              <span style={{ fontFamily: "inherit", fontSize: 10, color: reason.length > REASON_MAX ? "#c23934" : T.textMuted }}>
+                {reason.length}/{REASON_MAX}
+              </span>
+            )}
+          </div>
+          <textarea
+            id="defer-reason"
+            value={reason}
+            onChange={e => setReason(e.target.value.slice(0, REASON_MAX))}
+            placeholder={tab === "defer" ? "Why are you snoozing this? (Energy too low, waiting on someone, etc.)" : "Why are you moving this? (No judgement — just helpful context for later.)"}
+            rows={2}
+            style={{
+              width: "100%", padding: "9px 12px", borderRadius: 8,
+              border: `1.5px solid ${T.border}`, background: T.stone100,
+              fontSize: 12, lineHeight: 1.5, color: T.textPrimary, fontFamily: "inherit",
+              outline: "none", boxSizing: "border-box", resize: "vertical",
+              minHeight: 56, transition: "border-color 0.14s",
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = T.accent)}
+            onBlur={e => (e.currentTarget.style.borderColor = T.border)}
+          />
+        </div>
 
         {/* Actions */}
         <div style={{ padding: "10px 18px", display: "flex", justifyContent: "flex-end", gap: 8 }}>
