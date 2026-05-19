@@ -311,6 +311,16 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                   >
                     <span>👤</span> Profile
                   </button>
+                  <button onClick={() => { setShowUser(false); window.dispatchEvent(new CustomEvent("orin:show-tour")); }} style={{
+                    display: "flex", alignItems: "center", gap: 8, width: "100%",
+                    padding: "9px 14px", background: "none", border: "none",
+                    cursor: "pointer", fontSize: 12, color: "#082d1d", fontFamily: "inherit",
+                  }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f1f3ef"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
+                  >
+                    <span>✨</span> Show intro
+                  </button>
                   <div style={{ height: 1, background: "#e9ede9", margin: "4px 0" }} />
                   <form action={signOut}>
                     <button type="submit" style={{

@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { AIPanel } from "@/components/AIPanel";
 import { ProfileModal } from "@/components/ProfileModal";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import {
   EnergyCheckInModal, loadEnergyStore, saveEnergyStore,
   todayKey, type CheckIn,
 } from "@/components/EnergyCheckInModal";
-import { Sparkles, Zap, User } from "lucide-react";
+import { Sparkles, Zap, User, HelpCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { signOut, signInWithGoogle } from "@/app/actions/auth";
 
@@ -19,10 +20,11 @@ interface Props {
   email: string;
   initial: string;
   isGuest?: boolean;
+  onboardingCompleted?: boolean;
   children: React.ReactNode;
 }
 
-export function AppShell({ userName, email, initial, isGuest = false, children }: Props) {
+export function AppShell({ userName, email, initial, isGuest = false, onboardingCompleted = true, children }: Props) {
   const [aiOpen, setAiOpen]   = useState(false);
   const isMobile              = useIsMobile();
   const pathname              = usePathname();
@@ -33,6 +35,13 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
   const [energyOpen, setEnergyOpen]       = useState(false);
   const [currentName, setCurrentName]     = useState(userName);
   const [avatarSrc, setAvatarSrc]         = useState<string | null>(null);
+  const [tourOpen, setTourOpen]           = useState(!onboardingCompleted);
+
+  useEffect(() => {
+    const handler = () => setTourOpen(true);
+    window.addEventListener("orin:show-tour", handler);
+    return () => window.removeEventListener("orin:show-tour", handler);
+  }, []);
 
   const avatarContent = avatarSrc
     ? <img src={avatarSrc} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -184,8 +193,9 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
             ) : (
               <>
                 {([
-                  { icon: <Zap size={15} color="#059669" />,  label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
-                  { icon: <User size={15} color="#4a6d47" />, label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+                  { icon: <Zap size={15} color="#059669" />,        label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
+                  { icon: <User size={15} color="#4a6d47" />,       label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+                  { icon: <HelpCircle size={15} color="#4a6d47" />, label: "Show intro",        action: () => { setShowMenu(false); setTourOpen(true); } },
                 ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
                   <button key={item.label} onClick={item.action} style={{
                     display: "flex", alignItems: "center", gap: 10, width: "100%",
@@ -244,6 +254,12 @@ export function AppShell({ userName, email, initial, isGuest = false, children }
       )}
 
       {aiOpen && <AIPanel onClose={() => setAiOpen(false)} />}
+
+      <OnboardingTour
+        open={tourOpen}
+        name={isGuest ? "there" : currentName.split(" ")[0]}
+        onClose={() => setTourOpen(false)}
+      />
     </div>
   );
 }
