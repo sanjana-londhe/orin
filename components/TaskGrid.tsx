@@ -30,7 +30,10 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
     // and don't celebrate a completion that won't happen.
     if (isOptimisticTaskId(id)) return;
     const activeRemaining = tasks.filter(t => !t.isCompleted).length;
-    celebrate(activeRemaining <= 1 ? "day" : "task", intensity);
+    const wasDeferred = (tasks.find(t => t.id === id)?.deferredCount ?? 0) > 0;
+    // Priority: clearing the day is the grandest, then a deferred comeback.
+    const level = activeRemaining <= 1 ? "day" : wasDeferred ? "deferred" : "task";
+    celebrate(level, intensity);
     m.markDone(id);
   }, [tasks, intensity, m]);
 

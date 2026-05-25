@@ -10,7 +10,10 @@
 
 import type { CelebrationIntensity } from "@/store/ui";
 
-export type CelebrationLevel = "task" | "day";
+// "task"     — a normal completion (whisper)
+// "deferred" — completing a task that had been pushed off (a comeback win)
+// "day"      — clearing the last active task (full fanfare)
+export type CelebrationLevel = "task" | "deferred" | "day";
 
 export interface FanfareEvent {
   level: CelebrationLevel;
@@ -27,6 +30,15 @@ const DAY_MESSAGES = [
   "Inbox zero for today. Nicely done.",
   "All caught up — that took real effort.",
   "Day's list: empty. You earned this.",
+];
+
+// Shown when a previously-deferred task finally gets completed.
+const COMEBACK_MESSAGES = [
+  "Yay! You finally got to it 🎉",
+  "You kept putting this off — and still did it!",
+  "Done at last. That one didn't get away.",
+  "Pushed it off, then nailed it anyway. 🎉",
+  "Persistence win — that one's done!",
 ];
 
 function pick(list: string[]): string {
@@ -126,6 +138,23 @@ export function celebrate(level: CelebrationLevel, intensity: CelebrationIntensi
     if (intensity === "standard") tone([660], 0.12, 0.05);
     else /* celebratory */        tone([880], 0.14, 0.07);
     emit({ level, intensity, message: "", origin: lastPointer });
+    return;
+  }
+
+  if (level === "deferred") {
+    // Comeback — a task you'd been deferring is finally done. Bigger than a
+    // whisper, with an encouraging line; calm still gets just the line.
+    const message = pick(COMEBACK_MESSAGES);
+    if (intensity === "calm") {
+      vibrate([14, 40, 14]);
+    } else if (intensity === "standard") {
+      vibrate([16, 45, 16]);
+      tone([587.33, 880], 0.42, 0.05, 0.07);           // D5 → A5, a little cheer
+    } else {
+      vibrate([18, 45, 18, 45, 24]);
+      tone([587.33, 783.99, 1046.5], 0.6, 0.07, 0.07); // D5 → G5 → C6 rising
+    }
+    emit({ level, intensity, message, origin: null });
     return;
   }
 

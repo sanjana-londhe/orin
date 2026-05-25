@@ -60,9 +60,11 @@ export function CelebrationOverlay() {
       const reduced = prefersReducedMotion();
       const isTask = e.level === "task";
       if (!reduced && e.intensity !== "calm") {
-        const count = isTask
-          ? (e.intensity === "celebratory" ? 18 : 12)
-          : (e.intensity === "celebratory" ? 44 : 26);
+        const cel = e.intensity === "celebratory";
+        const count =
+          e.level === "task"     ? (cel ? 18 : 12) :
+          e.level === "deferred" ? (cel ? 34 : 22) :
+                                   (cel ? 46 : 28); // day
         setParticles(buildParticles(count, isTask));
         timers.current.push(setTimeout(() => setParticles([]), isTask ? 1200 : 2000));
       } else {
