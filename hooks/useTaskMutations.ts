@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task } from "@prisma/client";
-import type { TaskWithSubtasks } from "@/lib/types";
+import { isOptimisticTaskId, type TaskWithSubtasks } from "@/lib/types";
 
 export function useTaskMutations() {
   const queryClient = useQueryClient();
@@ -22,6 +22,9 @@ export function useTaskMutations() {
   const markDone = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
+      // 409 = the task is already completed server-side; the desired end state
+      // is already true, so keep the optimistic "done" instead of rolling back.
+      if (res.status === 409) return { alreadyCompleted: true };
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
@@ -164,12 +167,27 @@ export function useTaskMutations() {
   // we wrap the arg-shaping ones in useCallback so consumers passing them as
   // props don't bust `memo()` on TaskCard / SortableTaskCard on every parent
   // re-render.
+  // All wrappers no-op on optimistic placeholder ids — a freshly-created task
+  // has no real UUID yet, so any server call would 500. The placeholder is
+  // swapped for the real task within a beat (see AllTasksView.handleCreate).
+  const markDoneCb = useCallback(
+    (id: string) => { if (!isOptimisticTaskId(id)) markDone.mutate(id); },
+    [markDone.mutate],
+  );
+  const uncompleteCb = useCallback(
+    (id: string) => { if (!isOptimisticTaskId(id)) uncompleteTask.mutate(id); },
+    [uncompleteTask.mutate],
+  );
+  const deleteCb = useCallback(
+    (id: string) => { if (!isOptimisticTaskId(id)) deleteTask.mutate(id); },
+    [deleteTask.mutate],
+  );
   const updateTaskCb = useCallback(
-    (id: string, patch: Partial<Task>) => updateTask.mutate({ id, patch }),
+    (id: string, patch: Partial<Task>) => { if (!isOptimisticTaskId(id)) updateTask.mutate({ id, patch }); },
     [updateTask.mutate],
   );
   const deferTaskCb = useCallback(
-    (id: string, newDueAt: Date, reason?: string) => deferTask.mutate({ id, newDueAt, reason }),
+    (id: string, newDueAt: Date, reason?: string) => { if (!isOptimisticTaskId(id)) deferTask.mutate({ id, newDueAt, reason }); },
     [deferTask.mutate],
   );
 
@@ -177,12 +195,12 @@ export function useTaskMutations() {
   // new reference on every render either.
   return useMemo(
     () => ({
-      markDone:       markDone.mutate,
-      uncompleteTask: uncompleteTask.mutate,
+      markDone:       markDoneCb,
+      uncompleteTask: uncompleteCb,
       updateTask:     updateTaskCb,
       deferTask:      deferTaskCb,
-      deleteTask:     deleteTask.mutate,
+      deleteTask:     deleteCb,
     }),
-    [markDone.mutate, uncompleteTask.mutate, updateTaskCb, deferTaskCb, deleteTask.mutate],
+    [markDoneCb, uncompleteCb, updateTaskCb, deferTaskCb, deleteCb],
   );
 }

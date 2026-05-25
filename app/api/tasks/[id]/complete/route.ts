@@ -12,37 +12,48 @@ export async function POST(_request: Request, { params }: Params) {
 
   const { id } = await params;
 
-  const task = await prisma.task.findFirst({ where: { id, userId: user.id } });
-  if (!task) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (task.isCompleted) return NextResponse.json({ error: "Already completed" }, { status: 409 });
+  // Reject non-UUID ids (e.g. client "optimistic-…" placeholders) before they
+  // reach Prisma's UUID column and throw an unhandled 500.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(id)) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  // Mark the task complete
-  const completed = await prisma.task.update({
-    where: { id },
-    data: { isCompleted: true, lastTouchedAt: new Date() },
-  });
+  try {
+    const task = await prisma.task.findFirst({ where: { id, userId: user.id } });
+    if (!task) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (task.isCompleted) return NextResponse.json({ error: "Already completed" }, { status: 409 });
 
-  // If recurring, insert next occurrence
-  let nextTask = null;
-  if (task.recurrenceRule) {
-    const base = task.dueAt ?? new Date();
-    const next = nextOccurrence(task.recurrenceRule, base);
+    // Mark the task complete
+    const completed = await prisma.task.update({
+      where: { id },
+      data: { isCompleted: true, lastTouchedAt: new Date() },
+    });
 
-    if (next) {
-      nextTask = await prisma.task.create({
-        data: {
-          userId: task.userId,
-          title: task.title,
-          emotionalState: task.emotionalState,
-          recurrenceRule: task.recurrenceRule,
-          dueAt: next,
-          sortOrder: task.sortOrder,
-          parentTaskId: task.parentTaskId,
-          deferredCount: 0,
-        },
-      });
+    // If recurring, insert next occurrence
+    let nextTask = null;
+    if (task.recurrenceRule) {
+      const base = task.dueAt ?? new Date();
+      const next = nextOccurrence(task.recurrenceRule, base);
+
+      if (next) {
+        nextTask = await prisma.task.create({
+          data: {
+            userId: task.userId,
+            title: task.title,
+            emotionalState: task.emotionalState,
+            recurrenceRule: task.recurrenceRule,
+            dueAt: next,
+            sortOrder: task.sortOrder,
+            parentTaskId: task.parentTaskId,
+            deferredCount: 0,
+          },
+        });
+      }
     }
-  }
 
-  return NextResponse.json({ completed, nextTask }, { status: 200 });
+    return NextResponse.json({ completed, nextTask }, { status: 200 });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Server error";
+    console.error(`[tasks] complete failed for id=${id}:`, msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

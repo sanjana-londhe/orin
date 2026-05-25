@@ -243,11 +243,19 @@ export function AllTasksView() {
     resetForm();
 
     try {
-      await fetch("/api/tasks", {
+      const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: optimistic.title, emotionalState: emotion || null, dueAt }),
       });
+      if (!res.ok) throw new Error("Failed to create task");
+      // Swap the placeholder for the real task immediately so its id is a valid
+      // UUID — otherwise completing it during the refetch window hits /complete
+      // with the "optimistic-…" id and 500s.
+      const real = await res.json();
+      queryClient.setQueryData<TaskWithSubtasks[]>(["tasks", activeFilter], old =>
+        (old ?? []).map(t => (t.id === optimisticId ? { ...real, subtasks: real.subtasks ?? [] } : t)),
+      );
       queryClient.invalidateQueries({ queryKey: ["tasks", activeFilter] });
       queryClient.invalidateQueries({ queryKey: ["tasks", completedFilter] });
     } catch {

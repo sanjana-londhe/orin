@@ -8,7 +8,7 @@ import { useUIStore } from "@/store/ui";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { celebrate } from "@/lib/celebrate";
-import type { TaskWithSubtasks } from "@/lib/types";
+import { isOptimisticTaskId, type TaskWithSubtasks } from "@/lib/types";
 
 interface Props {
   tasks: TaskWithSubtasks[];
@@ -26,6 +26,9 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
   // flag, so the active-count below still includes it. If it was the last one
   // standing, clearing it empties the list → fanfare; otherwise → a whisper.
   const handleMarkDone = useCallback((id: string) => {
+    // Task not persisted yet — let the no-op guard in the mutation handle it,
+    // and don't celebrate a completion that won't happen.
+    if (isOptimisticTaskId(id)) return;
     const activeRemaining = tasks.filter(t => !t.isCompleted).length;
     celebrate(activeRemaining <= 1 ? "day" : "task", intensity);
     m.markDone(id);
