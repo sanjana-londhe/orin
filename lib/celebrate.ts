@@ -16,6 +16,8 @@ export interface FanfareEvent {
   level: CelebrationLevel;
   intensity: CelebrationIntensity;
   message: string;
+  // viewport coords to burst from; null = burst from screen center (day-clear)
+  origin: { x: number; y: number } | null;
 }
 
 // ── Affirmations ──────────────────────────────────────────────────────
@@ -97,15 +99,33 @@ const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+// Track the last pointer position so a per-task burst can originate from the
+// checkbox the user actually tapped, rather than the screen center.
+let lastPointer: { x: number; y: number } | null = null;
+let pointerBound = false;
+function bindPointer() {
+  if (pointerBound || typeof window === "undefined") return;
+  pointerBound = true;
+  window.addEventListener(
+    "pointerdown",
+    (e) => { lastPointer = { x: e.clientX, y: e.clientY }; },
+    { passive: true, capture: true },
+  );
+}
+
 // ── Public API ────────────────────────────────────────────────────────
 export function celebrate(level: CelebrationLevel, intensity: CelebrationIntensity) {
+  bindPointer();
+
   if (level === "task") {
-    // Whisper. The task card's own strike-through/fade is the baseline visual;
-    // here we only add a feather-light haptic + (above calm) a soft tick.
+    // Whisper. The card's own strike-through/fade is the baseline; on top we
+    // add a light haptic, a soft tick, and a small confetti burst at the tap.
+    // Calm stays confetti-free — it's the "off" switch.
     if (intensity === "calm") return;
     vibrate(10);
     if (intensity === "standard") tone([660], 0.12, 0.05);
     else /* celebratory */        tone([880], 0.14, 0.07);
+    emit({ level, intensity, message: "", origin: lastPointer });
     return;
   }
 
@@ -124,8 +144,9 @@ export function celebrate(level: CelebrationLevel, intensity: CelebrationIntensi
   }
 
   // The overlay decides whether to throw confetti based on intensity +
-  // reduced-motion; it always at least shows the line.
-  emit({ level, intensity, message });
+  // reduced-motion; it always at least shows the line. Day-clear bursts from
+  // center for a grand finish.
+  emit({ level, intensity, message, origin: null });
 }
 
 export { prefersReducedMotion };
