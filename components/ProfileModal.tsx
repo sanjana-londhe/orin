@@ -3,6 +3,13 @@
 import { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
+import { useUIStore, type CelebrationIntensity } from "@/store/ui";
+
+const CELEBRATION_OPTIONS: { value: CelebrationIntensity; label: string; sub: string }[] = [
+  { value: "calm",        label: "Calm",        sub: "Quiet — just a line when the day clears" },
+  { value: "standard",    label: "Standard",    sub: "Soft tick per task · confetti on a clear day" },
+  { value: "celebratory", label: "Celebratory", sub: "Brighter sound · a full burst on a clear day" },
+];
 
 interface Props {
   open: boolean;
@@ -20,6 +27,8 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
   const [saving, setSaving]           = useState(false);
   const [saved, setSaved]             = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const celebrationIntensity    = useUIStore(s => s.celebrationIntensity);
+  const setCelebrationIntensity = useUIStore(s => s.setCelebrationIntensity);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -119,6 +128,53 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
               fontSize: 12, color: "#4a6d47", userSelect: "none",
             }}>
               {email || "—"}
+            </div>
+          </div>
+
+          {/* Completion celebration */}
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", margin: "0 0 6px" }}>
+              Completion celebration
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {CELEBRATION_OPTIONS.map(opt => {
+                const active = celebrationIntensity === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setCelebrationIntensity(opt.value)}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+                      width: "100%", padding: "9px 12px", borderRadius: 8,
+                      border: `1px solid ${active ? "#059669" : "#dde4de"}`,
+                      background: active ? "#f2fdec" : "#fafbf7",
+                      cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                      transition: "border-color 0.14s, background 0.14s",
+                    }}
+                  >
+                    <span style={{ minWidth: 0 }}>
+                      <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: active ? "#059669" : "#082d1d" }}>
+                        {opt.label}
+                      </span>
+                      <span style={{ display: "block", fontSize: 11, color: "#4a6d47", lineHeight: 1.35 }}>
+                        {opt.sub}
+                      </span>
+                    </span>
+                    <span style={{
+                      width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
+                      border: `1.5px solid ${active ? "#059669" : "#c4cbc2"}`,
+                      background: active ? "#059669" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      {active && (
+                        <svg width="9" height="6" viewBox="0 0 11 8" fill="none">
+                          <path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

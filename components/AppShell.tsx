@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { AIPanel } from "@/components/AIPanel";
 import { ProfileModal } from "@/components/ProfileModal";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { CelebrationOverlay } from "@/components/CelebrationOverlay";
 import {
   EnergyCheckInModal, loadEnergyStore, saveEnergyStore,
   todayKey, type CheckIn,
@@ -273,6 +274,8 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
         name={isGuest ? "there" : currentName.split(" ")[0]}
         onClose={() => setTourOpen(false)}
       />
+
+      <CelebrationOverlay />
     </div>
   );
 }

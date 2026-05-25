@@ -1,12 +1,13 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { Sparkles } from "lucide-react";
 import { SortableTaskCard } from "@/components/SortableTaskCard";
 import { useTaskMutations } from "@/hooks/useTaskMutations";
 import { useUIStore } from "@/store/ui";
 import { SkeletonTaskList } from "@/components/Skeleton";
 import { EmptyState } from "@/components/EmptyState";
+import { celebrate } from "@/lib/celebrate";
 import type { TaskWithSubtasks } from "@/lib/types";
 
 interface Props {
@@ -19,6 +20,16 @@ interface Props {
 function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Props) {
   const m = useTaskMutations();
   const editingTaskId = useUIStore(s => s.editingTaskId);
+  const intensity = useUIStore(s => s.celebrationIntensity);
+
+  // Fire the celebration *before* the optimistic mutation flips this task's
+  // flag, so the active-count below still includes it. If it was the last one
+  // standing, clearing it empties the list → fanfare; otherwise → a whisper.
+  const handleMarkDone = useCallback((id: string) => {
+    const activeRemaining = tasks.filter(t => !t.isCompleted).length;
+    celebrate(activeRemaining <= 1 ? "day" : "task", intensity);
+    m.markDone(id);
+  }, [tasks, intensity, m]);
 
   if (isLoading) return <SkeletonTaskList count={4} />;
 
@@ -48,7 +59,7 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
             <SortableTaskCard
               task={task}
               dragActive={dragActive}
-              onMarkDone={m.markDone}
+              onMarkDone={handleMarkDone}
               onUncomplete={m.uncompleteTask}
               onDefer={m.deferTask}
               onUpdate={m.updateTask}
