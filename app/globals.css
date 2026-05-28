@@ -86,6 +86,23 @@
   }
 }
 
+/* Task checkbox circle — border managed by CSS so the browser's :hover stays
+ * authoritative even when the list reorders under the cursor (avoids two cards
+ * appearing "hovered" at once after a complete/uncomplete reshuffle). Size,
+ * background, and the inner checkmark stay inline on the element.
+ *   data-done="false" → dashed gray default, solid emerald on hover
+ *   data-done="true"  → solid emerald always (paired with green fill inline)
+ */
+.task-check {
+  border: 1.5px dashed #c4cbc2;
+}
+.task-check[data-done="true"] {
+  border: 1.5px solid #059669;
+}
+.task-check[data-done="false"]:hover {
+  border: 1.5px solid #059669;
+}
+
 /* Task completion animations */
 @keyframes strikethrough-draw {
   from { width: 0; }

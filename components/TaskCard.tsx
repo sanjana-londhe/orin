@@ -200,7 +200,6 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
   const [note, setNote]               = useState("");
   const [mounted, setMounted]         = useState(false);
   const [hovered, setHovered]         = useState(false);
-  const [checkHov, setCheckHov]       = useState(false);
   const editTitleRef = useRef<HTMLInputElement>(null);
   const editChipBarRef = useRef<HTMLDivElement>(null);
   const nativeDateRef = useRef<HTMLInputElement>(null);
@@ -458,6 +457,8 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         {/* Circle checkbox */}
         <div style={{ paddingTop: 2, paddingRight: 12, flexShrink: 0 }}>
           <div
+            className="task-check"
+            data-done={done ? "true" : "false"}
             onClick={e => {
               e.stopPropagation();
               if (done) {
@@ -469,11 +470,10 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               setCompleting(true);
               setTimeout(() => { onMarkDone?.(task.id); setCompleting(false); }, 500);
             }}
-            onMouseEnter={() => setCheckHov(true)}
-            onMouseLeave={() => setCheckHov(false)}
             style={{
               width: isMobile ? 22 : 18, height: isMobile ? 22 : 18, borderRadius: "50%",
-              border: done ? `1.5px solid ${T.accent}` : checkHov ? `1.5px solid ${T.accent}` : "1.5px dashed #c4cbc2",
+              // border managed by .task-check rules in globals.css so the
+              // browser's :hover is authoritative across list reorders
               background: done ? T.accent : "transparent",
               cursor: "pointer", flexShrink: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
