@@ -12,8 +12,9 @@ import type { CelebrationIntensity } from "@/store/ui";
 
 // "task"     — a normal completion (whisper)
 // "deferred" — completing a task that had been pushed off (a comeback win)
+// "dreaded"  — completing a task whose emotional weight was DREADING
 // "day"      — clearing the last active task (full fanfare)
-export type CelebrationLevel = "task" | "deferred" | "day";
+export type CelebrationLevel = "task" | "deferred" | "dreaded" | "day";
 
 export interface FanfareEvent {
   level: CelebrationLevel;
@@ -39,6 +40,16 @@ const COMEBACK_MESSAGES = [
   "Done at last. That one didn't get away.",
   "Pushed it off, then nailed it anyway. 🎉",
   "Persistence win — that one's done!",
+];
+
+// Shown when a DREADING task gets completed — names the dread out loud so the
+// moment feels earned rather than generic.
+const DREADED_MESSAGES = [
+  "You did the hard one. 💪",
+  "Dreaded. Done.",
+  "That was the heavy one.",
+  "The one you didn't want to do — done anyway.",
+  "Fear → finished. Nicely done.",
 ];
 
 function pick(list: string[]): string {
@@ -153,6 +164,26 @@ export function celebrate(level: CelebrationLevel, intensity: CelebrationIntensi
     } else {
       vibrate([18, 45, 18, 45, 24]);
       tone([587.33, 783.99, 1046.5], 0.6, 0.07, 0.07); // D5 → G5 → C6 rising
+    }
+    emit({ level, intensity, message, origin: null });
+    return;
+  }
+
+  if (level === "dreaded") {
+    // The heavy one — a task you marked DREADING. Musically: start on a tense
+    // minor and resolve up to a bright major triad ("fear → relief"). Haptic
+    // is a long-short-long, like exhaling.
+    const message = pick(DREADED_MESSAGES);
+    if (intensity === "calm") {
+      vibrate([20, 50, 20]);
+    } else if (intensity === "standard") {
+      vibrate([22, 40, 14, 40, 22]);
+      // E♭5 (tense) → G5 → B♭5 → C6 (resolves up a step into bright major)
+      tone([622.25, 783.99, 932.33, 1046.5], 0.7, 0.06, 0.085);
+    } else {
+      vibrate([24, 40, 14, 40, 24, 50, 30]);
+      // E♭5 → G5 → B♭5 → C6 → E♭6 — same resolution, with a final lift
+      tone([622.25, 783.99, 932.33, 1046.5, 1244.5], 0.85, 0.075, 0.085);
     }
     emit({ level, intensity, message, origin: null });
     return;

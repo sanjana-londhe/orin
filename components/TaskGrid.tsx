@@ -30,9 +30,17 @@ function TaskGridInner({ tasks, isLoading, emptyState, dragActive = false }: Pro
     // and don't celebrate a completion that won't happen.
     if (isOptimisticTaskId(id)) return;
     const activeRemaining = tasks.filter(t => !t.isCompleted).length;
-    const wasDeferred = (tasks.find(t => t.id === id)?.deferredCount ?? 0) > 0;
-    // Priority: clearing the day is the grandest, then a deferred comeback.
-    const level = activeRemaining <= 1 ? "day" : wasDeferred ? "deferred" : "task";
+    const task = tasks.find(t => t.id === id);
+    const wasDeferred = (task?.deferredCount ?? 0) > 0;
+    const wasDreaded  = task?.emotionalState === "DREADING";
+    // Priority: clearing the day is the grandest, then a dreaded task (the
+    // heavy one), then a deferred comeback. Dread outranks defer because the
+    // emotional weight is the bigger story when both are true.
+    const level =
+      activeRemaining <= 1 ? "day" :
+      wasDreaded           ? "dreaded" :
+      wasDeferred          ? "deferred" :
+                             "task";
     celebrate(level, intensity);
     m.markDone(id);
   }, [tasks, intensity, m]);

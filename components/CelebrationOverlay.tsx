@@ -10,6 +10,12 @@ const CONFETTI_COLORS = [
   "#B07A10", "#D14626", "#082d1d",            // anxious / dreading / ink
 ];
 
+// Dreaded tier tells a "fear → relief" story: particles start in the dreading
+// reds/ambers and end in willing/excited greens. The build function picks per
+// particle, so a single burst contains both halves of the arc.
+const DREAD_COLORS = ["#D14626", "#c23934", "#B07A10", "#886a00"];
+const RELIEF_COLORS = ["#1A9444", "#59d10b", "#0E8A7D", "#059669"];
+
 interface Particle {
   id: number;
   left: number;   // vw offset from center origin, in px
@@ -23,13 +29,27 @@ interface Particle {
   round: boolean;
 }
 
-function buildParticles(count: number, small: boolean): Particle[] {
-  // Per-task bursts are tighter and quicker; day-clear bursts travel farther.
-  const baseDist = small ? 50 : 120;
-  const spread = small ? 90 : 220;
+type Variant = "task" | "big" | "dreaded";
+
+function buildParticles(count: number, variant: Variant): Particle[] {
+  // Per-task bursts are tighter and quicker; day-clear bursts travel farther;
+  // dreaded sits between the two with extra reach so the moment registers.
+  const small = variant === "task";
+  const baseDist = variant === "task" ? 50 : variant === "dreaded" ? 90 : 120;
+  const spread   = variant === "task" ? 90 : variant === "dreaded" ? 180 : 220;
+  // For "dreaded", earlier-launched particles wear the dread reds; later ones
+  // arrive in the relief greens — a visual "fear → finished" arc within the
+  // same burst. Other variants pull from the unified palette.
+  const dreadedSplit = Math.floor(count * 0.45);
   return Array.from({ length: count }, (_, id) => {
     const angle = Math.random() * Math.PI;          // upper half-circle
     const dist = baseDist + Math.random() * spread;
+    const color =
+      variant === "dreaded"
+        ? (id < dreadedSplit
+            ? DREAD_COLORS[Math.floor(Math.random() * DREAD_COLORS.length)]
+            : RELIEF_COLORS[Math.floor(Math.random() * RELIEF_COLORS.length)])
+        : CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
     return {
       id,
       left: (Math.random() - 0.5) * (small ? 24 : 80),
@@ -39,7 +59,7 @@ function buildParticles(count: number, small: boolean): Particle[] {
       delay: Math.random() * (small ? 0.05 : 0.12),
       dur: small ? 0.6 + Math.random() * 0.4 : 0.9 + Math.random() * 0.7,
       size: small ? 5 + Math.random() * 4 : 6 + Math.random() * 6,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      color,
       round: Math.random() < 0.4,
     };
   });
@@ -64,8 +84,13 @@ export function CelebrationOverlay() {
         const count =
           e.level === "task"     ? (cel ? 18 : 12) :
           e.level === "deferred" ? (cel ? 34 : 22) :
+          e.level === "dreaded"  ? (cel ? 42 : 28) :
                                    (cel ? 46 : 28); // day
-        setParticles(buildParticles(count, isTask));
+        const variant: Variant =
+          e.level === "task"    ? "task" :
+          e.level === "dreaded" ? "dreaded" :
+                                  "big";
+        setParticles(buildParticles(count, variant));
         timers.current.push(setTimeout(() => setParticles([]), isTask ? 1200 : 2000));
       } else {
         setParticles([]);
