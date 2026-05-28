@@ -8,6 +8,7 @@ import { loadEnergyStore, todayKey, type CheckIn } from "@/components/EnergyChec
 import { EMOTION_MAP } from "@/lib/emotions";
 import type { TaskWithSubtasks } from "@/lib/types";
 import { withTz } from "@/lib/client-tz";
+import { SkeletonBox } from "@/components/Skeleton";
 
 // ── Scoring ──────────────────────────────────────────────────────────
 
@@ -67,6 +68,46 @@ function Block({ icon: Icon, title, children }: {
   );
 }
 
+// ── Skeleton placeholders — shaped like Hero + Block ─────────────────
+// Shown while the panel's queries are in flight so the user sees the panel's
+// real layout (not a "Get started" empty state) until the data lands.
+
+function SkeletonHero() {
+  return (
+    <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f1f3ef", marginBottom: 6 }}>
+      <SkeletonBox height={10} width={60}  radius={3} style={{ marginBottom: 8 }} />
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
+        <SkeletonBox height={22} width={38}  radius={4} />
+        <SkeletonBox height={11} width={120} radius={4} />
+      </div>
+      <SkeletonBox height={11} width={180} radius={4} />
+    </div>
+  );
+}
+
+function SkeletonBlock({ lines = 2 }: { lines?: number }) {
+  return (
+    <div style={{
+      background: "#fff",
+      border: "1px solid #e9ede9",
+      borderRadius: 4,
+      padding: "12px 14px",
+      marginTop: 8,
+      boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
+        <SkeletonBox width={22} height={22} radius={999} />
+        <SkeletonBox height={11} width={110} radius={4} />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {Array.from({ length: lines }).map((_, i) => (
+          <SkeletonBox key={i} height={11} width={i === lines - 1 ? "60%" : "92%"} radius={4} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ───────────────────────────────────────────────────
 
 interface Props { onClose: () => void }
@@ -76,29 +117,36 @@ export function AIPanel({ onClose }: Props) {
   const [tab, setTab] = useState<"today" | "week">("today");
   useEffect(() => setMounted(true), []);
 
-  const { data: todayTasks = [] } = useQuery<TaskWithSubtasks[]>({
+  const { data: todayTasks = [], isLoading: todayLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", new Date().toISOString().slice(0, 10)],
     queryFn: () => fetch(withTz("/api/tasks?filter=today")).then(r => r.json()),
     retry: 1,
   });
 
-  const { data: allTasks = [] } = useQuery<TaskWithSubtasks[]>({
+  const { data: allTasks = [], isLoading: allLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "all"],
     queryFn: () => fetch("/api/tasks?filter=all").then(r => r.json()),
     retry: 1,
   });
 
-  const { data: completedTasks = [] } = useQuery<TaskWithSubtasks[]>({
+  const { data: completedTasks = [], isLoading: completedLoading } = useQuery<TaskWithSubtasks[]>({
     queryKey: ["tasks", "completed"],
     queryFn: () => fetch("/api/tasks?filter=completed").then(r => r.json()),
     retry: 1,
   });
 
-  const { data: weekly } = useQuery<WeeklyReport>({
+  const { data: weekly, isLoading: weeklyLoading } = useQuery<WeeklyReport>({
     queryKey: ["reports", "weekly"],
     queryFn: () => fetch("/api/reports/weekly").then(r => r.json()),
     retry: 1,
   });
+
+  // Show the skeleton until both (a) we've hydrated on the client — energy
+  // check-ins live in localStorage and aren't readable on SSR — and (b) every
+  // dependency query has resolved at least once. Without this gate the panel
+  // briefly renders the "Get started" empty state on every open because
+  // `weekly` is undefined for the first ~50–300ms.
+  const loading = !mounted || todayLoading || allLoading || completedLoading || weeklyLoading;
 
   // ── Derived data ──────────────────────────────────────────────────
 
@@ -297,6 +345,19 @@ export function AIPanel({ onClose }: Props) {
 
       {/* ── Scrollable body ── */}
       <div style={{ flex: 1, overflowY: "auto", padding: "0 18px 24px" }}>
+
+      {loading ? (
+        // Skeleton mirrors the real layout (hero + a few blocks) so the panel
+        // never flashes the "Get started" empty state for users who do have
+        // data — we just haven't fetched it yet.
+        <>
+          <SkeletonHero />
+          <SkeletonBlock lines={2} />
+          <SkeletonBlock lines={3} />
+          <SkeletonBlock lines={2} />
+        </>
+      ) : (
+      <>
 
         {/* Empty-week onboarding pinned at top */}
         {noDataYet && mounted ? (
@@ -564,6 +625,8 @@ export function AIPanel({ onClose }: Props) {
 
           </>
         )}
+      </>
+      )}
       </div>
     </aside>
   );
