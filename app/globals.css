@@ -92,6 +92,10 @@
  * background, and the inner checkmark stay inline on the element.
  *   data-done="false" → dashed gray default, solid emerald on hover
  *   data-done="true"  → solid emerald always (paired with green fill inline)
+ *
+ * The :hover preview is gated to `hover: hover` + `pointer: fine` so it never
+ * fires from tap-simulated hover on iOS/Android — on touch, the row's existing
+ * fade-out animation already provides tap feedback.
  */
 .task-check {
   border: 1.5px dashed #c4cbc2;
@@ -99,8 +103,10 @@
 .task-check[data-done="true"] {
   border: 1.5px solid #059669;
 }
-.task-check[data-done="false"]:hover {
-  border: 1.5px solid #059669;
+@media (hover: hover) and (pointer: fine) {
+  .task-check[data-done="false"]:hover {
+    border: 1.5px solid #059669;
+  }
 }
 
 /* Task completion animations */
