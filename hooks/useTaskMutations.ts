@@ -63,6 +63,11 @@ export function useTaskMutations() {
   });
 
   // ── uncompleteTask: reverse, also in place ────────────────────────
+  // Mirror-image of markDone: flip the flag everywhere, then explicitly move
+  // the task between the bucketed caches. Without the explicit move, the
+  // entry sits in `today-completed` (or `completed`) with its flag flipped to
+  // false — gridTasks then renders it once from there *and* once from the
+  // active cache, producing the duplicate rows you saw.
   const uncompleteTask = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/tasks/${id}`, {
@@ -75,14 +80,52 @@ export function useTaskMutations() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ["tasks"] });
       const snap = snapshot();
+
+      // Find the full task object before we touch the caches
+      let taskData: TaskWithSubtasks | undefined;
+      for (const [, data] of queryClient.getQueriesData<TaskWithSubtasks[]>({ queryKey: ["tasks"] })) {
+        if (Array.isArray(data)) {
+          taskData = data.find(t => t.id === id);
+          if (taskData) break;
+        }
+      }
+
+      // Flip the flag in every cached list (some lists may not contain the
+      // task — map is a no-op there).
       queryClient.setQueriesData({ queryKey: ["tasks"] }, (old: unknown) =>
         Array.isArray(old)
           ? (old as TaskWithSubtasks[]).map(t => t.id === id ? { ...t, isCompleted: false } : t)
           : old
       );
+
+      // Remove from any completed-bucketed lists — an uncompleted task
+      // doesn't belong in "tasks completed today" / "all completed".
+      const drop = (key: readonly unknown[]) =>
+        queryClient.setQueryData<TaskWithSubtasks[]>(
+          key as unknown as Parameters<typeof queryClient.setQueryData>[0],
+          old => (old ?? []).filter(t => t.id !== id),
+        );
+      drop(["tasks", "today-completed"]);
+      drop(["tasks", "completed"]);
+
+      // Insert (or move to top of) the active-bucketed lists so the row
+      // appears immediately. Filter-then-prepend keeps things idempotent if
+      // the task was already there.
+      if (taskData) {
+        const reopened: TaskWithSubtasks = { ...taskData, isCompleted: false, updatedAt: new Date() };
+        const upsertTop = (key: readonly unknown[]) =>
+          queryClient.setQueryData<TaskWithSubtasks[]>(
+            key as unknown as Parameters<typeof queryClient.setQueryData>[0],
+            old => [reopened, ...(old ?? []).filter(t => t.id !== id)],
+          );
+        upsertTop(["tasks", "today-active"]);
+        upsertTop(["tasks", "all"]);
+      }
+
       return { snap };
     },
     onError: (_e, _v, ctx) => rollback(ctx!.snap),
+    onSettled: settle, // reconcile with server (e.g. flagged/calendar lists)
   });
 
   // ── updateTask ────────────────────────────────────────────────────

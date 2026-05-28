@@ -270,10 +270,22 @@ export function AllTasksView() {
 
   // Stable list reference — without this, every chip toggle / keystroke produces
   // a new array, busting TaskGrid's memo and re-rendering every TaskCard.
-  const gridTasks = useMemo(
-    () => [...allTasks.filter(t => !t.isCompleted), ...completedTasks],
-    [allTasks, completedTasks],
-  );
+  //
+  // We trust the live `isCompleted` flag, not which cache the entry came from:
+  // a stale entry in `completedTasks` whose flag has been flipped to false
+  // (e.g. mid-mutation) is dropped here rather than rendered as a phantom row.
+  // We also dedupe by id so a task that ended up in both caches surfaces once.
+  const gridTasks = useMemo(() => {
+    const seen = new Set<string>();
+    const out: TaskWithSubtasks[] = [];
+    for (const t of allTasks) {
+      if (!t.isCompleted && !seen.has(t.id)) { seen.add(t.id); out.push(t); }
+    }
+    for (const t of completedTasks) {
+      if (t.isCompleted && !seen.has(t.id)) { seen.add(t.id); out.push(t); }
+    }
+    return out;
+  }, [allTasks, completedTasks]);
 
   return (
     <div style={{ background: T.bg, minHeight: "100%" }}>
