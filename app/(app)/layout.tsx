@@ -1,4 +1,3 @@
-import { after } from "next/server";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { displayName } from "@/lib/utils";
@@ -21,8 +20,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const ua = hdrs.get("user-agent") ?? "";
   const initialIsMobile = /Mobile|Android|iPhone|iPad|iPod|Windows Phone|BlackBerry/i.test(ua);
 
-  // Run the onboarding seed AFTER the response — don't block the layout render.
-  if (user) after(() => seedOnboardingTasks(user.id).catch(() => {}));
+  // Await the seed so the first task fetch on this page load sees the rows.
+  // (after() ran post-response, racing the client's immediate /api/tasks fetch.)
+  if (user) await seedOnboardingTasks(user.id).catch(() => {});
 
   return (
     <MobileHintProvider initial={initialIsMobile}>
