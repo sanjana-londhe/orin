@@ -41,7 +41,7 @@ export function TaskCreateModal({ open, onOpenChange, defaultDate, defaultTitle 
       onClick={() => onOpenChange(false)}
       style={{
         position: "fixed", inset: 0, zIndex: 200,
-        background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)",
+        background: "rgba(29, 29, 31,0.25)", backdropFilter: "blur(2px)",
         display: "flex", alignItems: "flex-start", justifyContent: "center",
         padding: isMobile ? "60px 16px 0" : "80px 24px 0",
       }}
@@ -132,13 +132,13 @@ function InlineCreateForm({
 
   return (
     <div style={{
-      border: "1px solid #059669", borderRadius: 4, background: "#fff",
-      boxShadow: "0 4px 24px rgba(5,150,105,0.10)",
+      border: "1px solid #0066cc", borderRadius: 11, background: "#fff",
+      boxShadow: "0 4px 24px rgba(0, 102, 204,0.10)",
     }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px 4px 16px" }}>
-        <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 2 }} />
+        <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1px dashed #d2d2d7", flexShrink: 0, marginTop: 2 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <style>{`.task-name-input.is-error::placeholder { color: #c23934; opacity: 1; }`}</style>
+          <style>{`.task-name-input.is-error::placeholder { color: #d70015; opacity: 1; }`}</style>
           <textarea
             ref={titleRef} value={title} autoFocus
             className={`task-name-input${titleError ? " is-error" : ""}`}
@@ -159,7 +159,7 @@ function InlineCreateForm({
             rows={1}
             style={{
               width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-              fontSize: isMobile ? 14 : 12, letterSpacing: "-0.01em", color: "#082d1d",
+              fontSize: isMobile ? 14 : 12, letterSpacing: "-0.01em", color: "#1d1d1f",
               background: "transparent", marginBottom: 2,
               resize: "none", lineHeight: 1.4, padding: 0, overflow: "hidden",
               display: "block",
@@ -177,14 +177,14 @@ function InlineCreateForm({
               placeholder="Notes" rows={2}
               style={{
                 width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-                fontSize: isMobile ? 14 : 11, color: "#3d5a4a", background: "transparent",
+                fontSize: isMobile ? 14 : 11, color: "#333333", background: "transparent",
                 resize: "none", lineHeight: 1.5, padding: 0, overflow: "hidden",
               }}
             />
           ) : (
             <div
               onClick={() => setNoteOpen(true)}
-              style={{ fontSize: isMobile ? 14 : 11, color: "#b9d3c4", cursor: "text" }}
+              style={{ fontSize: isMobile ? 14 : 11, color: "#c7c7cc", cursor: "text" }}
             >
               {note.trim() || "Notes"}
             </div>
@@ -206,8 +206,8 @@ function InlineCreateForm({
               <button
                 onClick={submit} disabled={isPending}
                 style={{
-                  padding: "5px 14px", borderRadius: 6, border: "none",
-                  background: "#059669", color: "#fff",
+                  padding: "5px 14px", borderRadius: 8, border: "none",
+                  background: "#0066cc", color: "#fff",
                   fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
                 }}
               >
@@ -226,8 +226,8 @@ function InlineCreateForm({
             onClick={onClose}
             style={{
               padding: "7px 16px", borderRadius: 8,
-              border: "1.5px solid #dde4de", background: "#fff",
-              color: "#3d5a4a", fontSize: 12, fontWeight: 500,
+              border: "1px solid #e0e0e0", background: "#fff",
+              color: "#333333", fontSize: 12, fontWeight: 500,
               cursor: "pointer", fontFamily: "inherit",
             }}
           >Cancel</button>
@@ -235,7 +235,7 @@ function InlineCreateForm({
             onClick={submit} disabled={isPending}
             style={{
               padding: "7px 20px", borderRadius: 8, border: "none",
-              background: isPending ? "#c4cbc2" : "#059669",
+              background: isPending ? "#d2d2d7" : "#0066cc",
               color: "#fff", fontSize: 12, fontWeight: 700,
               cursor: isPending ? "default" : "pointer", fontFamily: "inherit",
             }}

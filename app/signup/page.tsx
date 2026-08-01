@@ -21,7 +21,7 @@ export default function SignUpPage() {
     <div style={{
       position: "fixed", inset: 0, overflow: "hidden",
       display: "flex", alignItems: "center", justifyContent: "center",
-      background: "#f8f9f5", fontFamily: "inherit",
+      background: "#f5f5f7", fontFamily: "inherit",
     }}>
       <div style={{ width: "100%", maxWidth: 360, padding: "0 24px" }}>
 
@@ -29,15 +29,15 @@ export default function SignUpPage() {
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
             <svg width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100" height="100" rx="22" fill="#02382a"/>
-              <circle cx="50" cy="41" r="18" fill="#059669"/>
-              <circle cx="50" cy="59" r="18" fill="#59d10b"/>
+              <rect width="100" height="100" rx="22" fill="#1d1d1f"/>
+              <circle cx="50" cy="41" r="18" fill="#2997ff"/>
+              <circle cx="50" cy="59" r="18" fill="#0066cc"/>
             </svg>
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", margin: "0 0 6px" }}>
+          <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#1d1d1f", margin: "0 0 6px" }}>
             Create your account
           </h1>
-          <p style={{ fontSize: 12, color: "#4a6d47", margin: 0 }}>
+          <p style={{ fontSize: 12, color: "#86868b", margin: 0 }}>
             Start tracking tasks and energy with orin
           </p>
         </div>
@@ -49,9 +49,9 @@ export default function SignUpPage() {
             disabled={googlePending}
             style={{
               width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-              padding: "13px 20px", borderRadius: 10,
+              padding: "13px 20px", borderRadius: 11,
               border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
-              fontSize: 12, fontWeight: 500, color: "#082d1d",
+              fontSize: 12, fontWeight: 500, color: "#1d1d1f",
               cursor: "pointer", fontFamily: "inherit",
               transition: "border-color 0.14s",
               opacity: googlePending ? 0.6 : 1,
@@ -60,7 +60,7 @@ export default function SignUpPage() {
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.12)"; }}
           >
             {googlePending ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "spin 0.8s linear infinite" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066cc" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "spin 0.8s linear infinite" }}>
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
               </svg>
@@ -76,9 +76,9 @@ export default function SignUpPage() {
           </button>
         </form>
 
-        <p style={{ textAlign: "center", fontSize: 11, color: "#4a6d47", marginTop: 28 }}>
+        <p style={{ textAlign: "center", fontSize: 11, color: "#86868b", marginTop: 28 }}>
           Already have an account?{" "}
-          <Link href="/login" style={{ color: "#059669", fontWeight: 500, textDecoration: "none" }}>
+          <Link href="/login" style={{ color: "#0066cc", fontWeight: 500, textDecoration: "none" }}>
             Sign in
           </Link>
         </p>

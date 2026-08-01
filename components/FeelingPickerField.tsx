@@ -6,23 +6,23 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 
 const D = {
   surface:      "#ffffff",
-  surfacePage:  "#fafbf7",
-  surfaceMuted: "#f1f3ef",
-  accentSubtle: "#f2fdec",
-  border:       "#dde4de",
-  borderHover:  "#c4cbc2",
-  accent:       "#059669",
-  textPrimary:  "#082d1d",
-  textTertiary: "#4a6d47",
-  textMuted:    "#b9d3c4",
+  surfacePage:  "#fafafc",
+  surfaceMuted: "#f5f5f7",
+  accentSubtle: "#f5f5f7",
+  border:       "#e0e0e0",
+  borderHover:  "#d2d2d7",
+  accent:       "#0066cc",
+  textPrimary:  "#1d1d1f",
+  textTertiary: "#86868b",
+  textMuted:    "#c7c7cc",
 };
 
 const FEELINGS = [
-  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#F3F2F0", fg: "#7A756E" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444" },
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#fdf0f0", fg: "#d70015" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#fdf4ec", fg: "#b25000" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#f5f5f7", fg: "#6e6e73" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#eef6fa", fg: "#0071a4" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#eef7f1", fg: "#248a3d" },
 ] as const;
 
 export type Feeling = typeof FEELINGS[number]["value"] | "";
@@ -94,7 +94,7 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp,
         onClick={handleOpen}
         style={compact ? {
           display: "inline-flex", alignItems: "center", gap: 5,
-          padding: "4px 9px", borderRadius: 6,
+          padding: "4px 9px", borderRadius: 8,
           background: selected?.bg ?? D.surfacePage,
           border: `0.5px solid ${selected ? selected.fg + "33" : "rgba(0,0,0,0.08)"}`,
           color: selected?.fg ?? D.textTertiary,
@@ -103,7 +103,7 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp,
         } : {
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,
-          border: `1.5px solid ${open ? D.accent : D.border}`,
+          border: `1px solid ${open ? D.accent : D.border}`,
           background: D.surfacePage,
           cursor: "pointer", fontFamily: "inherit",
           transition: "border-color 0.14s", boxSizing: "border-box", outline: "none",
@@ -128,13 +128,13 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp,
           {isMobile && (
             <div
               onClick={() => setOpen(false)}
-              style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(8,45,29,0.15)" }}
+              style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(29, 29, 31,0.15)" }}
             />
           )}
           <div style={{
             ...(isMobile ? mobileDropdownStyle : desktopDropdownStyle),
-            background: D.surface, border: `1.5px solid ${D.border}`,
-            borderRadius: 4, padding: "4px 0",
+            background: D.surface, border: `1px solid ${D.border}`,
+            borderRadius: 11, padding: "4px 0",
             boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
           }}>
             {FEELINGS.map(f => (
@@ -151,7 +151,7 @@ export function FeelingPickerField({ value, onChange, label = "Feeling", dropUp,
               >
                 <span style={{
                   display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  width: 28, height: 28, borderRadius: 6,
+                  width: 28, height: 28, borderRadius: 8,
                   background: f.bg, fontSize: 14, flexShrink: 0,
                 }}>{f.emoji}</span>
                 <span style={{ fontSize: 12, color: D.textPrimary, fontWeight: value === f.value ? 600 : 400 }}>

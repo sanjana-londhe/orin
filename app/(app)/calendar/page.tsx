@@ -162,23 +162,23 @@ export default function CalendarPage() {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px 16px", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px 16px", borderBottom: "1px solid #e0e0e0", flexShrink: 0 }}>
         <div>
-          <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>Workspace · Calendar</p>
+          <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#86868b", margin: "0 0 4px" }}>Workspace · Calendar</p>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 14, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
-            <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>
+            <button onClick={() => setViewDate(new Date(year, month - 1, 1))} style={{ width: 28, height: 28, borderRadius: 8, border: "1px solid #e0e0e0", background: "#fff", cursor: "pointer", fontSize: 14, color: "#86868b", display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+            <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#1d1d1f", lineHeight: 1, margin: 0 }}>
               {new Date(year, month).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </h1>
-            <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 28, height: 28, borderRadius: 6, border: "1.5px solid #dde4de", background: "#fff", cursor: "pointer", fontSize: 14, color: "#4a6d47", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
+            <button onClick={() => setViewDate(new Date(year, month + 1, 1))} style={{ width: 28, height: 28, borderRadius: 8, border: "1px solid #e0e0e0", background: "#fff", cursor: "pointer", fontSize: 14, color: "#86868b", display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
           </div>
         </div>
         <div />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid #e0e0e0", flexShrink: 0 }}>
         {DAY_NAMES.map(d => (
-          <div key={d} style={{ padding: "8px 0", textAlign: "center", fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#b9d3c4" }}>{d}</div>
+          <div key={d} style={{ padding: "8px 0", textAlign: "center", fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#c7c7cc" }}>{d}</div>
         ))}
       </div>
 
@@ -186,7 +186,7 @@ export default function CalendarPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
           {days.map((day, i) => {
             if (!day) return (
-              <div key={`empty-${i}`} style={{ height: 130, borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", background: "#fafbf7" }} />
+              <div key={`empty-${i}`} style={{ height: 130, borderRight: i % 7 !== 6 ? "1px solid #e0e0e0" : "none", borderBottom: "1px solid #e0e0e0", background: "#fafafc" }} />
             );
 
             const key          = isoDate(day);
@@ -203,18 +203,18 @@ export default function CalendarPage() {
                 onClick={() => { if (!isPast) setCreateDate(key); }}
                 style={{
                   height: 130, overflow: "hidden",
-                  borderRight: i % 7 !== 6 ? "1px solid #dde4de" : "none",
-                  borderBottom: "1px solid #dde4de",
-                  borderTop: isToday ? "2px solid #059669" : "none",
+                  borderRight: i % 7 !== 6 ? "1px solid #e0e0e0" : "none",
+                  borderBottom: "1px solid #e0e0e0",
+                  borderTop: isToday ? "2px solid #0066cc" : "none",
                   padding: "6px 6px 4px",
-                  background: isOtherMonth || isPast ? "#fafbf7" : "#fff",
+                  background: isOtherMonth || isPast ? "#fafafc" : "#fff",
                   cursor: isPast ? "default" : "pointer", transition: "background 0.1s",
                 }}
-                onMouseEnter={e => { if (!isOtherMonth && !isPast) (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isOtherMonth || isPast ? "#fafbf7" : "#fff"; }}
+                onMouseEnter={e => { if (!isOtherMonth && !isPast) (e.currentTarget as HTMLElement).style.background = "#f5f5f7"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isOtherMonth || isPast ? "#fafafc" : "#fff"; }}
               >
                 <div style={{ marginBottom: 4, display: "flex", justifyContent: "center" }}>
-                  <span style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: isToday ? 700 : 400, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isOtherMonth ? "#c4cbc2" : "#082d1d" }}>
+                  <span style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: isToday ? 700 : 400, background: isToday ? "#0066cc" : "transparent", color: isToday ? "#fff" : isOtherMonth ? "#d2d2d7" : "#1d1d1f" }}>
                     {day.getDate()}
                   </span>
                 </div>
@@ -225,7 +225,7 @@ export default function CalendarPage() {
                     return (
                       <div key={task.id}
                         onClick={e => { e.stopPropagation(); setDayTaskList(key); }}
-                        style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 4, background: ps.background, cursor: "pointer", overflow: "hidden" }}
+                        style={{ display: "flex", alignItems: "center", padding: "2px 6px", borderRadius: 11, background: ps.background, cursor: "pointer", overflow: "hidden" }}
                       >
                         <span style={{ fontSize: 11, fontWeight: 500, color: ps.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textDecoration: task.isCompleted ? "line-through" : "none" }}>
                           {fmtTime(task.dueAt) && <>{fmtTime(task.dueAt)} </>}{task.title}
@@ -236,12 +236,12 @@ export default function CalendarPage() {
                   {overflow > 0 && (
                     <button
                       onClick={e => { e.stopPropagation(); setDayTaskList(key); }}
-                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: 10, color: "#059669", fontWeight: 600, padding: "0 4px", textAlign: "left", fontFamily: "inherit" }}>
+                      style={{ background: "none", border: "none", cursor: "pointer", fontSize: 10, color: "#0066cc", fontWeight: 600, padding: "0 4px", textAlign: "left", fontFamily: "inherit" }}>
                       +{overflow} more
                     </button>
                   )}
                   {dayTasks.length === 0 && (
-                    <div style={{ textAlign: "center", marginTop: 4, fontSize: 14, color: "#dde4de", lineHeight: 1 }}>+</div>
+                    <div style={{ textAlign: "center", marginTop: 4, fontSize: 14, color: "#e0e0e0", lineHeight: 1 }}>+</div>
                   )}
                 </div>
               </div>

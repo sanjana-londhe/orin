@@ -41,22 +41,22 @@ function LoginPageInner() {
           <div className="text-center mb-7">
             <div className="flex justify-center mb-3.5">
               <svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <rect width="100" height="100" rx="22" fill="#02382a" />
-                <circle cx="50" cy="41" r="18" fill="#059669" />
-                <circle cx="50" cy="59" r="18" fill="#59d10b" />
+                <rect width="100" height="100" rx="22" fill="#1d1d1f" />
+                <circle cx="50" cy="41" r="18" fill="#2997ff" />
+                <circle cx="50" cy="59" r="18" fill="#0066cc" />
               </svg>
             </div>
             <h1 className="text-[22px] font-medium tracking-[-0.03em] text-foreground mt-0 mb-2">
               Welcome to orin
             </h1>
-            <p className="text-xs text-[#3d5a4a] leading-relaxed m-0">
+            <p className="text-xs text-[#333333] leading-relaxed m-0">
               Your personal space to manage tasks,<br />track energy, and understand yourself better.
             </p>
           </div>
 
           {error && (
-            <div className="px-3.5 py-2.5 rounded-lg bg-[#FFF0EC] border-[0.5px] border-[#d14626]/20 mb-4">
-              <p className="m-0 text-[11px] text-[#D14626]">{decodeURIComponent(error)}</p>
+            <div className="px-3.5 py-2.5 rounded-lg bg-[#fdf0f0] border-[0.5px] border-[#d70015]/20 mb-4">
+              <p className="m-0 text-[11px] text-[#d70015]">{decodeURIComponent(error)}</p>
             </div>
           )}
 
@@ -66,7 +66,7 @@ function LoginPageInner() {
                 {googlePending ? (
                   <svg
                     width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="#059669" strokeWidth="2.5" strokeLinecap="round"
+                    stroke="#0066cc" strokeWidth="2.5" strokeLinecap="round"
                     className="animate-spin"
                   >
                     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
@@ -87,7 +87,7 @@ function LoginPageInner() {
               <button type="submit" disabled={pending} className={buttonClasses}>
                 <svg
                   width="18" height="18" viewBox="0 0 24 24" fill="none"
-                  stroke="#4a6d47" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+                  stroke="#86868b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
                 >
                   <circle cx="12" cy="8" r="4" />
                   <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />

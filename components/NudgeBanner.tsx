@@ -58,7 +58,7 @@ export function NudgeBanner({ task, onDefer, onMarkDone }: Props) {
         role="status"
         aria-live="polite"
         aria-label="Task nudge"
-        className="mx-5 mb-4 rounded-[10px] bg-[var(--anxious-bg,#fffbeb)] border border-[var(--anxious-border,#ebd587)] px-4 py-3 relative"
+        className="mx-5 mb-4 rounded-[10px] bg-[var(--anxious-bg,#fdf4ec)] border border-[var(--anxious-border,#f0d5bb)] px-4 py-3 relative"
       >
         {/* Decorative quote mark */}
         <span
@@ -68,7 +68,7 @@ export function NudgeBanner({ task, onDefer, onMarkDone }: Props) {
           &ldquo;
         </span>
 
-        <p className="text-[13px] text-[#92400e] leading-[1.5] mb-3 pl-6">
+        <p className="text-[13px] text-[#b25000] leading-[1.5] mb-3 pl-6">
           {message}
         </p>
 

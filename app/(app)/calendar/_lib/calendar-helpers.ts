@@ -64,10 +64,10 @@ export function taskDayState(task: TaskWithSubtasks): "overdue" | "today" | "fut
 
 export function pillStyle(task: TaskWithSubtasks): React.CSSProperties {
   // Completed → grey with strikethrough (clear visual on the grid)
-  if (task.isCompleted) return { background: "#F3F2F0", color: "#7A756E" };
+  if (task.isCompleted) return { background: "#f5f5f7", color: "#6e6e73" };
   // Active → colour based on due date
   const state = taskDayState(task);
-  if (state === "overdue") return { background: "#FFF0EC", color: "#D14626" };
-  if (state === "today")   return { background: "#EEFAF1", color: "#1A9444" };
-  return { background: "#F3F2F0", color: "#7A756E" }; // future / no date
+  if (state === "overdue") return { background: "#fdf0f0", color: "#d70015" };
+  if (state === "today")   return { background: "#eef7f1", color: "#248a3d" };
+  return { background: "#f5f5f7", color: "#6e6e73" }; // future / no date
 }

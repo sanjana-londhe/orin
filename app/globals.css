@@ -2,66 +2,78 @@
 
 @layer base {
   :root {
-    /* ── shadcn base tokens (5.html palette) ── */
-    --background: 120 14% 99%;          /* #fcfdfc — stone-wash near-white */
-    --foreground: 155 79% 10%;          /* #082d1d — lime-ink dark forest */
+    /* ── shadcn base tokens (documents/DESIGN.md — Apple system) ── */
+    --background: 0 0% 100%;            /* #ffffff — canvas */
+    --foreground: 240 4% 12%;           /* #1d1d1f — ink */
     --card: 0 0% 100%;
-    --card-foreground: 155 79% 10%;
+    --card-foreground: 240 4% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 155 79% 10%;
-    --primary: 162 91% 30%;             /* #059669 — emerald CTA */
+    --popover-foreground: 240 4% 12%;
+    --primary: 210 100% 40%;            /* #0066cc — Action Blue */
     --primary-foreground: 0 0% 100%;
-    --secondary: 120 11% 95%;           /* #f1f3ef — stone-200 */
-    --secondary-foreground: 125 20% 35%;
-    --muted: 120 9% 96%;                /* #f8f9f5 — stone-100 */
-    --muted-foreground: 125 20% 35%;    /* #4a6d47 — stone-700 */
-    --accent: 120 11% 95%;
-    --accent-foreground: 155 79% 10%;
-    --destructive: 3 57% 47%;           /* #c23934 — dreading */
+    --secondary: 240 12% 96%;           /* #f5f5f7 — parchment */
+    --secondary-foreground: 0 0% 20%;   /* #333333 — ink-muted-80 */
+    --muted: 240 12% 96%;               /* #f5f5f7 */
+    --muted-foreground: 240 2% 53%;     /* #86868b — ink-muted-64 */
+    --accent: 240 12% 96%;
+    --accent-foreground: 240 4% 12%;
+    --destructive: 354 100% 42%;        /* #d70015 — systemRed accessible */
     --destructive-foreground: 0 0% 100%;
-    --border: 130 11% 86%;              /* #dde4de — stone-400, visible */
-    --input: 130 11% 86%;
-    --ring: 162 91% 30%;
-    --radius: 0.5rem;                   /* 8px base — r-md */
+    --border: 0 0% 88%;                 /* #e0e0e0 — hairline */
+    --input: 0 0% 88%;
+    --ring: 210 100% 45%;               /* #0071e3 — focus blue */
+    --radius: 0.6875rem;                /* 11px — rounded.md, the overlay radius */
 
-    /* ── Design tokens ── */
-    --lime: #59d10b;                    /* Kanpla lime — progress, chips */
-    --lime-subtle: #f2fdec;             /* lime-50 — card footers, washes */
-    --lime-muted: #e3ffd1;              /* lime-100 — insight callouts */
-    --lime-border: #c8f7ae;             /* lime-200 */
-    --lime-dark: #243000;               /* deep forest */
-    --lime-ink: #082d1d;                /* darkest forest text */
-    --stone-100: #f8f9f5;               /* sidebar bg */
-    --stone-200: #f1f3ef;               /* muted surface */
-    --stone-300: #e9ede9;               /* border light */
-    --stone-400: #dde4de;               /* border default */
-    --stone-500: #c4cbc2;               /* border strong */
+    /* ── Colour tokens ── */
+    --primary-hex:      #0066cc;        /* Action Blue */
+    --primary-focus:    #0071e3;        /* Focus Blue */
+    --primary-on-dark:  #2997ff;        /* Sky Link Blue */
+    --ink:              #1d1d1f;
+    --ink-muted-80:     #333333;
+    --ink-muted-64:     #86868b;        /* Orin extension */
+    --ink-muted-48:     #7a7a7a;
+    --ink-muted-30:     #c7c7cc;        /* Orin extension */
+    --canvas:           #ffffff;
+    --canvas-parchment: #f5f5f7;
+    --surface-pearl:    #fafafc;
+    --surface-tile-1:   #272729;
+    --surface-tile-2:   #2a2a2c;
+    --surface-tile-3:   #252527;
+    --surface-black:    #000000;
+    --surface-chip:     #d2d2d7;
+    --divider-soft:     #f0f0f0;
+    --hairline:         #e0e0e0;
+    --danger:           #d70015;
+    --danger-bg:        #fdf0f0;
+    --danger-border:    #f0c9c9;
+    --flagged:          #ff9500;
 
-    /* ── Emotional state tokens (5.html values) ── */
-    --emotion-dreading:        3 57% 47%;    /* #c23934 */
-    --emotion-dreading-bg:     350 73% 97%;  /* #fcf0f3 */
-    --emotion-dreading-fg:     341 68% 36%;  /* #991e4b */
-    --emotion-dreading-border: 4 44% 83%;    /* #e9c3c1 */
+    /* ── Emotional state tokens — Apple system colours, accessible variants ──
+     * Data categories, not affordances: never used on a button, link, or ring. */
+    --emotion-dreading:        354 100% 42%;  /* #d70015 systemRed */
+    --emotion-dreading-bg:     0 63% 96%;     /* #fdf0f0 */
+    --emotion-dreading-fg:     354 100% 42%;  /* #d70015 */
+    --emotion-dreading-border: 0 63% 87%;     /* #f0c9c9 */
 
-    --emotion-anxious:         44 100% 27%;  /* #886a00 */
-    --emotion-anxious-bg:      46 79% 91%;   /* #f9f2d9 */
-    --emotion-anxious-fg:      44 100% 27%;  /* #886a00 */
-    --emotion-anxious-border:  49 72% 73%;   /* #ebd587 */
+    --emotion-anxious:         28 100% 35%;   /* #b25000 systemOrange */
+    --emotion-anxious-bg:      33 79% 96%;    /* #fdf4ec */
+    --emotion-anxious-fg:      28 100% 35%;   /* #b25000 */
+    --emotion-anxious-border:  30 63% 85%;    /* #f0d5bb */
 
-    --emotion-neutral:         135 8% 77%;   /* #c4cbc2 */
-    --emotion-neutral-bg:      120 11% 95%;  /* #f1f3ef */
-    --emotion-neutral-fg:      125 20% 35%;  /* #4a6d47 */
-    --emotion-neutral-border:  130 11% 86%;  /* #dde4de */
+    --emotion-neutral:         240 3% 44%;    /* #6e6e73 systemGray */
+    --emotion-neutral-bg:      240 12% 96%;   /* #f5f5f7 */
+    --emotion-neutral-fg:      240 3% 44%;    /* #6e6e73 */
+    --emotion-neutral-border:  0 0% 88%;      /* #e0e0e0 */
 
-    --emotion-willing:         168 41% 30%;  /* #2b6b5e */
-    --emotion-willing-bg:      180 40% 94%;  /* #e8f5f5 */
-    --emotion-willing-fg:      168 35% 24%;  /* #234b43 */
-    --emotion-willing-border:  180 27% 80%;  /* #bed7d7 */
+    --emotion-willing:         197 100% 32%;  /* #0071a4 systemTeal */
+    --emotion-willing-bg:      203 55% 96%;   /* #eef6fa */
+    --emotion-willing-fg:      197 100% 32%;  /* #0071a4 */
+    --emotion-willing-border:  200 47% 84%;   /* #c3dbe8 */
 
-    --emotion-excited:         91 88% 52%;   /* #59d10b — Kanpla lime */
-    --emotion-excited-bg:      107 94% 97%;  /* #f2fdec */
-    --emotion-excited-fg:      99 100% 13%;  /* #243000 */
-    --emotion-excited-border:  103 83% 82%;  /* #c8f7ae */
+    --emotion-excited:         136 58% 34%;   /* #248a3d systemGreen */
+    --emotion-excited-bg:      132 39% 95%;   /* #eef7f1 */
+    --emotion-excited-fg:      136 58% 34%;   /* #248a3d */
+    --emotion-excited-border:  135 32% 82%;   /* #c6e0ce */
   }
 
   * {
@@ -72,6 +84,11 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     overflow-x: hidden;
+    /* SF Pro on Apple platforms, Inter everywhere else — see DESIGN.md
+     * "Note on Font Substitutes". */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
   }
 
   html {
@@ -86,26 +103,35 @@
   }
 }
 
+/* The system-wide micro-interaction: every button presses in by 5%. */
+button:active {
+  transform: scale(0.95);
+}
+/* …except full-width row/list affordances, where the shrink reads as a glitch. */
+button[data-no-press]:active {
+  transform: none;
+}
+
 /* Task checkbox circle — border managed by CSS so the browser's :hover stays
  * authoritative even when the list reorders under the cursor (avoids two cards
  * appearing "hovered" at once after a complete/uncomplete reshuffle). Size,
  * background, and the inner checkmark stay inline on the element.
- *   data-done="false" → dashed gray default, solid emerald on hover
- *   data-done="true"  → solid emerald always (paired with green fill inline)
+ *   data-done="false" → hairline ring default, Action Blue on hover
+ *   data-done="true"  → solid Action Blue always (paired with blue fill inline)
  *
  * The :hover preview is gated to `hover: hover` + `pointer: fine` so it never
  * fires from tap-simulated hover on iOS/Android — on touch, the row's existing
  * fade-out animation already provides tap feedback.
  */
 .task-check {
-  border: 1.5px dashed #c4cbc2;
+  border: 1.5px solid var(--surface-chip);
 }
 .task-check[data-done="true"] {
-  border: 1.5px solid #059669;
+  border: 1.5px solid var(--primary-hex);
 }
 @media (hover: hover) and (pointer: fine) {
   .task-check[data-done="false"]:hover {
-    border: 1.5px solid #059669;
+    border: 1.5px solid var(--primary-hex);
   }
 }
 
@@ -179,22 +205,28 @@
   --color-emotion-excited-border:  hsl(var(--emotion-excited-border));
 
   /* Design tokens */
-  --color-lime:         var(--lime);
-  --color-lime-subtle:  var(--lime-subtle);
-  --color-lime-muted:   var(--lime-muted);
-  --color-lime-border:  var(--lime-border);
-  --color-lime-dark:    var(--lime-dark);
-  --color-stone-100:    var(--stone-100);
-  --color-stone-200:    var(--stone-200);
-  --color-stone-300:    var(--stone-300);
-  --color-stone-400:    var(--stone-400);
-  --color-stone-500:    var(--stone-500);
+  --color-ink:              var(--ink);
+  --color-ink-muted-80:     var(--ink-muted-80);
+  --color-ink-muted-64:     var(--ink-muted-64);
+  --color-ink-muted-48:     var(--ink-muted-48);
+  --color-ink-muted-30:     var(--ink-muted-30);
+  --color-canvas:           var(--canvas);
+  --color-canvas-parchment: var(--canvas-parchment);
+  --color-surface-pearl:    var(--surface-pearl);
+  --color-surface-tile-1:   var(--surface-tile-1);
+  --color-surface-tile-2:   var(--surface-tile-2);
+  --color-surface-tile-3:   var(--surface-tile-3);
+  --color-surface-black:    var(--surface-black);
+  --color-divider-soft:     var(--divider-soft);
+  --color-hairline:         var(--hairline);
+  --color-flagged:          var(--flagged);
 
-  /* Radius scale */
-  --radius-xs:   4px;
-  --radius-sm:   6px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
+  /* Radius scale — DESIGN.md `rounded` */
+  --radius-none: 0px;
+  --radius-xs:   5px;
+  --radius-sm:   8px;
+  --radius-md:   11px;
+  --radius-lg:   18px;
+  --radius-pill: 9999px;
   --radius-full: 9999px;
 }

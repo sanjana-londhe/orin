@@ -6,15 +6,15 @@ import { subscribeCelebration, prefersReducedMotion, type FanfareEvent } from "@
 // Brand greens + the emotion palette — confetti pulls from the same colors
 // used across the app so the burst feels native to Orin.
 const CONFETTI_COLORS = [
-  "#059669", "#59d10b", "#1A9444", "#0E8A7D", // brand / willing / excited
-  "#B07A10", "#D14626", "#082d1d",            // anxious / dreading / ink
+  "#0066cc", "#0066cc", "#248a3d", "#0071a4", // brand / willing / excited
+  "#b25000", "#d70015", "#1d1d1f",            // anxious / dreading / ink
 ];
 
 // Dreaded tier tells a "fear → relief" story: particles start in the dreading
 // reds/ambers and end in willing/excited greens. The build function picks per
 // particle, so a single burst contains both halves of the arc.
-const DREAD_COLORS = ["#D14626", "#c23934", "#B07A10", "#886a00"];
-const RELIEF_COLORS = ["#1A9444", "#59d10b", "#0E8A7D", "#059669"];
+const DREAD_COLORS = ["#d70015", "#d70015", "#b25000", "#b25000"];
+const RELIEF_COLORS = ["#248a3d", "#0066cc", "#0071a4", "#0066cc"];
 
 interface Particle {
   id: number;
@@ -153,8 +153,8 @@ export function CelebrationOverlay() {
           transform: "translateX(-50%)",
           display: "flex", alignItems: "center", gap: 8,
           padding: "10px 18px", borderRadius: 999,
-          background: "rgba(8,45,29,0.92)",
-          boxShadow: "0 8px 32px rgba(5,150,105,0.28)",
+          background: "rgba(29, 29, 31,0.92)",
+          boxShadow: "0 8px 32px rgba(0, 102, 204,0.28)",
           color: "#fff", fontSize: 13, fontWeight: 600,
           letterSpacing: "-0.01em", whiteSpace: "nowrap",
           animation: "fanfare-line 2.6s ease forwards",

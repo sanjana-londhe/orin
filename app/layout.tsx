@@ -1,14 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { NudgePoller } from "@/components/NudgePoller";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({
+// Inter is the closest open-source stand-in for SF Pro (documents/DESIGN.md,
+// "Note on Font Substitutes"). It only ever renders off-Apple — the stack below
+// resolves to the real SF Pro first on macOS/iOS.
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
+
+const FONT_STACK =
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-sans), system-ui, sans-serif';
 
 export const metadata: Metadata = {
   title: "Orin",
@@ -31,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={jakarta.variable} style={{ fontFamily: "var(--font-sans), system-ui, sans-serif" }}>
+      <body className={inter.variable} style={{ fontFamily: FONT_STACK }}>
         <QueryProvider>
           <NudgePoller />
           {children}

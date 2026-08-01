@@ -78,7 +78,7 @@ function WheelColumn<T extends string | number>({
                 fontSize: active ? 19 : 16,
                 fontWeight: active ? 700 : 400,
                 fontVariantNumeric: "tabular-nums",
-                color: active ? "#082d1d" : "#888780",
+                color: active ? "#1d1d1f" : "#86868b",
                 cursor: "pointer",
                 transition: "font-size 0.15s, color 0.15s",
                 userSelect: "none",
@@ -115,8 +115,8 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
       {/* Center selection band — hairlines only so centered text is visible */}
       <div style={{
         position: "absolute", top: WHEEL_PAD, left: 0, right: 0, height: WHEEL_ITEM_H,
-        borderTop: "1px solid rgba(5,150,105,0.18)",
-        borderBottom: "1px solid rgba(5,150,105,0.18)",
+        borderTop: "1px solid rgba(0, 102, 204,0.18)",
+        borderBottom: "1px solid rgba(0, 102, 204,0.18)",
         pointerEvents: "none", zIndex: 0,
       }} />
 
@@ -137,7 +137,7 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
       <div style={{ display: "flex", height: "100%", gap: 4 }}>
         <WheelColumn items={HOURS_12} value={hour12} onChange={v => update(v, m, ampm)} format={v => String(v)} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: WHEEL_HEIGHT, width: 8 }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: "#082d1d" }}>:</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "#1d1d1f" }}>:</span>
         </div>
         <WheelColumn items={MINUTES} value={m} onChange={v => update(hour12, v, ampm)} format={v => String(v).padStart(2, "0")} />
         <WheelColumn items={[...AMPMS]} value={ampm} onChange={v => update(hour12, m, v)} format={v => v} />
@@ -148,16 +148,16 @@ export function WheelTimePicker({ value, onChange }: { value: string; onChange: 
 
 const D = {
   surface:       "#ffffff",
-  surfacePage:   "#fafbf7",
-  surfaceMuted:  "#f1f3ef",
-  accentSubtle:  "#f2fdec",
-  border:        "#dde4de",
-  borderHover:   "#c4cbc2",
-  accent:        "#059669",
-  textPrimary:   "#082d1d",
-  textSecondary: "#3d5a4a",
-  textTertiary:  "#4a6d47",
-  textMuted:     "#b9d3c4",
+  surfacePage:   "#fafafc",
+  surfaceMuted:  "#f5f5f7",
+  accentSubtle:  "#f5f5f7",
+  border:        "#e0e0e0",
+  borderHover:   "#d2d2d7",
+  accent:        "#0066cc",
+  textPrimary:   "#1d1d1f",
+  textSecondary: "#333333",
+  textTertiary:  "#86868b",
+  textMuted:     "#c7c7cc",
 };
 
 const QUICK_TIMES = [
@@ -265,16 +265,16 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
         onClick={handleOpen}
         style={compact ? {
           display: "inline-flex", alignItems: "center", gap: 5,
-          padding: "4px 9px", borderRadius: 6,
-          background: "#f8f9f5",
+          padding: "4px 9px", borderRadius: 8,
+          background: "#f5f5f7",
           border: "0.5px solid rgba(0,0,0,0.08)",
-          color: value ? "#3d5a4a" : "#b9d3c4",
+          color: value ? "#333333" : "#c7c7cc",
           fontSize: 11, fontWeight: 500,
           cursor: "pointer", fontFamily: "inherit",
         } : {
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,
-          border: `1.5px solid ${open ? D.accent : D.border}`,
+          border: `1px solid ${open ? D.accent : D.border}`,
           background: D.surfacePage,
           cursor: "pointer", fontFamily: "inherit",
           transition: "border-color 0.14s", boxSizing: "border-box", outline: "none",
@@ -292,7 +292,7 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
           {isMobile && (
             <div
               onClick={() => { setOpen(false); setShowCustom(false); }}
-              style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(8,45,29,0.15)" }}
+              style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(29, 29, 31,0.15)" }}
             />
           )}
 
@@ -301,8 +301,8 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
                trigger when inlinePopup is set (matches create-form pickers). */
             <div style={{
               ...(inlinePopup ? mobileInlineStyle : mobileDropdownStyle),
-              background: D.surface, border: `1.5px solid ${D.border}`,
-              borderRadius: 4, padding: "4px 0",
+              background: D.surface, border: `1px solid ${D.border}`,
+              borderRadius: 11, padding: "4px 0",
               boxShadow: inlinePopup ? "0 4px 20px rgba(0,0,0,0.1)" : "0 -4px 24px rgba(0,0,0,0.1)",
             }}>
               {QUICK_TIMES.map(opt => {
@@ -345,8 +345,8 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
             /* Desktop: side-by-side panels */
             <div style={desktopPositionStyle}>
               <div style={{
-                background: D.surface, border: `1.5px solid ${D.border}`,
-                borderRadius: 4, padding: "4px 0",
+                background: D.surface, border: `1px solid ${D.border}`,
+                borderRadius: 11, padding: "4px 0",
                 boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 180,
               }}>
                 {QUICK_TIMES.map(opt => {
@@ -386,8 +386,8 @@ export function TimePickerField({ value, onChange, label = "Due time", selectedD
 
               {showCustom && (
                 <div style={{
-                  background: D.surface, border: `1.5px solid ${D.border}`,
-                  borderRadius: 4, padding: "14px 16px",
+                  background: D.surface, border: `1px solid ${D.border}`,
+                  borderRadius: 11, padding: "14px 16px",
                   boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
                   display: "flex", flexDirection: "column", gap: 12,
                 }}>

@@ -17,11 +17,11 @@ interface WeeklyReport {
 }
 
 const EMOTION_COLOUR: Record<string, string> = {
-  DREADING: "#c23934",
-  ANXIOUS:  "#886a00",
-  NEUTRAL:  "#c4cbc2",
-  WILLING:  "#2b6b5e",
-  EXCITED:  "#59d10b",
+  DREADING: "#d70015",
+  ANXIOUS:  "#b25000",
+  NEUTRAL:  "#d2d2d7",
+  WILLING:  "#0071a4",
+  EXCITED:  "#0066cc",
 };
 
 const EMOTION_EMOJI: Record<string, string> = {
@@ -130,13 +130,13 @@ export function WeeklyReviewCard() {
             {
               emoji: "✅",
               num: data.total_completed,
-              colour: "#059669",
+              colour: "#0066cc",
               label: "Tasks\ncompleted",
             },
             {
               emoji: "📊",
               num: data.total_deferrals,
-              colour: data.total_deferrals > 5 ? EMOTION_COLOUR["DREADING"] : "#4a6d47",
+              colour: data.total_deferrals > 5 ? EMOTION_COLOUR["DREADING"] : "#86868b",
               label: "Total\ndeferred",
             },
           ].map((stat, i) => (

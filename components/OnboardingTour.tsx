@@ -56,13 +56,13 @@ function DeferIllustration() {
         <div
           key={item.title}
           className="bg-white rounded-[10px] border border-[var(--stone-300)] px-3 py-2.5 text-left"
-          style={{ boxShadow: "0 1px 2px rgba(8,45,29,0.04)" }}
+          style={{ boxShadow: "0 1px 2px rgba(29, 29, 31,0.04)" }}
         >
           <div className="flex justify-between items-center mb-1">
             <span className="text-[13px] font-semibold tracking-[-0.01em] text-[var(--lime-ink)]">{item.title}</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#4a6d47]">{item.note}</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#86868b]">{item.note}</span>
           </div>
-          <p className="text-[11px] text-[#4a6d47] italic m-0 leading-relaxed">
+          <p className="text-[11px] text-[#86868b] italic m-0 leading-relaxed">
             “{item.reason}”
           </p>
         </div>
@@ -86,7 +86,7 @@ function ViewsGrid() {
           className="bg-white rounded-[10px] border border-[var(--stone-300)] px-3 py-2.5 text-left"
         >
           <p className="text-[12px] font-bold tracking-[-0.02em] text-[var(--lime-ink)] m-0">{v.label}</p>
-          <p className="text-[10px] text-[#4a6d47] m-0 mt-0.5 leading-relaxed">{v.desc}</p>
+          <p className="text-[10px] text-[#86868b] m-0 mt-0.5 leading-relaxed">{v.desc}</p>
         </div>
       ))}
     </div>
@@ -97,7 +97,7 @@ function WelcomeLogo() {
   return (
     <div
       className="w-[72px] h-[72px] rounded-[18px] mx-auto flex items-center justify-center"
-      style={{ background: "var(--lime-dark)", boxShadow: "0 8px 24px rgba(36,48,0,0.22)" }}
+      style={{ background: "var(--lime-dark)", boxShadow: "0 8px 24px rgba(29, 29, 31,0.22)" }}
     >
       <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <circle cx="50" cy="41" r="18" fill="hsl(var(--primary))"/>
@@ -182,7 +182,7 @@ export function OnboardingTour({ open, name, onClose }: Props) {
   const isLast = step === slides.length - 1;
   const stepIcon = [
     <Sparkles      key="s" size={12} className="text-[var(--lime)]"       />,
-    <Heart         key="h" size={12} className="text-[#c23934]"            />,
+    <Heart         key="h" size={12} className="text-[#d70015]"            />,
     <CalendarClock key="c" size={12} className="text-[hsl(var(--primary))]" />,
     <ListChecks    key="l" size={12} className="text-[hsl(var(--primary))]" />,
   ][step];
@@ -194,7 +194,7 @@ export function OnboardingTour({ open, name, onClose }: Props) {
       aria-label="Welcome to Orin"
       className="fixed inset-0 z-[200] flex items-center justify-center p-4"
       style={{
-        background: "rgba(8,45,29,0.55)",
+        background: "rgba(29, 29, 31,0.55)",
         backdropFilter: "blur(6px)",
         WebkitBackdropFilter: "blur(6px)",
         animation: "orin-fade-in 0.18s ease-out",
@@ -208,15 +208,15 @@ export function OnboardingTour({ open, name, onClose }: Props) {
       <div
         className="relative w-full max-w-[520px] overflow-hidden rounded-[20px] border border-[var(--stone-400)]"
         style={{
-          background: "#fcfdfc",
-          boxShadow: "0 24px 60px rgba(8,45,29,0.25)",
+          background: "#ffffff",
+          boxShadow: "0 24px 60px rgba(29, 29, 31,0.25)",
         }}
       >
         {/* Skip / close */}
         <button
           onClick={handleSkip}
           aria-label="Skip intro"
-          className="absolute top-3.5 right-3.5 z-[2] w-8 h-8 rounded-[8px] flex items-center justify-center cursor-pointer text-[#4a6d47] hover:bg-[var(--stone-200)] transition-colors"
+          className="absolute top-3.5 right-3.5 z-[2] w-8 h-8 rounded-[8px] flex items-center justify-center cursor-pointer text-[#86868b] hover:bg-[var(--stone-200)] transition-colors"
           style={{ background: "rgba(255,255,255,0.7)", border: "1px solid var(--stone-300)" }}
         >
           <X size={15} />
@@ -230,7 +230,7 @@ export function OnboardingTour({ open, name, onClose }: Props) {
         >
           {/* Eyebrow */}
           <div
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-6 rounded-full border border-[var(--stone-300)] bg-[var(--stone-200)] font-mono text-[10px] font-bold text-[#3d5a4a] uppercase tracking-[0.12em]"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-6 rounded-full border border-[var(--stone-300)] bg-[var(--stone-200)] font-mono text-[10px] font-bold text-[#333333] uppercase tracking-[0.12em]"
           >
             {stepIcon}
             {slide.eyebrow}
@@ -247,7 +247,7 @@ export function OnboardingTour({ open, name, onClose }: Props) {
           </h2>
 
           {/* Body */}
-          <p className="text-[15px] leading-relaxed text-[#4a6d47] max-w-[400px] mx-auto mb-0">
+          <p className="text-[15px] leading-relaxed text-[#86868b] max-w-[400px] mx-auto mb-0">
             {slide.body}
           </p>
         </div>
@@ -279,7 +279,7 @@ export function OnboardingTour({ open, name, onClose }: Props) {
             {!isLast && (
               <button
                 onClick={handleSkip}
-                className="bg-transparent border-0 text-[12px] text-[#4a6d47] cursor-pointer px-1.5 py-2 hover:text-[var(--lime-ink)] transition-colors"
+                className="bg-transparent border-0 text-[12px] text-[#86868b] cursor-pointer px-1.5 py-2 hover:text-[var(--lime-ink)] transition-colors"
               >
                 Skip
               </button>
@@ -287,7 +287,7 @@ export function OnboardingTour({ open, name, onClose }: Props) {
             <button
               onClick={handleNext}
               className="inline-flex items-center gap-2 px-[18px] py-2.5 rounded-[10px] border border-[var(--stone-400)] bg-[hsl(var(--primary))] text-white text-[13px] font-bold cursor-pointer transition-all hover:bg-[hsl(var(--primary)/0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2"
-              style={{ boxShadow: "0 4px 12px rgba(5,150,105,0.25)" }}
+              style={{ boxShadow: "0 4px 12px rgba(0, 102, 204,0.25)" }}
             >
               {isLast ? "Let's go" : "Next"}
               <ArrowRight size={14} strokeWidth={2.5} />

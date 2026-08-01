@@ -64,8 +64,8 @@ export function MobileCalendar({ tasksByDate, today, onAddTask, onTaskTap }: Pro
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", flexShrink: 0, background: "#fff", textAlign: "center" }}>
-        <h1 style={{ fontSize: 14, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.02em", margin: 0, fontFamily: "inherit" }}>
+      <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #e0e0e0", flexShrink: 0, background: "#fff", textAlign: "center" }}>
+        <h1 style={{ fontSize: 14, fontWeight: 600, color: "#1d1d1f", letterSpacing: "-0.02em", margin: 0, fontFamily: "inherit" }}>
           {headerLabel}
         </h1>
       </div>
@@ -83,11 +83,11 @@ export function MobileCalendar({ tasksByDate, today, onAddTask, onTaskTap }: Pro
               key={key}
               data-day={key}
               data-today={isToday ? "true" : undefined}
-              style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56, background: isToday ? "#f2fdec" : isPast ? "#fafbf7" : "#fff" }}
+              style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f5f5f7", minHeight: 56, background: isToday ? "#f5f5f7" : isPast ? "#fafafc" : "#fff" }}
             >
-              <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#059669" : "#e9ede9"}` }}>
-                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: isToday ? "#059669" : isPast ? "#c4cbc2" : "#b9d3c4", textTransform: "uppercase" }}>{dow}</span>
-                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isToday ? 700 : 500, background: isToday ? "#059669" : "transparent", color: isToday ? "#fff" : isPast ? "#c4cbc2" : "#082d1d" }}>{day.getDate()}</span>
+              <div style={{ width: 56, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 2, padding: "12px 0 8px", borderRight: `2px solid ${isToday ? "#0066cc" : "#f0f0f0"}` }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: isToday ? "#0066cc" : isPast ? "#d2d2d7" : "#c7c7cc", textTransform: "uppercase" }}>{dow}</span>
+                <span style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isToday ? 700 : 500, background: isToday ? "#0066cc" : "transparent", color: isToday ? "#fff" : isPast ? "#d2d2d7" : "#1d1d1f" }}>{day.getDate()}</span>
               </div>
 
               <div
@@ -101,7 +101,7 @@ export function MobileCalendar({ tasksByDate, today, onAddTask, onTaskTap }: Pro
                       key={task.id}
                       onClick={e => { e.stopPropagation(); onTaskTap(task); }}
                       style={{
-                        padding: "4px 10px", borderRadius: 6,
+                        padding: "4px 10px", borderRadius: 8,
                         background: ps.background, cursor: "pointer",
                         display: "flex", alignItems: "center", gap: 6, overflow: "hidden",
                       }}
@@ -117,10 +117,10 @@ export function MobileCalendar({ tasksByDate, today, onAddTask, onTaskTap }: Pro
                   <button
                     onClick={e => { e.stopPropagation(); onAddTask(key); }}
                     style={{
-                      background: dayTasks.length === 0 ? "#f2fdec" : "none",
-                      border: dayTasks.length === 0 ? "1px dashed #b6d9c2" : "none",
-                      borderRadius: 6, cursor: "pointer",
-                      fontSize: 11, fontWeight: 500, color: "#059669",
+                      background: dayTasks.length === 0 ? "#f5f5f7" : "none",
+                      border: dayTasks.length === 0 ? "1px dashed #d2d2d7" : "none",
+                      borderRadius: 8, cursor: "pointer",
+                      fontSize: 11, fontWeight: 500, color: "#0066cc",
                       display: "flex", alignItems: "center", gap: 5,
                       fontFamily: "inherit",
                       padding: dayTasks.length === 0 ? "6px 10px" : "4px 0",

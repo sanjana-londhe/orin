@@ -1,20 +1,20 @@
 import React from "react";
 
 const pulse: React.CSSProperties = {
-  background: "linear-gradient(90deg, #f1f3ef 25%, #e9ede9 50%, #f1f3ef 75%)",
+  background: "linear-gradient(90deg, #f5f5f7 25%, #f0f0f0 50%, #f5f5f7 75%)",
   backgroundSize: "200% 100%",
   animation: "pulse 1.4s ease infinite",
-  borderRadius: 4,
+  borderRadius: 11,
 };
 
 export function CalendarSkeleton() {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: "20px 28px 16px", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
+      <div style={{ padding: "20px 28px 16px", borderBottom: "1px solid #e0e0e0", flexShrink: 0 }}>
         <div style={{ ...pulse, height: 10, width: 70, marginBottom: 10 }} />
         <div style={{ ...pulse, height: 28, width: 200 }} />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid #dde4de", flexShrink: 0 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid #e0e0e0", flexShrink: 0 }}>
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} style={{ padding: "8px 0", display: "flex", justifyContent: "center" }}>
             <div style={{ ...pulse, height: 10, width: 24 }} />
@@ -23,7 +23,7 @@ export function CalendarSkeleton() {
       </div>
       <div style={{ flex: 1, display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {Array.from({ length: 35 }).map((_, i) => (
-          <div key={i} style={{ height: 130, borderRight: (i + 1) % 7 !== 0 ? "1px solid #dde4de" : "none", borderBottom: "1px solid #dde4de", padding: "8px 6px" }}>
+          <div key={i} style={{ height: 130, borderRight: (i + 1) % 7 !== 0 ? "1px solid #e0e0e0" : "none", borderBottom: "1px solid #e0e0e0", padding: "8px 6px" }}>
             <div style={{ ...pulse, width: 22, height: 22, borderRadius: "50%", margin: "0 auto 6px" }} />
             {i % 3 === 0 && <div style={{ ...pulse, height: 15, marginBottom: 3 }} />}
             {i % 5 === 0 && <div style={{ ...pulse, height: 15, width: "70%" }} />}
@@ -38,13 +38,13 @@ export function CalendarSkeleton() {
 export function MobileCalendarSkeleton() {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #dde4de", display: "flex", justifyContent: "center" }}>
+      <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #e0e0e0", display: "flex", justifyContent: "center" }}>
         <div style={{ ...pulse, height: 22, width: 160 }} />
       </div>
       <div style={{ flex: 1, overflowY: "auto" }}>
         {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f1f3ef", minHeight: 56 }}>
-            <div style={{ width: 56, borderRight: "2px solid #e9ede9", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 4, padding: "12px 0 8px" }}>
+          <div key={i} style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #f5f5f7", minHeight: 56 }}>
+            <div style={{ width: 56, borderRight: "2px solid #f0f0f0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", gap: 4, padding: "12px 0 8px" }}>
               <div style={{ ...pulse, height: 10, width: 20 }} />
               <div style={{ ...pulse, height: 24, width: 24, borderRadius: "50%" }} />
             </div>

@@ -6,17 +6,17 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 
 const D = {
   surface:       "#ffffff",
-  surfacePage:   "#fcfdfc",
-  stone100:      "#f8f9f5",
-  stone200:      "#f1f3ef",
-  stone400:      "#dde4de",
-  stone500:      "#c4cbc2",
-  accent:        "#059669",
-  accentSubtle:  "#f2fdec",
-  limeInk:       "#082d1d",
-  textSecondary: "#3d5a4a",
-  textTertiary:  "#4a6d47",
-  textMuted:     "#b9d3c4",
+  surfacePage:   "#ffffff",
+  stone100:      "#f5f5f7",
+  stone200:      "#f5f5f7",
+  stone400:      "#e0e0e0",
+  stone500:      "#d2d2d7",
+  accent:        "#0066cc",
+  accentSubtle:  "#f5f5f7",
+  limeInk:       "#1d1d1f",
+  textSecondary: "#333333",
+  textTertiary:  "#86868b",
+  textMuted:     "#c7c7cc",
 };
 
 const DAYS   = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -51,8 +51,8 @@ export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: stri
   return (
     <div style={{
       background: D.surface,
-      border: `1.5px solid ${D.stone400}`,
-      borderRadius: 4,
+      border: `1px solid ${D.stone400}`,
+      borderRadius: 11,
       padding: "12px 14px",
       boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
       width: fullWidth ? "100%" : 248,
@@ -62,7 +62,7 @@ export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: stri
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <button
           onClick={() => setView(v => { const d = new Date(v.year, v.month - 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: D.textTertiary, display: "flex", alignItems: "center" }}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 8, color: D.textTertiary, display: "flex", alignItems: "center" }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = D.stone200}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronLeft size={14} /></button>
@@ -73,7 +73,7 @@ export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: stri
 
         <button
           onClick={() => setView(v => { const d = new Date(v.year, v.month + 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: D.textTertiary, display: "flex", alignItems: "center" }}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 8, color: D.textTertiary, display: "flex", alignItems: "center" }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = D.stone200}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronRight size={14} /></button>
@@ -95,8 +95,8 @@ export function MiniCalendar({ selected, onSelect, fullWidth }: { selected: stri
           return (
             <button key={i} onClick={() => !isPast && onSelect(iso)} style={{
               width: "100%", aspectRatio: "1",
-              borderRadius: 6,
-              border: isToday && !isSelected ? `1.5px solid ${D.accent}` : "none",
+              borderRadius: 8,
+              border: isToday && !isSelected ? `1px solid ${D.accent}` : "none",
               background: isSelected ? D.accent : "transparent",
               color: isSelected ? "#fff" : isPast ? D.textMuted : D.limeInk,
               fontSize: 11,
@@ -205,16 +205,16 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
         onClick={handleOpen}
         style={compact ? {
           display: "inline-flex", alignItems: "center", gap: 5,
-          padding: "4px 9px", borderRadius: 6,
-          background: "#f8f9f5",
-          border: "0.5px solid rgba(5,150,105,0.25)",
+          padding: "4px 9px", borderRadius: 8,
+          background: "#f5f5f7",
+          border: "0.5px solid rgba(0, 102, 204,0.25)",
           color: D.accent,
           fontSize: 11, fontWeight: 500,
           cursor: "pointer", fontFamily: "inherit",
         } : {
           width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "9px 12px", height: 38, borderRadius: 8,
-          border: `1.5px solid ${open ? D.accent : D.stone400}`,
+          border: `1px solid ${open ? D.accent : D.stone400}`,
           background: D.surfacePage,
           cursor: "pointer", fontFamily: "inherit",
           transition: "border-color 0.14s",
@@ -238,7 +238,7 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
           {isMobile && (
             <div
               onClick={() => { setOpen(false); setShowCal(false); }}
-              style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(8,45,29,0.15)" }}
+              style={{ position: "fixed", inset: 0, zIndex: 299, background: "rgba(29, 29, 31,0.15)" }}
             />
           )}
 
@@ -247,8 +247,8 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
                trigger when inlinePopup is set (matches create-form pickers). */
             <div style={{
               ...(inlinePopup ? mobileInlineStyle : mobileDropdownStyle),
-              background: D.surface, border: `1.5px solid ${D.stone400}`,
-              borderRadius: 4, padding: "8px 0",
+              background: D.surface, border: `1px solid ${D.stone400}`,
+              borderRadius: 11, padding: "8px 0",
               boxShadow: inlinePopup ? "0 4px 20px rgba(0,0,0,0.1)" : "0 -4px 24px rgba(0,0,0,0.1)",
             }}>
               {/* Quick picks */}
@@ -301,8 +301,8 @@ export function DatePickerField({ value, onChange, label = "Due date", calendarO
               ) : (
                 <>
                   <div style={{
-                    background: D.surface, border: `1.5px solid ${D.stone400}`,
-                    borderRadius: 4, padding: "4px 0",
+                    background: D.surface, border: `1px solid ${D.stone400}`,
+                    borderRadius: 11, padding: "4px 0",
                     boxShadow: "0 4px 16px rgba(0,0,0,0.09)", minWidth: 200,
                   }}>
                     {[

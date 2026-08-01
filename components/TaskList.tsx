@@ -25,11 +25,11 @@ import { withTz } from "@/lib/client-tz";
 type Emotion = "DREADING" | "ANXIOUS" | "NEUTRAL" | "WILLING" | "EXCITED";
 
 const INLINE_FEELINGS = [
-  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#F3F2F0", fg: "#7A756E" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444" },
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#fdf0f0", fg: "#d70015" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#fdf4ec", fg: "#b25000" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#f5f5f7", fg: "#6e6e73" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#eef6fa", fg: "#0071a4" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#eef7f1", fg: "#248a3d" },
 ] as const;
 
 function fmtDateLabel(iso: string) {
@@ -316,23 +316,23 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
         const chip = (active: boolean, fg?: string) => ({
           display: "inline-flex" as const, alignItems: "center" as const, gap: 5,
-          padding: "5px 10px", borderRadius: 7,
-          background: active ? "#f1f3ef" : "#f8f9f5",
+          padding: "5px 10px", borderRadius: 8,
+          background: active ? "#f5f5f7" : "#f5f5f7",
           border: `0.5px solid ${active && fg ? fg + "44" : "rgba(0,0,0,0.08)"}`,
-          color: active && fg ? fg : "#5f5e5a",
+          color: active && fg ? fg : "#86868b",
           fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
           transition: "all 0.1s",
         });
 
         return (
-          <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#f8f9f5", paddingBottom: 16 }}>
-            <div ref={formContainerRef} onFocus={() => setFormFocused(true)} style={{ border: `1px solid ${formFocused ? "#059669" : "rgba(0,0,0,0.09)"}`, borderRadius: 4, transition: "border-color 0.15s", background: "#fff" }}>
+          <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#f5f5f7", paddingBottom: 16 }}>
+            <div ref={formContainerRef} onFocus={() => setFormFocused(true)} style={{ border: `1px solid ${formFocused ? "#0066cc" : "rgba(0,0,0,0.09)"}`, borderRadius: 11, transition: "border-color 0.15s", background: "#fff" }}>
 
               {/* Top: circle + title + Add */}
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "14px 14px 6px" }}>
-                <div style={{ width: 20, height: 20, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 1 }} />
+                <div style={{ width: 20, height: 20, borderRadius: "50%", border: "1px dashed #d2d2d7", flexShrink: 0, marginTop: 1 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <style>{`.inline-task-input.is-error::placeholder { color: #c23934; opacity: 1; }`}</style>
+                  <style>{`.inline-task-input.is-error::placeholder { color: #d70015; opacity: 1; }`}</style>
                   <input
                     ref={inputRef}
                     id="inline-task-input"
@@ -347,7 +347,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                     }}
                     onKeyDown={e => { if (e.key === "Enter") submitForm(); }}
                     placeholder="Task name"
-                    style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, letterSpacing: "-0.01em", color: "#082d1d", background: "transparent", marginBottom: 4 }}
+                    style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, letterSpacing: "-0.01em", color: "#1d1d1f", background: "transparent", marginBottom: 4 }}
                   />
                   {/* Note inline */}
                   {noteOpen ? (
@@ -357,10 +357,10 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                       onChange={e => setInlineNote(e.target.value)}
                       placeholder="Notes"
                       rows={2}
-                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 11, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, display: "block", padding: 0 }}
+                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 11, color: "#333333", background: "transparent", resize: "none", lineHeight: 1.5, display: "block", padding: 0 }}
                     />
                   ) : (
-                    <div onClick={() => setNoteOpen(true)} style={{ fontSize: 11, color: "#b9d3c4", cursor: "text", marginBottom: 2 }}>
+                    <div onClick={() => setNoteOpen(true)} style={{ fontSize: 11, color: "#c7c7cc", cursor: "text", marginBottom: 2 }}>
                       {inlineNote.trim() || "Notes"}
                     </div>
                   )}
@@ -373,14 +373,14 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 {/* Feeling chip + dropdown */}
                 <div style={{ position: "relative" }}>
                   <button onClick={() => { setShowEmotionPicker(o => !o); setShowDatePicker(false); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); }}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:em.bg, border:`0.5px solid ${em.fg}33`, color:em.fg, fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius: 8, background:em.bg, border:`0.5px solid ${em.fg}33`, color:em.fg, fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                   </button>
                   {showEmotionPicker && (
-                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
+                    <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
                       {INLINE_FEELINGS.map(f => (
                         <button key={f.value} onClick={() => { setInlineEmotion(f.value as Emotion); setShowEmotionPicker(false); }}
-                          style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:inlineEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize: 12, color:inlineEmotion===f.value?f.fg:"#082d1d", fontFamily:"inherit" }}>
+                          style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:inlineEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize: 12, color:inlineEmotion===f.value?f.fg:"#1d1d1f", fontFamily:"inherit" }}>
                           {f.emoji} {f.label}
                           {inlineEmotion===f.value && <span style={{ marginLeft:"auto", fontSize: 11 }}>✓</span>}
                         </button>
@@ -392,7 +392,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 {/* Date chip + dropdown */}
                 <div style={{ position: "relative" }}>
                   <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); setShowEmotionPicker(false); }}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(5,150,105,0.25)", color:"#059669", fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius: 8, background:"#f5f5f7", border:"0.5px solid rgba(0, 102, 204,0.25)", color:"#0066cc", fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                   </button>
                   {showDatePicker && (
@@ -402,19 +402,19 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                         : { position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }
                     }>
                       {!(isMobile && showCustomDate) && (
-                        <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
+                        <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:200, padding:"4px 0", overflow:"hidden" }}>
                           {getDatePresets().map(opt => (
                             <button key={opt.value} onClick={() => { setInlineDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
-                              style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                              <span style={{ fontSize: 12, color:inlineDueDate===opt.value?"#059669":"#082d1d", fontWeight:inlineDueDate===opt.value?500:400 }}>{opt.label}</span>
-                              <span style={{ fontSize: 11, color:inlineDueDate===opt.value?"#059669":"#888780" }}>{opt.sub}{inlineDueDate===opt.value?" ✓":""}</span>
+                              style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueDate===opt.value?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                              <span style={{ fontSize: 12, color:inlineDueDate===opt.value?"#0066cc":"#1d1d1f", fontWeight:inlineDueDate===opt.value?500:400 }}>{opt.label}</span>
+                              <span style={{ fontSize: 11, color:inlineDueDate===opt.value?"#0066cc":"#86868b" }}>{opt.sub}{inlineDueDate===opt.value?" ✓":""}</span>
                             </button>
                           ))}
                           <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
                           <button onClick={() => { if (isMobile) captureChipBarBottom(); setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
-                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomDate?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                            <span style={{ fontSize: 12, color:"#082d1d", fontWeight:showCustomDate?500:400 }}>Custom date</span>
-                            <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
+                            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomDate?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                            <span style={{ fontSize: 12, color:"#1d1d1f", fontWeight:showCustomDate?500:400 }}>Custom date</span>
+                            <ChevronRight size={13} color={showCustomDate ? "#0066cc" : "#86868b"} />
                           </button>
                         </div>
                       )}
@@ -432,7 +432,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                 {/* Time chip + dropdown */}
                 <div style={{ position: "relative" }}>
                   <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowDatePicker(false); setShowCustomDate(false); setShowEmotionPicker(false); }}
-                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6, background:"#f8f9f5", border:"0.5px solid rgba(0,0,0,0.08)", color:"#3d5a4a", fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                    style={{ display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius: 8, background:"#f5f5f7", border:"0.5px solid rgba(0,0,0,0.08)", color:"#333333", fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
                     <span style={{ fontSize: 10 }}>🕐</span> {inlineDueTime ? fmtTimeLabel(inlineDueTime) : "Add time"}
                   </button>
                   {showTimePicker && (() => {
@@ -448,13 +448,13 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                           : { position:"absolute", top:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }
                       }>
                         {!(isMobile && showCustomTime) && (
-                          <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
+                          <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow:"0 4px 20px rgba(0,0,0,0.1)", minWidth:190, padding:"4px 0", overflow:"hidden" }}>
                             {slots.map(opt => (
                               <button key={opt.value}
                                 onClick={() => { setInlineDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
-                                style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                                <span style={{ fontSize: 12, color:inlineDueTime===opt.value?"#059669":"#082d1d", fontWeight:inlineDueTime===opt.value?500:400 }}>{opt.label}</span>
-                                <span style={{ fontSize: 11, color:inlineDueTime===opt.value?"#059669":"#888780" }}>{fmtTimeLabel(opt.value)}{inlineDueTime===opt.value?" ✓":""}</span>
+                                style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:inlineDueTime===opt.value?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                                <span style={{ fontSize: 12, color:inlineDueTime===opt.value?"#0066cc":"#1d1d1f", fontWeight:inlineDueTime===opt.value?500:400 }}>{opt.label}</span>
+                                <span style={{ fontSize: 11, color:inlineDueTime===opt.value?"#0066cc":"#86868b" }}>{fmtTimeLabel(opt.value)}{inlineDueTime===opt.value?" ✓":""}</span>
                               </button>
                             ))}
                             <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
@@ -465,20 +465,20 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                               setShowDatePicker(false); setShowCustomDate(false);
                               if (opening && !inlineDueTime) setInlineDueTime("09:00");
                             }}
-                              style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomTime?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                              <span style={{ fontSize: 12, color:"#082d1d", fontWeight:showCustomTime?500:400 }}>Custom time</span>
-                              <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
+                              style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:showCustomTime?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                              <span style={{ fontSize: 12, color:"#1d1d1f", fontWeight:showCustomTime?500:400 }}>Custom time</span>
+                              <ChevronRight size={13} color={showCustomTime ? "#0066cc" : "#86868b"} />
                             </button>
                             {inlineDueTime && (
                               <button onClick={() => { setInlineDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
-                                style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 11, color: "#D14626", fontFamily:"inherit", textAlign:"left" }}>
+                                style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 11, color: "#d70015", fontFamily:"inherit", textAlign:"left" }}>
                                 Remove time
                               </button>
                             )}
                           </div>
                         )}
                         {showCustomTime && (
-                          <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius: 4, boxShadow:"0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
+                          <div style={{ background:"#fff", border:"1px solid #e0e0e0", borderRadius: 11, boxShadow:"0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
                             <WheelTimePicker value={inlineDueTime || "09:00"} onChange={t => setInlineDueTime(t)} />
                           </div>
                         )}
@@ -487,7 +487,7 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
                   })()}
                 <div style={{ flex: 1 }} />
                 <button onClick={submitForm} disabled={creatingInline}
-                  style={{ padding:"5px 14px", borderRadius:6, border:"none", background:"#059669", color:"#fff", fontSize: 11, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+                  style={{ padding:"5px 14px", borderRadius: 8, border:"none", background:"#0066cc", color:"#fff", fontSize: 11, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
                   {creatingInline ? "…" : "Add"}
                 </button>
                 </div>
@@ -499,8 +499,8 @@ export function TaskList({ userName = "there", timeGreeting = "morning" }: { use
 
       {/* ── Page header ── */}
       <div style={{ marginBottom: 16, marginTop: 8 }}>
-        <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>Workspace · Today</p>
-        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#082d1d", lineHeight: 1, margin: 0 }}>Today</h1>
+        <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#86868b", margin: "0 0 4px" }}>Workspace · Today</p>
+        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: "#1d1d1f", lineHeight: 1, margin: 0 }}>Today</h1>
       </div>
 
       {/* ── Cards ── */}

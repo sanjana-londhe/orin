@@ -72,19 +72,19 @@ const REASON_MAX = 500;
 
 const T = {
   surface:       "#ffffff",
-  stone100:      "#f8f9f5",
-  stone200:      "#f1f3ef",
-  border:        "#dde4de",
-  borderHover:   "#c4cbc2",
-  accent:        "#059669",
-  accentHover:   "#047857",
-  accentSubtle:  "#f2fdec",
-  lime100:       "#e3ffd1",
-  lime200:       "#c8f7ae",
-  textPrimary:   "#082d1d",
-  textSecondary: "#3d5a4a",
-  textTertiary:  "#4a6d47",
-  textMuted:     "#b9d3c4",
+  stone100:      "#f5f5f7",
+  stone200:      "#f5f5f7",
+  border:        "#e0e0e0",
+  borderHover:   "#d2d2d7",
+  accent:        "#0066cc",
+  accentHover:   "#0071e3",
+  accentSubtle:  "#f5f5f7",
+  lime100:       "#f5f5f7",
+  lime200:       "#e0e0e0",
+  textPrimary:   "#1d1d1f",
+  textSecondary: "#333333",
+  textTertiary:  "#86868b",
+  textMuted:     "#c7c7cc",
 };
 
 // ── Mini Calendar ─────────────────────────────────────────────────────
@@ -110,22 +110,22 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
 
   return (
     <div style={{
-      background: T.surface, border: `1.5px solid ${T.border}`,
-      borderRadius: 4, padding: "12px 14px",
+      background: T.surface, border: `1px solid ${T.border}`,
+      borderRadius: 11, padding: "12px 14px",
       boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
       width: 248, userSelect: "none", flexShrink: 0,
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <button
           onClick={() => setView(v => { const d = new Date(v.year, v.month - 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: T.textTertiary, display: "flex", alignItems: "center" }}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 8, color: T.textTertiary, display: "flex", alignItems: "center" }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = T.stone200}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronLeft size={14} /></button>
         <span style={{ fontSize: 11, fontWeight: 600, color: T.textPrimary }}>{MONTHS[month]} {year}</span>
         <button
           onClick={() => setView(v => { const d = new Date(v.year, v.month + 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: T.textTertiary, display: "flex", alignItems: "center" }}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 8, color: T.textTertiary, display: "flex", alignItems: "center" }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = T.stone200}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
         ><ChevronRight size={14} /></button>
@@ -144,8 +144,8 @@ function MiniCalendar({ selected, onSelect }: { selected: string; onSelect: (iso
           const isPast     = iso < today;
           return (
             <button key={i} onClick={() => !isPast && onSelect(iso)} style={{
-              width: "100%", aspectRatio: "1", borderRadius: 6,
-              border: isToday && !isSelected ? `1.5px solid ${T.accent}` : "none",
+              width: "100%", aspectRatio: "1", borderRadius: 8,
+              border: isToday && !isSelected ? `1px solid ${T.accent}` : "none",
               background: isSelected ? T.accent : "transparent",
               color: isSelected ? "#fff" : isPast ? T.textMuted : T.textPrimary,
               fontSize: 11, fontWeight: isSelected || isToday ? 700 : 400,
@@ -282,7 +282,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
   function optionStyle(active: boolean): React.CSSProperties {
     return {
       flex: 1, padding: "10px 8px", borderRadius: 8,
-      border: `1.5px solid ${active ? T.accent : T.border}`,
+      border: `1px solid ${active ? T.accent : T.border}`,
       background: active ? T.accentSubtle : T.stone100,
       color: active ? T.accent : T.textSecondary,
       fontSize: 12, fontWeight: active ? 600 : 400,
@@ -293,7 +293,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
 
   const nativeInputStyle: React.CSSProperties = {
     height: 38, padding: "0 12px", borderRadius: 8,
-    border: `1.5px solid ${T.border}`, background: T.stone100,
+    border: `1px solid ${T.border}`, background: T.stone100,
     fontSize: 12, color: T.textPrimary, fontFamily: "inherit",
     outline: "none", boxSizing: "border-box", transition: "border-color 0.14s", width: "100%",
   };
@@ -308,7 +308,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
     }}>
       <div onClick={handleClose} style={{
         position: "absolute", inset: 0,
-        background: "rgba(8,45,29,0.25)", backdropFilter: "blur(2px)",
+        background: "rgba(29, 29, 31,0.25)", backdropFilter: "blur(2px)",
       }} />
 
       <div style={{
@@ -316,7 +316,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         width: "100%", maxWidth: isMobile ? "100%" : 460,
         background: T.surface,
         borderRadius: isMobile ? "16px 16px 0 0" : 12,
-        border: `1.5px solid ${T.border}`,
+        border: `1px solid ${T.border}`,
         boxShadow: isMobile ? "0 -4px 24px rgba(0,0,0,0.08)" : "0 8px 24px rgba(0,0,0,0.08)",
         paddingBottom: isMobile ? 24 : 0,
       }}>
@@ -339,7 +339,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           </div>
           <button onClick={handleClose} style={{
             width: 28, height: 28, borderRadius: 8,
-            border: `1.5px solid ${T.border}`, background: T.stone100,
+            border: `1px solid ${T.border}`, background: T.stone100,
             cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
             color: T.textTertiary, flexShrink: 0,
           }}>
@@ -360,7 +360,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                 if (t === "reschedule") switchToReschedule();
                 else setSelected(null);
               }} style={{
-                flex: 1, padding: "6px 0", borderRadius: 6,
+                flex: 1, padding: "6px 0", borderRadius: 8,
                 border: tab === t ? `1px solid ${T.border}` : "1px solid transparent",
                 background: tab === t ? T.surface : "transparent",
                 color: tab === t ? T.textPrimary : T.textTertiary,
@@ -424,7 +424,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                     style={{
                       width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
                       padding: "9px 12px", height: 38, borderRadius: 8,
-                      border: `1.5px solid ${dropdownOpen ? T.accent : T.border}`,
+                      border: `1px solid ${dropdownOpen ? T.accent : T.border}`,
                       background: T.stone100, cursor: "pointer", fontFamily: "inherit",
                       transition: "border-color 0.14s", boxSizing: "border-box", outline: "none",
                     }}
@@ -448,8 +448,8 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
                     }}>
                       {/* Options list */}
                       <div style={{
-                        background: T.surface, border: `1.5px solid ${T.border}`,
-                        borderRadius: 4, padding: "4px 0",
+                        background: T.surface, border: `1px solid ${T.border}`,
+                        borderRadius: 11, padding: "4px 0",
                         boxShadow: "0 4px 16px rgba(0,0,0,0.09)",
                         width: isMobile ? "100%" : undefined,
                         minWidth: isMobile ? undefined : 200,
@@ -508,7 +508,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
           <div style={{ padding: "12px 18px", borderBottom: `1px solid ${T.border}` }}>
             <div style={{
               background: T.surface, border: `1px solid ${T.border}`,
-              borderRadius: 4, padding: "12px 14px",
+              borderRadius: 11, padding: "12px 14px",
             }}>
               <p style={{
                 fontFamily: "inherit", fontSize: 10, fontWeight: 600,
@@ -541,7 +541,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
               Reason <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: T.textMuted }}>· optional</span>
             </label>
             {reason.length > 0 && (
-              <span style={{ fontFamily: "inherit", fontSize: 10, color: reason.length > REASON_MAX ? "#c23934" : T.textMuted }}>
+              <span style={{ fontFamily: "inherit", fontSize: 10, color: reason.length > REASON_MAX ? "#d70015" : T.textMuted }}>
                 {reason.length}/{REASON_MAX}
               </span>
             )}
@@ -554,7 +554,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
             rows={2}
             style={{
               width: "100%", padding: "9px 12px", borderRadius: 8,
-              border: `1.5px solid ${T.border}`, background: T.stone100,
+              border: `1px solid ${T.border}`, background: T.stone100,
               fontSize: 12, lineHeight: 1.5, color: T.textPrimary, fontFamily: "inherit",
               outline: "none", boxSizing: "border-box", resize: "vertical",
               minHeight: 56, transition: "border-color 0.14s",
@@ -568,7 +568,7 @@ export function DeferralModal({ open, onOpenChange, task, onConfirm, defaultTab 
         <div style={{ padding: "10px 18px", display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button onClick={handleClose} style={{
             padding: "7px 16px", borderRadius: 8,
-            border: `1.5px solid ${T.border}`, background: T.surface,
+            border: `1px solid ${T.border}`, background: T.surface,
             color: T.textSecondary, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
           }}>Cancel</button>
           <AddTimeButton disabled={!preview} onClick={handleConfirm} />
@@ -586,7 +586,7 @@ function AddTimeButton({ onClick, disabled }: { onClick: () => void; disabled: b
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{
         padding: "7px 20px", borderRadius: 8, border: "none",
-        background: disabled ? "#c4cbc2" : hov ? "#047857" : "#059669",
+        background: disabled ? "#d2d2d7" : hov ? "#0071e3" : "#0066cc",
         color: "#fff", fontSize: 12, fontWeight: 700,
         cursor: disabled ? "default" : "pointer",
         fontFamily: "inherit", transition: "background 0.12s",

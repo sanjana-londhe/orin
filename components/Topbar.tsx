@@ -15,13 +15,13 @@ const PAGE_NAMES: Record<string, string> = {
 };
 
 const T = {
-  border:      "#dde4de",
-  textPrimary: "#082d1d",
-  textSecondary:"#3d5a4a",
-  textTertiary:"#4a6d47",
-  surfaceMuted:"#f1f3ef",
-  stone500:    "#c4cbc2",
-  accent:      "#059669",
+  border:      "#e0e0e0",
+  textPrimary: "#1d1d1f",
+  textSecondary:"#333333",
+  textTertiary:"#86868b",
+  surfaceMuted:"#f5f5f7",
+  stone500:    "#d2d2d7",
+  accent:      "#0066cc",
 };
 
 interface Props { pageName: string; initial: string; name?: string; email?: string }
@@ -47,14 +47,15 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
   return (
     <div style={{
       height: 50, flexShrink: 0,
-      borderBottom: `1.5px solid ${T.border}`,
+      borderBottom: `1px solid ${T.border}`,
       padding: "0 24px",
       display: "flex", alignItems: "center", gap: 12,
-      background: "rgba(252,253,252,0.9)",
-      backdropFilter: "blur(12px)",
+      background: "rgba(245, 245, 247, 0.8)",
+      backdropFilter: "saturate(180%) blur(20px)",
+      WebkitBackdropFilter: "saturate(180%) blur(20px)",
     }}>
       {/* Breadcrumb */}
-      <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: T.textTertiary, flex: 1 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, letterSpacing: "-0.08px", color: T.textTertiary, flex: 1 }}>
         <span>Workspace</span>
         <span style={{ color: T.stone500 }}>/</span>
         <span style={{ color: T.textPrimary, fontWeight: 600 }}>{currentPage}</span>
@@ -64,7 +65,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
       <div ref={dropdownRef} style={{ position: "relative" }}>
         <div onClick={() => setView(v => v ? null : "menu")} style={{
           width: 28, height: 28, borderRadius: "50%",
-          background: T.accent, border: `1.5px solid ${T.border}`,
+          background: T.accent, border: `1px solid ${T.border}`,
           color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 11, fontWeight: 700, cursor: "pointer", userSelect: "none",
           overflow: "hidden",
@@ -79,8 +80,8 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
         {view === "menu" && (
           <div style={{
             position: "absolute", top: 36, right: 0, zIndex: 100,
-            background: "#fff", border: `1.5px solid ${T.border}`,
-            borderRadius: 4, padding: "4px 0",
+            background: "#fff", border: `1px solid ${T.border}`,
+            borderRadius: 11, padding: "4px 0",
             boxShadow: "0 4px 16px rgba(0,0,0,0.1)", minWidth: 160,
           }}>
             <button onClick={() => { setView(null); setProfileOpen(true); }} style={{
@@ -98,9 +99,9 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
               display: "flex", alignItems: "center", gap: 9,
               width: "100%", padding: "9px 14px",
               background: "none", border: "none", cursor: "pointer",
-              fontSize: 12, color: "#D14626", fontFamily: "inherit",
+              fontSize: 12, color: "#d70015", fontFamily: "inherit",
             }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fdf0f0"}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}>
               <span>→</span> Log out
             </button>
@@ -111,8 +112,8 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
         {view === "confirm-logout" && (
           <div style={{
             position: "absolute", top: 36, right: 0, zIndex: 100,
-            background: "#fff", border: `1.5px solid ${T.border}`,
-            borderRadius: 4, padding: "20px",
+            background: "#fff", border: `1px solid ${T.border}`,
+            borderRadius: 11, padding: "20px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)", width: 240,
           }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: T.textPrimary, marginBottom: 6 }}>Log out?</p>
@@ -130,7 +131,7 @@ export function Topbar({ initial, name = "", email = "" }: Props) {
               <form action={signOut} style={{ flex: 1 }}>
                 <button type="submit" style={{
                   width: "100%", padding: "7px 0", borderRadius: 8,
-                  border: "none", background: "#c23934",
+                  border: "none", background: "#d70015",
                   fontSize: 11, fontWeight: 600, color: "#fff", cursor: "pointer", fontFamily: "inherit",
                 }}>
                   Log out

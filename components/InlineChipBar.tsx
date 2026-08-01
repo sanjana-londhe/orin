@@ -7,11 +7,11 @@ import { ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 const INLINE_FEELINGS = [
-  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#F3F2F0", fg: "#7A756E" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444" },
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#fdf0f0", fg: "#d70015" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#fdf4ec", fg: "#b25000" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#f5f5f7", fg: "#6e6e73" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#eef6fa", fg: "#0071a4" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#eef7f1", fg: "#248a3d" },
 ] as const;
 
 export type InlineEmotion = typeof INLINE_FEELINGS[number]["value"] | "";
@@ -125,10 +125,10 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
 
   const chipStyle = (fg?: string): React.CSSProperties => ({
     display: "inline-flex", alignItems: "center", gap: 5,
-    padding: "4px 9px", borderRadius: 6,
-    background: "#f8f9f5",
+    padding: "4px 9px", borderRadius: 8,
+    background: "#f5f5f7",
     border: `0.5px solid ${fg ? fg + "33" : "rgba(0,0,0,0.08)"}`,
-    color: fg ?? "#5f5e5a",
+    color: fg ?? "#86868b",
     fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
     position: "relative", overflow: "hidden",
   });
@@ -159,7 +159,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
         {showEmoPicker && (
           <div style={{
             position: "fixed", top: emoAnchor.top, left: emoAnchor.left, zIndex: 300,
-            background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
+            background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 11,
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 150,
             padding: "4px 0", overflow: "hidden",
           }}>
@@ -173,7 +173,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
                   padding: "8px 14px",
                   background: emotion === f.value ? f.bg : "none",
                   border: "none", cursor: "pointer",
-                  fontSize: 12, color: emotion === f.value ? f.fg : "#082d1d",
+                  fontSize: 12, color: emotion === f.value ? f.fg : "#1d1d1f",
                   fontFamily: "inherit",
                 }}
               >
@@ -196,7 +196,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
             setShowCustomDate(false); setShowTimePicker(false);
             setShowCustomTime(false); setShowEmoPicker(false);
           }}
-          style={chipStyle("#059669")}
+          style={chipStyle("#0066cc")}
         >
           <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
         </button>
@@ -208,7 +208,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
           }>
             {!(isMobile && showCustomDate) && (
               <div style={{
-                background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
+                background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 11,
                 boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                 minWidth: 200,
                 padding: "4px 0", overflow: "hidden",
@@ -221,12 +221,12 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
                       width: "100%", padding: "8px 14px",
-                      background: dueDate === opt.value ? "#f2fdec" : "none",
+                      background: dueDate === opt.value ? "#f5f5f7" : "none",
                       border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                     }}
                   >
-                    <span style={{ fontSize: 12, color: dueDate === opt.value ? "#059669" : "#082d1d", fontWeight: dueDate === opt.value ? 500 : 400 }}>{opt.label}</span>
-                    <span style={{ fontSize: 11, color: dueDate === opt.value ? "#059669" : "#888780" }}>{opt.sub}{dueDate === opt.value ? " ✓" : ""}</span>
+                    <span style={{ fontSize: 12, color: dueDate === opt.value ? "#0066cc" : "#1d1d1f", fontWeight: dueDate === opt.value ? 500 : 400 }}>{opt.label}</span>
+                    <span style={{ fontSize: 11, color: dueDate === opt.value ? "#0066cc" : "#86868b" }}>{opt.sub}{dueDate === opt.value ? " ✓" : ""}</span>
                   </button>
                 ))}
                 <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
@@ -236,12 +236,12 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                     width: "100%", padding: "8px 14px",
-                    background: showCustomDate ? "#f2fdec" : "none",
+                    background: showCustomDate ? "#f5f5f7" : "none",
                     border: "none", cursor: "pointer", fontFamily: "inherit",
                   }}
                 >
-                  <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
-                  <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
+                  <span style={{ fontSize: 12, color: "#1d1d1f", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
+                  <ChevronRight size={13} color={showCustomDate ? "#0066cc" : "#86868b"} />
                 </button>
               </div>
             )}
@@ -267,7 +267,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
             setShowCustomTime(false); setShowDatePicker(false);
             setShowCustomDate(false); setShowEmoPicker(false);
           }}
-          style={chipStyle(dueTime ? "#5f5e5a" : undefined)}
+          style={chipStyle(dueTime ? "#86868b" : undefined)}
         >
           <span style={{ fontSize: 10 }}>🕐</span> {dueTime ? fmtTimeLbl(dueTime) : "Add time"}
         </button>
@@ -285,7 +285,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
             }>
               {!(isMobile && showCustomTime) && (
                 <div style={{
-                  background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4,
+                  background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 11,
                   boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                   minWidth: 190,
                   padding: "4px 0", overflow: "hidden",
@@ -298,12 +298,12 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         width: "100%", padding: "8px 14px",
-                        background: dueTime === opt.value ? "#f2fdec" : "none",
+                        background: dueTime === opt.value ? "#f5f5f7" : "none",
                         border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                       }}
                     >
-                      <span style={{ fontSize: 12, color: dueTime === opt.value ? "#059669" : "#082d1d", fontWeight: dueTime === opt.value ? 500 : 400 }}>{opt.label}</span>
-                      <span style={{ fontSize: 11, color: dueTime === opt.value ? "#059669" : "#888780" }}>{fmtTimeLbl(opt.value)}{dueTime === opt.value ? " ✓" : ""}</span>
+                      <span style={{ fontSize: 12, color: dueTime === opt.value ? "#0066cc" : "#1d1d1f", fontWeight: dueTime === opt.value ? 500 : 400 }}>{opt.label}</span>
+                      <span style={{ fontSize: 11, color: dueTime === opt.value ? "#0066cc" : "#86868b" }}>{fmtTimeLbl(opt.value)}{dueTime === opt.value ? " ✓" : ""}</span>
                     </button>
                   ))}
                   <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
@@ -319,12 +319,12 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between",
                       width: "100%", padding: "8px 14px",
-                      background: showCustomTime ? "#f2fdec" : "none",
+                      background: showCustomTime ? "#f5f5f7" : "none",
                       border: "none", cursor: "pointer", fontFamily: "inherit",
                     }}
                   >
-                    <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
-                    <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
+                    <span style={{ fontSize: 12, color: "#1d1d1f", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
+                    <ChevronRight size={13} color={showCustomTime ? "#0066cc" : "#86868b"} />
                   </button>
                   {dueTime && (
                     <button
@@ -334,7 +334,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
                         display: "block", width: "100%", padding: "7px 14px",
                         background: "none", border: "none",
                         borderTop: "0.5px solid rgba(0,0,0,0.06)",
-                        cursor: "pointer", fontSize: 11, color: "#D14626",
+                        cursor: "pointer", fontSize: 11, color: "#d70015",
                         fontFamily: "inherit", textAlign: "left",
                       }}
                     >
@@ -345,7 +345,7 @@ export function InlineChipBar({ emotion, setEmotion, dueDate, setDueDate, dueTim
               )}
               {showCustomTime && (
                 <div style={{
-                  background: "#fff", border: "1.5px solid #dde4de", borderRadius: 4,
+                  background: "#fff", border: "1px solid #e0e0e0", borderRadius: 11,
                   boxShadow: "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px",
                 }}>
                   <WheelTimePicker value={dueTime || "09:00"} onChange={t => setDueTime(t)} />

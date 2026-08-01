@@ -59,8 +59,8 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
           style={{
             position: "fixed", bottom: 72, right: 20, zIndex: 60,
             width: 52, height: 52, borderRadius: "50%",
-            background: "#059669", border: "none",
-            boxShadow: "0 4px 12px rgba(5,150,105,0.35)",
+            background: "#0066cc", border: "none",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.14)",
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: "pointer", color: "#fff",
           }}
@@ -71,8 +71,8 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
         {/* Bottom nav — 5 views */}
         <nav style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 50,
-          height: 60, background: "#f8f9f5",
-          borderTop: "1.5px solid #dde4de",
+          height: 60, background: "#f5f5f7",
+          borderTop: "1px solid #e0e0e0",
           display: "flex", alignItems: "stretch",
         }}>
           {VIEWS.map(({ href, Icon, label }) => {
@@ -82,13 +82,13 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 flex: 1,
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                 gap: 3, textDecoration: "none",
-                color: active ? "#059669" : "#4a6d47",
-                background: active ? "#f2fdec" : "transparent",
-                borderTop: active ? "2px solid #059669" : "2px solid transparent",
-                transition: "background 0.1s",
+                color: active ? "#0066cc" : "#86868b",
+                background: "transparent",
+                borderTop: active ? "2px solid #0066cc" : "2px solid transparent",
+                transition: "color 0.1s",
               }}>
                 <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-                <span style={{ fontSize: 11, fontWeight: active ? 700 : 500 }}>{label}</span>
+                <span style={{ fontSize: 11, fontWeight: active ? 600 : 400, letterSpacing: 0 }}>{label}</span>
               </Link>
             );
           })}
@@ -104,8 +104,8 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
       <aside style={{
         width: isCollapsed ? 64 : 240,
         flexShrink: 0,
-        background: "#f8f9f5",
-        borderRight: "1.5px solid #dde4de",
+        background: "#f5f5f7",
+        borderRight: "1px solid #e0e0e0",
         display: "flex",
         flexDirection: "column",
         height: "100vh",
@@ -120,23 +120,23 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
           height: 54, flexShrink: 0,
           padding: isCollapsed ? "0 10px" : "0 14px 0 18px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          borderBottom: "1px solid #e9ede9",
+          borderBottom: "1px solid #f0f0f0",
         }}>
           {!isCollapsed && (
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
               <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                <rect width="100" height="100" rx="22" fill="#02382a"/>
-                <circle cx="50" cy="41" r="18" fill="#059669"/>
-                <circle cx="50" cy="59" r="18" fill="#59d10b"/>
+                <rect width="100" height="100" rx="22" fill="#1d1d1f"/>
+                <circle cx="50" cy="41" r="18" fill="#2997ff"/>
+                <circle cx="50" cy="59" r="18" fill="#0066cc"/>
               </svg>
-              <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
+              <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.374px", color: "#1d1d1f" }}>orin</span>
             </Link>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
             style={{
-              width: 26, height: 26, borderRadius: 6, border: "1px solid #e9ede9",
-              background: "#fff", cursor: "pointer", color: "#4a6d47",
+              width: 26, height: 26, borderRadius: 8, border: "1px solid #f0f0f0",
+              background: "#fff", cursor: "pointer", color: "#86868b",
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0, transition: "transform 0.2s",
               transform: collapsed ? "rotate(180deg)" : "none",
@@ -162,14 +162,16 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                     alignItems: "center", gap: 9,
                     padding: isCollapsed ? "9px" : "8px 10px",
                     borderRadius: 8, textDecoration: "none",
-                    background: active ? "#e8f5f0" : "transparent",
-                    color: active ? "#059669" : "#3d5a4a",
+                    // Surface change, not chrome: the row lifts to canvas white
+                    // against the parchment rail; Action Blue text carries state.
+                    background: active ? "#ffffff" : "transparent",
+                    color: active ? "#0066cc" : "#86868b",
                     fontWeight: active ? 600 : 400,
-                    fontSize: 12,
+                    fontSize: 13, letterSpacing: "-0.08px",
                     justifyContent: isCollapsed ? "center" : "flex-start",
                     transition: "background 0.1s",
                   }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "#f1f3ef"; }}
+                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "#ffffff"; }}
                   onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                 >
                   <Icon size={15} strokeWidth={active ? 2.5 : 2} style={{ flexShrink: 0 }} />
@@ -179,8 +181,8 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                       {href === "/" && tasks.length > 0 && (
                         <span style={{
                           fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 999,
-                          background: active ? "rgba(5,150,105,0.15)" : "#f1f3ef",
-                          color: active ? "#059669" : "#4a6d47",
+                          background: active ? "rgba(0, 102, 204,0.15)" : "#f5f5f7",
+                          color: active ? "#0066cc" : "#86868b",
                         }}>{tasks.length}</span>
                       )}
                     </>
@@ -190,44 +192,44 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
             })}
           </nav>
 
-          {/* Track energy promo — calm meadow palette */}
+          {/* Track energy promo — store-utility-card: white on parchment,
+              hairline border, no shadow, text-link CTA in Action Blue. */}
           {!isCollapsed && (
             <button
+              data-no-press
               onClick={() => setEnergyModalOpen(true)}
               style={{
                 width: "100%", textAlign: "left",
-                padding: 14, borderRadius: 4,
-                border: "0.5px solid rgba(14,58,37,0.10)",
-                background: "linear-gradient(160deg, #e7eed7 0%, #cad9b6 60%, #b9cfa7 100%)",
-                color: "#0e3a25", cursor: "pointer", fontFamily: "inherit",
-                boxShadow: "0 1px 2px rgba(14,58,37,0.04)",
-                transition: "box-shadow 0.16s, transform 0.16s",
+                padding: 16, borderRadius: 18,
+                border: "1px solid #e0e0e0",
+                background: "#ffffff",
+                color: "#1d1d1f", cursor: "pointer", fontFamily: "inherit",
+                transition: "border-color 0.16s",
               }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(14,58,37,0.10)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 2px rgba(14,58,37,0.04)"; }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#d2d2d7"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#e0e0e0"; }}
             >
-              <p style={{ fontWeight: 600, fontSize: 12, margin: "0 0 5px", lineHeight: 1.3, letterSpacing: "-0.01em" }}>Track your energy</p>
-              <p style={{ fontSize: 11, margin: "0 0 10px", color: "#3d5a4a", lineHeight: 1.5 }}>
+              <p style={{ fontWeight: 600, fontSize: 14, margin: "0 0 4px", lineHeight: 1.29, letterSpacing: "-0.224px" }}>Track your energy</p>
+              <p style={{ fontSize: 13, margin: "0 0 10px", color: "#86868b", lineHeight: 1.45, letterSpacing: "-0.08px" }}>
                 Log how you feel and see patterns over time.
               </p>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#0e3a25" }}>Check in now →</span>
+              <span style={{ fontSize: 13, color: "#0066cc", letterSpacing: "-0.08px" }}>Check in now ›</span>
             </button>
           )}
         </div>
 
         {/* Bottom section */}
-        <div style={{ padding: isCollapsed ? "10px 6px" : "10px 10px", borderTop: "1px solid #e9ede9", flexShrink: 0 }}>
+        <div style={{ padding: isCollapsed ? "10px 6px" : "10px 10px", borderTop: "1px solid #f0f0f0", flexShrink: 0 }}>
           {!isCollapsed && (
+            {/* button-primary — the one Action Blue pill in the chrome */}
             <button onClick={openCreate} style={{
-              display: "flex", alignItems: "center", gap: 8, width: "100%",
-              padding: "7px 10px", borderRadius: 8, border: "1.5px dashed #c4cbc2",
-              background: "none", cursor: "pointer", fontSize: 11, color: "#4a6d47",
-              fontFamily: "inherit", marginBottom: 6,
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#059669"; (e.currentTarget as HTMLElement).style.color = "#059669"; (e.currentTarget as HTMLElement).style.background = "#f2fdec"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "#c4cbc2"; (e.currentTarget as HTMLElement).style.color = "#4a6d47"; (e.currentTarget as HTMLElement).style.background = "none"; }}
-            >
-              <Plus size={13} /> New task…
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%",
+              padding: "9px 16px", borderRadius: 9999, border: "none",
+              background: "#0066cc", cursor: "pointer", fontSize: 14, fontWeight: 400,
+              letterSpacing: "-0.224px", color: "#ffffff",
+              fontFamily: "inherit", marginBottom: 8,
+            }}>
+              <Plus size={14} /> New task
             </button>
           )}
 
@@ -241,7 +243,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                     width: "100%", padding: "9px 10px", borderRadius: 8,
                     border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
-                    cursor: "pointer", fontSize: 11, fontWeight: 500, color: "#082d1d",
+                    cursor: "pointer", fontSize: 11, fontWeight: 500, color: "#1d1d1f",
                     fontFamily: "inherit",
                   }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,0,0,0.25)"}
@@ -256,7 +258,7 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                     Login with Google
                   </button>
                 </form>
-                <p style={{ fontSize: 10, color: "#b9d3c4", textAlign: "center", margin: "6px 0 0", lineHeight: 1.4 }}>
+                <p style={{ fontSize: 10, color: "#c7c7cc", textAlign: "center", margin: "6px 0 0", lineHeight: 1.4 }}>
                   Guest session · data not saved
                 </p>
               </div>
@@ -273,11 +275,11 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                   background: "transparent", border: "none", fontFamily: "inherit",
                   justifyContent: isCollapsed ? "center" : "flex-start",
                 }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f1f3ef"}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f5f5f7"}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
               >
                 <div style={{
-                  width: 30, height: 30, borderRadius: "50%", background: "#059669",
+                  width: 30, height: 30, borderRadius: "50%", background: "#0066cc",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 11, fontWeight: 700, color: "#fff", flexShrink: 0, overflow: "hidden",
                 }}>
@@ -288,8 +290,8 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                 </div>
                 {!isCollapsed && (
                   <div style={{ textAlign: "left", minWidth: 0, flex: 1 }}>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentName}</p>
-                    <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Free plan</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "#1d1d1f", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentName}</p>
+                    <p style={{ fontSize: 11, color: "#86868b", margin: 0 }}>Free plan</p>
                   </div>
                 )}
               </button>
@@ -297,16 +299,16 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
               {showUser && (
                 <div style={{
                   position: "absolute", bottom: "100%", left: 0, right: 0,
-                  background: "#fff", border: "1.5px solid #e9ede9",
-                  borderRadius: 4, padding: "4px 0", marginBottom: 4,
+                  background: "#fff", border: "1px solid #f0f0f0",
+                  borderRadius: 11, padding: "4px 0", marginBottom: 4,
                   boxShadow: "0 -4px 16px rgba(0,0,0,0.08)", zIndex: 100,
                 }}>
                   <button onClick={() => { setShowUser(false); setProfileOpen(true); }} style={{
                     display: "flex", alignItems: "center", gap: 8, width: "100%",
                     padding: "9px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 12, color: "#082d1d", fontFamily: "inherit",
+                    cursor: "pointer", fontSize: 12, color: "#1d1d1f", fontFamily: "inherit",
                   }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f1f3ef"}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f5f5f7"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
                   >
                     <span>👤</span> Profile
@@ -314,21 +316,21 @@ export function Sidebar({ userName, email = "", initial = "", isGuest = false }:
                   <button onClick={() => { setShowUser(false); window.dispatchEvent(new CustomEvent("orin:show-tour")); }} style={{
                     display: "flex", alignItems: "center", gap: 8, width: "100%",
                     padding: "9px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 12, color: "#082d1d", fontFamily: "inherit",
+                    cursor: "pointer", fontSize: 12, color: "#1d1d1f", fontFamily: "inherit",
                   }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f1f3ef"}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f5f5f7"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
                   >
                     <span>✨</span> Show intro
                   </button>
-                  <div style={{ height: 1, background: "#e9ede9", margin: "4px 0" }} />
+                  <div style={{ height: 1, background: "#f0f0f0", margin: "4px 0" }} />
                   <form action={signOut}>
                     <button type="submit" style={{
                       display: "flex", alignItems: "center", gap: 8, width: "100%",
                       padding: "9px 14px", background: "none", border: "none",
-                      cursor: "pointer", fontSize: 12, color: "#D14626", fontFamily: "inherit",
+                      cursor: "pointer", fontSize: 12, color: "#d70015", fontFamily: "inherit",
                     }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fdf0f0"}
                       onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
                     >
                       <span>→</span> Log out

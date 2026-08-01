@@ -14,11 +14,11 @@ interface Props {
  * Reusable empty-state illustration.
  *
  * Picks colors from the DESIGN.md token palette:
- *   bg     #f2fdec   (accent-subtle)
- *   border #c8f7ae   (lime-200)
- *   icon   #059669   (accent)
- *   title  #082d1d   (text-primary)
- *   desc   #4a6d47   (text-tertiary)
+ *   bg     #f5f5f7   (accent-subtle)
+ *   border #e0e0e0   (lime-200)
+ *   icon   #0066cc   (accent)
+ *   title  #1d1d1f   (text-primary)
+ *   desc   #86868b   (text-tertiary)
  */
 export function EmptyState({ icon: Icon, title, description, compact = false }: Props) {
   const dim = compact ? 44 : 64;
@@ -36,10 +36,10 @@ export function EmptyState({ icon: Icon, title, description, compact = false }: 
     }}>
       <div style={{
         width: dim, height: dim, borderRadius: "50%",
-        background: "#f2fdec",
-        border: "1px solid #c8f7ae",
+        background: "#f5f5f7",
+        border: "1px solid #e0e0e0",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: "#059669",
+        color: "#0066cc",
       }}>
         <Icon size={iconSize} strokeWidth={1.7} />
       </div>
@@ -47,14 +47,14 @@ export function EmptyState({ icon: Icon, title, description, compact = false }: 
         <p style={{
           fontSize: compact ? 13 : 14,
           fontWeight: 600,
-          color: "#082d1d",
+          color: "#1d1d1f",
           margin: 0,
           letterSpacing: "-0.01em",
         }}>{title}</p>
         {description && (
           <p style={{
             fontSize: compact ? 11.5 : 12.5,
-            color: "#4a6d47",
+            color: "#86868b",
             margin: 0,
             lineHeight: 1.5,
           }}>{description}</p>

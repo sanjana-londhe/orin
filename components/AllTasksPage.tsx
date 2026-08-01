@@ -12,18 +12,18 @@ import type { TaskWithSubtasks } from "@/lib/types";
 
 // ── design tokens ──────────────────────────────────────────────────────
 const T = {
-  bg:           "#fcfdfc",
+  bg:           "#ffffff",
   surface:      "#ffffff",
-  textPrimary:  "#082d1d",
-  textSecondary:"#3d5a4a",
-  textTertiary: "#4a6d47",
-  textMuted:    "#b9d3c4",
-  border:       "#dde4de",
-  borderStrong: "#c4cbc2",
-  accent:       "#059669",
-  stone100:     "#f8f9f5",
-  stone200:     "#f1f3ef",
-  stone300:     "#e9ede9",
+  textPrimary:  "#1d1d1f",
+  textSecondary:"#333333",
+  textTertiary: "#86868b",
+  textMuted:    "#c7c7cc",
+  border:       "#e0e0e0",
+  borderStrong: "#d2d2d7",
+  accent:       "#0066cc",
+  stone100:     "#f5f5f7",
+  stone200:     "#f5f5f7",
+  stone300:     "#f0f0f0",
 };
 
 type Tab    = "incomplete" | "deferred" | "completed";
@@ -139,8 +139,8 @@ export function AllTasksPage() {
           onClick={() => { setPreset(null); setFrom(""); setTo(""); }}
           style={{
             padding: isMobile ? "8px 16px" : "6px 14px",
-            borderRadius: 6, fontSize: 11, fontWeight: 500,
-            border: `1.5px solid ${preset === null ? T.accent : T.border}`,
+            borderRadius: 8, fontSize: 11, fontWeight: 500,
+            border: `1px solid ${preset === null ? T.accent : T.border}`,
             background: preset === null ? T.accent : T.surface,
             color: preset === null ? "#fff" : T.textSecondary,
             cursor: "pointer", fontFamily: "inherit", transition: "all 0.12s",
@@ -156,8 +156,8 @@ export function AllTasksPage() {
               onClick={() => { setPreset(p.key); if (p.key !== "custom") { setFrom(""); setTo(""); } }}
               style={{
                 padding: isMobile ? "8px 16px" : "6px 14px",
-                borderRadius: 6, fontSize: 11, fontWeight: 500,
-                border: `1.5px solid ${active ? T.accent : T.border}`,
+                borderRadius: 8, fontSize: 11, fontWeight: 500,
+                border: `1px solid ${active ? T.accent : T.border}`,
                 background: active ? T.accent : T.surface,
                 color: active ? "#fff" : T.textSecondary,
                 cursor: "pointer", fontFamily: "inherit", transition: "all 0.12s",
@@ -202,7 +202,7 @@ export function AllTasksPage() {
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: isMobile ? "9px 6px" : "7px 10px",
-                borderRadius: 6, border: "none", cursor: "pointer",
+                borderRadius: 8, border: "none", cursor: "pointer",
                 fontSize: isMobile ? 12 : 12.5, fontWeight: active ? 600 : 400,
                 background: active ? T.surface : "transparent",
                 color: active ? T.textPrimary : T.textTertiary,
@@ -215,7 +215,7 @@ export function AllTasksPage() {
                 ? <SkeletonBox width={28} height={18} radius={999} />
                 : (
                   <span style={{
-                    fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 4,
+                    fontSize: 11, fontWeight: 600, padding: "1px 6px", borderRadius: 11,
                     background: active ? T.stone200 : T.stone300,
                     color: active ? T.accent : T.textTertiary,
                     minWidth: 20, textAlign: "center",

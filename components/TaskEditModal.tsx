@@ -7,11 +7,11 @@ import type { TaskWithSubtasks } from "@/lib/types";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 const EMOTIONS = [
-  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626", activeBg: "#D14626" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10", activeBg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#F3F2F0", fg: "#7A756E", activeBg: "#7A756E" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D", activeBg: "#0E8A7D" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444", activeBg: "#1A9444" },
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#fdf0f0", fg: "#d70015", activeBg: "#d70015" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#fdf4ec", fg: "#b25000", activeBg: "#b25000" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#f5f5f7", fg: "#6e6e73", activeBg: "#6e6e73" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#eef6fa", fg: "#0071a4", activeBg: "#0071a4" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#eef7f1", fg: "#248a3d", activeBg: "#248a3d" },
 ] as const;
 
 interface Props {
@@ -40,13 +40,13 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(10,32,16,0.4)", backdropFilter: "blur(4px)" }} />
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(29, 29, 31,0.4)", backdropFilter: "blur(4px)" }} />
 
-      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480, background: "#fff", borderRadius: 4, boxShadow: "0 24px 64px rgba(0,0,0,0.15)", overflow: "hidden" }}>
+      <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480, background: "#fff", borderRadius: 11, boxShadow: "0 24px 64px rgba(0,0,0,0.15)", overflow: "hidden" }}>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid #f0f0f0" }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: "#0a2010", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
-          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1.5px solid #dde4de", background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: "#1d1d1f", margin: 0, letterSpacing: "-0.02em" }}>Edit task</h2>
+          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8, border: "1px solid #e0e0e0", background: "#f5f5f7", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#86868b" }}>
             <X size={13} />
           </button>
         </div>
@@ -54,43 +54,43 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
         <div style={{ padding: "18px 20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
 
           <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Task title</label>
+            <label style={{ fontSize: 11, fontWeight: 700, color: "#333333", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Task title</label>
             <input ref={titleRef} value={title} onChange={e => setTitle(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") handleSave(); }}
-              style={{ width: "100%", fontSize: 14, fontWeight: 600, color: "#0a2010", padding: "10px 12px", borderRadius: 4, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
+              style={{ width: "100%", fontSize: 14, fontWeight: 600, color: "#1d1d1f", padding: "10px 12px", borderRadius: 11, border: "1px solid #e0e0e0", outline: "none", fontFamily: "inherit", background: "#fafafc", boxSizing: "border-box" }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#0066cc")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#e0e0e0")}
             />
-            {error && <p style={{ fontSize: 11, color: "#ef4444", margin: "4px 0 0" }}>{error}</p>}
+            {error && <p style={{ fontSize: 11, color: "#d70015", margin: "4px 0 0" }}>{error}</p>}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due date</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#333333", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due date</label>
               <input type="date" value={dateStr} onChange={e => setDateStr(e.target.value)}
-                style={{ width: "100%", fontSize: 12, padding: "9px 10px", borderRadius: 4, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: "#fafafa", boxSizing: "border-box" }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
-                onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                style={{ width: "100%", fontSize: 12, padding: "9px 10px", borderRadius: 11, border: "1px solid #e0e0e0", outline: "none", fontFamily: "inherit", background: "#fafafc", boxSizing: "border-box" }}
+                onFocus={e => (e.currentTarget.style.borderColor = "#0066cc")}
+                onBlur={e => (e.currentTarget.style.borderColor = "#e0e0e0")}
               />
             </div>
             <div>
-              <label style={{ fontSize: 11, fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due time</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#333333", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Due time</label>
               <input type="time" value={timeStr} onChange={e => setTimeStr(e.target.value)} disabled={!dateStr}
-                style={{ width: "100%", fontSize: 12, padding: "9px 10px", borderRadius: 4, border: "1.5px solid #e5e7eb", outline: "none", fontFamily: "inherit", background: dateStr ? "#fafafa" : "#f3f4f6", boxSizing: "border-box" }}
-                onFocus={e => (e.currentTarget.style.borderColor = "#16a34a")}
-                onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                style={{ width: "100%", fontSize: 12, padding: "9px 10px", borderRadius: 11, border: "1px solid #e0e0e0", outline: "none", fontFamily: "inherit", background: dateStr ? "#fafafc" : "#f5f5f7", boxSizing: "border-box" }}
+                onFocus={e => (e.currentTarget.style.borderColor = "#0066cc")}
+                onBlur={e => (e.currentTarget.style.borderColor = "#e0e0e0")}
               />
             </div>
           </div>
 
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#082d1d", display: "block", marginBottom: 10 }}>How do you feel about it?</label>
+            <label style={{ fontSize: 12, fontWeight: 700, color: "#1d1d1f", display: "block", marginBottom: 10 }}>How do you feel about it?</label>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {EMOTIONS.map(s => {
                 const active = emotion === s.value;
                 return (
                   <button key={s.value} onClick={() => setEmotion(s.value)} style={{
-                    display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 4,
+                    display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 11,
                     background: active ? s.activeBg : s.bg, color: active ? "#fff" : s.fg,
                     border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.12s",
                   }}>
@@ -103,11 +103,11 @@ export function TaskEditModal({ task, onClose, onUpdate }: Props) {
 
           <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
             {isMobile && (
-              <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 4, border: "1.5px solid #e5e7eb", background: "#fff", color: "#6b7280", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+              <button onClick={onClose} style={{ flex: 1, padding: "11px 0", borderRadius: 11, border: "1px solid #e0e0e0", background: "#fff", color: "#86868b", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
                 Cancel
               </button>
             )}
-            <button onClick={handleSave} style={{ flex: isMobile ? 2 : 1, padding: "11px 0", borderRadius: 4, border: "none", background: "#16a34a", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+            <button onClick={handleSave} style={{ flex: isMobile ? 2 : 1, padding: "11px 0", borderRadius: 11, border: "none", background: "#0066cc", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
               Save changes
             </button>
           </div>

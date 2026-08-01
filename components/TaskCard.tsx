@@ -11,21 +11,21 @@ import { Pencil, Trash2, ChevronRight } from "lucide-react";
 import { MiniCalendar } from "@/components/DatePickerField";
 import { WheelTimePicker } from "@/components/TimePickerField";
 
-// design.md tokens
+// documents/DESIGN.md tokens
 const T = {
-  textPrimary:   "#082d1d",
-  textSecondary: "#3d5a4a",
-  textTertiary:  "#4a6d47",
-  textMuted:     "#b9d3c4",
-  border:        "#dde4de",
-  borderStrong:  "#c4cbc2",
-  surface:       "#ffffff",
-  stone100:      "#f8f9f5",
-  stone200:      "#f1f3ef",
-  accent:        "#059669",
-  accentHover:   "#047857",
-  danger:        "#c23934",
-  dangerBg:      "#FFF0EC",
+  textPrimary:   "#1d1d1f",   // colors.ink — task titles only
+  textSecondary: "#333333",   // colors.ink-muted-80
+  textTertiary:  "#86868b",   // colors.ink-muted-64
+  textMuted:     "#c7c7cc",   // colors.ink-muted-30
+  border:        "#e0e0e0",   // colors.hairline
+  borderStrong:  "#d2d2d7",   // colors.surface-chip-translucent
+  surface:       "#ffffff",   // colors.canvas
+  stone100:      "#fafafc",   // colors.surface-pearl
+  stone200:      "#f5f5f7",   // colors.canvas-parchment — the hover surface
+  accent:        "#0066cc",   // colors.primary — Action Blue
+  accentHover:   "#0071e3",   // colors.primary-focus
+  danger:        "#d70015",
+  dangerBg:      "#fdf0f0",
   flagged:       "#ff9500",
 };
 
@@ -132,11 +132,11 @@ function parseTimeInput(raw: string): string | null {
 // ── emotion config ─────────────────────────────────────────────────────
 
 const EMOTIONS = [
-  { value: "DREADING", label: "Dreading", emoji: "😰", bg: "#FFF0EC", fg: "#D14626" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟", bg: "#FFF8E8", fg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐", bg: "#F3F2F0", fg: "#7A756E" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂", bg: "#EEF9F7", fg: "#0E8A7D" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩", bg: "#EEFAF1", fg: "#1A9444" },
+  { value: "DREADING", label: "Dreading", emoji: "😰", bg: "#fdf0f0", fg: "#d70015" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟", bg: "#fdf4ec", fg: "#b25000" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐", bg: "#f5f5f7", fg: "#6e6e73" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂", bg: "#eef6fa", fg: "#0071a4" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩", bg: "#eef7f1", fg: "#248a3d" },
 ] as const;
 
 // ── note helpers ───────────────────────────────────────────────────────
@@ -282,9 +282,9 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
       return `${h%12||12}:${String(m).padStart(2,"0")} ${h>=12?"PM":"AM"}`;
     }
     const chip = (fg?: string): React.CSSProperties => ({
-      display:"inline-flex", alignItems:"center", gap:5, padding:"4px 9px", borderRadius:6,
-      background:"#f8f9f5", border:`0.5px solid ${fg ? fg+"33" : "rgba(0,0,0,0.08)"}`,
-      color: fg ?? "#5f5e5a", fontSize: 11, fontWeight:500, cursor:"pointer", fontFamily:"inherit",
+      display:"inline-flex", alignItems:"center", gap:6, padding:"5px 12px", borderRadius: 9999,
+      background:"#f5f5f7", border:"none",
+      color: fg ?? "#86868b", fontSize: 13, fontWeight:400, letterSpacing:"-0.08px", cursor:"pointer", fontFamily:"inherit",
     });
 
     return (
@@ -293,17 +293,17 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
           {/* Title + notes */}
           <div style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"10px 14px 4px 16px" }}>
-            <div style={{ width:18, height:18, borderRadius:"50%", border:`1.5px solid ${T.accent}`, flexShrink:0, marginTop:2 }} />
+            <div style={{ width:18, height:18, borderRadius:"50%", border:`1px solid ${T.accent}`, flexShrink:0, marginTop:2 }} />
             <div style={{ flex:1 }}>
               <input ref={editTitleRef} value={editTitle}
                 onChange={e => setEditTitle(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") closeEdit(); }}
-                style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 12, fontWeight:400, letterSpacing:"-0.01em", color:T.textPrimary, background:"transparent", marginBottom:2, display:"block" }} />
+                style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 15, fontWeight:400, letterSpacing:"-0.24px", color:T.textPrimary, background:"transparent", marginBottom:2, display:"block" }} />
               {editNoteOpen ? (
                 <textarea value={editNote} onChange={e => setEditNote(e.target.value)} placeholder="Notes" rows={2}
-                  style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 11, color:"#3d5a4a", background:"transparent", resize:"none", lineHeight:1.5, padding:0, display:"block" }} />
+                  style={{ width:"100%", border:"none", outline:"none", fontFamily:"inherit", fontSize: 13, color:"#86868b", background:"transparent", resize:"none", lineHeight:1.5, padding:0, display:"block" }} />
               ) : (
-                <div onClick={() => setEditNoteOpen(true)} style={{ fontSize: 11, color:"#b9d3c4", cursor:"text", marginBottom:2 }}>
+                <div onClick={() => setEditNoteOpen(true)} style={{ fontSize: 13, color:"#c7c7cc", cursor:"text", marginBottom:2 }}>
                   {editNote.trim() || "Notes"}
                 </div>
               )}
@@ -318,10 +318,10 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
               <button onClick={(e) => { pickDropDirection(e); setShowEditEmoPicker(o=>!o); setShowEditDatePicker(false); setShowEditCustomDate(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
                 style={{ ...chip(editEm.fg), background: editEm.bg }}><span style={{ fontSize: 10 }}>{editEm.emoji}</span> {editEm.label}</button>
               {showEditEmoPicker && (
-                <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
+                <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth:150, padding:"4px 0", overflow:"hidden" }}>
                   {EMOTIONS.map(f => (
                     <button key={f.value} onClick={() => { setEditEmotion(f.value); setShowEditEmoPicker(false); }}
-                      style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:editEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize: 12, color:editEmotion===f.value?f.fg:"#082d1d", fontFamily:"inherit" }}>
+                      style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"8px 14px", background:editEmotion===f.value?f.bg:"none", border:"none", cursor:"pointer", fontSize: 12, color:editEmotion===f.value?f.fg:"#1d1d1f", fontFamily:"inherit" }}>
                       {f.emoji} {f.label}
                       {editEmotion===f.value && <span style={{ marginLeft:"auto", fontSize: 11 }}>✓</span>}
                     </button>
@@ -333,15 +333,15 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
             {/* Date */}
             <div style={{ position:"relative" }}>
               <button onClick={(e) => { pickDropDirection(e); setShowEditDatePicker(o=>!o); setShowEditCustomDate(false); setShowEditEmoPicker(false); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
-                style={chip("#059669")}><span style={{ fontSize: 10 }}>📅</span> {editDateLabel}</button>
+                style={chip("#0066cc")}><span style={{ fontSize: 10 }}>📅</span> {editDateLabel}</button>
               {showEditDatePicker && (
                 <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding:"4px 0", overflow:"hidden" }}>
+                  <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding:"4px 0", overflow:"hidden" }}>
                     {getDatePresets().map(opt=>(
                       <button key={opt.value} onClick={() => { setEditDate(opt.value); setShowEditDatePicker(false); setShowEditCustomDate(false); }}
-                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                        <span style={{ fontSize: 12, color:editDate===opt.value?"#059669":"#082d1d", fontWeight:editDate===opt.value?500:400 }}>{opt.label}</span>
-                        <span style={{ fontSize: 11, color:editDate===opt.value?"#059669":"#888780" }}>{opt.sub}{editDate===opt.value?" ✓":""}</span>
+                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editDate===opt.value?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                        <span style={{ fontSize: 12, color:editDate===opt.value?"#0066cc":"#1d1d1f", fontWeight:editDate===opt.value?500:400 }}>{opt.label}</span>
+                        <span style={{ fontSize: 11, color:editDate===opt.value?"#0066cc":"#86868b" }}>{opt.sub}{editDate===opt.value?" ✓":""}</span>
                       </button>
                     ))}
                     <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
@@ -349,9 +349,9 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                       if (isMobile) { setShowEditDatePicker(false); openNativeDate(); return; }
                       setShowEditCustomDate(s => !s); setShowEditTimePicker(false); setShowEditCustomTime(false);
                     }}
-                      style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background: !isMobile && showEditCustomDate?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                      <span style={{ fontSize: 12, color:"#082d1d", fontWeight: !isMobile && showEditCustomDate?500:400 }}>Custom date</span>
-                      <ChevronRight size={13} color={!isMobile && showEditCustomDate ? "#059669" : "#888780"} />
+                      style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background: !isMobile && showEditCustomDate?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                      <span style={{ fontSize: 12, color:"#1d1d1f", fontWeight: !isMobile && showEditCustomDate?500:400 }}>Custom date</span>
+                      <ChevronRight size={13} color={!isMobile && showEditCustomDate ? "#0066cc" : "#86868b"} />
                     </button>
                   </div>
                   {!isMobile && showEditCustomDate && (
@@ -371,12 +371,12 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                 const slots = getTimeSlots(isToday, nowTime);
                 return (
                   <div style={{ position:"absolute", [editDropUp ? "bottom" : "top"]:"calc(100% + 6px)", left:0, zIndex:50, display:"flex", gap:8 }}>
-                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding:"4px 0", overflow:"hidden" }}>
+                    <div style={{ background:"#fff", border:"0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow: editDropUp ? "0 -4px 20px rgba(0,0,0,0.1)" : "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding:"4px 0", overflow:"hidden" }}>
                       {slots.map(opt=>(
                         <button key={opt.value} onClick={() => { setEditTime(opt.value); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
-                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                          <span style={{ fontSize: 12, color:editTime===opt.value?"#059669":"#082d1d", fontWeight:editTime===opt.value?500:400 }}>{opt.label}</span>
-                          <span style={{ fontSize: 11, color:editTime===opt.value?"#059669":"#888780" }}>{fmtEditTime(opt.value)}{editTime===opt.value?" ✓":""}</span>
+                          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background:editTime===opt.value?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                          <span style={{ fontSize: 12, color:editTime===opt.value?"#0066cc":"#1d1d1f", fontWeight:editTime===opt.value?500:400 }}>{opt.label}</span>
+                          <span style={{ fontSize: 11, color:editTime===opt.value?"#0066cc":"#86868b" }}>{fmtEditTime(opt.value)}{editTime===opt.value?" ✓":""}</span>
                         </button>
                       ))}
                       <div style={{ borderTop:"0.5px solid rgba(0,0,0,0.06)" }} />
@@ -387,17 +387,17 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                         setShowEditDatePicker(false); setShowEditCustomDate(false);
                         if (opening && !editTime) setEditTime("09:00");
                       }}
-                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background: !isMobile && showEditCustomTime?"#f2fdec":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
-                        <span style={{ fontSize: 12, color:"#082d1d", fontWeight: !isMobile && showEditCustomTime?500:400 }}>Custom time</span>
-                        <ChevronRight size={13} color={!isMobile && showEditCustomTime ? "#059669" : "#888780"} />
+                        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"8px 14px", background: !isMobile && showEditCustomTime?"#f5f5f7":"none", border:"none", cursor:"pointer", fontFamily:"inherit" }}>
+                        <span style={{ fontSize: 12, color:"#1d1d1f", fontWeight: !isMobile && showEditCustomTime?500:400 }}>Custom time</span>
+                        <ChevronRight size={13} color={!isMobile && showEditCustomTime ? "#0066cc" : "#86868b"} />
                       </button>
                       {editTime && (
                         <button onClick={()=>{ setEditTime(""); setShowEditTimePicker(false); setShowEditCustomTime(false); }}
-                          style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 11, color: "#D14626", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>
+                          style={{ display:"block", width:"100%", padding:"7px 14px", background:"none", border:"none", borderTop:"0.5px solid rgba(0,0,0,0.06)", cursor:"pointer", fontSize: 11, color: "#d70015", fontFamily:"inherit", textAlign:"left" }}>Remove time</button>
                       )}
                     </div>
                     {!isMobile && showEditCustomTime && (
-                      <div style={{ background:"#fff", border:"1.5px solid #dde4de", borderRadius: 4, boxShadow: editDropUp ? "0 -4px 16px rgba(0,0,0,0.09)" : "0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
+                      <div style={{ background:"#fff", border:"1px solid #e0e0e0", borderRadius: 11, boxShadow: editDropUp ? "0 -4px 16px rgba(0,0,0,0.09)" : "0 4px 16px rgba(0,0,0,0.09)", padding:"12px 14px" }}>
                         <WheelTimePicker value={editTime || "09:00"} onChange={t => setEditTime(t)} />
                       </div>
                     )}
@@ -407,12 +407,12 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
             </div>
 
             {isMobile && onDelete && (
-              <button onClick={()=>{onDelete(task.id);closeEdit();}} style={chip("#c23934")}>Delete</button>
+              <button onClick={()=>{onDelete(task.id);closeEdit();}} style={chip("#d70015")}>Delete</button>
             )}
 
             <div style={{ flex:1 }} />
             <button onClick={saveEdit}
-              style={{ padding:"5px 14px", borderRadius:6, border:"none", background:T.accent, color:"#fff", fontSize: 11, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+              style={{ padding:"7px 18px", borderRadius: 9999, border:"none", background:T.accent, color:"#fff", fontSize: 14, fontWeight:400, letterSpacing:"-0.224px", cursor:"pointer", fontFamily:"inherit" }}>
               Save
             </button>
           </div>
@@ -491,11 +491,13 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Title */}
+          {/* app-row — the only full-ink text in the list; everything
+              around it steps down to ink-muted-64 so the task speaks. */}
           <div style={{
-            fontSize: 12, fontWeight: 400,
+            fontSize: 15, fontWeight: 400,
             color: done ? T.textMuted : T.textPrimary,
-            lineHeight: 1.45,
-            letterSpacing: "-0.01em",
+            lineHeight: 1.4,
+            letterSpacing: "-0.24px",
             textDecoration: done ? "line-through" : "none",
             marginBottom: 4,
             position: "relative", display: "inline-block", width: "100%",
@@ -508,9 +510,9 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
 
           {/* Meta chips — feeling → date */}
           {!done && (
-            <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap", marginBottom: note && mounted ? 3 : 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: note && mounted ? 3 : 0 }}>
               {task.emotionalState && (
-                <span style={{ display:"inline-flex", alignItems:"center", gap:3, fontSize: 11, fontWeight:500, padding:"2px 7px", borderRadius:5, background:em.bg, color:em.fg }}>
+                <span style={{ display:"inline-flex", alignItems:"center", gap:4, fontSize: 13, fontWeight:400, letterSpacing:"-0.08px", padding:"3px 10px", borderRadius: 9999, background:em.bg, color:em.fg }}>
                   {em.emoji} {em.label}
                 </span>
               )}
@@ -518,14 +520,14 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                 {/* Date */}
                 <span
                   onClick={e => { e.stopPropagation(); setDeferOpen(true); }}
-                  style={{ fontSize: 11, fontWeight:500, color: due ? (due.overdue ? T.danger : due.isToday ? T.accent : "#888780") : "#c4cbc2", cursor:"pointer" }}>
+                  style={{ fontSize: 13, fontWeight:400, letterSpacing:"-0.08px", color: due ? (due.overdue ? T.danger : due.isToday ? T.accent : "#86868b") : "#d2d2d7", cursor:"pointer" }}>
                   {due ? <>{due.overdue && "⚠ "}{due.dateLabel}</> : "+ date"}
                 </span>
                 {/* Time — shown separately, only if set */}
                 {due?.timeLabel && (
                   <span
                     onClick={e => { e.stopPropagation(); setDeferOpen(true); }}
-                    style={{ fontSize: 11, fontWeight:500, color: "#4a6d47", cursor:"pointer" }}>
+                    style={{ fontSize: 13, fontWeight:400, letterSpacing:"-0.08px", color: "#86868b", cursor:"pointer" }}>
                     {due.timeLabel}
                   </span>
                 )}
@@ -534,7 +536,7 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
           )}
 
           {mounted && note && (
-            <div style={{ fontSize: 11, color: T.textMuted, lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <div style={{ fontSize: 13, color: T.textMuted, lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {note}
             </div>
           )}
@@ -550,14 +552,14 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
         {!isMobile && (
         <div style={{ display: "flex", alignItems: "center", gap: 4, paddingLeft: 8, flexShrink: 0, paddingTop: 1, opacity: hovered && !done ? 1 : 0, transition: "opacity 0.15s" }}>
           <button onClick={openEdit} title="Edit"
-            style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.stone100, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s, border-color 0.1s" }}
+            style={{ width: 26, height: 26, borderRadius: 8, border: `1px solid ${T.border}`, background: T.stone100, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s, border-color 0.1s" }}
             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.stone200; el.style.color = T.textSecondary; }}
             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.stone100; el.style.color = T.textTertiary; }}>
             <Pencil size={11} />
           </button>
           <button onClick={() => onDelete?.(task.id)} title="Delete"
-            style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.stone100, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s, border-color 0.1s" }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.dangerBg; el.style.color = T.danger; el.style.borderColor = "#e9c3c1"; }}
+            style={{ width: 26, height: 26, borderRadius: 8, border: `1px solid ${T.border}`, background: T.stone100, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: T.textTertiary, transition: "background 0.1s, color 0.1s, border-color 0.1s" }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.dangerBg; el.style.color = T.danger; el.style.borderColor = "#f0c9c9"; }}
             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = T.stone100; el.style.color = T.textTertiary; el.style.borderColor = T.border; }}>
             <Trash2 size={11} />
           </button>
@@ -579,18 +581,18 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
       {/* Prompt when uncompleting a future task */}
       {showUncompletePrompt && (
         <>
-          <div onClick={() => setShowUncompletePrompt(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(8,45,29,0.2)", backdropFilter: "blur(2px)" }} />
+          <div onClick={() => setShowUncompletePrompt(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(29, 29, 31,0.2)", backdropFilter: "blur(2px)" }} />
           <div style={{
             position: "fixed", top: "50%", left: "50%",
             transform: "translate(-50%, -50%)", zIndex: 201,
             width: isMobile ? "calc(100vw - 32px)" : 300,
             maxWidth: 360,
-            background: "#fff", borderRadius: 4,
-            border: "1px solid #dde4de", boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+            background: "#fff", borderRadius: 11,
+            border: "1px solid #e0e0e0", boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
             padding: "20px",
           }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "#082d1d", margin: "0 0 6px" }}>Future task</p>
-            <p style={{ fontSize: 12, color: "#3d5a4a", margin: "0 0 16px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#1d1d1f", margin: "0 0 6px" }}>Future task</p>
+            <p style={{ fontSize: 12, color: "#333333", margin: "0 0 16px", lineHeight: 1.5 }}>
               This task is due <strong>{due?.dateLabel}</strong>. Would you like to move it to today?
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -601,19 +603,19 @@ function TaskCardInner({ task, onMarkDone, onUncomplete, onDefer, onUpdate, onDe
                   onUncomplete?.(task.id);
                   setShowUncompletePrompt(false);
                 }}
-                style={{ padding: "10px", borderRadius: 8, border: "none", background: "#059669", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ padding: "10px", borderRadius: 8, border: "none", background: "#0066cc", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
               >
                 Move to today
               </button>
               <button
                 onClick={() => { onUncomplete?.(task.id); setShowUncompletePrompt(false); }}
-                style={{ padding: "10px", borderRadius: 8, border: "1px solid #dde4de", background: "#fff", color: "#3d5a4a", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ padding: "10px", borderRadius: 8, border: "1px solid #e0e0e0", background: "#fff", color: "#333333", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
               >
                 Keep original date
               </button>
               <button
                 onClick={() => setShowUncompletePrompt(false)}
-                style={{ padding: "6px", borderRadius: 8, border: "none", background: "none", color: "#b9d3c4", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
+                style={{ padding: "6px", borderRadius: 8, border: "none", background: "none", color: "#c7c7cc", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}
               >
                 Cancel
               </button>

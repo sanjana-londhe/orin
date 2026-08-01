@@ -72,8 +72,8 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
   };
   const mobileCardStyle: React.CSSProperties = {
     width: "100%", maxWidth: 520,
-    background: "#fff", borderRadius: 4,
-    border: "1px solid #dde4de",
+    background: "#fff", borderRadius: 11,
+    border: "1px solid #e0e0e0",
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
     maxHeight: "calc(100vh - 120px)", overflowY: "auto",
     pointerEvents: "auto",
@@ -84,8 +84,8 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
     pointerEvents: "none",
   };
   const desktopCardStyle: React.CSSProperties = {
-    width: 420, background: "#fff", borderRadius: 4,
-    border: "1px solid #dde4de",
+    width: 420, background: "#fff", borderRadius: 11,
+    border: "1px solid #e0e0e0",
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
     maxHeight: "70vh", overflowY: "auto",
     pointerEvents: "auto",
@@ -93,15 +93,15 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
 
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(8,45,29,0.2)", backdropFilter: "blur(2px)" }} />
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(29, 29, 31,0.2)", backdropFilter: "blur(2px)" }} />
       <div style={isMobile ? mobileWrapperStyle : desktopWrapperStyle}>
         <div style={isMobile ? mobileCardStyle : desktopCardStyle} onClick={ev => ev.stopPropagation()}>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #e9ede9" }}>
-            <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #f0f0f0" }}>
+            <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
               {editing ? "Edit task" : "Task"}
             </p>
-            <button onClick={onClose} style={{ width: 28, height: 28, border: "1.5px solid #dde4de", borderRadius: 8, background: "#f8f9f5", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47" }}>
+            <button onClick={onClose} style={{ width: 28, height: 28, border: "1px solid #e0e0e0", borderRadius: 8, background: "#f5f5f7", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#86868b" }}>
               <X size={13} />
             </button>
           </div>
@@ -109,7 +109,7 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
           {editing ? (
             <>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "12px 16px 4px" }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 4 }} />
+                <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1px dashed #d2d2d7", flexShrink: 0, marginTop: 4 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <input
                     autoFocus
@@ -122,7 +122,7 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
                     placeholder="Task name"
                     style={{
                       width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-                      fontSize: 14, fontWeight: 500, color: "#082d1d",
+                      fontSize: 14, fontWeight: 500, color: "#1d1d1f",
                       background: "transparent", marginBottom: 4,
                     }}
                   />
@@ -134,12 +134,12 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
                       rows={2}
                       style={{
                         width: "100%", border: "none", outline: "none", fontFamily: "inherit",
-                        fontSize: 12, color: "#3d5a4a", background: "transparent",
+                        fontSize: 12, color: "#333333", background: "transparent",
                         resize: "none", lineHeight: 1.5, padding: 0,
                       }}
                     />
                   ) : (
-                    <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12, color: "#b9d3c4", cursor: "text" }}>
+                    <div onClick={() => setNoteOpen(true)} style={{ fontSize: 12, color: "#c7c7cc", cursor: "text" }}>
                       {editNote.trim() || "+ Add note"}
                     </div>
                   )}
@@ -161,8 +161,8 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
                     onClick={() => setEditing(false)}
                     style={{
                       padding: "7px 16px", borderRadius: 8,
-                      border: "1.5px solid #dde4de", background: "#fff",
-                      color: "#3d5a4a", fontSize: 12, fontWeight: 500,
+                      border: "1px solid #e0e0e0", background: "#fff",
+                      color: "#333333", fontSize: 12, fontWeight: 500,
                       cursor: "pointer", fontFamily: "inherit",
                     }}
                   >Cancel</button>
@@ -171,7 +171,7 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
                   onClick={saveEdit}
                   style={{
                     padding: "7px 20px", borderRadius: 8, border: "none",
-                    background: "#059669", color: "#fff",
+                    background: "#0066cc", color: "#fff",
                     fontSize: 12, fontWeight: 700,
                     cursor: "pointer", fontFamily: "inherit",
                   }}
@@ -183,53 +183,53 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px 6px" }}>
                 <div
                   onClick={() => isDone ? onMarkUndone(task.id) : onMarkDone(task.id)}
-                  style={{ width: 22, height: 22, borderRadius: "50%", border: `1.5px solid ${isDone ? "#059669" : "#dde4de"}`, background: isDone ? "#059669" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2, cursor: "pointer", transition: "all 0.15s" }}
+                  style={{ width: 22, height: 22, borderRadius: "50%", border: `1px solid ${isDone ? "#0066cc" : "#e0e0e0"}`, background: isDone ? "#0066cc" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2, cursor: "pointer", transition: "all 0.15s" }}
                 >
                   {isDone && <svg width="10" height="7" viewBox="0 0 11 8" fill="none"><path d="M1 4l3 3 6-6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                 </div>
-                <p style={{ flex: 1, fontSize: 14, fontWeight: 500, color: "#082d1d", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>{task.title}</p>
+                <p style={{ flex: 1, fontSize: 14, fontWeight: 500, color: "#1d1d1f", margin: 0, lineHeight: 1.4, textDecoration: isDone ? "line-through" : "none" }}>{task.title}</p>
               </div>
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "4px 16px 14px" }}>
-                <span style={{ fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 4, background: e.pillBg, color: e.pillText }}>
+                <span style={{ fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 11, background: e.pillBg, color: e.pillText }}>
                   {e.emoji} {e.label}
                 </span>
                 {dateLabel && (
-                  <span style={{ fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 4, background: "#f8f9f5", color: overdue ? "#D14626" : "#4a6d47" }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 11, background: "#f5f5f7", color: overdue ? "#d70015" : "#86868b" }}>
                     {overdue && "⚠ "}{dateLabel}{time ? ` · ${time}` : ""}
                   </span>
                 )}
                 {task.deferredCount > 0 && (
-                  <span style={{ fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 4, background: "#FFF0EC", color: "#D14626" }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 11, background: "#fdf0f0", color: "#d70015" }}>
                     Deferred {task.deferredCount}×
                   </span>
                 )}
               </div>
 
               {initialNote && (
-                <div style={{ borderTop: "1px solid #f1f3ef", padding: "10px 16px" }}>
-                  <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.5 }}>{initialNote}</p>
+                <div style={{ borderTop: "1px solid #f5f5f7", padding: "10px 16px" }}>
+                  <p style={{ fontSize: 12, color: "#333333", margin: 0, lineHeight: 1.5 }}>{initialNote}</p>
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 8, padding: "12px 16px 16px", borderTop: "1px solid #f1f3ef" }}>
+              <div style={{ display: "flex", gap: 8, padding: "12px 16px 16px", borderTop: "1px solid #f5f5f7" }}>
                 {!confirmDel ? (
                   <>
                     <button
                       onClick={() => setConfirmDel(true)}
-                      style={{ flex: 1, padding: "10px 8px", borderRadius: 6, border: "1px solid #e9c3c1", background: "#FFF0EC", color: "#D14626", fontSize: 12, fontWeight: 500, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", fontFamily: "inherit" }}
+                      style={{ flex: 1, padding: "10px 8px", borderRadius: 8, border: "1px solid #f0c9c9", background: "#fdf0f0", color: "#d70015", fontSize: 12, fontWeight: 500, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", fontFamily: "inherit" }}
                     >
                       <Trash2 size={13} /> Delete
                     </button>
                     <button
                       onClick={() => setEditing(true)}
-                      style={{ flex: 1, padding: "10px 8px", borderRadius: 6, border: "1px solid #dde4de", background: "#f8f9f5", color: "#3d5a4a", fontSize: 12, fontWeight: 500, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", fontFamily: "inherit" }}
+                      style={{ flex: 1, padding: "10px 8px", borderRadius: 8, border: "1px solid #e0e0e0", background: "#f5f5f7", color: "#333333", fontSize: 12, fontWeight: 500, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", fontFamily: "inherit" }}
                     >
                       <Pencil size={13} /> Edit
                     </button>
                     <button
                       onClick={() => { if (isDone) onMarkUndone(task.id); else onMarkDone(task.id); onClose(); }}
-                      style={{ flex: 1.3, padding: "10px 8px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+                      style={{ flex: 1.3, padding: "10px 8px", borderRadius: 8, border: "none", background: "#0066cc", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
                     >
                       {isDone ? "Mark undone" : "Mark done"}
                     </button>
@@ -238,11 +238,11 @@ export function TaskFocusPopup({ task, onClose, onMarkDone, onMarkUndone, onUpda
                   <>
                     <button
                       onClick={() => setConfirmDel(false)}
-                      style={{ flex: 1, padding: "10px 12px", borderRadius: 6, border: "1px solid #dde4de", background: "#f8f9f5", color: "#3d5a4a", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
+                      style={{ flex: 1, padding: "10px 12px", borderRadius: 8, border: "1px solid #e0e0e0", background: "#f5f5f7", color: "#333333", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
                     >Cancel</button>
                     <button
                       onClick={() => onDelete(task.id)}
-                      style={{ flex: 1, padding: "10px 12px", borderRadius: 6, border: "none", background: "#D14626", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+                      style={{ flex: 1, padding: "10px 12px", borderRadius: 8, border: "none", background: "#d70015", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
                     >Confirm delete</button>
                   </>
                 )}

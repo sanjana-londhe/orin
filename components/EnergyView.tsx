@@ -18,15 +18,15 @@ import {
 
 // ── Mood constants ───────────────────────────────────────────────────
 
-// Brighter mood gradient — coral → amber → lime → emerald. Vivid enough
-// that each step is distinct at a glance on the heatmap, with the
-// brand-leaning emerald anchoring the high end.
+// Mood scale — a five-step sequential ramp drawn from Apple system colours
+// (red → orange → yellow → teal → green), so the heatmap reads in the same
+// language as the emotional-state chips. Data, not chrome: never an affordance.
 const MOODS = [
-  { value: 1, emoji: "😔", label: "Very unpleasant", color: "#ef6a55", soft: "#fde2dc" },
-  { value: 2, emoji: "😕", label: "Unpleasant",      color: "#f5a261", soft: "#fde9d7" },
-  { value: 3, emoji: "😐", label: "Neutral",         color: "#f1c95a", soft: "#fdf2cc" },
-  { value: 4, emoji: "🙂", label: "Pleasant",        color: "#74cf63", soft: "#dff5d5" },
-  { value: 5, emoji: "😄", label: "Very pleasant",   color: "#1f9e6b", soft: "#c8e9d4" },
+  { value: 1, emoji: "😔", label: "Very unpleasant", color: "#d70015", soft: "#fdf0f0" },
+  { value: 2, emoji: "😕", label: "Unpleasant",      color: "#b25000", soft: "#fdf4ec" },
+  { value: 3, emoji: "😐", label: "Neutral",         color: "#8a6d00", soft: "#fbf6e3" },
+  { value: 4, emoji: "🙂", label: "Pleasant",        color: "#0071a4", soft: "#eef6fa" },
+  { value: 5, emoji: "😄", label: "Very pleasant",   color: "#248a3d", soft: "#eef7f1" },
 ];
 
 function moodMeta(v: number) { return MOODS[Math.round(v) - 1] ?? MOODS[2]; }
@@ -124,7 +124,7 @@ function MoodHeatmap({
 
   if (days.every(d => d.value === null)) {
     return (
-      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "20px 0" }}>
+      <p style={{ fontSize: 12, color: "#c7c7cc", margin: 0, textAlign: "center", padding: "20px 0" }}>
         Log check-ins to fill your mood map.
       </p>
     );
@@ -146,7 +146,7 @@ function MoodHeatmap({
           return (
             <div key={idx} style={{
               flex: 1, minWidth: 0,
-              fontSize: 10, color: "#4a6d47", fontWeight: 600,
+              fontSize: 10, color: "#86868b", fontWeight: 600,
               letterSpacing: "0.04em", textTransform: "uppercase",
               whiteSpace: "nowrap", lineHeight: 1, height: 12,
             }}>{monthEntry?.label ?? ""}</div>
@@ -172,7 +172,7 @@ function MoodHeatmap({
             return (
               <div key={dow} style={{
                 flex: 1, minHeight: 0,
-                fontSize: 9, color: "#7a8a7a",
+                fontSize: 9, color: "#86868b",
                 display: "flex", alignItems: "center", justifyContent: "flex-end",
                 paddingRight: 4, lineHeight: 1,
                 visibility: showLabel ? "visible" : "hidden",
@@ -193,8 +193,8 @@ function MoodHeatmap({
                   return (
                     <div key={ri} style={{
                       aspectRatio: "1", width: "100%",
-                      borderRadius: 3,
-                      background: "#eef1ed", opacity: 0.5,
+                      borderRadius: 8,
+                      background: "#f0f0f0", opacity: 0.5,
                     }} />
                   );
                 }
@@ -207,9 +207,9 @@ function MoodHeatmap({
                     onMouseLeave={() => setTip(t => t?.cell.key === cell.key ? null : t)}
                     style={{
                       aspectRatio: "1", width: "100%",
-                      borderRadius: 3,
-                      background: has ? moodColor(cell.value!) : "#eef1ed",
-                      outline: today ? "2px solid #082d1d" : "none",
+                      borderRadius: 8,
+                      background: has ? moodColor(cell.value!) : "#f0f0f0",
+                      outline: today ? "2px solid #1d1d1f" : "none",
                       outlineOffset: today ? -1 : 0,
                       boxSizing: "border-box",
                       cursor: "pointer",
@@ -227,13 +227,13 @@ function MoodHeatmap({
         display: "flex", alignItems: "center", gap: 6,
         marginTop: 10, paddingLeft: dowGutter + 6,
       }}>
-        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Unpleasant</span>
+        <span style={{ fontSize: 10, color: "#86868b" }}>Unpleasant</span>
         {MOODS.map(m => (
           <div key={m.value} style={{
-            width: 11, height: 11, borderRadius: 3, background: m.color,
+            width: 11, height: 11, borderRadius: 8, background: m.color,
           }} />
         ))}
-        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Pleasant</span>
+        <span style={{ fontSize: 10, color: "#86868b" }}>Pleasant</span>
       </div>
 
       {tip && <HeatmapTooltip cell={tip.cell} rect={tip.rect} />}
@@ -281,7 +281,7 @@ function MoodHeatmapMobile({ days, store }: { days: HeatCell[]; store: EnergySto
 
   if (days.every(d => d.value === null)) {
     return (
-      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "20px 0" }}>
+      <p style={{ fontSize: 12, color: "#c7c7cc", margin: 0, textAlign: "center", padding: "20px 0" }}>
         Log check-ins to fill your mood map.
       </p>
     );
@@ -297,7 +297,7 @@ function MoodHeatmapMobile({ days, store }: { days: HeatCell[]; store: EnergySto
         {DOW.map((d, i) => (
           <div key={i} style={{
             flex: 1, textAlign: "center",
-            fontSize: 10, fontWeight: 600, color: "#7a8a7a",
+            fontSize: 10, fontWeight: 600, color: "#86868b",
           }}>{d}</div>
         ))}
       </div>
@@ -308,7 +308,7 @@ function MoodHeatmapMobile({ days, store }: { days: HeatCell[]; store: EnergySto
           <div key={ri} style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div style={{
               width: labelCol - 4, flexShrink: 0,
-              fontSize: 10, color: "#7a8a7a",
+              fontSize: 10, color: "#86868b",
               letterSpacing: "0.02em", textAlign: "right", paddingRight: 4,
             }}>{weekLabel(row)}</div>
             {row.map(cell => {
@@ -323,12 +323,12 @@ function MoodHeatmapMobile({ days, store }: { days: HeatCell[]; store: EnergySto
                   disabled={isFuture}
                   style={{
                     flex: 1, aspectRatio: "1",
-                    borderRadius: 6,
-                    background: has ? moodColor(cell.value!) : "#eef1ed",
+                    borderRadius: 8,
+                    background: has ? moodColor(cell.value!) : "#f0f0f0",
                     opacity: isFuture ? 0.35 : 1,
                     border: isSelected
-                      ? "2px solid #082d1d"
-                      : isToday ? "2px solid #082d1d" : "1px solid transparent",
+                      ? "2px solid #1d1d1f"
+                      : isToday ? "2px solid #1d1d1f" : "1px solid transparent",
                     boxSizing: "border-box",
                     cursor: isFuture ? "default" : "pointer",
                     padding: 0,
@@ -347,40 +347,40 @@ function MoodHeatmapMobile({ days, store }: { days: HeatCell[]; store: EnergySto
         <div style={{
           marginTop: 12,
           padding: "12px 14px",
-          background: "#f8f9f5",
-          border: "1px solid #e9ede9",
+          background: "#f5f5f7",
+          border: "1px solid #f0f0f0",
           borderRadius: 8,
         }}>
           <p style={{
-            fontSize: 10, fontWeight: 600, color: "#7a8a7a",
+            fontSize: 10, fontWeight: 600, color: "#86868b",
             letterSpacing: "0.08em", textTransform: "uppercase",
             margin: "0 0 6px",
           }}>{selected.date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
           {selected.entries.length === 0 ? (
-            <p style={{ margin: 0, color: "#7a8a7a", fontSize: 12 }}>No check-in this day.</p>
+            <p style={{ margin: 0, color: "#86868b", fontSize: 12 }}>No check-in this day.</p>
           ) : selected.entries.length === 1 ? (
             <>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#082d1d" }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#1d1d1f" }}>
                 <span style={{ marginRight: 6 }}>{moodEmoji(selected.entries[0].mood)}</span>
                 {moodLabel(selected.entries[0].mood)}
               </p>
               {selected.entries[0].contributions.length > 0 && (
-                <p style={{ margin: "4px 0 0", fontSize: 12, color: "#3d5a4a" }}>
+                <p style={{ margin: "4px 0 0", fontSize: 12, color: "#333333" }}>
                   {selected.entries[0].contributions.join(" · ")}
                 </p>
               )}
             </>
           ) : (
             <>
-              <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 600, color: "#082d1d" }}>
+              <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 600, color: "#1d1d1f" }}>
                 <span style={{ marginRight: 6 }}>{moodEmoji(selected.value!)}</span>
                 {moodLabel(selected.value!)}
-                <span style={{ color: "#7a8a7a", fontWeight: 500, marginLeft: 6, fontSize: 11 }}>
+                <span style={{ color: "#86868b", fontWeight: 500, marginLeft: 6, fontSize: 11 }}>
                   avg of {selected.entries.length}
                 </span>
               </p>
               {selected.entries.map((e, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#3d5a4a", marginTop: i === 0 ? 4 : 2 }}>
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#333333", marginTop: i === 0 ? 4 : 2 }}>
                   <span>{moodEmoji(e.mood)}</span>
                   <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {e.contributions.length > 0 ? e.contributions.join(" · ") : moodLabel(e.mood)}
@@ -397,13 +397,13 @@ function MoodHeatmapMobile({ days, store }: { days: HeatCell[]; store: EnergySto
         display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
         marginTop: 12,
       }}>
-        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Unpleasant</span>
+        <span style={{ fontSize: 10, color: "#86868b" }}>Unpleasant</span>
         {MOODS.map(m => (
           <div key={m.value} style={{
-            width: 12, height: 12, borderRadius: 3, background: m.color,
+            width: 12, height: 12, borderRadius: 8, background: m.color,
           }} />
         ))}
-        <span style={{ fontSize: 10, color: "#7a8a7a" }}>Pleasant</span>
+        <span style={{ fontSize: 10, color: "#86868b" }}>Pleasant</span>
       </div>
     </div>
   );
@@ -425,26 +425,26 @@ function HeatmapTooltip({ cell, rect }: { cell: HeatCell; rect: DOMRect }) {
       top, left,
       transform: `translate(-50%, ${above ? "-100%" : "0"})`,
       background: "#fff",
-      border: "1px solid #dde4de",
+      border: "1px solid #e0e0e0",
       borderRadius: 8,
       boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
       padding: "10px 12px",
       fontSize: 11.5,
       fontFamily: "inherit",
-      color: "#082d1d",
+      color: "#1d1d1f",
       zIndex: 200,
       pointerEvents: "none",
       minWidth: 180, maxWidth: 260,
       lineHeight: 1.45,
     }}>
       <p style={{
-        fontSize: 10, fontWeight: 600, color: "#7a8a7a",
+        fontSize: 10, fontWeight: 600, color: "#86868b",
         letterSpacing: "0.08em", textTransform: "uppercase",
         margin: "0 0 4px",
       }}>{dateLabel}</p>
 
       {cell.entries.length === 0 ? (
-        <p style={{ margin: 0, color: "#7a8a7a", fontSize: 11 }}>No check-in</p>
+        <p style={{ margin: 0, color: "#86868b", fontSize: 11 }}>No check-in</p>
       ) : cell.entries.length === 1 ? (
         <>
           <p style={{ margin: 0, fontSize: 12, fontWeight: 600 }}>
@@ -452,7 +452,7 @@ function HeatmapTooltip({ cell, rect }: { cell: HeatCell; rect: DOMRect }) {
             {moodLabel(cell.entries[0].mood)}
           </p>
           {cell.entries[0].contributions.length > 0 && (
-            <p style={{ margin: "3px 0 0", fontSize: 11, color: "#3d5a4a" }}>
+            <p style={{ margin: "3px 0 0", fontSize: 11, color: "#333333" }}>
               {cell.entries[0].contributions.join(" · ")}
             </p>
           )}
@@ -462,14 +462,14 @@ function HeatmapTooltip({ cell, rect }: { cell: HeatCell; rect: DOMRect }) {
           <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600 }}>
             <span style={{ marginRight: 4 }}>{moodEmoji(cell.value!)}</span>
             {moodLabel(cell.value!)}
-            <span style={{ color: "#7a8a7a", fontWeight: 500, marginLeft: 6 }}>
+            <span style={{ color: "#86868b", fontWeight: 500, marginLeft: 6 }}>
               avg of {cell.entries.length}
             </span>
           </p>
           {cell.entries.map((e, i) => (
             <div key={i} style={{
               display: "flex", alignItems: "center", gap: 6,
-              fontSize: 11, color: "#3d5a4a",
+              fontSize: 11, color: "#333333",
               marginTop: i === 0 ? 4 : 2,
             }}>
               <span style={{ fontSize: 12 }}>{moodEmoji(e.mood)}</span>
@@ -489,14 +489,14 @@ function HeatmapTooltip({ cell, rect }: { cell: HeatCell; rect: DOMRect }) {
 function MoodDistribution({ counts, total, isMobile = false }: { counts: number[]; total: number; isMobile?: boolean }) {
   if (total === 0) {
     return (
-      <p style={{ fontSize: 12, color: "#b9d3c4", margin: 0, textAlign: "center", padding: "12px 0" }}>
+      <p style={{ fontSize: 12, color: "#c7c7cc", margin: 0, textAlign: "center", padding: "12px 0" }}>
         No check-ins in this range.
       </p>
     );
   }
   return (
     <div>
-      <div style={{ display: "flex", width: "100%", height: 16, borderRadius: 4, overflow: "hidden", background: "#f1f3ef", marginBottom: 12 }}>
+      <div style={{ display: "flex", width: "100%", height: 16, borderRadius: 11, overflow: "hidden", background: "#f5f5f7", marginBottom: 12 }}>
         {MOODS.map((m, i) => {
           const c = counts[i] ?? 0;
           if (c === 0) return null;
@@ -519,8 +519,8 @@ function MoodDistribution({ counts, total, isMobile = false }: { counts: number[
               opacity: c > 0 ? 1 : 0.45,
             }}>
               <span style={{ fontSize: isMobile ? 18 : 20 }}>{m.emoji}</span>
-              <span style={{ fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
-              <span style={{ fontSize: 10, color: "#7a8a7a", letterSpacing: "0.02em" }}>{c} log{c === 1 ? "" : "s"}</span>
+              <span style={{ fontSize: isMobile ? 12 : 13, fontWeight: 600, color: "#1d1d1f", fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
+              <span style={{ fontSize: 10, color: "#86868b", letterSpacing: "0.02em" }}>{c} log{c === 1 ? "" : "s"}</span>
             </div>
           );
         })}
@@ -705,16 +705,16 @@ export function EnergyView() {
     return (
       <div style={{
         background: "#fff",
-        border: "1px solid #dde4de",
+        border: "1px solid #e0e0e0",
         borderRadius: 8,
         padding: isMobile ? "16px" : "20px 22px",
         marginBottom: 12,
       }}>
         {(eyebrow || title) && (
           <div style={{ marginBottom: 16 }}>
-            {eyebrow && <p style={{ fontSize: 10, color: "#7a8a7a", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>{eyebrow}</p>}
-            {title && <h3 style={{ fontSize: 15, fontWeight: 600, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>{title}</h3>}
-            {hint && <p style={{ fontSize: 12, color: "#5f6b5f", margin: "4px 0 0", lineHeight: 1.45 }}>{hint}</p>}
+            {eyebrow && <p style={{ fontSize: 10, color: "#86868b", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>{eyebrow}</p>}
+            {title && <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1d1d1f", margin: 0, letterSpacing: "-0.02em" }}>{title}</h3>}
+            {hint && <p style={{ fontSize: 12, color: "#86868b", margin: "4px 0 0", lineHeight: 1.45 }}>{hint}</p>}
           </div>
         )}
         {children}
@@ -727,10 +727,10 @@ export function EnergyView() {
 
       {/* ── Page header ── */}
       <div style={{ marginBottom: isMobile ? 16 : 20 }}>
-        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#4a6d47", margin: "0 0 4px" }}>
+        <p style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "#86868b", margin: "0 0 4px" }}>
           Workspace · My Energy
         </p>
-        <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d", margin: 0, lineHeight: 1.05 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", color: "#1d1d1f", margin: 0, lineHeight: 1.05 }}>
           My Energy
         </h1>
       </div>
@@ -739,15 +739,15 @@ export function EnergyView() {
       <Section>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: todayEntries.length === 0 ? 0 : 12 }}>
           <div>
-            <p style={{ fontSize: 10, color: "#7a8a7a", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>Today</p>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
+            <p style={{ fontSize: 10, color: "#86868b", letterSpacing: "0.10em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 4px" }}>Today</p>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1d1d1f", margin: 0, letterSpacing: "-0.02em" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </h3>
           </div>
           {todayEntries.length > 0 && (
             <button onClick={() => setModalOpen(true)} style={{
-              padding: "5px 12px", borderRadius: 6, border: "1px solid #dde4de",
-              background: "#fff", color: "#059669", fontSize: 11.5, fontWeight: 500,
+              padding: "5px 12px", borderRadius: 8, border: "1px solid #e0e0e0",
+              background: "#fff", color: "#0066cc", fontSize: 11.5, fontWeight: 500,
               cursor: "pointer", fontFamily: "inherit",
             }}>+ Log again</button>
           )}
@@ -760,7 +760,7 @@ export function EnergyView() {
               <button onClick={() => setModalOpen(true)} style={{
                 padding: "9px 22px", borderRadius: 8,
                 border: "none",
-                background: "#059669", color: "#fff", fontSize: 12.5, fontWeight: 600,
+                background: "#0066cc", color: "#fff", fontSize: 12.5, fontWeight: 600,
                 cursor: "pointer", fontFamily: "inherit",
               }}>Log my feelings</button>
             </div>
@@ -771,25 +771,25 @@ export function EnergyView() {
               <div style={{
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "12px 14px",
-                background: "#f8f9f5", border: "1px solid #e9ede9",
+                background: "#f5f5f7", border: "1px solid #f0f0f0",
                 borderRadius: 8, marginBottom: 10,
               }}>
                 <span style={{ fontSize: 22 }}>{moodEmoji(latest.mood)}</span>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 12, fontWeight: 500, color: "#082d1d", margin: "0 0 4px" }}>{moodLabel(latest.mood)}</p>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: "#1d1d1f", margin: "0 0 4px" }}>{moodLabel(latest.mood)}</p>
                   {latest.contributions.length > 0 && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                       {latest.contributions.map(c => (
                         <span key={c} style={{
-                          padding: "3px 9px", borderRadius: 6, fontSize: 11, fontWeight: 500,
-                          background: "#fff", border: "1px solid #dde4de",
-                          color: "#3d5a4a",
+                          padding: "3px 9px", borderRadius: 8, fontSize: 11, fontWeight: 500,
+                          background: "#fff", border: "1px solid #e0e0e0",
+                          color: "#333333",
                         }}>{c}</span>
                       ))}
                     </div>
                   )}
                 </div>
-                <p style={{ fontSize: 11, color: "#4a6d47", flexShrink: 0 }}>{timeAgo(latest.time)}</p>
+                <p style={{ fontSize: 11, color: "#86868b", flexShrink: 0 }}>{timeAgo(latest.time)}</p>
               </div>
             )}
             {todayEntries.length > 1 && (
@@ -797,19 +797,19 @@ export function EnergyView() {
                 {todayEntries.slice(0, -1).map((e, i) => (
                   <div key={i} style={{
                     display: "flex", alignItems: "center", gap: 6,
-                    padding: "4px 10px", borderRadius: 6,
-                    background: "#f8f9f5", border: "1px solid #dde4de",
-                    fontSize: 11, color: "#3d5a4a",
+                    padding: "4px 10px", borderRadius: 8,
+                    background: "#f5f5f7", border: "1px solid #e0e0e0",
+                    fontSize: 11, color: "#333333",
                   }}>
                     <span style={{ fontSize: 13 }}>{moodEmoji(e.mood)}</span>
-                    <span style={{ fontWeight: 500, color: "#082d1d" }}>{moodLabel(e.mood)}</span>
-                    <span style={{ color: "#4a6d47" }}>{timeAgo(e.time)}</span>
+                    <span style={{ fontWeight: 500, color: "#1d1d1f" }}>{moodLabel(e.mood)}</span>
+                    <span style={{ color: "#86868b" }}>{timeAgo(e.time)}</span>
                   </div>
                 ))}
               </div>
             )}
             {todayAvg !== null && todayEntries.length > 1 && (
-              <p style={{ fontSize: 11, color: "#059669", fontWeight: 500, margin: "10px 0 0" }}>
+              <p style={{ fontSize: 11, color: "#0066cc", fontWeight: 500, margin: "10px 0 0" }}>
                 Today&apos;s average: {moodLabel(todayAvg)}
               </p>
             )}
@@ -821,19 +821,19 @@ export function EnergyView() {
       {summary && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
           <div style={{
-            background: "#fff", border: "1px solid #dde4de",
+            background: "#fff", border: "1px solid #e0e0e0",
             borderRadius: 8, padding: "14px 16px",
             display: "flex", alignItems: "center", gap: 12,
           }}>
             <div style={{
               width: 34, height: 34, borderRadius: 8,
-              background: "#f8f9f5", color: "#4a6d47",
+              background: "#f5f5f7", color: "#86868b",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}><Flame size={16} /></div>
             <div>
-              <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>Streak</p>
-              <p style={{ fontSize: 15, fontWeight: 600, color: "#082d1d", margin: 0 }}>
-                {streak} <span style={{ fontSize: 12, color: "#4a6d47", fontWeight: 500 }}>day{streak === 1 ? "" : "s"}</span>
+              <p style={{ fontSize: 10, color: "#86868b", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>Streak</p>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#1d1d1f", margin: 0 }}>
+                {streak} <span style={{ fontSize: 12, color: "#86868b", fontWeight: 500 }}>day{streak === 1 ? "" : "s"}</span>
               </p>
             </div>
           </div>
@@ -842,19 +842,19 @@ export function EnergyView() {
             const m = MOODS[idx];
             return (
               <div style={{
-                background: "#fff", border: "1px solid #dde4de",
+                background: "#fff", border: "1px solid #e0e0e0",
                 borderRadius: 8, padding: "14px 16px",
                 display: "flex", alignItems: "center", gap: 12,
               }}>
                 <div style={{
                   width: 34, height: 34, borderRadius: 8,
-                  background: "#f8f9f5",
+                  background: "#f5f5f7",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 18,
                 }}>{m.emoji}</div>
                 <div>
-                  <p style={{ fontSize: 10, color: "#4a6d47", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>Most felt</p>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: "#082d1d", margin: 0 }}>{m.label}</p>
+                  <p style={{ fontSize: 10, color: "#86868b", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600, margin: "0 0 3px" }}>Most felt</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "#1d1d1f", margin: 0 }}>{m.label}</p>
                 </div>
               </div>
             );
@@ -879,25 +879,25 @@ export function EnergyView() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 18 }}>
             <div>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
-                <span style={{ color: "#1a9444" }}>▲</span> Lifts you
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
+                <span style={{ color: "#248a3d" }}>▲</span> Lifts you
               </p>
               {liftsPulls.lifts.length === 0 ? (
-                <p style={{ fontSize: 12, color: "#7a8a7a", margin: 0 }}>—</p>
+                <p style={{ fontSize: 12, color: "#86868b", margin: 0 }}>—</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {liftsPulls.lifts.map(l => (
                     <div key={l.tag} style={{
                       display: "flex", justifyContent: "space-between", alignItems: "center",
                       padding: "8px 12px", borderRadius: 8,
-                      background: "#f8f9f5", border: "1px solid #e9ede9",
-                      fontSize: 13, color: "#082d1d",
+                      background: "#f5f5f7", border: "1px solid #f0f0f0",
+                      fontSize: 13, color: "#1d1d1f",
                     }}>
-                      <span>{l.tag} <span style={{ color: "#7a8a7a", fontSize: 10, marginLeft: 4 }}>{l.count}×</span></span>
+                      <span>{l.tag} <span style={{ color: "#86868b", fontSize: 10, marginLeft: 4 }}>{l.count}×</span></span>
                       <span style={{
-                        padding: "2px 9px", borderRadius: 6,
-                        background: "#EEFAF1", border: "1px solid #c8f7ae",
-                        color: "#1A9444",
+                        padding: "2px 9px", borderRadius: 8,
+                        background: "#eef7f1", border: "1px solid #e0e0e0",
+                        color: "#248a3d",
                         fontWeight: 600, fontSize: 11, fontVariantNumeric: "tabular-nums",
                       }}>{l.avg.toFixed(1)}</span>
                     </div>
@@ -906,25 +906,25 @@ export function EnergyView() {
               )}
             </div>
             <div>
-              <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
-                <span style={{ color: "#D14626" }}>▼</span> Pulls you down
+              <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>
+                <span style={{ color: "#d70015" }}>▼</span> Pulls you down
               </p>
               {liftsPulls.pulls.length === 0 ? (
-                <p style={{ fontSize: 12, color: "#7a8a7a", margin: 0 }}>—</p>
+                <p style={{ fontSize: 12, color: "#86868b", margin: 0 }}>—</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {liftsPulls.pulls.map(p => (
                     <div key={p.tag} style={{
                       display: "flex", justifyContent: "space-between", alignItems: "center",
                       padding: "8px 12px", borderRadius: 8,
-                      background: "#f8f9f5", border: "1px solid #e9ede9",
-                      fontSize: 13, color: "#082d1d",
+                      background: "#f5f5f7", border: "1px solid #f0f0f0",
+                      fontSize: 13, color: "#1d1d1f",
                     }}>
-                      <span>{p.tag} <span style={{ color: "#7a8a7a", fontSize: 10, marginLeft: 4 }}>{p.count}×</span></span>
+                      <span>{p.tag} <span style={{ color: "#86868b", fontSize: 10, marginLeft: 4 }}>{p.count}×</span></span>
                       <span style={{
-                        padding: "2px 9px", borderRadius: 6,
-                        background: "#FFF0EC", border: "1px solid #e9c3c1",
-                        color: "#D14626",
+                        padding: "2px 9px", borderRadius: 8,
+                        background: "#fdf0f0", border: "1px solid #f0c9c9",
+                        color: "#d70015",
                         fontWeight: 600, fontSize: 11, fontVariantNumeric: "tabular-nums",
                       }}>{p.avg.toFixed(1)}</span>
                     </div>
@@ -942,58 +942,58 @@ export function EnergyView() {
           {moodVsTasks && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: taskByEmotion ? 14 : 0 }}>
               <div style={{
-                background: "#f8f9f5", borderRadius: 8,
-                border: "1px solid #e9ede9",
+                background: "#f5f5f7", borderRadius: 8,
+                border: "1px solid #f0f0f0",
                 padding: "14px 16px",
               }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>High-mood days</p>
-                <p style={{ margin: 0, color: "#082d1d" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>High-mood days</p>
+                <p style={{ margin: 0, color: "#1d1d1f" }}>
                   <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.highAvg}</strong>
-                  <span style={{ fontSize: 12, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
+                  <span style={{ fontSize: 12, color: "#86868b", marginLeft: 4 }}>tasks/day</span>
                 </p>
               </div>
               <div style={{
-                background: "#f8f9f5", borderRadius: 8,
-                border: "1px solid #e9ede9",
+                background: "#f5f5f7", borderRadius: 8,
+                border: "1px solid #f0f0f0",
                 padding: "14px 16px",
               }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Low-mood days</p>
-                <p style={{ margin: 0, color: "#082d1d" }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Low-mood days</p>
+                <p style={{ margin: 0, color: "#1d1d1f" }}>
                   <strong style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>{moodVsTasks.lowAvg}</strong>
-                  <span style={{ fontSize: 12, color: "#4a6d47", marginLeft: 4 }}>tasks/day</span>
+                  <span style={{ fontSize: 12, color: "#86868b", marginLeft: 4 }}>tasks/day</span>
                 </p>
               </div>
             </div>
           )}
 
           {moodVsTasks?.ratio && (
-            <p style={{ fontSize: 13, color: "#3d5a4a", margin: "0 0 18px", lineHeight: 1.5 }}>
-              You finish <strong style={{ color: "#082d1d" }}>{moodVsTasks.ratio}×</strong> more on high-mood days — protect that time.
+            <p style={{ fontSize: 13, color: "#333333", margin: "0 0 18px", lineHeight: 1.5 }}>
+              You finish <strong style={{ color: "#1d1d1f" }}>{moodVsTasks.ratio}×</strong> more on high-mood days — protect that time.
             </p>
           )}
 
           {taskByEmotion && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div style={{
-                background: "#f8f9f5", borderRadius: 8,
-                border: "1px solid #e9ede9",
+                background: "#f5f5f7", borderRadius: 8,
+                border: "1px solid #f0f0f0",
                 padding: "14px 16px",
               }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Most likely to finish</p>
-                <p style={{ margin: 0, fontSize: 13, color: "#082d1d", fontWeight: 600 }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Most likely to finish</p>
+                <p style={{ margin: 0, fontSize: 13, color: "#1d1d1f", fontWeight: 600 }}>
                   {taskByEmotion.best.em?.emoji} {taskByEmotion.best.em?.label}
-                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.best.rate * 100)}%</span>
+                  <span style={{ color: "#86868b", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.best.rate * 100)}%</span>
                 </p>
               </div>
               <div style={{
-                background: "#f8f9f5", borderRadius: 8,
-                border: "1px solid #e9ede9",
+                background: "#f5f5f7", borderRadius: 8,
+                border: "1px solid #f0f0f0",
                 padding: "14px 16px",
               }}>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#7a8a7a", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Least likely to finish</p>
-                <p style={{ margin: 0, fontSize: 13, color: "#082d1d", fontWeight: 600 }}>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Least likely to finish</p>
+                <p style={{ margin: 0, fontSize: 13, color: "#1d1d1f", fontWeight: 600 }}>
                   {taskByEmotion.worst.em?.emoji} {taskByEmotion.worst.em?.label}
-                  <span style={{ color: "#4a6d47", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.worst.rate * 100)}%</span>
+                  <span style={{ color: "#86868b", fontWeight: 400, fontSize: 11, marginLeft: 6 }}>· {Math.round(taskByEmotion.worst.rate * 100)}%</span>
                 </p>
               </div>
             </div>

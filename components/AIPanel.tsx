@@ -46,8 +46,8 @@ function Block({ icon: Icon, title, children }: {
   return (
     <div style={{
       background: "#fff",
-      border: "1px solid #e9ede9",
-      borderRadius: 4,
+      border: "1px solid #f0f0f0",
+      borderRadius: 11,
       padding: "12px 14px",
       marginTop: 8,
       boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
@@ -55,13 +55,13 @@ function Block({ icon: Icon, title, children }: {
       <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
         <span style={{
           width: 22, height: 22, borderRadius: "50%",
-          background: "#f2fdec",
+          background: "#f5f5f7",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
-          color: "#059669", flexShrink: 0,
+          color: "#0066cc", flexShrink: 0,
         }}>
           <Icon size={12} />
         </span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "#082d1d", letterSpacing: "-0.01em" }}>{title}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#1d1d1f", letterSpacing: "-0.01em" }}>{title}</span>
       </div>
       <div>{children}</div>
     </div>
@@ -74,7 +74,7 @@ function Block({ icon: Icon, title, children }: {
 
 function SkeletonHero() {
   return (
-    <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f1f3ef", marginBottom: 6 }}>
+    <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f5f5f7", marginBottom: 6 }}>
       <SkeletonBox height={10} width={60}  radius={3} style={{ marginBottom: 8 }} />
       <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
         <SkeletonBox height={22} width={38}  radius={4} />
@@ -89,8 +89,8 @@ function SkeletonBlock({ lines = 2 }: { lines?: number }) {
   return (
     <div style={{
       background: "#fff",
-      border: "1px solid #e9ede9",
-      borderRadius: 4,
+      border: "1px solid #f0f0f0",
+      borderRadius: 11,
       padding: "12px 14px",
       marginTop: 8,
       boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
@@ -278,21 +278,21 @@ export function AIPanel({ onClose }: Props) {
       display: "flex", flexDirection: "column",
     } : {
       width: 320, flexShrink: 0,
-      background: "#fff", borderLeft: "1px solid #e9ede9",
+      background: "#fff", borderLeft: "1px solid #f0f0f0",
       display: "flex", flexDirection: "column",
       height: "100vh", position: "sticky", top: 0,
     }}>
       {/* Header */}
       <div style={{
         padding: "16px 18px 14px",
-        borderBottom: "1px solid #e9ede9",
+        borderBottom: "1px solid #f0f0f0",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "linear-gradient(135deg, #f2fdec, #fff)",
+        background: "linear-gradient(135deg, #f5f5f7, #fff)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{
-            width: 30, height: 30, borderRadius: 9,
-            background: "linear-gradient(135deg, #059669, #047857)",
+            width: 30, height: 30, borderRadius: 11,
+            background: "linear-gradient(135deg, #0066cc, #0071e3)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             <Sparkles size={14} color="#fff" />
@@ -300,37 +300,37 @@ export function AIPanel({ onClose }: Props) {
           <div>
             <p style={{
               fontFamily: "inherit",
-              fontSize: 10, fontWeight: 600, color: "#4a6d47",
+              fontSize: 10, fontWeight: 600, color: "#86868b",
               textTransform: "uppercase", letterSpacing: "0.08em",
               margin: "0 0 1px",
             }}>Workspace · Insights</p>
-            <h2 style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: 0, letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: "#1d1d1f", margin: 0, letterSpacing: "-0.02em" }}>
               Orin Insight
             </h2>
           </div>
         </div>
         <button onClick={onClose} style={{
           width: 28, height: 28, borderRadius: 8,
-          border: "1.5px solid #dde4de", background: "#f8f9f5",
+          border: "1px solid #e0e0e0", background: "#f5f5f7",
           cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center", color: "#4a6d47",
+          display: "flex", alignItems: "center", justifyContent: "center", color: "#86868b",
         }}>
           <X size={13} />
         </button>
       </div>
 
       {/* ── Tabs ── */}
-      <div style={{ padding: "10px 18px 0", borderBottom: "1px solid #f1f3ef" }}>
-        <div style={{ display: "flex", gap: 4, background: "#f8f9f5", border: "1px solid #e9ede9", borderRadius: 4, padding: 3 }}>
+      <div style={{ padding: "10px 18px 0", borderBottom: "1px solid #f5f5f7" }}>
+        <div style={{ display: "flex", gap: 4, background: "#f5f5f7", border: "1px solid #f0f0f0", borderRadius: 11, padding: 3 }}>
           {(["today", "week"] as const).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
               style={{
-                flex: 1, padding: "5px 0", borderRadius: 3,
-                border: tab === t ? "1px solid #e9ede9" : "1px solid transparent",
+                flex: 1, padding: "5px 0", borderRadius: 8,
+                border: tab === t ? "1px solid #f0f0f0" : "1px solid transparent",
                 background: tab === t ? "#fff" : "transparent",
-                color: tab === t ? "#082d1d" : "#4a6d47",
+                color: tab === t ? "#1d1d1f" : "#86868b",
                 fontSize: 11, fontWeight: tab === t ? 600 : 500,
                 cursor: "pointer", fontFamily: "inherit",
                 boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.04)" : "none",
@@ -361,10 +361,10 @@ export function AIPanel({ onClose }: Props) {
 
         {/* Empty-week onboarding pinned at top */}
         {noDataYet && mounted ? (
-          <div style={{ marginTop: 14, padding: "14px 14px", background: "#f2fdec", border: "1px solid #c8f7ae", borderRadius: 4 }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#059669", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Get started</p>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: "0 0 8px", letterSpacing: "-0.01em" }}>Unlock insights in 3 steps</p>
-            <ol style={{ margin: 0, paddingLeft: 18, fontSize: 11, color: "#3d5a4a", lineHeight: 1.6 }}>
+          <div style={{ marginTop: 14, padding: "14px 14px", background: "#f5f5f7", border: "1px solid #e0e0e0", borderRadius: 11 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#0066cc", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Get started</p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#1d1d1f", margin: "0 0 8px", letterSpacing: "-0.01em" }}>Unlock insights in 3 steps</p>
+            <ol style={{ margin: 0, paddingLeft: 18, fontSize: 11, color: "#333333", lineHeight: 1.6 }}>
               <li>Add a few tasks with how you feel about each</li>
               <li>Log an energy check-in to capture your mood</li>
               <li>Complete or defer them — patterns will appear here</li>
@@ -374,34 +374,34 @@ export function AIPanel({ onClose }: Props) {
 
         {/* ── Hero ── */}
         {tab === "today" ? (
-          <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f1f3ef", marginBottom: 6 }}>
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>
+          <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f5f5f7", marginBottom: 6 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
             </p>
             <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
-              <span style={{ fontSize: 22, fontWeight: 600, color: "#082d1d", fontVariantNumeric: "tabular-nums" }}>{pending.length}</span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
+              <span style={{ fontSize: 22, fontWeight: 600, color: "#1d1d1f", fontVariantNumeric: "tabular-nums" }}>{pending.length}</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "#333333", marginLeft: 8 }}>
                 task{pending.length !== 1 ? "s" : ""} remaining
               </span>
             </p>
-            <p style={{ margin: 0, fontSize: 11, color: overdue.length > 0 ? "#D14626" : "#4a6d47", fontWeight: overdue.length > 0 ? 600 : 400 }}>
+            <p style={{ margin: 0, fontSize: 11, color: overdue.length > 0 ? "#d70015" : "#86868b", fontWeight: overdue.length > 0 ? 600 : 400 }}>
               {overdue.length > 0
                 ? `⚠ ${overdue.length} overdue${hasEnergy ? " · energy logged" : ""}`
                 : (hasEnergy ? "Nothing overdue · energy logged" : "Nothing overdue · log energy to unlock patterns")}
             </p>
           </div>
         ) : (
-          <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f1f3ef", marginBottom: 6 }}>
-            <p style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Streak</p>
+          <div style={{ padding: "20px 4px 18px", borderBottom: "1px solid #f5f5f7", marginBottom: 6 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.10em", margin: "0 0 6px" }}>Streak</p>
             <p style={{ margin: "0 0 4px", letterSpacing: "-0.02em" }}>
-              <span style={{ fontSize: 22, fontWeight: 600, color: "#059669", fontVariantNumeric: "tabular-nums" }}>{streak}</span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "#3d5a4a", marginLeft: 8 }}>
+              <span style={{ fontSize: 22, fontWeight: 600, color: "#0066cc", fontVariantNumeric: "tabular-nums" }}>{streak}</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "#333333", marginLeft: 8 }}>
                 day{streak === 1 ? "" : "s"} in a row
               </span>
             </p>
-            <p style={{ margin: 0, fontSize: 11, color: "#4a6d47" }}>
+            <p style={{ margin: 0, fontSize: 11, color: "#86868b" }}>
               {weekly
-                ? <><strong style={{ color: "#082d1d" }}>{weekly.total_completed}</strong> done · <strong style={{ color: "#082d1d" }}>{weekly.total_deferrals}</strong> deferred this week</>
+                ? <><strong style={{ color: "#1d1d1f" }}>{weekly.total_completed}</strong> done · <strong style={{ color: "#1d1d1f" }}>{weekly.total_deferrals}</strong> deferred this week</>
                 : "Loading…"}
             </p>
           </div>
@@ -414,14 +414,14 @@ export function AIPanel({ onClose }: Props) {
         {/* Avoidance alert — slipping tasks */}
         {avoidance.length > 0 && (
           <Block icon={AlertCircle} title="Slipping tasks">
-            <p style={{ fontSize: 11, color: "#3d5a4a", margin: "0 0 8px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 11, color: "#333333", margin: "0 0 8px", lineHeight: 1.5 }}>
               Deferred 3+ times — consider doing just step 1.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {avoidance.map(t => (
                 <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 12 }}>
-                  <span style={{ color: "#082d1d", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>&ldquo;{t.title}&rdquo;</span>
-                  <span style={{ color: "#D14626", fontWeight: 600, flexShrink: 0 }}>{t.deferredCount}×</span>
+                  <span style={{ color: "#1d1d1f", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>&ldquo;{t.title}&rdquo;</span>
+                  <span style={{ color: "#d70015", fontWeight: 600, flexShrink: 0 }}>{t.deferredCount}×</span>
                 </div>
               ))}
             </div>
@@ -432,16 +432,16 @@ export function AIPanel({ onClose }: Props) {
         <Block icon={Zap} title="Today's briefing">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
             {[
-              { label: "Overdue", val: String(overdue.length), color: overdue.length > 0 ? "#D14626" : "#082d1d", bg: overdue.length > 0 ? "#FFF0EC" : "#f8f9f5" },
-              { label: "Pending", val: String(pending.length), color: "#082d1d", bg: "#f8f9f5" },
-              { label: "Energy",  val: hasEnergy ? "✓" : "—", color: hasEnergy ? "#059669" : "#b9d3c4", bg: hasEnergy ? "#f2fdec" : "#f8f9f5" },
+              { label: "Overdue", val: String(overdue.length), color: overdue.length > 0 ? "#d70015" : "#1d1d1f", bg: overdue.length > 0 ? "#fdf0f0" : "#f5f5f7" },
+              { label: "Pending", val: String(pending.length), color: "#1d1d1f", bg: "#f5f5f7" },
+              { label: "Energy",  val: hasEnergy ? "✓" : "—", color: hasEnergy ? "#0066cc" : "#c7c7cc", bg: hasEnergy ? "#f5f5f7" : "#f5f5f7" },
             ].map(t => (
               <div key={t.label} style={{
-                background: t.bg, borderRadius: 4, padding: "8px 6px",
+                background: t.bg, borderRadius: 11, padding: "8px 6px",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
               }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: t.color, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>{t.val}</span>
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
               </div>
             ))}
           </div>
@@ -451,28 +451,28 @@ export function AIPanel({ onClose }: Props) {
         {(recommended || (pending.length === 0 && todayTasks.length > 0)) && (
         <Block icon={Compass} title={isEvening ? "Wrapping up the day" : "What to work on next"}>
           {pending.length === 0 ? (
-            <p style={{ fontSize: 12, color: "#059669", margin: 0 }}>🎉 All caught up — nothing pending today.</p>
+            <p style={{ fontSize: 12, color: "#0066cc", margin: 0 }}>🎉 All caught up — nothing pending today.</p>
           ) : recommended ? (
             <div style={{ fontSize: 12, lineHeight: 1.55 }}>
               {todayMood !== null && todayMood <= 2.5 && (recommended.emotionalState === "WILLING" || recommended.emotionalState === "EXCITED") && (
-                <p style={{ margin: "0 0 6px", fontSize: 11, color: "#4a6d47" }}>
+                <p style={{ margin: "0 0 6px", fontSize: 11, color: "#86868b" }}>
                   Low mood today — picking something gentler.
                 </p>
               )}
-              <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
+              <p style={{ margin: "0 0 6px", color: "#333333" }}>
                 Start with:{" "}
-                <strong style={{ color: "#082d1d" }}>&ldquo;{recommended.title}&rdquo;</strong>
+                <strong style={{ color: "#1d1d1f" }}>&ldquo;{recommended.title}&rdquo;</strong>
               </p>
               <p style={{ margin: "0 0 6px", display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {recommended.dueAt && new Date(recommended.dueAt) < new Date() && (
-                  <span style={{ color: "#D14626", fontWeight: 600 }}>Overdue</span>
+                  <span style={{ color: "#d70015", fontWeight: 600 }}>Overdue</span>
                 )}
                 {(() => {
                   const em = EMOTION_MAP[recommended.emotionalState as keyof typeof EMOTION_MAP];
                   return em ? <span style={{ color: em.pillText, fontWeight: 600 }}>{em.emoji} {em.label}</span> : null;
                 })()}
                 {recommended.deferredCount > 0 && (
-                  <span style={{ color: "#D14626", fontWeight: 600 }}>Deferred {recommended.deferredCount}×</span>
+                  <span style={{ color: "#d70015", fontWeight: 600 }}>Deferred {recommended.deferredCount}×</span>
                 )}
               </p>
             </div>
@@ -483,7 +483,7 @@ export function AIPanel({ onClose }: Props) {
         {/* End-of-day reflection — only after 6pm */}
         {isEvening && (
           <Block icon={Moon} title="End-of-day reflection">
-            <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.55 }}>
+            <p style={{ fontSize: 12, color: "#333333", margin: 0, lineHeight: 1.55 }}>
               {pending.length === 0
                 ? "You finished everything today. Take a breath and call it done."
                 : <>{pending.length} task{pending.length === 1 ? "" : "s"} unfinished — that&apos;s okay. Reschedule what won&apos;t happen tonight.</>
@@ -501,16 +501,16 @@ export function AIPanel({ onClose }: Props) {
           <Block icon={TrendingUp} title="At a glance">
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
               {[
-                { label: "Completed", val: weekly.total_completed, color: "#1A9444", bg: "#EEFAF1" },
-                { label: "Deferred",  val: weekly.total_deferrals, color: "#B07A10", bg: "#FFF8E8" },
-                { label: "Pending",   val: pending.length,         color: "#082d1d", bg: "#f8f9f5" },
+                { label: "Completed", val: weekly.total_completed, color: "#248a3d", bg: "#eef7f1" },
+                { label: "Deferred",  val: weekly.total_deferrals, color: "#b25000", bg: "#fdf4ec" },
+                { label: "Pending",   val: pending.length,         color: "#1d1d1f", bg: "#f5f5f7" },
               ].map(t => (
                 <div key={t.label} style={{
-                  background: t.bg, borderRadius: 4, padding: "8px 6px",
+                  background: t.bg, borderRadius: 11, padding: "8px 6px",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
                 }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: t.color, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>{t.val}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.label}</span>
                 </div>
               ))}
             </div>
@@ -520,8 +520,8 @@ export function AIPanel({ onClose }: Props) {
         {/* Streak — only if streak > 0 */}
         {streak > 0 && (
           <Block icon={Flame} title="Streak">
-            <p style={{ margin: 0, fontSize: 12, color: "#3d5a4a", lineHeight: 1.55 }}>
-              <strong style={{ color: "#059669", fontSize: 14, fontVariantNumeric: "tabular-nums" }}>{streak}</strong>
+            <p style={{ margin: 0, fontSize: 12, color: "#333333", lineHeight: 1.55 }}>
+              <strong style={{ color: "#0066cc", fontSize: 14, fontVariantNumeric: "tabular-nums" }}>{streak}</strong>
               <span style={{ marginLeft: 6 }}>day{streak === 1 ? "" : "s"} in a row with at least one task done.</span>
             </p>
           </Block>
@@ -532,29 +532,29 @@ export function AIPanel({ onClose }: Props) {
           <Block icon={Sparkles} title="Patterns">
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {bestEmotion && (
-                <div style={{ background: bestEmotion.em?.pillBg ?? "#f8f9f5", borderRadius: 4, padding: "8px 10px" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most completions when feeling</p>
-                  <p style={{ margin: 0, color: bestEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12 }}>
+                <div style={{ background: bestEmotion.em?.pillBg ?? "#f5f5f7", borderRadius: 11, padding: "8px 10px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most completions when feeling</p>
+                  <p style={{ margin: 0, color: bestEmotion.em?.pillText ?? "#1d1d1f", fontWeight: 600, fontSize: 12 }}>
                     {bestEmotion.em?.emoji} {bestEmotion.em?.label}
-                    <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {bestEmotion.count}</span>
+                    <span style={{ color: "#86868b", fontWeight: 400, marginLeft: 6 }}>· {bestEmotion.count}</span>
                   </p>
                 </div>
               )}
               {worstEmotion && (
-                <div style={{ background: worstEmotion.em?.pillBg ?? "#f8f9f5", borderRadius: 4, padding: "8px 10px" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferrals when feeling</p>
-                  <p style={{ margin: 0, color: worstEmotion.em?.pillText ?? "#082d1d", fontWeight: 600, fontSize: 12 }}>
+                <div style={{ background: worstEmotion.em?.pillBg ?? "#f5f5f7", borderRadius: 11, padding: "8px 10px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferrals when feeling</p>
+                  <p style={{ margin: 0, color: worstEmotion.em?.pillText ?? "#1d1d1f", fontWeight: 600, fontSize: 12 }}>
                     {worstEmotion.em?.emoji} {worstEmotion.em?.label}
-                    <span style={{ color: "#4a6d47", fontWeight: 400, marginLeft: 6 }}>· {worstEmotion.count}</span>
+                    <span style={{ color: "#86868b", fontWeight: 400, marginLeft: 6 }}>· {worstEmotion.count}</span>
                   </p>
                 </div>
               )}
               {weekly?.most_deferred_task && (
-                <div style={{ background: "#FFF0EC", borderRadius: 4, padding: "8px 10px" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#4a6d47", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferred task</p>
-                  <p style={{ margin: 0, color: "#082d1d", fontSize: 12 }}>
+                <div style={{ background: "#fdf0f0", borderRadius: 11, padding: "8px 10px" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 600, color: "#86868b", textTransform: "uppercase", letterSpacing: "0.06em" }}>Most deferred task</p>
+                  <p style={{ margin: 0, color: "#1d1d1f", fontSize: 12 }}>
                     &ldquo;{weekly.most_deferred_task.title}&rdquo;
-                    <span style={{ color: "#D14626", fontWeight: 600, marginLeft: 6 }}>· {weekly.most_deferred_task.deferredCount}×</span>
+                    <span style={{ color: "#d70015", fontWeight: 600, marginLeft: 6 }}>· {weekly.most_deferred_task.deferredCount}×</span>
                   </p>
                 </div>
               )}
@@ -566,13 +566,13 @@ export function AIPanel({ onClose }: Props) {
         {moodVsCompletion && (
           <Block icon={Heart} title="Mood vs. productivity">
             <div style={{ fontSize: 12, lineHeight: 1.55 }}>
-              <p style={{ margin: "0 0 6px", color: "#3d5a4a" }}>
-                <span style={{ color: "#082d1d", fontWeight: 600 }}>{moodVsCompletion.highAvg}</span> tasks/day on high-mood days
+              <p style={{ margin: "0 0 6px", color: "#333333" }}>
+                <span style={{ color: "#1d1d1f", fontWeight: 600 }}>{moodVsCompletion.highAvg}</span> tasks/day on high-mood days
                 {" vs "}
-                <span style={{ color: "#082d1d", fontWeight: 600 }}>{moodVsCompletion.lowAvg}</span> on low-mood days.
+                <span style={{ color: "#1d1d1f", fontWeight: 600 }}>{moodVsCompletion.lowAvg}</span> on low-mood days.
               </p>
               {moodVsCompletion.ratio && (
-                <p style={{ margin: 0, fontSize: 11, color: "#4a6d47" }}>
+                <p style={{ margin: 0, fontSize: 11, color: "#86868b" }}>
                   You finish <strong>{moodVsCompletion.ratio}×</strong> more when feeling good — protect your high-mood time.
                 </p>
               )}
@@ -584,10 +584,10 @@ export function AIPanel({ onClose }: Props) {
         {tomorrowLoad && (
           <Block icon={CalendarClock} title="Tomorrow's load">
             <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-              <p style={{ margin: "0 0 8px", color: "#3d5a4a" }}>
-                <strong style={{ color: "#082d1d" }}>{tomorrowLoad.total}</strong> task{tomorrowLoad.total === 1 ? "" : "s"} due tomorrow.
+              <p style={{ margin: "0 0 8px", color: "#333333" }}>
+                <strong style={{ color: "#1d1d1f" }}>{tomorrowLoad.total}</strong> task{tomorrowLoad.total === 1 ? "" : "s"} due tomorrow.
               </p>
-              <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", border: "1px solid #f1f3ef" }}>
+              <div style={{ display: "flex", height: 8, borderRadius: 11, overflow: "hidden", border: "1px solid #f5f5f7" }}>
                 {(["DREADING", "ANXIOUS", "NEUTRAL", "WILLING", "EXCITED"] as const).map(key => {
                   const n = tomorrowLoad.byEmotion[key] ?? 0;
                   if (!n) return null;
@@ -614,9 +614,9 @@ export function AIPanel({ onClose }: Props) {
         {/* Sunday review — only on Sundays */}
         {isSunday && weekly && (
           <Block icon={Lightbulb} title="Sunday review">
-            <p style={{ fontSize: 12, color: "#3d5a4a", margin: 0, lineHeight: 1.55 }}>
-              This week: <strong style={{ color: "#082d1d" }}>{weekly.total_completed}</strong> done,{" "}
-              <strong style={{ color: "#082d1d" }}>{weekly.total_deferrals}</strong> deferred.{" "}
+            <p style={{ fontSize: 12, color: "#333333", margin: 0, lineHeight: 1.55 }}>
+              This week: <strong style={{ color: "#1d1d1f" }}>{weekly.total_completed}</strong> done,{" "}
+              <strong style={{ color: "#1d1d1f" }}>{weekly.total_deferrals}</strong> deferred.{" "}
               {bestEmotion ? <>You moved best when feeling <span style={{ color: bestEmotion.em?.pillText, fontWeight: 600 }}>{bestEmotion.em?.label}</span>.</> : null}
               {" "}Take a breath and pick one thing to bring into next week.
             </p>

@@ -9,7 +9,7 @@ const SHIMMER_STYLE = `
   100% { background-position: 400px 0; }
 }
 .orin-shimmer {
-  background: linear-gradient(90deg, #f1f3ef 25%, #e9ede9 50%, #f1f3ef 75%);
+  background: linear-gradient(90deg, #f5f5f7 25%, #f0f0f0 50%, #f5f5f7 75%);
   background-size: 800px 100%;
   animation: orin-shimmer 1.4s ease-in-out infinite;
 }
@@ -63,9 +63,9 @@ export function SkeletonTaskRow() {
 export function SkeletonTaskList({ count = 5 }: { count?: number }) {
   injectStyles();
   return (
-    <div style={{ background: "#fff", borderRadius: 4, border: "1px solid #dde4de", overflow: "hidden" }}>
+    <div style={{ background: "#fff", borderRadius: 11, border: "1px solid #e0e0e0", overflow: "hidden" }}>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} style={{ borderBottom: i < count - 1 ? "1px solid #dde4de" : "none" }}>
+        <div key={i} style={{ borderBottom: i < count - 1 ? "1px solid #e0e0e0" : "none" }}>
           <SkeletonTaskRow />
         </div>
       ))}

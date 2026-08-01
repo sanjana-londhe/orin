@@ -51,18 +51,18 @@ const CONTRIBUTIONS = [
 
 const T = {
   surface:       "#ffffff",
-  stone100:      "#f8f9f5",
-  stone200:      "#f1f3ef",
-  border:        "#dde4de",
-  borderStrong:  "#c4cbc2",
-  accent:        "#059669",
-  accentHover:   "#047857",
-  accentSubtle:  "#f2fdec",
-  lime200:       "#c8f7ae",
-  textPrimary:   "#082d1d",
-  textSecondary: "#3d5a4a",
-  textTertiary:  "#4a6d47",
-  textMuted:     "#b9d3c4",
+  stone100:      "#f5f5f7",
+  stone200:      "#f5f5f7",
+  border:        "#e0e0e0",
+  borderStrong:  "#d2d2d7",
+  accent:        "#0066cc",
+  accentHover:   "#0071e3",
+  accentSubtle:  "#f5f5f7",
+  lime200:       "#e0e0e0",
+  textPrimary:   "#1d1d1f",
+  textSecondary: "#333333",
+  textTertiary:  "#86868b",
+  textMuted:     "#c7c7cc",
 };
 
 // ── Component ────────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
       {/* Backdrop — matches DeferralModal / TaskCreateModal */}
       <div onClick={onClose} style={{
         position: "absolute", inset: 0,
-        background: "rgba(8,45,29,0.25)",
+        background: "rgba(29, 29, 31,0.25)",
         backdropFilter: "blur(2px)",
         WebkitBackdropFilter: "blur(2px)",
       }} />
@@ -139,10 +139,10 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
         maxWidth: isMobile ? "100%" : 460,
         background: T.surface,
         borderRadius: isMobile ? "16px 16px 0 0" : 12,
-        border: `1.5px solid ${T.accent}`,
+        border: `1px solid ${T.accent}`,
         boxShadow: isMobile
-          ? "0 -4px 24px rgba(5,150,105,0.10)"
-          : "0 8px 32px rgba(5,150,105,0.12)",
+          ? "0 -4px 24px rgba(0, 102, 204,0.10)"
+          : "0 8px 32px rgba(0, 102, 204,0.12)",
         overflow: "hidden",
         paddingBottom: isMobile ? 20 : 0,
         maxHeight: isMobile ? "92vh" : "auto",
@@ -173,7 +173,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
           </div>
           <button onClick={onClose} style={{
             width: 28, height: 28, borderRadius: 8,
-            border: `1.5px solid ${T.border}`, background: T.stone100,
+            border: `1px solid ${T.border}`, background: T.stone100,
             cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
             color: T.textTertiary, flexShrink: 0,
           }}>
@@ -200,8 +200,8 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         flex: 1,
                         display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                         padding: "10px 2px",
-                        borderRadius: 6,
-                        border: `1.5px solid ${active ? T.accent : T.border}`,
+                        borderRadius: 8,
+                        border: `1px solid ${active ? T.accent : T.border}`,
                         background: active ? T.accentSubtle : T.stone100,
                         cursor: "pointer", fontFamily: "inherit",
                         transition: "background 0.12s, border-color 0.12s",
@@ -234,7 +234,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                         style={{
                           display: "flex", alignItems: "center", gap: 6,
                           padding: "8px 10px",
-                          borderRadius: 6,
+                          borderRadius: 8,
                           border: `1px solid ${active ? T.accent : T.border}`,
                           background: active ? T.accentSubtle : T.surface,
                           cursor: "pointer", fontFamily: "inherit",
@@ -255,7 +255,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                     style={{
                       display: "flex", alignItems: "center", gap: 6,
                       padding: "8px 10px",
-                      borderRadius: 6,
+                      borderRadius: 8,
                       border: `1px solid ${otherActive ? T.accent : T.border}`,
                       background: otherActive ? T.accentSubtle : T.surface,
                       cursor: "pointer", fontFamily: "inherit",
@@ -278,7 +278,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
                       marginTop: 8,
                       width: "100%", padding: "9px 12px",
                       borderRadius: 8,
-                      border: `1.5px solid ${T.accent}`,
+                      border: `1px solid ${T.accent}`,
                       background: T.accentSubtle,
                       fontSize: 12, color: T.textPrimary,
                       fontFamily: "inherit", outline: "none",
@@ -297,7 +297,7 @@ export function EnergyCheckInModal({ onClose, onSave }: Props) {
         }}>
           <button onClick={onClose} style={{
             padding: "8px 16px", borderRadius: 8,
-            border: `1.5px solid ${T.border}`, background: T.surface,
+            border: `1px solid ${T.border}`, background: T.surface,
             color: T.textSecondary, fontSize: 12, fontWeight: 500,
             cursor: "pointer", fontFamily: "inherit",
           }}>Cancel</button>

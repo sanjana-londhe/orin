@@ -55,23 +55,23 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden rounded-[16px] border border-[#dde4de]"
+      <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden rounded-[16px] border border-[#e0e0e0]"
         style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.1)" }}>
 
         {/* Header */}
         <div style={{ padding: "20px 20px 0", textAlign: "center" }}>
-          <p style={{ fontSize: 14, fontWeight: 700, color: "#082d1d", margin: "0 0 20px" }}>Profile</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#1d1d1f", margin: "0 0 20px" }}>Profile</p>
 
           {/* Avatar */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginBottom: 20 }}>
             <div style={{ position: "relative", width: 72, height: 72 }}>
               {avatarUrl ? (
                 <img src={avatarUrl} alt="avatar"
-                  style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: "2px solid #dde4de" }} />
+                  style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: "2px solid #e0e0e0" }} />
               ) : (
                 <div style={{
                   width: 72, height: 72, borderRadius: "50%",
-                  background: "#059669", border: "2px solid #dde4de",
+                  background: "#0066cc", border: "2px solid #e0e0e0",
                   color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 22, fontWeight: 700,
                 }}>
@@ -82,7 +82,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
               <button onClick={() => fileRef.current?.click()} style={{
                 position: "absolute", bottom: 0, right: 0,
                 width: 24, height: 24, borderRadius: "50%",
-                background: "#fff", border: "1.5px solid #dde4de",
+                background: "#fff", border: "1px solid #e0e0e0",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", fontSize: 11, boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
               }}
@@ -91,7 +91,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
               </button>
             </div>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
-            <p style={{ fontSize: 11, color: "#b9d3c4", margin: 0 }}>Click 📷 to change photo</p>
+            <p style={{ fontSize: 11, color: "#c7c7cc", margin: 0 }}>Click 📷 to change photo</p>
           </div>
         </div>
 
@@ -100,32 +100,32 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
 
           {/* Name */}
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", margin: "0 0 6px" }}>Display name</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#333333", margin: "0 0 6px" }}>Display name</p>
             <input
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
               placeholder="Your name"
               style={{
                 width: "100%", padding: "9px 12px", borderRadius: 8,
-                border: "1px solid #dde4de", background: "#fafbf7",
-                fontSize: 12, color: "#082d1d", fontFamily: "inherit",
+                border: "1px solid #e0e0e0", background: "#fafafc",
+                fontSize: 12, color: "#1d1d1f", fontFamily: "inherit",
                 outline: "none", boxSizing: "border-box",
                 transition: "border-color 0.14s",
               }}
-              onFocus={e => (e.target as HTMLElement).style.borderColor = "#059669"}
-              onBlur={e => (e.target as HTMLElement).style.borderColor = "#dde4de"}
+              onFocus={e => (e.target as HTMLElement).style.borderColor = "#0066cc"}
+              onBlur={e => (e.target as HTMLElement).style.borderColor = "#e0e0e0"}
             />
           </div>
 
           {/* Email — read only */}
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", margin: "0 0 6px" }}>
-              Gmail ID <span style={{ fontWeight: 400, color: "#b9d3c4" }}>· cannot be changed</span>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#333333", margin: "0 0 6px" }}>
+              Gmail ID <span style={{ fontWeight: 400, color: "#c7c7cc" }}>· cannot be changed</span>
             </p>
             <div style={{
               padding: "9px 12px", borderRadius: 8,
-              border: "1px solid #dde4de", background: "#f1f3ef",
-              fontSize: 12, color: "#4a6d47", userSelect: "none",
+              border: "1px solid #e0e0e0", background: "#f5f5f7",
+              fontSize: 12, color: "#86868b", userSelect: "none",
             }}>
               {email || "—"}
             </div>
@@ -133,7 +133,7 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
 
           {/* Completion celebration */}
           <div>
-            <p style={{ fontSize: 11, fontWeight: 600, color: "#3d5a4a", margin: "0 0 6px" }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#333333", margin: "0 0 6px" }}>
               Completion celebration
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -146,24 +146,24 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
                       width: "100%", padding: "9px 12px", borderRadius: 8,
-                      border: `1px solid ${active ? "#059669" : "#dde4de"}`,
-                      background: active ? "#f2fdec" : "#fafbf7",
+                      border: `1px solid ${active ? "#0066cc" : "#e0e0e0"}`,
+                      background: active ? "#f5f5f7" : "#fafafc",
                       cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                       transition: "border-color 0.14s, background 0.14s",
                     }}
                   >
                     <span style={{ minWidth: 0 }}>
-                      <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: active ? "#059669" : "#082d1d" }}>
+                      <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: active ? "#0066cc" : "#1d1d1f" }}>
                         {opt.label}
                       </span>
-                      <span style={{ display: "block", fontSize: 11, color: "#4a6d47", lineHeight: 1.35 }}>
+                      <span style={{ display: "block", fontSize: 11, color: "#86868b", lineHeight: 1.35 }}>
                         {opt.sub}
                       </span>
                     </span>
                     <span style={{
                       width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-                      border: `1.5px solid ${active ? "#059669" : "#c4cbc2"}`,
-                      background: active ? "#059669" : "transparent",
+                      border: `1px solid ${active ? "#0066cc" : "#d2d2d7"}`,
+                      background: active ? "#0066cc" : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}>
                       {active && (
@@ -185,13 +185,13 @@ export function ProfileModal({ open, onOpenChange, name, email, initial, onNameU
             style={{
               width: "100%", padding: "9px 0", borderRadius: 8,
               border: "none", marginTop: 4,
-              background: saved ? "#22C55E" : displayName.trim() ? "#059669" : "#c4cbc2",
+              background: saved ? "#22C55E" : displayName.trim() ? "#0066cc" : "#d2d2d7",
               color: "#fff", fontSize: 12, fontWeight: 600,
               cursor: displayName.trim() ? "pointer" : "default",
               fontFamily: "inherit", transition: "background 0.15s",
             }}
-            onMouseEnter={e => { if (displayName.trim() && !saved) (e.currentTarget as HTMLElement).style.background = "#047857"; }}
-            onMouseLeave={e => { if (!saved) (e.currentTarget as HTMLElement).style.background = displayName.trim() ? "#059669" : "#c4cbc2"; }}
+            onMouseEnter={e => { if (displayName.trim() && !saved) (e.currentTarget as HTMLElement).style.background = "#0071e3"; }}
+            onMouseLeave={e => { if (!saved) (e.currentTarget as HTMLElement).style.background = displayName.trim() ? "#0066cc" : "#d2d2d7"; }}
           >
             {saving ? "Saving…" : saved ? "✓ Saved" : "Save changes"}
           </button>

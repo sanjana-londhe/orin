@@ -62,7 +62,7 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
     : (currentName.charAt(0) || initial).toUpperCase();
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#fcfdfc" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#ffffff" }}>
       <Sidebar userName={userName} email={email} initial={initial} isGuest={isGuest} />
 
       {/* ── Mobile top bar ── */}
@@ -70,19 +70,19 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
           height: 52,
-          background: "#f8f9f5",
-          borderBottom: "1.5px solid #dde4de",
+          background: "#f5f5f7",
+          borderBottom: "1px solid #e0e0e0",
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "0 16px",
         }}>
           {/* Logo */}
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100" height="100" rx="22" fill="#02382a"/>
-              <circle cx="50" cy="41" r="18" fill="#059669"/>
-              <circle cx="50" cy="59" r="18" fill="#59d10b"/>
+              <rect width="100" height="100" rx="22" fill="#1d1d1f"/>
+              <circle cx="50" cy="41" r="18" fill="#2997ff"/>
+              <circle cx="50" cy="59" r="18" fill="#0066cc"/>
             </svg>
-            <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: "-0.03em", color: "#082d1d" }}>orin</span>
+            <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.374px", color: "#1d1d1f" }}>orin</span>
           </Link>
 
           {/* Right side: Orin Insight + profile avatar */}
@@ -91,15 +91,14 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
               onClick={() => setAiOpen(true)}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 4,
-                background: "#082d1d", color: "#fff",
+                padding: "8px 15px", borderRadius: 8,
+                background: "#1d1d1f", color: "#fff",
                 border: "none", cursor: "pointer",
-                fontSize: 11, fontWeight: 600,
-                boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
-                letterSpacing: "-0.01em", whiteSpace: "nowrap",
+                fontSize: 14, fontWeight: 400,
+                letterSpacing: "-0.224px", whiteSpace: "nowrap",
               }}
             >
-              <Sparkles size={12} color="#59d10b" />
+              <Sparkles size={12} color="#2997ff" />
               Orin Insight
             </button>
 
@@ -107,7 +106,7 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
               onClick={() => setShowMenu(o => !o)}
               style={{
                 width: 34, height: 34, borderRadius: "50%",
-                background: "#059669", border: "none",
+                background: "#0066cc", border: "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 12, fontWeight: 700, color: "#fff",
                 cursor: "pointer", overflow: "hidden", flexShrink: 0,
@@ -132,15 +131,14 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
             style={{
               position: "fixed", top: 14, right: 20, zIndex: 10,
               display: "flex", alignItems: "center", gap: 7,
-              padding: "7px 14px", borderRadius: 4,
-              background: "#082d1d", color: "#fff",
+              padding: "8px 15px", borderRadius: 8,
+              background: "#1d1d1f", color: "#fff",
               border: "none", cursor: "pointer",
-              fontSize: 11, fontWeight: 600,
-              boxShadow: "0 4px 16px rgba(5,150,105,0.25)",
-              letterSpacing: "-0.01em",
+              fontSize: 14, fontWeight: 400,
+              letterSpacing: "-0.224px",
             }}
           >
-            <Sparkles size={13} color="#59d10b" />
+            <Sparkles size={13} color="#2997ff" />
             Orin Insight
           </button>
         )}
@@ -157,8 +155,8 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
           <div style={{
             position: "fixed", top: 60, right: 12, zIndex: 70,
             background: "#fff",
-            borderRadius: 4,
-            border: "1.5px solid #dde4de",
+            borderRadius: 11,
+            border: "1px solid #e0e0e0",
             boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
             minWidth: 210,
             overflow: "hidden",
@@ -167,18 +165,18 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
             <div style={{
               display: "flex", alignItems: "center", gap: 10,
               padding: "12px 14px",
-              borderBottom: "1px solid #e9ede9",
+              borderBottom: "1px solid #f0f0f0",
             }}>
               <div style={{
-                width: 32, height: 32, borderRadius: "50%", background: "#059669",
+                width: 32, height: 32, borderRadius: "50%", background: "#0066cc",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 11, fontWeight: 700, color: "#fff", overflow: "hidden", flexShrink: 0,
               }}>
                 {avatarContent}
               </div>
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: "#082d1d", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentName}</p>
-                <p style={{ fontSize: 11, color: "#4a6d47", margin: 0 }}>Free plan</p>
+                <p style={{ fontSize: 12, fontWeight: 600, color: "#1d1d1f", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentName}</p>
+                <p style={{ fontSize: 11, color: "#86868b", margin: 0 }}>Free plan</p>
               </div>
             </div>
 
@@ -189,7 +187,7 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                   width: "100%", padding: "10px 14px", borderRadius: 8,
                   border: "0.5px solid rgba(0,0,0,0.12)", background: "#fff",
-                  cursor: "pointer", fontSize: 12, fontWeight: 500, color: "#082d1d",
+                  cursor: "pointer", fontSize: 12, fontWeight: 500, color: "#1d1d1f",
                   fontFamily: "inherit",
                 }}>
                   <svg width="16" height="16" viewBox="0 0 18 18">
@@ -200,37 +198,37 @@ export function AppShell({ userName, email, initial, isGuest = false, onboarding
                   </svg>
                   Login with Google
                 </button>
-                <p style={{ fontSize: 11, color: "#4a6d47", textAlign: "center", margin: "8px 0 0", lineHeight: 1.4 }}>
+                <p style={{ fontSize: 11, color: "#86868b", textAlign: "center", margin: "8px 0 0", lineHeight: 1.4 }}>
                   Your guest data will be saved to your account
                 </p>
               </form>
             ) : (
               <>
                 {([
-                  { icon: <Zap size={15} color="#059669" />,        label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
-                  { icon: <User size={15} color="#4a6d47" />,       label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
-                  { icon: <HelpCircle size={15} color="#4a6d47" />, label: "Show intro",        action: () => { setShowMenu(false); setTourOpen(true); } },
+                  { icon: <Zap size={15} color="#0066cc" />,        label: "Track your energy", action: () => { setShowMenu(false); setEnergyOpen(true); } },
+                  { icon: <User size={15} color="#86868b" />,       label: "Profile settings",  action: () => { setShowMenu(false); setProfileOpen(true); } },
+                  { icon: <HelpCircle size={15} color="#86868b" />, label: "Show intro",        action: () => { setShowMenu(false); setTourOpen(true); } },
                 ] as { icon: React.ReactNode; label: string; action: () => void }[]).map(item => (
                   <button key={item.label} onClick={item.action} style={{
                     display: "flex", alignItems: "center", gap: 10, width: "100%",
                     padding: "12px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 12, color: "#082d1d", fontFamily: "inherit", textAlign: "left",
+                    cursor: "pointer", fontSize: 12, color: "#1d1d1f", fontFamily: "inherit", textAlign: "left",
                   }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f8f9f5"}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f5f5f7"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
                   >
                     {item.icon} {item.label}
                   </button>
                 ))}
 
-                <div style={{ height: 1, background: "#e9ede9" }} />
+                <div style={{ height: 1, background: "#f0f0f0" }} />
                 <form action={signOut}>
                   <button type="submit" style={{
                     display: "flex", alignItems: "center", gap: 10, width: "100%",
                     padding: "12px 14px", background: "none", border: "none",
-                    cursor: "pointer", fontSize: 12, color: "#D14626", fontFamily: "inherit",
+                    cursor: "pointer", fontSize: 12, color: "#d70015", fontFamily: "inherit",
                   }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fff0ec"}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fdf0f0"}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "none"}
                   >
                     <span>→</span> Log out

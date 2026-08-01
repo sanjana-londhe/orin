@@ -16,28 +16,28 @@ import type { TaskWithSubtasks } from "@/lib/types";
 import { withTz } from "@/lib/client-tz";
 
 const T = {
-  bg:           "#fcfdfc",
+  bg:           "#ffffff",
   surface:      "#ffffff",
-  textPrimary:  "#082d1d",
-  textSecondary:"#3d5a4a",
-  textTertiary: "#4a6d47",
-  textMuted:    "#b9d3c4",
-  border:       "#dde4de",
-  borderStrong: "#c4cbc2",
-  accent:       "#059669",
-  accentHover:  "#047857",
-  stone100:     "#f8f9f5",
-  stone200:     "#f1f3ef",
+  textPrimary:  "#1d1d1f",
+  textSecondary:"#333333",
+  textTertiary: "#86868b",
+  textMuted:    "#c7c7cc",
+  border:       "#e0e0e0",
+  borderStrong: "#d2d2d7",
+  accent:       "#0066cc",
+  accentHover:  "#0071e3",
+  stone100:     "#f5f5f7",
+  stone200:     "#f5f5f7",
 };
 
 type Emotion = "DREADING" | "ANXIOUS" | "NEUTRAL" | "WILLING" | "EXCITED" | "";
 
 const INLINE_FEELINGS = [
-  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#FFF0EC", fg: "#D14626" },
-  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#FFF8E8", fg: "#B07A10" },
-  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#F3F2F0", fg: "#7A756E" },
-  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#EEF9F7", fg: "#0E8A7D" },
-  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#EEFAF1", fg: "#1A9444" },
+  { value: "DREADING", label: "Dreading", emoji: "😮‍💨", bg: "#fdf0f0", fg: "#d70015" },
+  { value: "ANXIOUS",  label: "Anxious",  emoji: "😟",   bg: "#fdf4ec", fg: "#b25000" },
+  { value: "NEUTRAL",  label: "Neutral",  emoji: "😐",   bg: "#f5f5f7", fg: "#6e6e73" },
+  { value: "WILLING",  label: "Willing",  emoji: "🙂",   bg: "#eef6fa", fg: "#0071a4" },
+  { value: "EXCITED",  label: "Excited",  emoji: "🤩",   bg: "#eef7f1", fg: "#248a3d" },
 ] as const;
 
 const FEELING_KW: Record<string, string> = {
@@ -297,20 +297,20 @@ export function AllTasksView() {
 
       {/* Header */}
       <div style={{ marginBottom: isMobile ? 16 : 24 }}>
-        <p style={{ fontFamily: "inherit", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: T.textTertiary, margin: "0 0 4px" }}>
+        <p style={{ fontFamily: "inherit", fontSize: 13, fontWeight: 400, letterSpacing: "-0.08px", color: T.textTertiary, margin: "0 0 6px" }}>
           {isAllPage
             ? "Workspace · All Tasks"
             : new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
         </p>
-        <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-0.03em", color: T.textPrimary, margin: 0, lineHeight: 1 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: "-0.4px", color: T.textPrimary, margin: 0, lineHeight: 1.1 }}>
           {isAllPage ? "All Tasks" : "Today"}
         </h1>
       </div>
 
       {/* Tasks (N) label */}
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: T.textSecondary }}>Tasks</span>
-        <span style={{ fontSize: 11, color: T.textMuted }}>
+        <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.374px", color: T.textPrimary }}>Tasks</span>
+        <span style={{ fontSize: 15, color: T.textTertiary }}>
           ({allTasks.filter(t => !t.isCompleted).length})
         </span>
       </div>
@@ -321,11 +321,11 @@ export function AllTasksView() {
         const dateLabel = fmtDateLbl(dueDate);
         const chip = (active: boolean, fg?: string): React.CSSProperties => ({
           display: "inline-flex", alignItems: "center", gap: 5,
-          padding: "4px 9px", borderRadius: 6,
-          background: active ? "#f1f3ef" : "#f8f9f5",
-          border: `0.5px solid ${active && fg ? fg + "44" : "rgba(0,0,0,0.08)"}`,
-          color: active && fg ? fg : "#5f5e5a",
-          fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          padding: "5px 12px", borderRadius: 9999,
+          background: "#f5f5f7",
+          border: "none",
+          color: active && fg ? fg : "#86868b",
+          fontSize: 13, fontWeight: 400, letterSpacing: "-0.08px", cursor: "pointer", fontFamily: "inherit",
         });
         const EMOTIONS_CYCLE: Emotion[] = ["DREADING","ANXIOUS","NEUTRAL","WILLING","EXCITED"];
         function cycleEmotion() {
@@ -342,43 +342,43 @@ export function AllTasksView() {
         }
         const chipStyle = (fg?: string): React.CSSProperties => ({
           display: "inline-flex", alignItems: "center", gap: 5,
-          padding: "4px 9px", borderRadius: 6,
-          background: "#f8f9f5",
-          border: `0.5px solid ${fg ? fg + "33" : "rgba(0,0,0,0.08)"}`,
-          color: fg ?? "#5f5e5a",
-          fontSize: 11, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+          padding: "5px 12px", borderRadius: 9999,
+          background: "#f5f5f7",
+          border: "none",
+          color: fg ?? "#86868b",
+          fontSize: 13, fontWeight: 400, letterSpacing: "-0.08px", cursor: "pointer", fontFamily: "inherit",
           position: "relative", overflow: "hidden",
         });
         return (
           <div style={{ marginBottom: 8 }}>
             {!formOpen ? (
               <div onClick={openForm} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px 8px 14px", cursor: "pointer", borderRadius: 8, width: "fit-content" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f8f9f5"; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f5f5f7"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
-                <span style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px solid #059669", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ width: 18, height: 18, borderRadius: "50%", border: "1px solid #0066cc", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 1v8M1 5h8" stroke="#059669" strokeWidth="1.75" strokeLinecap="round"/>
+                    <path d="M5 1v8M1 5h8" stroke="#0066cc" strokeWidth="1.75" strokeLinecap="round"/>
                   </svg>
                 </span>
-                <span style={{ fontSize: 12, fontWeight: 500, color: "#059669" }}>New task</span>
+                <span style={{ fontSize: 15, fontWeight: 400, letterSpacing: "-0.24px", color: "#0066cc" }}>New task</span>
               </div>
             ) : (
-              <div ref={formRef} style={{ border: "1px solid #059669", borderRadius: 4, background: "#fff" }}>
+              <div ref={formRef} style={{ border: "1px solid #0066cc", borderRadius: 11, background: "#fff" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 14px 4px 16px" }}>
-                  <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px dashed #c4cbc2", flexShrink: 0, marginTop: 2 }} />
+                  <div style={{ width: 18, height: 18, borderRadius: "50%", border: "1px dashed #d2d2d7", flexShrink: 0, marginTop: 2 }} />
                   <div style={{ flex: 1 }}>
-                    <style>{`.task-name-input.is-error::placeholder { color: #c23934; opacity: 1; }`}</style>
+                    <style>{`.task-name-input.is-error::placeholder { color: #d70015; opacity: 1; }`}</style>
                     <input ref={titleRef} value={title} autoFocus
                       className={`task-name-input${titleError ? " is-error" : ""}`}
                       onChange={e => { setTitle(e.target.value); if (titleError && e.target.value.trim()) setTitleError(false); const d = detectEmotion(e.target.value); if (d) setEmotion(d as Emotion); }}
                       onKeyDown={e => { if (e.key === "Enter") submit(); if (e.key === "Escape") resetForm(); }}
                       placeholder="Task name"
-                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 12, letterSpacing: "-0.01em", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />
+                      style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 15, letterSpacing: "-0.24px", color: T.textPrimary, background: "transparent", marginBottom: 2 }} />
                     {noteOpen ? (
                       <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Notes" rows={2}
-                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 11, color: "#3d5a4a", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
+                        style={{ width: "100%", border: "none", outline: "none", fontFamily: "inherit", fontSize: 13, color: "#86868b", background: "transparent", resize: "none", lineHeight: 1.5, padding: 0 }} />
                     ) : (
-                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 11, color: "#b9d3c4", cursor: "text" }}>{note.trim() || "Notes"}</div>
+                      <div onClick={() => setNoteOpen(true)} style={{ fontSize: 13, color: "#c7c7cc", cursor: "text" }}>{note.trim() || "Notes"}</div>
                     )}
                   </div>
                 </div>
@@ -391,10 +391,10 @@ export function AllTasksView() {
                       <span style={{ fontSize: 10 }}>{em.emoji}</span> {em.label}
                     </button>
                     {showEmoPicker && (
-                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 150, padding: "4px 0", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 150, padding: "4px 0", overflow: "hidden" }}>
                         {INLINE_FEELINGS.map(f => (
                           <button key={f.value} onClick={() => { setEmotion(f.value as Emotion); setShowEmoPicker(false); }}
-                            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 14px", background: emotion === f.value ? f.bg : "none", border: "none", cursor: "pointer", fontSize: 12, color: emotion === f.value ? f.fg : "#082d1d", fontFamily: "inherit" }}>
+                            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 14px", background: emotion === f.value ? f.bg : "none", border: "none", cursor: "pointer", fontSize: 12, color: emotion === f.value ? f.fg : "#1d1d1f", fontFamily: "inherit" }}>
                             {f.emoji} {f.label}
                             {emotion === f.value && <span style={{ marginLeft: "auto", fontSize: 11 }}>✓</span>}
                           </button>
@@ -406,7 +406,7 @@ export function AllTasksView() {
                   {/* Date chip + dropdown */}
                   <div style={{ position: "relative" }}>
                     <button onClick={() => { setShowDatePicker(o => !o); setShowCustomDate(false); setShowTimePicker(false); setShowCustomTime(false); setShowEmoPicker(false); }}
-                      style={chipStyle("#059669")}>
+                      style={chipStyle("#0066cc")}>
                       <span style={{ fontSize: 10 }}>📅</span> {dateLabel}
                     </button>
                     {showDatePicker && (
@@ -416,19 +416,19 @@ export function AllTasksView() {
                           : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }
                       }>
                         {!(isMobile && showCustomDate) && (
-                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding: "4px 0", overflow: "hidden" }}>
+                          <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 200, padding: "4px 0", overflow: "hidden" }}>
                             {getDatePresets().map(opt => (
                               <button key={opt.value} onClick={() => { setDueDate(opt.value); setShowDatePicker(false); setShowCustomDate(false); }}
-                                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueDate === opt.value ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
-                                <span style={{ fontSize: 12, color: dueDate === opt.value ? "#059669" : "#082d1d", fontWeight: dueDate === opt.value ? 500 : 400 }}>{opt.label}</span>
-                                <span style={{ fontSize: 11, color: dueDate === opt.value ? "#059669" : "#888780" }}>{opt.sub}{dueDate === opt.value ? " ✓" : ""}</span>
+                                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueDate === opt.value ? "#f5f5f7" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
+                                <span style={{ fontSize: 12, color: dueDate === opt.value ? "#0066cc" : "#1d1d1f", fontWeight: dueDate === opt.value ? 500 : 400 }}>{opt.label}</span>
+                                <span style={{ fontSize: 11, color: dueDate === opt.value ? "#0066cc" : "#86868b" }}>{opt.sub}{dueDate === opt.value ? " ✓" : ""}</span>
                               </button>
                             ))}
                             <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
                             <button onClick={() => { if (isMobile) captureChipBarBottom(); setShowCustomDate(s => !s); setShowTimePicker(false); setShowCustomTime(false); }}
-                              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomDate ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                              <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
-                              <ChevronRight size={13} color={showCustomDate ? "#059669" : "#888780"} />
+                              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomDate ? "#f5f5f7" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
+                              <span style={{ fontSize: 12, color: "#1d1d1f", fontWeight: showCustomDate ? 500 : 400 }}>Custom date</span>
+                              <ChevronRight size={13} color={showCustomDate ? "#0066cc" : "#86868b"} />
                             </button>
                           </div>
                         )}
@@ -446,7 +446,7 @@ export function AllTasksView() {
                   {/* Time chip + dropdown */}
                   <div style={{ position: "relative" }}>
                     <button onClick={() => { setShowTimePicker(o => !o); setShowCustomTime(false); setShowDatePicker(false); setShowCustomDate(false); setShowEmoPicker(false); }}
-                      style={chipStyle(dueTime ? "#5f5e5a" : undefined)}>
+                      style={chipStyle(dueTime ? "#86868b" : undefined)}>
                       <span style={{ fontSize: 10 }}>🕐</span> {dueTime ? fmtTimeLbl(dueTime) : "Add time"}
                     </button>
                     {showTimePicker && (() => {
@@ -462,13 +462,13 @@ export function AllTasksView() {
                             : { position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50, display: "flex", gap: 8 }
                         }>
                           {!(isMobile && showCustomTime) && (
-                            <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding: "4px 0", overflow: "hidden" }}>
+                            <div style={{ background: "#fff", border: "0.5px solid rgba(0,0,0,0.12)", borderRadius: 11, boxShadow: "0 4px 20px rgba(0,0,0,0.1)", minWidth: 190, padding: "4px 0", overflow: "hidden" }}>
                               {slots.map(opt => (
                                 <button key={opt.value}
                                   onClick={() => { setDueTime(opt.value); setShowTimePicker(false); setShowCustomTime(false); }}
-                                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueTime === opt.value ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
-                                  <span style={{ fontSize: 12, color: dueTime === opt.value ? "#059669" : "#082d1d", fontWeight: dueTime === opt.value ? 500 : 400 }}>{opt.label}</span>
-                                  <span style={{ fontSize: 11, color: dueTime === opt.value ? "#059669" : "#888780" }}>{fmtTimeLbl(opt.value)}{dueTime === opt.value ? " ✓" : ""}</span>
+                                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: dueTime === opt.value ? "#f5f5f7" : "none", border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}>
+                                  <span style={{ fontSize: 12, color: dueTime === opt.value ? "#0066cc" : "#1d1d1f", fontWeight: dueTime === opt.value ? 500 : 400 }}>{opt.label}</span>
+                                  <span style={{ fontSize: 11, color: dueTime === opt.value ? "#0066cc" : "#86868b" }}>{fmtTimeLbl(opt.value)}{dueTime === opt.value ? " ✓" : ""}</span>
                                 </button>
                               ))}
                               <div style={{ borderTop: "0.5px solid rgba(0,0,0,0.06)" }} />
@@ -479,20 +479,20 @@ export function AllTasksView() {
                                 setShowDatePicker(false); setShowCustomDate(false);
                                 if (opening && !dueTime) setDueTime("09:00");
                               }}
-                                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomTime ? "#f2fdec" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                                <span style={{ fontSize: 12, color: "#082d1d", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
-                                <ChevronRight size={13} color={showCustomTime ? "#059669" : "#888780"} />
+                                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "8px 14px", background: showCustomTime ? "#f5f5f7" : "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
+                                <span style={{ fontSize: 12, color: "#1d1d1f", fontWeight: showCustomTime ? 500 : 400 }}>Custom time</span>
+                                <ChevronRight size={13} color={showCustomTime ? "#0066cc" : "#86868b"} />
                               </button>
                               {dueTime && (
                                 <button onClick={() => { setDueTime(""); setShowTimePicker(false); setShowCustomTime(false); }}
-                                  style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 11, color: "#D14626", fontFamily: "inherit", textAlign: "left" }}>
+                                  style={{ display: "block", width: "100%", padding: "7px 14px", background: "none", border: "none", borderTop: "0.5px solid rgba(0,0,0,0.06)", cursor: "pointer", fontSize: 11, color: "#d70015", fontFamily: "inherit", textAlign: "left" }}>
                                   Remove time
                                 </button>
                               )}
                             </div>
                           )}
                           {showCustomTime && (
-                            <div style={{ background: "#fff", border: "1.5px solid #dde4de", borderRadius: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px" }}>
+                            <div style={{ background: "#fff", border: "1px solid #e0e0e0", borderRadius: 11, boxShadow: "0 4px 16px rgba(0,0,0,0.09)", padding: "12px 14px" }}>
                               <WheelTimePicker value={dueTime || "09:00"} onChange={t => setDueTime(t)} />
                             </div>
                           )}
@@ -503,7 +503,7 @@ export function AllTasksView() {
 
                   <div style={{ flex: 1 }} />
                   <button onClick={submit} disabled={submitting}
-                    style={{ padding: "5px 14px", borderRadius: 6, border: "none", background: "#059669", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                    style={{ padding: "5px 14px", borderRadius: 8, border: "none", background: "#0066cc", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
                     {submitting ? "…" : "Add"}
                   </button>
                 </div>
